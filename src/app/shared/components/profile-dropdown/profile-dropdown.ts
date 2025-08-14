@@ -20,10 +20,10 @@ import { RouterModule } from '@angular/router';
 })
 export class ProfileDropdown {
   onViewProfileClick(){
-    console.log("Navigate user to profile page");
+    //console.log("Navigate user to profile page");
   }
 
   onSettingsClick(){
-    console.log("Navigate user to settings page");
+    //console.log("Navigate user to settings page");
   }
 }
