@@ -6,17 +6,9 @@
     </section>
     
     <mat-nav-list class="item-area">
-      <a mat-list-item routerLink="/dashboard/client">
-        <mat-icon matListItemIcon>dashboard</mat-icon>
-        <p matListItemTitle>Client DashBoard</p>
-      </a>
-      <a mat-list-item routerLink="/dashboard/admin">
-        <mat-icon matListItemIcon>dashboard</mat-icon>
-        <p matListItemTitle>Admin Dashboard</p>
-      </a>
-      <a mat-list-item routerLink="/login">
-        <mat-icon matListItemIcon>login</mat-icon>
-        <p matListItemTitle>Login</p>
+      <a mat-list-item *ngFor="let item of sideBarLinks" [routerLink]="item.route">
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <p matListItemTitle>{{ item.label }}</p>
       </a>
     </mat-nav-list>
   </mat-sidenav>
