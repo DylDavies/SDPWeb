@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -11,11 +11,6 @@ import {MatToolbarModule} from '@angular/material/toolbar';
   styleUrl: './topbar.scss'
 })
 export class Topbar {
-  userType: string = 'Admin';     // dynamic user type
-  userName: string = 'John Doe';
-
-  //constructor(private userService: UserService) {
-    //this.userType = this.userService.getUserType();
-    //this.userName = this.userService.getUserName();
-  //}
+   @Input() userType: string = 'User Type';
+   @Input() userName: string = 'John Doe';
 }
