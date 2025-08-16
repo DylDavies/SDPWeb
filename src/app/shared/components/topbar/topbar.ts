@@ -11,6 +11,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
   styleUrl: './topbar.scss'
 })
 export class Topbar {
-   @Input() userType: string = 'User Type';
-   @Input() userName: string = 'John Doe';
+  // Placeholder for username and usertype
+  userType = 'User Type';
+  userName = 'John Doe';
 }
