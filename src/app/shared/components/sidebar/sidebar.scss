@@ -1,5 +1,5 @@
 .custom-sidebar {
-  width: 250px; // Set a specific width for the sidebar
+  width: 250px; 
   background-color: var(--mat-sys-surface-container-low); // Use a Material variable for a distinct background color
   color: var(--mat-sys-on-surface); // Ensure text color contrasts with the background
 }
@@ -9,7 +9,7 @@
     transition: background-color 0.2s ease-in-out;
   }
   &:hover {
-    background-color: var(--mat-sys-state-hover); // Add a hover effect for better user experience
+    background-color: var(--mat-sys-state-hover); // Add a hover effect 
   }
 }
 
