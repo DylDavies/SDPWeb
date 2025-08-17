@@ -5,7 +5,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-topbar',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule,],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss'
 })
