@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { ProfileDropdown } from '../shared/components/profile-dropdown/profile-dropdown';
+import { ButtonGoogle } from '../shared/components/button/modules/button-google/button-google';
 
 @Component({
   selector: 'app-login',
-  imports: [ProfileDropdown],
+  imports: [ButtonGoogle],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
