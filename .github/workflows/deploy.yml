@@ -1,7 +1,9 @@
 name: Build and Deploy AngularJS App
 
 # This workflow triggers when a new release is published
-on: push
+on:
+  release:
+    types: [published]
 
 jobs:
   build-and-deploy:
