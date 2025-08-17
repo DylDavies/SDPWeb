@@ -1,0 +1,112 @@
+.image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  font-family: "Roboto";
+}
+
+.logo-container {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center; 
+  width: 100%; 
+}
+
+.logo-image {
+  width: 150px;
+  height: auto;
+  max-width: 100%;
+}
+
+.main-image-container {
+  position: relative;
+  width: 90vw;
+  max-width: 90%;
+  margin: 10px auto 0 auto; /* reduced top margin from 0 to 10px */
+  display: flex;
+  justify-content: center; /* centers the image + overlay */
+}
+
+.glass-overlay {
+  position: absolute;
+  top: 0;
+  left: 50%;              /* place center at mid of container */
+  transform: translateX(-50%); /* shift back so it aligns */
+  
+  width: 90%;             /* same width as .main-image */
+  height: 100%;
+  
+  background: rgba(255,255,255,0.08); 
+  backdrop-filter: blur(4px) saturate(120%);
+  -webkit-backdrop-filter: blur(4px) saturate(120%);
+  
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 2;
+
+  background-image: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%), 
+    rgba(255,255,255,0.15), 
+    transparent 70%
+  );
+  transition: background-position 0.2s ease;
+}
+
+.main-image {
+  width: 90%;
+  height: 450px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.image-text {
+  position: absolute;
+  top: 50%;               /* center vertically */
+  left: 50%;              /* center horizontally */
+  transform: translate(-50%, -50%); /* perfect centering */
+  text-align: center;
+  color: white;           /* white text for contrast */
+  z-index: 3;             /* sits above image + glass */
+  padding: 0 20px;        /* keep safe spacing on smaller screens */
+}
+
+.main-heading {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5); /* readability */
+}
+
+.slogan {
+  font-size: 1.2rem;
+  font-weight: 300;
+  opacity: 0.9;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.dark-overlay {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  width: 90%;  /* matches .main-image */
+  height: 100%;
+  
+  background: rgba(0, 0, 0, 0.35); /* translucent black */
+  border-radius: 8px;
+  z-index: 2;   /* above image, below text & glass */
+  pointer-events: none;
+}
+
+
+
