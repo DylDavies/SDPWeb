@@ -13,12 +13,12 @@ import { CardAction } from '../../../models/interfaces/ICardAction.Interface';
   styleUrls: ['./card.scss'],
 })
 export class Card {
-  @Input() title: string = 'Title';
-  @Input() subtitle: string = 'subtitle';
-  @Input() imageUrl: string = 'https://material.angular.dev/assets/img/examples/shiba2.jpg';
-  @Input() imageAlt: string ='Picture of a dog';
-  @Input() avatarUrl: string = 'https://material.angular.dev/assets/img/examples/shiba1.jpg';
-  @Input() content: string = `
+  @Input() title = 'Title';
+  @Input() subtitle = 'subtitle';
+  @Input() imageUrl = 'https://material.angular.dev/assets/img/examples/shiba2.jpg';
+  @Input() imageAlt ='Picture of a dog';
+  @Input() avatarUrl = 'https://material.angular.dev/assets/img/examples/shiba1.jpg';
+  @Input() content = `
     actural content
   `;
   @Input() actions: CardAction[] = [];
