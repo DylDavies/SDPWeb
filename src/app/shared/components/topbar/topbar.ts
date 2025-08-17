@@ -2,10 +2,11 @@ import {Component, Input} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
+import { ProfileDropdown } from '../profile-dropdown/profile-dropdown';
 
 @Component({
   selector: 'app-topbar',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule,],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, ProfileDropdown],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss'
 })
