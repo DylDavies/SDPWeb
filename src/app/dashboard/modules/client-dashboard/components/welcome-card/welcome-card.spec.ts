@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { WelcomeCard } from './welcome-card';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 describe('WelcomeCard', () => {
   let component: WelcomeCard;
@@ -8,7 +9,10 @@ describe('WelcomeCard', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WelcomeCard]
+      imports: [WelcomeCard],
+      providers: [
+        provideAnimationsAsync()
+      ]
     })
     .compileComponents();
 

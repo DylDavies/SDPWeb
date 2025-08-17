@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { ClientDashboard } from './client-dashboard';
 
@@ -8,7 +9,10 @@ describe('ClientDashboard', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClientDashboard]
+      imports: [ClientDashboard],
+      providers: [
+        provideAnimationsAsync()
+      ]
     })
     .compileComponents();
 

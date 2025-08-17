@@ -30,9 +30,8 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: false,
 
-    browsers: ['ChromeHeadlessCI'],
+    browsers: process.env.CI ? ['ChromeHeadlessCI'] : ['Chrome'],
     
     customLaunchers: {
       ChromeHeadlessCI: {
@@ -44,7 +43,8 @@ module.exports = function (config) {
       }
     },
 
-    singleRun: true,
+    singleRun: !!process.env.CI,
+    autoWatch: !process.env.CI,
     restartOnFileChange: true
   });
 };
