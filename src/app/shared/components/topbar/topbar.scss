@@ -1,0 +1,53 @@
+mat-toolbar.barBackground {
+  //background-color: #545455; 
+  position: relative;      
+  display: flex;
+  align-items: center;
+  color: #b6b6b6;
+  font-family: "Roboto";
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  background-color: var(--mat-sys-surface-container-low); // Use a Material variable for a distinct background color
+  color: var(--mat-sys-on-surface); // Ensure text color contrasts with the background
+  border-bottom: 1px solid #b6b6b656;
+}
+
+// mat-toolbar.barBackground mat-icon {
+//     color: #d3d3d3; /* light gray, you can adjust */
+// }
+
+.leftSide {
+  display: flex;
+  align-items: center;
+  margin-left: 0;  
+}
+
+.spacer2 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap; 
+}
+
+.rightSide {
+  display: flex;
+  align-items: center;
+  margin-left: auto; 
+}
+
+.spacer1 {
+  flex: 0 0 auto;
+}
+
+.companyName {
+    font-size: 24px;
+    
+}
+
+#userType {
+    font-size: 20px;
+}
+.rightSide button:hover mat-icon,
+.leftSide button:hover mat-icon {
+  color: #9e9e9e; 
+}

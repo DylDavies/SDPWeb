@@ -1,0 +1,19 @@
+<mat-toolbar color="primary" class="barBackground">
+  <div class="leftSide">
+    <img class="companyLogo" src="assets/logo.png" alt="TutorCore Logo">
+    <p class="spacer1"></p>
+  </div>  
+  
+   <p class="spacer2" id="userType">{{ userType }}</p>
+
+   <div class = "rightSide">
+        <button matIconButton class="notifications-icon" aria-label="Notifications">
+            <mat-icon>notifications</mat-icon>
+        </button>
+        <button matIconButton class="profile-icon" aria-label="User profile">
+            <mat-icon>account_circle</mat-icon>
+        </button>
+        <p class="userName">{{ userName }}</p>
+  </div>
+</mat-toolbar>
+
