@@ -26,4 +26,8 @@ export class ProfileDropdown {
   onSettingsClick(){
     //console.log("Navigate user to settings page");
   }
+
+  onLogoutClick(){
+    //console.log("Log user out");
+  }
 }
