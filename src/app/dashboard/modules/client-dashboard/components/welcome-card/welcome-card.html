@@ -1,0 +1,25 @@
+@if (isWelcomeCardVisible) {
+    <section class="welcome-card-holder">
+        <mat-card class="welcome-card" appearance="outlined" [@cardAnimation]="cardState">
+            <mat-card-header>
+                <div class="header-content">
+                <div mat-card-avatar class="welcome-header-image"></div>
+                <div class="header-text">
+                    <mat-card-title>Sudo Nakamoto</mat-card-title>
+                    <mat-card-subtitle>TutorCore Administrator</mat-card-subtitle>
+                </div>
+                </div>
+                <button matIconButton class="close-button" (click)="closeWelcomeCard()" aria-label="Close welcome card" >
+                <mat-icon>close</mat-icon>
+                </button>
+            </mat-card-header>
+            <mat-card-content>
+                <p>
+                    Welcome to TutorCore! We are very excited to have you here with us. If you have not gotten a tour yet, please reach out to your supervisor to get one as soon as you can.
+                    We are very excited to have you here on our team, ready to make a different to the world! I am Sudo Nakamuto, and I am your resident system administrator. If you have any issues with the system at any point. Feel free to reach out to me or any one of my minions!
+                    Happy tutoring!
+                </p>
+            </mat-card-content>
+        </mat-card>
+    </section>
+}

@@ -1,0 +1,19 @@
+<mat-card class="card" appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar class="header-image" [style.background-image]="'url(' + avatarUrl + ')'"></div>
+    <mat-card-title>{{title}}</mat-card-title>
+    <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
+  </mat-card-header>
+  <img mat-card-image src={{imageUrl}} alt={{imageAlt}}>
+  <mat-card-content>
+    <p>
+      {{content}}
+    </p>
+  </mat-card-content>
+  <mat-card-actions>
+    <button *ngFor="let action of actions" mat-button (click)="action.onClick()">
+      {{ action.text }}
+    </button>
+  </mat-card-actions>
+</mat-card>
+
