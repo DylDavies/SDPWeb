@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test -- --watch=false --progress=false --code-coverage
+        run: npm test -- --watch=false --progress=false --code-coverage --browsers=ChromeHeadlessCI
 
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.3.6
