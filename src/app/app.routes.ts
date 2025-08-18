@@ -8,6 +8,7 @@ import { authGuard } from './guards/auth-guard';
 import { LoginCallback } from './handlers/login-callback/login-callback';
 import { loginGuard } from './guards/login-guard';
 import { Logout } from './handlers/logout/logout';
+import { Profile } from './dashboard/modules/profile-dashboard/profile-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -15,6 +16,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'client', pathMatch: 'full' },
       { path: 'admin', component: AdminDashboard },
       { path: 'client', component: ClientDashboard },
+      { path: 'profile', component: Profile}
     ],
     canActivate: [authGuard]
   },
