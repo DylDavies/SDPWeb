@@ -35,9 +35,7 @@ export class Sidebar implements OnInit {
    * List storing information on the items on the Sidebar
    */
   sideBarLinks: ISidebarItem[] = [
-    { label: 'Client Dashboard', icon: 'dashboard', route: '/dashboard/client' },
-    { label: 'Admin Dashboard', icon: 'dashboard', route: '/dashboard/admin' },
-    { label: 'Logout', icon: 'logout', route: '/logout' },
+    { label: 'Home', icon: 'dashboard', route: '/dashboard/client' }
   ]
 
   public authService = inject(AuthService);
