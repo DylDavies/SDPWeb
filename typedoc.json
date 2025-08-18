@@ -1,0 +1,10 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/app/"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "tsconfig": "tsconfig.json",
+  "name": "Angular Frontend Documentation",
+  "readme": "README.md",
+  "exclude": ["**/*.spec.ts"]
+}
