@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { NotificationService } from '../../services/notification-service';
@@ -10,13 +10,11 @@ import { NotificationService } from '../../services/notification-service';
   styleUrl: './login-callback.scss',
   standalone: true
 })
-export class LoginCallback {
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private notif: NotificationService
-  ) {}
+export class LoginCallback implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private notif = inject(NotificationService);
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');

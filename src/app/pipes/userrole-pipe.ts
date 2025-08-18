@@ -6,7 +6,7 @@ import { EUserRole } from '../models/enums/user-role.enum';
 })
 export class UserRolePipe implements PipeTransform {
 
-  transform(value: EUserRole | undefined, ...args: unknown[]): unknown {
+  transform(value: EUserRole | undefined): unknown {
     switch (value) {
       case EUserRole.User:
         return "Tutor";

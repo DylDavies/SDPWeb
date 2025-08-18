@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,17 +11,13 @@ import { Router } from '@angular/router';
   styleUrl: './not-found.scss',
   standalone: true
 })
-export class NotFound {
-/**
+export class NotFound implements OnInit {
+  /**
    * Stores the URL path that the user tried to access.
    */
-  public pathNotFound: string = '';
+  public pathNotFound = '';
 
-  /**
-   * Constructor to inject services.
-   * @param router The Angular Router service for navigation and URL access.
-   */
-  constructor(private router: Router) { }
+  private router = inject(Router);
 
   /**
    * A lifecycle hook that is called after Angular has initialized all data-bound properties.

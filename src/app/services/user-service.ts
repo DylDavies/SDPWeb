@@ -1,5 +1,5 @@
 // src/app/services/user.service.ts
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
@@ -8,9 +8,7 @@ import { IUser } from '../models/interfaces/IUser.interface';
   providedIn: 'root'
 })
 export class UserService {
-  constructor(
-    public httpService: HttpService
-  ) {}
+  public httpService = inject(HttpService);
 
   // This method gets the profile of the currently authenticated user.
   // Note: We already have this logic in AuthService for session management,

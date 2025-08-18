@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 /**
@@ -10,11 +10,7 @@ import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 })
 export class NotificationService {
 
-  /**
-   * Constructor to inject the MatSnackBar service.
-   * @param snackBar The Angular Material service for showing snack bar notifications.
-   */
-  constructor(private snackBar: MatSnackBar) { }
+  private snackBar = inject(MatSnackBar);
 
   /**
    * Displays a success notification.

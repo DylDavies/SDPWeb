@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, catchError, tap, shareReplay } from 'rxjs';
 import { Router } from '@angular/router';
 import { IUser } from '../models/interfaces/IUser.interface';
@@ -14,10 +14,8 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
   private verification$: Observable<IUser | null> | null = null;
 
-  constructor(
-    private httpService: HttpService,
-    private router: Router
-  ) {}
+  private httpService = inject(HttpService);
+  private router = inject(Router);
 
   getToken(): string | null {
     return sessionStorage.getItem(TOKEN_STORAGE_KEY);

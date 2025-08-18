@@ -1,8 +1,8 @@
-import { UserrolePipe } from './userrole-pipe';
+import { UserRolePipe } from './userrole-pipe';
 
-describe('UserrolePipe', () => {
+describe('UserRolePipe', () => {
   it('create an instance', () => {
-    const pipe = new UserrolePipe();
+    const pipe = new UserRolePipe();
     expect(pipe).toBeTruthy();
   });
 });

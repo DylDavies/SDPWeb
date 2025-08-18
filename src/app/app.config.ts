@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, ApplicationConfig, inject, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -8,8 +8,9 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { authInterceptor } from './interceptors/auth-interceptor';
 import { Observable } from 'rxjs';
 import { AuthService } from './services/auth-service';
+import { IUser } from './models/interfaces/IUser.interface';
 
-export function initializeAppFactory(authService: AuthService): () => Observable<any> {
+export function initializeAppFactory(authService: AuthService): () => Observable<IUser | null> {
   return () => authService.verifyCurrentUser();
 }
 

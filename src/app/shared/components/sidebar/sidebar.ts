@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { MatSidenavModule, MatSidenav } from "@angular/material/sidenav";
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +9,6 @@ import { ISidebarItem } from '../../../models/interfaces/ISidebarItem.interface'
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
-import { log } from 'console';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,7 +26,7 @@ import { log } from 'console';
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss']
 })
-export class Sidebar {
+export class Sidebar implements OnInit {
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
   public user: IUser | null = null;
@@ -41,9 +40,7 @@ export class Sidebar {
     { label: 'Logout', icon: 'logout', route: '/logout' },
   ]
 
-  constructor(
-    public authService: AuthService
-  ) {}
+  public authService = inject(AuthService);
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe({

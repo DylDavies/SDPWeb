@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth-service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../services/notification-service';
@@ -10,12 +10,10 @@ import { NotificationService } from '../../services/notification-service';
   styleUrl: './logout.scss',
   standalone: true
 })
-export class Logout {
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private notif: NotificationService
-  ) {}
+export class Logout implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private notif = inject(NotificationService);
 
   ngOnInit(): void {
     this.authService.logout();

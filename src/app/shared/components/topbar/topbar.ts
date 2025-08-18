@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -18,7 +18,9 @@ import { AsyncPipe } from '@angular/common';
 export class Topbar {
   public currentUser$: Observable<IUser | null>;
 
-  constructor(private authService: AuthService) {
+  private authService = inject(AuthService);
+
+  constructor() {
     this.currentUser$ = this.authService.currentUser$;
   }
 }
