@@ -61,4 +61,8 @@ export class AuthService {
     this.removeToken();
     this.router.navigate(['/']);
   }
+
+  public get currentUserValue(): IUser | null {
+    return this.currentUserSubject.getValue();
+  }
 }
