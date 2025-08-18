@@ -2,16 +2,17 @@
   <div class="leftSide">
     <img src="assets/logo.png" alt="Company Logo" class="logo-image">
     <p class="spacer1"></p>
-  </div>  
-  
-   <p class="spacer2" id="userType">{{ userType }}</p>
-
-   <div class = "rightSide">
-        <button matIconButton class="notifications-icon" aria-label="Notifications">
-            <mat-icon>notifications</mat-icon>
-        </button>
-        <app-profile-dropdown />
-        <p class="userName">{{ userName }}</p>
   </div>
-</mat-toolbar>
 
+  @if (currentUser$ | async; as user) {
+    <p class="spacer2" id="userType">{{ user.role | userrole }}</p>
+
+    <div class = "rightSide">
+      <button matIconButton class="notifications-icon" aria-label="Notifications">
+          <mat-icon>notifications</mat-icon>
+      </button>
+      <app-profile-dropdown />
+      <p class="userName">{{ user.displayName }}</p>
+    </div>
+  }
+</mat-toolbar>

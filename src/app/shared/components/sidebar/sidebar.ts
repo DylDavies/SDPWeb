@@ -7,6 +7,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { ISidebarItem } from '../../../models/interfaces/ISidebarItem.interface';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../services/auth-service';
+import { IUser } from '../../../models/interfaces/IUser.interface';
+import { log } from 'console';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,14 +30,28 @@ import { CommonModule } from '@angular/common';
 export class Sidebar {
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
+  public user: IUser | null = null;
+
   /**
    * List storing information on the items on the Sidebar
    */
   sideBarLinks: ISidebarItem[] = [
     { label: 'Client Dashboard', icon: 'dashboard', route: '/dashboard/client' },
     { label: 'Admin Dashboard', icon: 'dashboard', route: '/dashboard/admin' },
-    { label: 'Login', icon: 'login', route: '/login' },
+    { label: 'Logout', icon: 'logout', route: '/logout' },
   ]
+
+  constructor(
+    public authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.currentUser$.subscribe({
+      next: (user) => {
+        this.user = user;
+      }
+    })
+  }
   
   toggleSidenav() {
     this.sidenav.toggle();
