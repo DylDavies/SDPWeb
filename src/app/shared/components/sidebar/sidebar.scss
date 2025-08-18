@@ -2,6 +2,16 @@
   width: 250px; 
   background-color: var(--mat-sys-surface-container-low); // Use a Material variable for a distinct background color
   color: var(--mat-sys-on-surface); // Ensure text color contrasts with the background
+  position: fixed;
+  height: 94vh;
+  top: 6vh;
+  border-radius: 0;
+  box-shadow: 5px 3px 7px 0px #111111;
+}
+
+mat-toolbar {
+  position: fixed;
+  height: 6vh;
 }
 
 .mat-list-item {
@@ -39,4 +49,9 @@
 
 .user-name{
   text-align: center;
+}
+
+.content {
+  width: 100%;
+  margin-top: 6vh;
 }

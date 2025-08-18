@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 @Component({
   selector: 'app-profile-dropdown',
   imports: [
@@ -19,15 +19,17 @@ import { RouterModule } from '@angular/router';
   styleUrl: './profile-dropdown.scss'
 })
 export class ProfileDropdown {
+  private router = inject(Router);
+
   onViewProfileClick(){
-    //console.log("Navigate user to profile page");
+    this.router.navigate(["/dashboard/profile"]);
   }
 
-  onSettingsClick(){
-    //console.log("Navigate user to settings page");
-  }
+  // onSettingsClick(){
+  //   //console.log("Navigate user to settings page");
+  // }
 
   onLogoutClick(){
-    //console.log("Log user out");
+    this.router.navigate(["/logout"]);
   }
 }

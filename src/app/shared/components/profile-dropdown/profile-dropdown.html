@@ -1,5 +1,5 @@
 <button mat-icon-button [matMenuTriggerFor]="profileMenu" aria-label="User profile menu">
-  <mat-icon>account_circle</mat-icon>
+  <mat-icon id="accountIcon">account_circle</mat-icon>
 </button>
 
 <mat-menu #profileMenu="matMenu">
@@ -7,10 +7,10 @@
     <mat-icon>person</mat-icon>
     <p>Your Profile</p>
   </button>
-  <button mat-menu-item (click)="onSettingsClick()">
+  <!-- <button mat-menu-item (click)="onSettingsClick()">
     <mat-icon>settings</mat-icon>
     <p>Settings</p>
-  </button>
+  </button> -->
   <button mat-menu-item (click)="onLogoutClick()">
     <mat-icon>logout</mat-icon>
     <p>Logout</p>
