@@ -22,31 +22,15 @@ jobs:
         run: npm install
 
       - name: Build the application
-        run: npm run build
+        run: npm run build -- --configuration production
 
-      - name: Copy built files to server
+      - name: Copy files to server
+        # This action will copy the contents of your build output to the server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "dist,ecosystem.config.js"
+          source: "dist/SDPWeb/browser/"
           target: "/var/www/angular"
-          overwrite: true
-
-      - name: Run commands on server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Source NVM to make node, npm, and pm2 available
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-            # Navigate to the application directory
-            cd /var/www/angular
-
-            # Start or restart the new SSR app process using its ecosystem file
-            pm2 startOrRestart ecosystem.config.js --env production
+          strip_components: 3

@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { Sidebar } from './sidebar';
+import { LoginCallback } from './login-callback';
+import { provideRouter } from '@angular/router';
 
-describe('Sidebar', () => {
-  let component: Sidebar;
-  let fixture: ComponentFixture<Sidebar>;
+describe('LoginCallback', () => {
+  let component: LoginCallback;
+  let fixture: ComponentFixture<LoginCallback>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Sidebar],
+      imports: [LoginCallback],
       providers: [
         provideRouter([]),
         provideHttpClient(),
@@ -20,7 +20,7 @@ describe('Sidebar', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Sidebar);
+    fixture = TestBed.createComponent(LoginCallback);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { ButtonGoogle } from '../shared/components/button/modules/button-google/button-google';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-landing',
   imports: [ButtonGoogle],
-  templateUrl: './login.html',
-  styleUrl: './login.scss'
+  templateUrl: './landing.html',
+  styleUrl: './landing.scss'
 })
-export class Login {
+export class Landing {
 
 }
