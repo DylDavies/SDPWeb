@@ -1,31 +1,55 @@
-<div class="profile-container">
-
+<div class="profile-page-container">
   <ng-container *ngIf="user; else loadingTemplate">
-    
-    <app-card
-      title="Your Information"
-      [subtitle]="user.role || 'User'"
-      [imageUrl]="user.picture || '/assets/no_profile_pic.png'" 
-      [imageAlt]="'Profile picture of ' + (user.displayName || 'user')"
-      [actions]="profileCardActions">
-
-      <div class="user-details-content">
-        <div class="detail-item">
-          <span class="detail-label">Display Name</span>
-          <span class="detail-value">{{ user.displayName || 'Not Provided' }}</span>
+    <div class="profile-card">
+      
+      <div class="profile-header">
+        <div class="profile-avatar-wrapper">
+          <img class="profile-avatar" [src]="user.picture || '/assets/no_profile_pic.png'" [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
         </div>
-        <div class="detail-item">
-          <span class="detail-label">Email</span>
-          <span class="detail-value">{{ user.email }}</span>
+        <div class="profile-info">
+          <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
+          <h2 class="user-role">{{ user.role | userrole }}</h2>
+        </div>
+        <div class="profile-actions">
+          <button mat-flat-button color="primary" (click)="editProfile()">
+            <mat-icon>edit</mat-icon>
+            <span>Edit Profile</span>
+          </button>
         </div>
       </div>
 
-    </app-card>
-    
-    </ng-container>
+      <mat-divider></mat-divider>
+
+      <div class="profile-details">
+        <div class="detail-item">
+          <mat-icon class="detail-icon" color="primary">mail_outline</mat-icon>
+          <div class="detail-text">
+            <span class="detail-label">Email Address</span>
+            <span class="detail-value">{{ user.email }}</span>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <mat-icon class="detail-icon" color="primary">badge</mat-icon>
+          <div class="detail-text">
+            <span class="detail-label">User ID</span>
+            <span class="detail-value code">{{ user._id }}</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <mat-icon class="detail-icon" color="primary">calendar_today</mat-icon>
+          <div class="detail-text">
+            <span class="detail-label">Member Since</span>
+            <span class="detail-value">{{ user.createdAt | date:'longDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
 
   <ng-template #loadingTemplate>
-    <p>Loading profile...</p>
+    <mat-spinner diameter="50"></mat-spinner>
   </ng-template>
-
 </div>

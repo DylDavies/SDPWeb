@@ -21,10 +21,6 @@ import { Router, RouterModule } from '@angular/router';
 export class ProfileDropdown {
   private router = inject(Router);
 
-  onViewProfileClick(){
-    this.router.navigate(["/dashboard/profile"]);
-  }
-
   // onSettingsClick(){
   //   //console.log("Navigate user to settings page");
   // }
