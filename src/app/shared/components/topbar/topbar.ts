@@ -8,10 +8,11 @@ import { AuthService } from '../../../services/auth-service';
 import { UserRolePipe } from '../../../pipes/userrole-pipe';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common'; 
+import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 
 @Component({
   selector: 'app-topbar',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, ProfileDropdown, UserRolePipe, AsyncPipe],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, ProfileDropdown, UserRolePipe, AsyncPipe, DisplayNamePipe],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss'
 })

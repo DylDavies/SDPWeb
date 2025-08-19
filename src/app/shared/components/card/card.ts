@@ -7,7 +7,7 @@ import { CardAction } from '../../../models/interfaces/ICardAction.Interface';
 
 @Component({
   selector: 'app-card',
-  standalone: true, // ask about this shit, allegedly makes it easier, won't need to be declared in declerations array of ngmodule
+  standalone: true, //  makes it easier, won't need to be declared in declerations array of ngmodule
   imports: [CommonModule, MatCardModule, MatButtonModule],
   templateUrl: './card.html',
   styleUrls: ['./card.scss'],
@@ -17,9 +17,5 @@ export class Card {
   @Input() subtitle = 'subtitle';
   @Input() imageUrl = 'https://material.angular.dev/assets/img/examples/shiba2.jpg';
   @Input() imageAlt ='Picture of a dog';
-  @Input() avatarUrl = 'https://material.angular.dev/assets/img/examples/shiba1.jpg';
-  @Input() content = `
-    actural content
-  `;
   @Input() actions: CardAction[] = [];
 }

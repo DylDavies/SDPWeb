@@ -8,7 +8,7 @@ import { EUserRole } from '../models/enums/user-role.enum';
 
 // A sample user object to use in our tests
 const mockUser: IUser = {
-  id: 'user-123',
+  _id: 'user-123',
   email: 'test@tutorcore.com',
   displayName: 'Test User',
   role: EUserRole.User,
