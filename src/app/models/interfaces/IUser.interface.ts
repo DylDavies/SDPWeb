@@ -5,5 +5,7 @@ export interface IUser {
     email: string,
     displayName: string,
     role: EUserRole,
-    picture: string
+    picture: string,
+    createdAt: Date,
+    firstLogin: boolean
 }
