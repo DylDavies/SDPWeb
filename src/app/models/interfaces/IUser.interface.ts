@@ -1,5 +1,11 @@
-import { EUserType } from "../enums/user-type.enum";
+import { EUserRole } from "../enums/user-role.enum";
 
 export interface IUser {
-    userType: EUserType
+    _id: string,
+    email: string,
+    displayName: string,
+    role: EUserRole,
+    picture: string,
+    createdAt: Date,
+    firstLogin: boolean
 }

@@ -1,0 +1,53 @@
+.dialog-container {
+    padding: 24px;
+}
+
+.dialog-header {
+    // THIS IS THE ALIGNMENT FIX:
+    // Use flexbox to vertically center the icon and the title.
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.dialog-header mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+}
+
+h1[mat-dialog-title] {
+    margin: 0;
+    padding: 0;
+    line-height: 2.4; // Adjust line-height for perfect centering
+}
+
+// This removes the default padding from MatDialog's content wrapper,
+// which was throwing off our container's alignment.
+::ng-deep .mat-mdc-dialog-content {
+    padding: 0 !important;
+    margin-top: 16px;
+}
+
+.dialog-subtitle {
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0;
+}
+
+mat-form-field {
+    width: 100%;
+    margin-top: 24px;
+}
+
+mat-dialog-actions { 
+    padding: 24px 0 0 0;
+}
+
+button[mat-flat-button] {
+    min-width: 160px;
+    min-height: 40px;
+}
+
+mat-progress-spinner {
+    margin: 0 auto;
+}

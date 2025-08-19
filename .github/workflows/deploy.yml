@@ -1,0 +1,36 @@
+name: Build and Deploy AngularJS App
+
+# This workflow triggers when a new release is published
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the application
+        run: npm run build -- --configuration production
+
+      - name: Copy files to server
+        # This action will copy the contents of your build output to the server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "dist/SDPWeb/browser/"
+          target: "/var/www/angular"
+          strip_components: 3

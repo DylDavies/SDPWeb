@@ -1,0 +1,111 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  // Dark background for the page
+  background-color: #121212; 
+  font-family: 'Roboto', sans-serif;
+}
+
+.not-found-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.not-found-card {
+  max-width: 500px;
+  width: 100%;
+  padding: 40px;
+  border-radius: 16px;
+  // Darker card background
+  background-color: #1e1e1e;
+  // A more subtle shadow for dark mode
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25), 0 6px 6px rgba(0,0,0,0.2) !important;
+  transition: transform 0.3s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.error-code {
+  font-size: 10rem;
+  font-weight: 700;
+  line-height: 1;
+  // Material Indigo 500 still works well on a dark background
+  color: #3F51B5;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.error-title {
+  font-size: 2.5rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  // Light text color for contrast
+  color: #e0e0e0;
+}
+
+.error-message {
+  font-size: 1.1rem;
+  // Lighter grey for the message text
+  color: #bdbdbd;
+  margin-bottom: 16px; // Adjusted margin
+  line-height: 1.6;
+}
+
+/* New styles for the path info section */
+.path-info {
+  color: #9e9e9e;
+  margin-bottom: 32px;
+  font-size: 0.9rem;
+  word-break: break-all; /* Ensures long paths don't overflow the card */
+
+  code {
+    background-color: #2c2c2c;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #ffab40; // An amber color for the path
+  }
+}
+
+button[mat-raised-button] {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+  
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+// A subtle floating animation for the 404 text
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+// Responsive adjustments for smaller screens
+@media (max-width: 600px) {
+  .not-found-card {
+    padding: 24px;
+  }
+  .error-code {
+    font-size: 7rem;
+  }
+  .error-title {
+    font-size: 2rem;
+  }
+  .error-message {
+    font-size: 1rem;
+  }
+}

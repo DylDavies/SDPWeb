@@ -19,7 +19,7 @@ html {
   // Default the application to a light color theme. This can be changed to
   // `dark` to enable the dark color theme, or to `light dark` to defer to the
   // user's system settings.
-  color-scheme: light;
+  color-scheme: dark;
 
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
@@ -31,3 +31,101 @@ html {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+@keyframes progress-bar-animation {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+// Base styles for the snackbar surface to contain the progress bar
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  position: relative;
+  overflow: hidden;
+}
+
+// Base styles for the progress bar pseudo-element
+.mat-mdc-snack-bar-container .mdc-snackbar__surface::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  animation-name: progress-bar-animation;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+// Duration-specific classes to control animation speed
+.mat-mdc-snack-bar-container.duration-3000 .mdc-snackbar__surface::after {
+  animation-duration: 3s;
+}
+
+.mat-mdc-snack-bar-container.duration-5000 .mdc-snackbar__surface::after {
+  animation-duration: 5s;
+}
+
+
+// --- Snackbar Color Styling ---
+
+// Success Snackbar Styling
+.mat-mdc-snack-bar-container.success-snackbar .mdc-snackbar__surface {
+  background-color: #4CAF50; // Standard Material Green
+  color: white;
+}
+.mat-mdc-snack-bar-container.success-snackbar .mdc-snackbar__surface::after {
+  background-color: rgba(255, 255, 255, 0.5); // Lighter progress bar
+}
+.mat-mdc-snack-bar-container.success-snackbar .mat-mdc-snack-bar-label {
+  color: white;
+}
+
+// Error Snackbar Styling
+.mat-mdc-snack-bar-container.error-snackbar .mdc-snackbar__surface {
+  background-color: #F44336; // Standard Material Red
+  color: white;
+}
+.mat-mdc-snack-bar-container.error-snackbar .mdc-snackbar__surface::after {
+  background-color: rgba(255, 255, 255, 0.5); // Lighter progress bar
+}
+.mat-mdc-snack-bar-container.error-snackbar .mat-mdc-snack-bar-label {
+  color: white;
+}
+
+// Info Snackbar Styling
+.mat-mdc-snack-bar-container.info-snackbar .mdc-snackbar__surface {
+  background-color: #2196F3; // Standard Material Blue
+  color: white;
+}
+.mat-mdc-snack-bar-container.info-snackbar .mdc-snackbar__surface::after {
+  background-color: rgba(0, 0, 0, 0.2); // Darker progress bar for better contrast
+}
+.mat-mdc-snack-bar-container.info-snackbar .mat-mdc-snack-bar-label {
+  color: white;
+}
+
+.image-backdrop {
+  background-color: transparent;
+}
+
+.image-backdrop::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  
+  background-image: url('/assets/landing_page.png');
+  background-size: cover;
+  background-position: center;
+
+  // Apply the blur and darken effect directly to the image element
+  filter: blur(8px) brightness(0.4);
+  -webkit-filter: blur(8px) brightness(0.4); /* For Safari support */
+}

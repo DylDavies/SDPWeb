@@ -1,0 +1,33 @@
+<!-- Main container that uses flexbox to center the content both vertically and horizontally -->
+<div class="not-found-container">
+
+  <!-- Angular Material Card for a clean, contained look -->
+  <mat-card class="not-found-card">
+    <mat-card-content>
+      <!-- The large "404" text with a subtle animation class -->
+      <div class="error-code">404</div>
+
+      <!-- The main heading for the page -->
+      <div class="error-title">Page Not Found</div>
+
+      <!-- A user-friendly message explaining the issue -->
+      <p class="error-message">
+        Oops! The page you are looking for does not exist. It might have been moved or deleted.
+      </p>
+
+      <!-- New section to display the path the user tried to access -->
+       @if (pathNotFound) {
+        <div class="path-info">
+          You tried to access: <code>{{ pathNotFound }}</code>
+        </div>
+       }
+
+      <!-- A clear call-to-action button to guide the user back home -->
+      <button mat-raised-button color="primary" (click)="goHome()">
+        <mat-icon>home</mat-icon>
+        <span>Go to Homepage</span>
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+</div>

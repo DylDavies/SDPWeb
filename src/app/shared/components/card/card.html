@@ -1,0 +1,18 @@
+<mat-card class="card" appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>{{title}}</mat-card-title>
+    <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
+  </mat-card-header>
+
+  <img *ngIf="imageUrl" mat-card-image [src]="imageUrl" [alt]="imageAlt">
+
+  <mat-card-content>
+    <ng-content></ng-content>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button *ngFor="let action of actions" mat-button (click)="action.onClick()">
+      {{ action.text }}
+    </button>
+  </mat-card-actions>
+</mat-card>

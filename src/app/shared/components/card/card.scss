@@ -1,0 +1,87 @@
+/* card.component.css */
+
+.card {
+  /* By setting width to 100%, the card will attempt to fill its parent container.
+    This makes it fluid and responsive.
+  */
+  width: 100%;
+
+  /*
+    max-width prevents the card from becoming excessively wide on large desktop screens.
+    This value has been increased significantly to make the card wider. Feel free to adjust it.
+  */
+  max-width: 900px;
+  
+  /* Adds some margin so the card doesn't stick to the edges of the screen or other elements. */
+  margin: 16px;
+}
+
+img[mat-card-image] {
+  /* Your original styles for the circular image are kept. */
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 16px auto; /* This centers the image horizontally */
+}
+
+/*
+  Adjust the main content area. 
+  We remove the top padding so it sits closer to the image.
+*/
+mat-card-content {
+  padding: 0 16px 16px;
+}
+
+/*
+  The following styles target the content projected into the card from the parent.
+  We use ':host ::ng-deep' to pierce Angular's style encapsulation and apply
+  styles to the projected .user-details-content div.
+  
+  NOTE: ::ng-deep is deprecated but is a straightforward way to style projected 
+  content from within the component that receives it. The alternative is to place 
+  these styles in a global stylesheet (e.g., styles.scss).
+*/
+:host ::ng-deep .user-details-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px; /* Adds a little space below the image */
+}
+
+:host ::ng-deep .detail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+:host ::ng-deep .detail-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  /* color property removed to inherit from theme */
+  margin-bottom: 2px;
+}
+
+:host ::ng-deep .detail-value {
+  font-size: 1rem;
+  /* color property removed to inherit from theme */
+}
+
+/* It's good practice to align the actions. 'end' is a common choice,
+  placing the buttons on the right. You can also use 'start'.
+*/
+mat-card-actions {
+  padding: 8px 16px !important; /* Ensures consistent padding for actions */
+}
+
+/* Optional: On very small screens (like smaller mobile phones), 
+  you might want to reduce the image size to give more room for text content.
+*/
+@media (max-width: 400px) {
+  img[mat-card-image] {
+    width: 120px;
+    height: 120px;
+  }
+}

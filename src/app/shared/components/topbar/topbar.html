@@ -1,0 +1,19 @@
+<mat-toolbar color="primary" class="barBackground">
+  <div class="leftSide">
+    <img src="assets/navlogo.png" alt="Company Logo" class="logo-image">
+    <p class="logoName">TutorCore</p>
+    <p class="spacer1"></p>
+  </div>
+
+  @if (currentUser$ | async; as user) {
+    <p class="spacer2" id="userType">{{ user.role | userrole }}</p>
+
+    <div class = "rightSide">
+      <!-- <button matIconButton class="notifications-icon" aria-label="Notifications">
+          <mat-icon>notifications</mat-icon>
+      </button> -->
+      <p class="userName">{{ user.displayName | displayNamePipe }}</p>
+      <app-profile-dropdown />
+    </div>
+  }
+</mat-toolbar>

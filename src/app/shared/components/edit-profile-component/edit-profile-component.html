@@ -1,0 +1,23 @@
+<h1 mat-dialog-title>Edit Your Profile</h1>
+<mat-dialog-content>
+    <p>Update your public display name.</p>
+    <form [formGroup]="editForm" (ngSubmit)="onSave()">
+    <mat-form-field appearance="outline">
+        <mat-label>Display Name</mat-label>
+        <input matInput formControlName="displayName" required cdkFocusInitial>
+        @if (editForm.get('displayName')?.hasError('required')) {
+        <mat-error>Display name is required.</mat-error>
+        }
+    </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="editForm.invalid || isSaving">
+    @if (isSaving) {
+        <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+    } @else {
+        <span>Save Changes</span>
+    }
+    </button>
+</mat-dialog-actions>
