@@ -59,7 +59,15 @@ export class AuthService {
 
   logout(): void {
     this.removeToken();
-    this.router.navigate(['/']);
+    this.httpService.post('auth/logout', {}).subscribe({
+      next: () => {
+        this.router.navigate(['/']);
+      }
+    })
+  }
+
+  public updateCurrentUserState(updatedUser: IUser): void {
+    this.currentUserSubject.next(updatedUser);
   }
 
   public get currentUserValue(): IUser | null {

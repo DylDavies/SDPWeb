@@ -1,0 +1,31 @@
+<div class="dialog-container">
+    <header class="dialog-header">
+        <mat-icon color="primary">badge</mat-icon>
+        <h1 mat-dialog-title>Welcome to TutorCore!</h1>
+    </header>
+    
+    <mat-dialog-content>
+    <p class="dialog-subtitle">
+        Please set your public display name to continue.
+    </p>
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline">
+        <mat-label>Display Name</mat-label>
+        <input matInput formControlName="displayName" required cdkFocusInitial>
+        @if (profileForm.get('displayName')?.hasError('required')) {
+            <mat-error>A display name is required.</mat-error>
+        }
+        </mat-form-field>
+    </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="profileForm.invalid || isSaving">
+        @if (isSaving) {
+        <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+        } @else {
+        <span>Save and Continue</span>
+        }
+    </button>
+    </mat-dialog-actions>
+</div>

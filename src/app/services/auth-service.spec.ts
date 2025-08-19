@@ -12,7 +12,9 @@ const mockUser: IUser = {
   email: 'test@tutorcore.com',
   displayName: 'Test User',
   role: EUserRole.User,
-  picture: 'http://example.com/pic.jpg'
+  picture: 'http://example.com/pic.jpg',
+  firstLogin: false,
+  createdAt: new Date()
 };
 
 const MOCK_TOKEN = 'mock-jwt-token';
@@ -23,7 +25,7 @@ describe('AuthService', () => {
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const httpSpy = jasmine.createSpyObj('HttpService', ['get']);
+    const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post']);
     const navSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
@@ -136,13 +138,19 @@ describe('AuthService', () => {
 
   describe('logout', () => {
     it('should remove the token, clear the user, and navigate to the root', () => {
-      // Act
-      service.logout();
+    // Arrange
+    httpServiceSpy.post.and.returnValue(of({ status: 'success' }));
 
-      // Assert: Use the new getter
-      expect(sessionStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
-      expect(service.currentUserValue).toBeNull();
-      expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/']);
+    // Act
+    service.logout();
+
+    // Assert
+    expect(sessionStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
+    expect(service.currentUserValue).toBeNull();
+    // Verify the API call was made
+    expect(httpServiceSpy.post).toHaveBeenCalledOnceWith('auth/logout', {});
+    // Verify navigation happens
+    expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/']);
     });
   });
 });

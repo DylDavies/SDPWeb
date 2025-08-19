@@ -9,6 +9,7 @@ import { LoginCallback } from './handlers/login-callback/login-callback';
 import { loginGuard } from './guards/login-guard';
 import { Logout } from './handlers/logout/logout';
 import { Profile } from './dashboard/modules/profile-dashboard/profile-dashboard';
+import { profileCompletionGuard } from './guards/profile-completion-guard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -18,7 +19,7 @@ export const routes: Routes = [
       { path: 'client', component: ClientDashboard },
       { path: 'profile', component: Profile}
     ],
-    canActivate: [authGuard]
+    canActivate: [authGuard, profileCompletionGuard]
   },
   { path: 'login/callback', component: LoginCallback },
   { path: 'logout', component: Logout },
