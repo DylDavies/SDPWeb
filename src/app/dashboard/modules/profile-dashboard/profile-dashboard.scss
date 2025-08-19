@@ -1,0 +1,27 @@
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem;
+  height: 100%;
+}
+
+// New styles for the content projected INSIDE the card
+.user-details-content {
+  padding-top: 16px; 
+  .detail-item {
+    margin-bottom: 12px;
+  }
+
+  .detail-label {
+    display: block;
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant); 
+  }
+
+  .detail-value {
+    display: block;
+    font-size: 1em;
+  }
+}

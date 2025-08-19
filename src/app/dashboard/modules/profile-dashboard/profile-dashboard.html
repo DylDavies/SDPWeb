@@ -1,0 +1,31 @@
+<div class="profile-container">
+
+  <ng-container *ngIf="user; else loadingTemplate">
+    
+    <app-card
+      title="Your Information"
+      [subtitle]="user.role || 'User'"
+      [imageUrl]="user.picture || '/assets/no_profile_pic.png'" 
+      [imageAlt]="'Profile picture of ' + (user.displayName || 'user')"
+      [actions]="profileCardActions">
+
+      <div class="user-details-content">
+        <div class="detail-item">
+          <span class="detail-label">Display Name</span>
+          <span class="detail-value">{{ user.displayName || 'Not Provided' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">{{ user.email }}</span>
+        </div>
+      </div>
+
+    </app-card>
+    
+    </ng-container>
+
+  <ng-template #loadingTemplate>
+    <p>Loading profile...</p>
+  </ng-template>
+
+</div>
