@@ -107,3 +107,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .mat-mdc-snack-bar-container.info-snackbar .mat-mdc-snack-bar-label {
   color: white;
 }
+
+.image-backdrop {
+  background-color: transparent;
+}
+
+.image-backdrop::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  
+  background-image: url('/assets/landing_page.png');
+  background-size: cover;
+  background-position: center;
+
+  // Apply the blur and darken effect directly to the image element
+  filter: blur(8px) brightness(0.4);
+  -webkit-filter: blur(8px) brightness(0.4); /* For Safari support */
+}
