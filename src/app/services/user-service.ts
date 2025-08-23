@@ -18,8 +18,40 @@ export class UserService {
     return this.httpService.get<IUser>('user');
   }
 
-  // Example of an update method
+  /**
+   * Updates the profile of the currently logged-in user.
+   * @param profileData The partial user data to update.
+   * @returns An observable of the updated user.
+   */
   updateProfile(data: Partial<IUser>): Observable<IUser> {
     return this.httpService.patch<IUser>('user', data);
+  }
+
+  /**
+   * Fetches a list of all users from the API.
+   * @returns An observable array of user objects.
+   */
+  getAllUsers(): Observable<IUser[]> {
+    return this.httpService.get<IUser[]>('users');
+  }
+
+  /**
+   * Assigns a specific role to a user.
+   * @param userId The ID of the user to modify.
+   * @param roleId The ID of the role to assign.
+   * @returns An observable of the updated user.
+   */
+  assignRoleToUser(userId: string, roleId: string): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/roles`, { roleId });
+  }
+
+  /**
+   * Removes a specific role from a user.
+   * @param userId The ID of the user to modify.
+   * @param roleId The ID of the role to remove.
+   * @returns An observable of the updated user.
+   */
+  removeRoleFromUser(userId: string, roleId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/roles/${roleId}`);
   }
 }

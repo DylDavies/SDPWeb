@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of, catchError, tap, shareReplay } from 'r
 import { Router } from '@angular/router';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { HttpService } from './http-service';
+import { EPermission } from '../models/enums/permission.enum';
 
 const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
 
@@ -72,5 +73,15 @@ export class AuthService {
 
   public get currentUserValue(): IUser | null {
     return this.currentUserSubject.getValue();
+  }
+
+  /**
+   * Checks if the currently logged-in user has a specific permission.
+   * @param permission The permission to check for.
+   * @returns `true` if the user has the permission, otherwise `false`.
+   */
+  public hasPermission(permission: EPermission): boolean {
+    const user = this.currentUserValue;
+    return user?.permissions?.includes(permission) ?? false;
   }
 }
