@@ -10,6 +10,7 @@ import { loginGuard } from './guards/login-guard';
 import { Logout } from './handlers/logout/logout';
 import { Profile } from './dashboard/modules/profile-dashboard/profile-dashboard';
 import { profileCompletionGuard } from './guards/profile-completion-guard';
+import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -17,7 +18,8 @@ export const routes: Routes = [
       { path: '', redirectTo: 'client', pathMatch: 'full' },
       { path: 'admin', component: AdminDashboard },
       { path: 'client', component: ClientDashboard },
-      { path: 'profile', component: Profile}
+      { path: 'profile', component: Profile},
+      { path: 'bundles', component: BundleDashboard }
     ],
     canActivate: [authGuard, profileCompletionGuard]
   },

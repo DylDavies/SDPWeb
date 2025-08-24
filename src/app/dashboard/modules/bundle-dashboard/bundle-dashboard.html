@@ -1,0 +1,135 @@
+<!--
+  This is the main container for our bundle management page.
+  We're using flexbox to lay out the cards in a responsive way.
+-->
+<div class="bundle-dashboard-container">
+
+  <!-- Card 1: Create a New Bundle -->
+  <mat-card class="bundle-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Create New Bundle</mat-card-title>
+      <mat-card-subtitle>Create a new tutoring bundle for a student.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content [formGroup]="createBundleForm">
+      <!-- Input for the Student's ID -->
+      <mat-form-field appearance="outline">
+        <mat-label>Student ID</mat-label>
+        <input matInput formControlName="student" placeholder="Enter student ID">
+      </mat-form-field>
+
+      <mat-divider></mat-divider>
+      
+      <!-- This section will hold the list of subjects for the new bundle -->
+      <div formArrayName="subjects">
+        <h3 class="subjects-title">Subjects</h3>
+        <!-- We loop through the 'subjects' FormArray to create an input group for each one -->
+        @for (subjectGroup of subjects.controls; track subjectGroup; let i = $index) {
+          <div [formGroupName]="i" class="subject-group">
+            <mat-form-field appearance="outline" class="flex-item">
+              <mat-label>Subject ID</mat-label>
+              <input matInput formControlName="subject">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-item">
+              <mat-label>Tutor ID</mat-label>
+              <input matInput formControlName="tutor">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-item">
+              <mat-label>Hours</mat-label>
+              <input matInput type="number" formControlName="hours">
+            </mat-form-field>
+            <!-- A button to remove this specific subject from the list -->
+            <button mat-icon-button color="warn" (click)="removeSubject(i)" aria-label="Remove subject">
+              <mat-icon>remove_circle</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+      <!-- Buttons to add more subjects or submit the form -->
+      <div class="button-row">
+        <button mat-stroked-button color="primary" (click)="addSubject()">
+          <mat-icon>add</mat-icon>
+          Add Another Subject
+        </button>
+      </div>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-flat-button color="primary" (click)="onCreateBundle()" [disabled]="createBundleForm.invalid">Create Bundle</button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- This card is a container for all other actions that modify an existing bundle -->
+  <mat-card class="bundle-card" appearance="outlined">
+    <mat-card-header>
+        <mat-card-title>Manage Existing Bundle</mat-card-title>
+        <mat-card-subtitle>Update statuses or add/remove subjects from a bundle.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+
+      <!-- Section 2: Add a Subject to an Existing Bundle -->
+      <div class="action-section" [formGroup]="addSubjectForm">
+        <h4>Add Subject to Bundle</h4>
+        <mat-form-field appearance="outline">
+          <mat-label>Bundle ID to Add To</mat-label>
+          <input matInput formControlName="bundleId">
+        </mat-form-field>
+        <div class="subject-group">
+          <mat-form-field appearance="outline" class="flex-item">
+            <mat-label>Subject ID</mat-label>
+            <input matInput formControlName="subject">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-item">
+            <mat-label>Tutor ID</mat-label>
+            <input matInput formControlName="tutor">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-item">
+            <mat-label>Hours</mat-label>
+            <input matInput type="number" formControlName="hours">
+          </mat-form-field>
+        </div>
+        <button mat-stroked-button color="primary" (click)="onAddSubjectToBundle()" [disabled]="addSubjectForm.invalid">Add Subject</button>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Section 3: Manage a Bundle (delete subjects, update status) -->
+      <div class="action-section" [formGroup]="manageBundleForm">
+        <h4>Update Bundle Status or Remove Subject</h4>
+        <mat-form-field appearance="outline">
+          <mat-label>Bundle ID to Manage</mat-label>
+          <input matInput formControlName="bundleId">
+        </mat-form-field>
+
+        <!-- Sub-section for removing a subject -->
+        <div class="sub-action">
+          <mat-form-field appearance="outline">
+            <mat-label>Subject ID to Remove</mat-label>
+            <input matInput formControlName="subjectIdToDelete">
+          </mat-form-field>
+          <button mat-stroked-button color="warn" (click)="onRemoveSubjectFromBundle()">Remove Subject</button>
+        </div>
+
+        <!-- Sub-section for updating bundle status -->
+        <div class="sub-action">
+          <mat-form-field appearance="outline">
+            <mat-label>Set Bundle Status</mat-label>
+            <mat-select formControlName="status">
+              @for (status of EBundleStatus | keyvalue; track status) {
+                <mat-option [value]="status.value">{{ status.key | titlecase }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-stroked-button (click)="onSetBundleStatus()">Update Status</button>
+        </div>
+
+        <!-- Sub-section for setting active/inactive -->
+        <div class="sub-action status-toggle">
+           <mat-slide-toggle formControlName="isActive" (change)="onSetBundleActiveStatus()">
+            Set Active Status
+          </mat-slide-toggle>
+        </div>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+</div>

@@ -37,7 +37,9 @@ export class Sidebar {
    */
   sideBarLinks: ISidebarItem[] = [
     { label: 'Home', icon: 'dashboard', route: '/dashboard/client' },
-    { label: 'Profile', icon: 'person', route: '/dashboard/profile' }
+    { label: 'Profile', icon: 'person', route: '/dashboard/profile' },
+    // Add the new link to the sidebar navigation.
+    { label: 'Bundles', icon: 'inventory_2', route: '/dashboard/bundles' }
   ]
 
   public authService = inject(AuthService);

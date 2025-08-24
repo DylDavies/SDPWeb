@@ -1,0 +1,33 @@
+/**
+ * @file This file contains the interfaces related to the 'Bundle' feature.
+ * It defines the structure for bundles and the subjects within them.
+ */
+
+import { EBundleStatus } from "../enums/bundle-status.enum";
+
+/**
+ * Represents a single subject within a tutoring bundle.
+ * It links a subject to a specific tutor and defines the number of hours allocated.
+ */
+export interface IBundleSubject {
+  _id: string; // The unique identifier for this subject entry in the bundle
+  subject: string; // The ID of the subject being taught
+  tutor: string; // The ID of the assigned tutor
+  hours: number; // The number of tutoring hours for this subject
+}
+
+/**
+ * Represents a tutoring bundle.
+ * A bundle is a collection of subjects that a student is enrolled in,
+ * created and managed by a staff member.
+ */
+export interface IBundle {
+  _id: string; // The unique identifier for the bundle
+  student: string; // The ID of the student this bundle is for
+  subjects: IBundleSubject[]; // An array of subjects included in the bundle
+  creator: string; // The ID of the user who created the bundle
+  status: EBundleStatus; // The current status of the bundle (e.g., pending, approved)
+  isActive: boolean; // Whether the bundle is currently active or not
+  createdAt: Date; // The timestamp when the bundle was created
+  updatedAt: Date; // The timestamp when the bundle was last updated
+}

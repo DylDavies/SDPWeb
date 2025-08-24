@@ -1,0 +1,70 @@
+/**
+ * Styles for the Bundle Dashboard component.
+ * We're using modern CSS like flexbox and grid for layout,
+ * and CSS variables for consistent theming.
+ */
+
+:host {
+  display: block;
+  padding: 24px;
+  background-color: var(--mat-sidenav-content-background-color);
+}
+
+.bundle-dashboard-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+}
+
+.bundle-card {
+  // On larger screens, each card can take up about half the width.
+  // On smaller screens, they'll wrap and take up the full width.
+  flex: 1 1 45%;
+  min-width: 320px;
+  max-width: 600px;
+}
+
+// Styling for the group of inputs that represent a single subject.
+.subject-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.flex-item {
+  flex: 1 1 auto; // Allows items to grow and shrink nicely.
+}
+
+.subjects-title {
+  margin: 24px 0 8px 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.button-row {
+  margin-top: 16px;
+}
+
+// Styles for the sections inside the "Manage" card.
+.action-section {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sub-action {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  mat-form-field {
+    flex-grow: 1;
+  }
+}
+
+.status-toggle {
+  padding: 16px 0;
+}
