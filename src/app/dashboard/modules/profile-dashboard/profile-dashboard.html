@@ -11,10 +11,15 @@
           <h2 class="user-role">{{ user.role | userrole }}</h2>
         </div>
         <div class="profile-actions">
-          <button mat-flat-button color="primary" (click)="editProfile()">
+          <button mat-stroked-button color="primary" (click)="editProfile()">
             <mat-icon>edit</mat-icon>
             <span>Edit Profile</span>
           </button>
+
+          <button mat-stroked-button color="primary" (click)="openLeaveModal()">
+        <mat-icon>event_busy</mat-icon>
+      <span>Request Leave</span>
+    </button>
         </div>
       </div>
 

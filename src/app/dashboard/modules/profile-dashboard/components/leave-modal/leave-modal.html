@@ -1,0 +1,28 @@
+<h1 mat-dialog-title>Request Leave</h1>
+<em></em>
+<form mat-dialog-content class="dialog-content">
+  <mat-form-field class="full-width" appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput placeholder="Ex. Jane Doe">
+  </mat-form-field>
+
+  <mat-form-field class="full-width" appearance="outline">
+    <mat-label>Reason</mat-label>
+    <textarea matInput rows="4" placeholder="Please provide a reason for your leave..."></textarea>
+  </mat-form-field>
+
+  <mat-form-field class="full-width" appearance="outline">
+    <mat-label>Enter a date range</mat-label>
+    <mat-date-range-input [rangePicker]="picker">
+      <input matStartDate placeholder="Start date">
+      <input matEndDate placeholder="End date">
+    </mat-date-range-input>
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker #picker></mat-date-range-picker>
+  </mat-form-field>
+</form>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cancel</button>
+  <button mat-stroked-button color="primary" [mat-dialog-close]="true">Submit Request</button>
+</div>
