@@ -6,17 +6,19 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { UserRolePipe } from '../../../pipes/userrole-pipe';
+import { UserTypePipe } from '../../../pipes/usertype-pipe';
 import { MatDialog } from '@angular/material/dialog';
 import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
 import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
+import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
 
 @Component({
   selector: 'app-profile-dashboard',
   standalone: true,
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
-    MatProgressSpinnerModule, UserRolePipe, DatePipe, DisplayNamePipe
+    MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
+    RoleChipRow
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -30,6 +32,7 @@ export class Profile implements OnInit {
     this.authService.currentUser$.subscribe({
       next: (user) => {
         this.user = user;
+        console.log(user);
       }
     });
   }

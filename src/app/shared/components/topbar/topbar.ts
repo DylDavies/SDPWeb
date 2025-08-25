@@ -5,14 +5,14 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import { ProfileDropdown } from '../profile-dropdown/profile-dropdown';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { AuthService } from '../../../services/auth-service';
-import { UserRolePipe } from '../../../pipes/userrole-pipe';
+import { UserTypePipe } from '../../../pipes/usertype-pipe';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common'; 
 import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 
 @Component({
   selector: 'app-topbar',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, ProfileDropdown, UserRolePipe, AsyncPipe, DisplayNamePipe],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, ProfileDropdown, UserTypePipe, AsyncPipe, DisplayNamePipe],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss'
 })

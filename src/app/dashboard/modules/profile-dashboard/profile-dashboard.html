@@ -8,7 +8,10 @@
         </div>
         <div class="profile-info">
           <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
-          <h2 class="user-role">{{ user.role | userrole }}</h2>
+          <h2 class="user-role">{{ user.type | userTypePipe }}</h2>
+          <div class="roles-container">
+            <app-role-chip-row [roles]="user.roles"></app-role-chip-row>
+          </div>
         </div>
         <div class="profile-actions">
           <button mat-flat-button color="primary" (click)="editProfile()">

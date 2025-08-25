@@ -8,10 +8,14 @@
     }
     
     <mat-nav-list class="item-area">
-      <a mat-list-item *ngFor="let item of sideBarLinks" [routerLink]="item.route">
-        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-        <p matListItemTitle>{{ item.label }}</p>
-      </a>
+      @for (item of sideBarLinks; track item.route) {
+        @if (canView(item.requiredPermissions)) {
+        <a mat-list-item [routerLink]="item.route">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <p matListItemTitle>{{ item.label }}</p>
+        </a>
+        }
+      }
     </mat-nav-list>
   </mat-sidenav>
 

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { HttpService } from './http-service';
 import { EPermission } from '../models/enums/permission.enum';
+import { EUserType } from '../models/enums/user-type.enum';
 
 const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
 
@@ -82,6 +83,6 @@ export class AuthService {
    */
   public hasPermission(permission: EPermission): boolean {
     const user = this.currentUserValue;
-    return user?.permissions?.includes(permission) ?? false;
+    return (user?.permissions?.includes(permission) ?? false) || (user?.type == EUserType.Admin);
   }
 }
