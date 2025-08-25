@@ -9,7 +9,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UserTypePipe } from '../../../pipes/usertype-pipe';
 import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
-import { UserRolePipe } from '../../../pipes/userrole-pipe';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
 import { LeaveModal } from "./components/leave-modal/leave-modal";
@@ -20,7 +19,7 @@ import { LeaveModal } from "./components/leave-modal/leave-modal";
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, UserRolePipe, LeaveModal, MatDialogModule
+    RoleChipRow, MatDialogModule
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
