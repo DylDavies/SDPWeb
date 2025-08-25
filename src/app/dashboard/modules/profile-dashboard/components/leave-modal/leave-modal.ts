@@ -1,9 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// --- IMPORT these for Reactive Forms ---
 import { FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-
-// --- (Keep all your existing Angular Material imports) ---
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,9 +15,7 @@ import { MatNativeDateModule } from '@angular/material/core';
   standalone: true,
   imports: [
     CommonModule,
-    // --- ADD ReactiveFormsModule HERE ---
     ReactiveFormsModule,
-    // --- (Keep all your existing Angular Material imports) ---
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
@@ -34,8 +29,6 @@ import { MatNativeDateModule } from '@angular/material/core';
   styleUrls: ['./leave-modal.scss']
 })
 export class LeaveModal {
-  // Create a FormControl for the name input.
-  // The first argument is the initial value ('').
-  // The second argument is an array of validators (e.g., it's required).
+  // FormControl input.
   nameFormControl = new FormControl('', [Validators.required]);
 }
