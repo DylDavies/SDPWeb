@@ -1,16 +1,13 @@
-// --- Header Styling ---
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   [mat-dialog-title] {
     margin: 0;
-    // Use the CSS variable for the primary theme color (cyan)
     color: var(--mat-sys-primary);
   }
 }
 
-// --- Main Content Area ---
 .dialog-content {
    padding: 0.5rem 1rem 1rem 1rem;
   display: flex;
@@ -18,7 +15,6 @@
   gap: 1rem;
 }
 
-// --- Footer / Actions Area ---
 .mat-mdc-dialog-actions {
   padding-top: 0.5rem;
 }
