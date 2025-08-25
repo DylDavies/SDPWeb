@@ -11,6 +11,8 @@ import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 import { Observable } from 'rxjs';
+import { EPermission } from '../../../models/enums/permission.enum';
+import { EUserType } from '../../../models/enums/user-type.enum';
 
 @Component({
   selector: 'app-sidebar',
@@ -36,8 +38,9 @@ export class Sidebar {
    * List storing information on the items on the Sidebar
    */
   sideBarLinks: ISidebarItem[] = [
-    { label: 'Home', icon: 'dashboard', route: '/dashboard/client' },
-    { label: 'Profile', icon: 'person', route: '/dashboard/profile' }
+    { label: 'Home', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Profile', icon: 'person', route: '/dashboard/profile' },
+    { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW] }
   ]
 
   public authService = inject(AuthService);
@@ -50,5 +53,15 @@ export class Sidebar {
   
   toggleSidenav() {
     this.sidenav.toggle();
+  }
+  
+  public canView(requiredPermissions: EPermission[] | undefined) {
+    if (!requiredPermissions || requiredPermissions.length == 0) return true;
+
+    const user = this.authService.currentUserValue;
+
+    if (user && user.type == EUserType.Admin) return true;
+
+    return requiredPermissions.every(p => this.authService.hasPermission(p));
   }
 }

@@ -10,13 +10,14 @@ import { loginGuard } from './guards/login-guard';
 import { Logout } from './handlers/logout/logout';
 import { Profile } from './dashboard/modules/profile-dashboard/profile-dashboard';
 import { profileCompletionGuard } from './guards/profile-completion-guard';
+import { permissionGuard } from './guards/permission-guard-guard';
+import { EPermission } from './models/enums/permission.enum';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
   { path: 'dashboard', component: Dashboard, children: [
-      { path: '', redirectTo: 'client', pathMatch: 'full' },
-      { path: 'admin', component: AdminDashboard },
-      { path: 'client', component: ClientDashboard },
+      { path: '', component: ClientDashboard },
+      { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
       { path: 'profile', component: Profile}
     ],
     canActivate: [authGuard, profileCompletionGuard]

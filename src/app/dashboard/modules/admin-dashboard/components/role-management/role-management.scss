@@ -1,0 +1,66 @@
+.role-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.role-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.tree-container {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 300px;
+}
+
+.mat-tree-node, mat-nested-tree-node {
+  list-style-type: none;
+}
+
+.mat-tree-node {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+}
+
+.role-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.role-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.role-name {
+  font-weight: 500;
+}
+
+.role-actions {
+  display: none;
+}
+
+.mat-tree-node:hover .role-actions {
+  display: block;
+}
+
+.tree-invisible {
+  display: none;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

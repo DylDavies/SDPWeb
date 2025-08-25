@@ -2,15 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { AdminDashboard } from './admin-dashboard';
+import { RoleManagement } from './role-management';
 
-describe('AdminDashboard', () => {
-  let component: AdminDashboard;
-  let fixture: ComponentFixture<AdminDashboard>;
+describe('RoleManagement', () => {
+  let component: RoleManagement;
+  let fixture: ComponentFixture<RoleManagement>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminDashboard],
+      imports: [RoleManagement],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting()
@@ -18,7 +18,7 @@ describe('AdminDashboard', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AdminDashboard);
+    fixture = TestBed.createComponent(RoleManagement);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

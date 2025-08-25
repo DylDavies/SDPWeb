@@ -4,17 +4,22 @@ import { of, throwError } from 'rxjs';
 import { AuthService } from './auth-service';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
-import { EUserRole } from '../models/enums/user-role.enum';
+import { EUserType } from '../models/enums/user-type.enum';
 
 // A sample user object to use in our tests
 const mockUser: IUser = {
   _id: 'user-123',
   email: 'test@tutorcore.com',
   displayName: 'Test User',
-  role: EUserRole.User,
+  type: EUserType.Staff,
   picture: 'http://example.com/pic.jpg',
   firstLogin: false,
-  createdAt: new Date()
+  createdAt: new Date(),
+  googleId: '',
+  roles: [],
+  permissions: [],
+  pending: false,
+  disabled: false
 };
 
 const MOCK_TOKEN = 'mock-jwt-token';

@@ -6,7 +6,7 @@
   </div>
 
   @if (currentUser$ | async; as user) {
-    <p class="spacer2" id="userType">{{ user.role | userrole }}</p>
+    <p class="spacer2" id="userType">{{ user.type | userTypePipe }}</p>
 
     <div class = "rightSide">
       <!-- <button matIconButton class="notifications-icon" aria-label="Notifications">

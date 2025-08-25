@@ -1,0 +1,54 @@
+<header class="dialog-header">
+    <mat-icon color="primary">{{ data.role ? 'edit_note' : 'add_circle' }}</mat-icon>
+    <h1 mat-dialog-title>{{ data.role ? 'Edit Role' : 'Create New Role' }}</h1>
+</header>
+<mat-dialog-content>
+    <form [formGroup]="roleForm" (ngSubmit)="onSave()">
+    <mat-form-field appearance="outline">
+        <mat-label for="nameInput">Role Name</mat-label>
+        <input matInput formControlName="name" required cdkFocusInitial id="nameInput">
+        @if (roleForm.get('name')?.hasError('required')) {
+            <mat-error>Role name is required.</mat-error>
+        }
+        @if (roleForm.get('name')?.hasError('maxlength')) {
+            <mat-error>Role name must be 20 characters or less.</mat-error>
+        }
+    </mat-form-field>
+    
+    <div class="color-palette-container">
+        <label class="color-palette-label" for="color-palette">Role Colour</label>
+        <div class="color-palette" id="color-palette">
+        @for (color of presetColors; track color) {
+            <button type="button" mat-icon-button class="color-swatch" 
+                    [style.background-color]="color"
+                    (click)="selectColor(color)"
+                    [class.selected]="roleForm.get('color')?.value === color"
+                    matTooltip="{{ color }}">
+            @if (roleForm.get('color')?.value === color) {
+                <mat-icon>check</mat-icon>
+            }
+            </button>
+        }
+        </div>
+    </div>
+    
+    <mat-form-field appearance="outline">
+        <mat-label>Permissions</mat-label>
+        <mat-select formControlName="permissions" multiple>
+        @for (permission of allPermissions; track permission) {
+            <mat-option [value]="permission">{{ formatPermission(permission) }}</mat-option>
+        }
+        </mat-select>
+    </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="roleForm.invalid || isSaving">
+    @if (isSaving) {
+        <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+    } @else {
+        <span>{{ data.role ? 'Save Changes' : 'Create Role' }}</span>
+    }
+    </button>
+</mat-dialog-actions>
