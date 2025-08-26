@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { EPermission } from '../../../../../models/enums/permission.enum';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { AuthService } from '../../../../../services/auth-service';
@@ -30,7 +30,7 @@ import { RoleChipRow } from '../../../../components/role-chip-row/role-chip-row'
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss'
 })
-export class UserManagement implements OnInit {
+export class UserManagement implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
@@ -42,19 +42,27 @@ export class UserManagement implements OnInit {
 
   public types = Object.values(EUserType);
 
+  public currentUser: IUser | null = null;
+  private userSubscription: Subscription | null = null;
+
   ngOnInit(): void {
     this.userService.fetchAllUsers().subscribe();
+
+    this.userSubscription = this.authService.currentUser$.subscribe((user) => this.currentUser = user);
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) this.userSubscription.unsubscribe();
   }
 
   manageRoles(user: IUser): void {
-    const currentUser = this.authService.currentUserValue;
-    if (!currentUser) return;
+    if (!this.currentUser) return;
 
     this.dialog.open(ManageUserRolesDialog, {
       width: 'clamp(400px, 80vw, 600px)',
       data: {
         targetUser: user,
-        currentUser: currentUser
+        currentUser: this.currentUser
       }
     });
   }

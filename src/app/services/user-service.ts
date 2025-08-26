@@ -4,12 +4,15 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
+import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   public httpService = inject(HttpService);
+  public socketService = inject(SocketService);
 
   private users$ = new BehaviorSubject<IUser[]>([]);
 
@@ -17,6 +20,18 @@ export class UserService {
    * A public observable that components can subscribe to for the user list.
    */
   public allUsers$ = this.users$.asObservable();
+
+  constructor() {
+    this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+      console.log('Received users-updated event. Refreshing user list.');
+      this.fetchAllUsers().subscribe();
+    });
+
+    this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+      console.log('Received roles-updated event. Refreshing user list to update roles.');
+      this.fetchAllUsers().subscribe();
+    });
+  }
 
   /**
    * Fetches all users from the API and updates the state.
