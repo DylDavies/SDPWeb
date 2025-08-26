@@ -76,3 +76,7 @@ mat-nested-tree-node {
 mat-dialog-actions {
   padding: 16px 24px;
 }
+
+.no-hover {
+  pointer-events: none;
+}
