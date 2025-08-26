@@ -1,6 +1,6 @@
 <mat-sidenav-container style="height: 94vh;">
   <mat-sidenav #sidenav mode="side" opened class="custom-sidebar">
-    @if ((currentUser$ | async); as user) {
+    @if (user) {
       <section class="profile-area">
         <img [src]="user.picture || '/no_profile_pic.png'" alt="Profile Picture" class="profile-pic">
         <h4 class="user-name">{{(user.displayName | displayNamePipe) || "Loading..."}}</h4>
