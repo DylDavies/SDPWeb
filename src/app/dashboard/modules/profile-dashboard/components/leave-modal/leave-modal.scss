@@ -1,0 +1,20 @@
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  [mat-dialog-title] {
+    margin: 0;
+    color: var(--mat-sys-primary);
+  }
+}
+
+.dialog-content {
+   padding: 0.5rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mat-mdc-dialog-actions {
+  padding-top: 0.5rem;
+}

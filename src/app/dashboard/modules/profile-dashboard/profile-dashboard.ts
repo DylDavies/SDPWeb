@@ -7,10 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UserTypePipe } from '../../../pipes/usertype-pipe';
-import { MatDialog } from '@angular/material/dialog';
-import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
 import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
+import { LeaveModal } from "./components/leave-modal/leave-modal";
 
 @Component({
   selector: 'app-profile-dashboard',
@@ -18,7 +19,7 @@ import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow
+    RoleChipRow, MatDialogModule
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -28,6 +29,15 @@ export class Profile implements OnInit {
   public user: IUser | null = null;
   public dialog = inject(MatDialog); 
 
+
+  openLeaveModal(): void {
+    this.dialog.open(LeaveModal, {
+      width: 'clamp(60vh, 80vw, 60vh)', // Responsive width
+    });
+  }
+
+
+  
   ngOnInit(): void {
     this.authService.currentUser$.subscribe({
       next: (user) => {
