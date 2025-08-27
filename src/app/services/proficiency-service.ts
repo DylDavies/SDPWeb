@@ -16,14 +16,15 @@ export class ProficiencyService {
 
   private proficiencies$ = new BehaviorSubject<IProficiency[]>([]);
 
-    /**
-     * A public observable that components can subscribe to for the proficiencies list.
-     */
-    public allProficiencies$ = this.proficiencies$.asObservable();
+  /**
+   * A public observable that components can subscribe to for the proficiencies list.
+   */
+  public allProficiencies$ = this.proficiencies$.asObservable();
 
   public fetchAllProficiencies(): Observable<IProficiency[]>{
     return this.httpService.get<IProficiency[]>('proficiencies/fetchAll').pipe(
         tap(proficiencies => this.proficiencies$.next(proficiencies))
     );
   }
+
 }
