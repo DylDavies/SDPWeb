@@ -1,14 +1,19 @@
-import { Component } from '@angular/core';
+// src/app/leave-modal/leave-modal.ts
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogModule } from '@angular/material/dialog';
+import { FormControl, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { UserService } from '../../../../../services/user-service';
+import { IUser } from '../../../../../models/interfaces/IUser.interface';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+
 
 @Component({
   selector: 'app-leave-modal',
@@ -26,9 +31,71 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatNativeDateModule
   ],
   templateUrl: './leave-modal.html',
-  styleUrls: ['./leave-modal.scss']
+  styleUrls: ['./leave-modal.scss'],
+  providers: [provideNativeDateAdapter()],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LeaveModal {
-  // FormControl input.
-  nameFormControl = new FormControl('', [Validators.required]);
+export class LeaveModal implements OnInit {
+  // Use a FormGroup to manage all form controls
+  leaveForm = new FormGroup({
+    // Add a FormControl for the name, and disable it
+    name: new FormControl({ value: '', disabled: true }),
+    reason: new FormControl('', [Validators.required]),
+    startDate: new FormControl(null, [Validators.required]),
+    endDate: new FormControl(null, [Validators.required]),
+  });
+
+  // Use the inject() function for dependency injection
+  public dialogRef = inject(MatDialogRef<LeaveModal>);
+  private userService = inject(UserService);
+
+  // Inject the user ID that is passed into the modal when it is opened.
+  public userId: string = inject(MAT_DIALOG_DATA);
+
+  ngOnInit(): void {
+    // Call a method to get the current user's profile and autofill the name
+    this.userService.getUser().subscribe({
+      next: (user: IUser) => {
+        if (user && user.displayName) {
+          // Use setValue to set the value of the 'name' FormControl
+          this.leaveForm.get('name')?.setValue(user.displayName);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to get user data for autofill.', err);
+      },
+    });
+  }
+
+  /**
+   * Submits the leave request to the API.
+   */
+  onSubmit(): void {
+    if (this.leaveForm.valid) {
+      const { reason, startDate, endDate } = this.leaveForm.value;
+      if (reason && startDate && endDate) {
+        const leaveData = {
+          reason: reason,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+        };
+
+        // Use the injected userId from MAT_DIALOG_DATA to submit the request
+        console.log(this.userId);
+        this.userService.requestLeave(this.userId, leaveData).subscribe({
+          next: (response) => {
+            console.log('Leave request submitted successfully', response);
+            this.dialogRef.close(true); // Close the modal on success
+          },
+          error: (error) => {
+            console.error('Error submitting leave request:', error);
+            // TODO: Add user-facing error message
+          },
+        });
+      }
+    } else {
+      // Mark all controls as touched to display validation errors
+      this.leaveForm.markAllAsTouched();
+    }
+  }
 }

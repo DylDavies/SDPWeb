@@ -31,9 +31,12 @@ export class Profile implements OnInit {
 
 
   openLeaveModal(): void {
-    this.dialog.open(LeaveModal, {
-      width: 'clamp(60vh, 80vw, 60vh)', // Responsive width
-    });
+    if (this.user) {
+      this.dialog.open(LeaveModal, {
+        width: 'clamp(60vh, 80vw, 60vh)', // Responsive width
+        data: this.user._id
+      });
+    }
   }
 
 
