@@ -44,61 +44,75 @@ export class ProficiencyManagement implements OnInit {
   public dialogRef = inject(MatDialogRef<ProficiencyManagement>);
 
   // Test data is now correctly defined as a class property
-  proficiencies = [
-    {
-      name: "Cambridge",
-      subjects: [
-        { name: "Mathematics", grade: "12" },
-        { name: "Physics", grade: "12" },
-        { name: "Information Technology", grade: "11" }
-      ]
-    },
-    {
-      name: "Oxford",
-      subjects: [
-        { name: "Biology", grade: "10" },
-        { name: "Chemistry", grade: "11" }
-      ]
-    }
-  ];
+  // proficiencies = [
+  //   {
+  //     name: "Cambridge",
+  //     subjects: [
+  //       { name: "Mathematics", grade: "12" },
+  //       { name: "Physics", grade: "12" },
+  //       { name: "Information Technology", grade: "11" }
+  //     ]
+  //   },
+  //   {
+  //     name: "Oxford",
+  //     subjects: [
+  //       { name: "Biology", grade: "10" },
+  //       { name: "Chemistry", grade: "11" }
+  //     ]
+  //   }
+  // ];
 
+  proficiencies: IProficiency[] = []; // hold all the data regarding profs
   selectedSyllabus: string | null = null;
-  // This property will hold the subjects for the current view
   selectedSyllabusSubjects: any[] = [];
-  availableSubjects = ["Mathematics", "Physics", "Chemistry", "Biology", "IT"];
+  availableSubjects: string[] = [];
   selectedSubjects: string[] = [];
 
-
   // Testing:
-  profs: IProficiency[] = [];
-
   constructor(private profService: ProficiencyService){};
 
-  ngOnInit(): void {
-    if (this.proficiencies.length > 0) {
-      this.onSyllabusSelect(this.proficiencies[0].name);
-    }
+ngOnInit(): void {
+  this.profService.fetchAllProficiencies().subscribe({
+    next: (data) => {
+      // Make sure each prof.subjects is an array
+      this.proficiencies = data.map((prof) => ({
+        ...prof,
+        subjects: Object.values(prof.subjects) // turn object → array
+      }));
 
-    // testing prof service
-     this.profService.fetchAllProficiencies().subscribe({
-      next: (data) => {
-        this.profs = data;
-        console.log('Proficiencies from backend:', data);
-      },
-      error: (err) => console.error('Error fetching proficiencies:', err)
-    });
-  }
+      // build unique list of subject names
+      this.availableSubjects = Array.from(
+        new Set(
+          this.proficiencies.flatMap((prof) =>
+            prof.subjects.map((s: any) => s.name)
+          )
+        )
+      );
 
-  onSyllabusSelect(name: string) {
-    const prof = this.proficiencies.find(p => p.name === name);
-    if (prof) {
-      this.selectedSyllabus = name;
-      // Populate the new property with the found subjects
-      this.selectedSyllabusSubjects = prof.subjects;
-      // Also update the subjects for the edit tab
-      this.selectedSubjects = prof.subjects.map(s => s.name);
-    }
+      // select first syllabus
+      if (this.proficiencies.length > 0) {
+        this.onSyllabusSelect(this.proficiencies[0].name);
+      }
+
+      console.log("loaded proficiencies: ", this.proficiencies);
+      console.log("available subjects: ", this.availableSubjects);
+    },
+    error: (err) => console.error('Error fetching proficiencies:', err)
+  });
+}
+
+onSyllabusSelect(name: string) {
+  const prof = this.proficiencies.find((p) => p.name === name);
+  if (prof) {
+    //this.selectedSyllabus = name;
+
+    // already ensured subjects is an array
+    this.selectedSyllabusSubjects = prof.subjects;
+
+    // also update selected subjects
+    this.selectedSubjects = prof.subjects.map((s: any) => s.name);
   }
+}
 
   onAutocompleteSelected(event: MatAutocompleteSelectedEvent) {
     const value = event.option.value;
