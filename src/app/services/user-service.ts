@@ -6,6 +6,8 @@ import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
 import { ELeave } from '../models/enums/ELeave.enum';
+import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
 
 
 @Injectable({
@@ -13,10 +15,27 @@ import { ELeave } from '../models/enums/ELeave.enum';
 })
 export class UserService {
   public httpService = inject(HttpService);
+  public socketService = inject(SocketService);
 
   private users$ = new BehaviorSubject<IUser[]>([]);
   public allUsers$ = this.users$.asObservable();
 
+  constructor() {
+    this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+      console.log('Received users-updated event. Refreshing user list.');
+      this.fetchAllUsers().subscribe();
+    });
+
+    this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+      console.log('Received roles-updated event. Refreshing user list to update roles.');
+      this.fetchAllUsers().subscribe();
+    });
+  }
+
+  /**
+   * Fetches all users from the API and updates the state.
+   * Any component subscribed to `allUsers$` will automatically receive the new data.
+   */
   public fetchAllUsers(): Observable<IUser[]> {
     return this.httpService.get<IUser[]>('users').pipe(
       tap(users => this.users$.next(users))

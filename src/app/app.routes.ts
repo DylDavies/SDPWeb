@@ -18,7 +18,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard, children: [
       { path: '', component: ClientDashboard },
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
-      { path: 'profile', component: Profile}
+      { path: 'profile', component: Profile }
     ],
     canActivate: [authGuard, profileCompletionGuard]
   },
