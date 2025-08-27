@@ -13,7 +13,7 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
     <button mat-button (click)="onCancel()">Cancel</button>
-    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="editForm.invalid || isSaving">
+    <button mat-stroked-button color="primary" (click)="onSave()" [disabled]="editForm.invalid || isSaving">
     @if (isSaving) {
         <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
     } @else {
