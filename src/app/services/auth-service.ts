@@ -98,7 +98,7 @@ export class AuthService {
     this.removeToken();
     this.httpService.post('auth/logout', {}).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.router.navigateByUrl('/');
       }
     })
   }

@@ -121,7 +121,7 @@ describe('AuthService', () => {
       expect(localStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
       expect(getCurrentUser()).toBeNull();
       expect(httpServiceSpy.post).toHaveBeenCalledOnceWith('auth/logout', {});
-      expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/']);
+      expect(routerSpy.navigateByUrl).toHaveBeenCalledOnceWith('/');
     });
   });
 

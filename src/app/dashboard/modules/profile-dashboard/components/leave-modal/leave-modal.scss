@@ -18,3 +18,21 @@
 .mat-mdc-dialog-actions {
   padding-top: 0.5rem;
 }
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+}
+
+.header h1 {
+    margin: 0;
+    padding: 0;
+    line-height: 2.4;
+}

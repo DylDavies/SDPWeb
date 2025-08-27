@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth-service';
 import { Observable, map } from 'rxjs';
 
@@ -9,11 +9,11 @@ import { Observable, map } from 'rxjs';
 export const accountStatusGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
-): Observable<boolean> => {
+): Observable<boolean | UrlTree> => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  return authService.currentUser$.pipe(
+  return authService.verifyCurrentUser().pipe(
     map(user => {
       // If there's no user, the main authGuard will handle it. We can allow it.
       if (!user) {
@@ -29,8 +29,7 @@ export const accountStatusGuard: CanActivateFn = (
           return true;
         }
 
-        router.navigate(["/account/disabled"]);
-        return false;
+        return router.createUrlTree(["/account/disabled"]);
       }
       
       // Handle pending users
@@ -38,15 +37,14 @@ export const accountStatusGuard: CanActivateFn = (
         if (state.url == "/account/pending") {
           return true;
         }
-        router.navigate(["/account/pending"]);
-        return false;
+
+        return router.createUrlTree(["/account/pending"]);
       }
 
       // If the user is active (not pending or disabled) but is trying
       // to access a status page, redirect them to the dashboard.
       if (isTryingToAccessStatusPage) {
-        router.navigate(['/dashboard']);
-        return false;
+        return router.createUrlTree(['/dashboard']);
       }
 
       // If the user is active and not trying to access a status page, allow navigation.

@@ -1,5 +1,5 @@
 // src/app/leave-modal/leave-modal.ts
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,7 +8,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { UserService } from '../../../../../services/user-service';
-import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -35,11 +34,9 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
   providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LeaveModal implements OnInit {
+export class LeaveModal {
   // Use a FormGroup to manage all form controls
   leaveForm = new FormGroup({
-    // Add a FormControl for the name, and disable it
-    name: new FormControl({ value: '', disabled: true }),
     reason: new FormControl('', [Validators.required]),
     startDate: new FormControl(null, [Validators.required]),
     endDate: new FormControl(null, [Validators.required]),
@@ -51,21 +48,6 @@ export class LeaveModal implements OnInit {
 
   // Inject the user ID that is passed into the modal when it is opened.
   public userId: string = inject(MAT_DIALOG_DATA);
-
-  ngOnInit(): void {
-    // Call a method to get the current user's profile and autofill the name
-    this.userService.getUser().subscribe({
-      next: (user: IUser) => {
-        if (user && user.displayName) {
-          // Use setValue to set the value of the 'name' FormControl
-          this.leaveForm.get('name')?.setValue(user.displayName);
-        }
-      },
-      error: (err) => {
-        console.error('Failed to get user data for autofill.', err);
-      },
-    });
-  }
 
   /**
    * Submits the leave request to the API.
