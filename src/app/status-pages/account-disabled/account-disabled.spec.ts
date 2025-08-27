@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { AccountDisabled } from './account-disabled';
 
@@ -8,7 +10,11 @@ describe('AccountDisabled', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AccountDisabled]
+      imports: [AccountDisabled],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 

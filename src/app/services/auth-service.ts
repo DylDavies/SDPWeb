@@ -1,5 +1,5 @@
 import { DOCUMENT, inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, catchError, tap, shareReplay, skip, startWith, pairwise } from 'rxjs';
+import { BehaviorSubject, Observable, of, catchError, tap, shareReplay, startWith, pairwise } from 'rxjs';
 import { Router } from '@angular/router';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { HttpService } from './http-service';
