@@ -1,0 +1,77 @@
+<div mat-dialog-title class="modal-title">
+  <h2>Manage Proficiencies</h2>
+  <button mat-icon-button [mat-dialog-close]="true" class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div mat-dialog-content>
+  <mat-tab-group>
+    <mat-tab label="View">
+      <div class="tab-content-container">
+        <mat-chip-listbox aria-label="Syllabus selection">
+          <mat-chip-option
+            *ngFor="let prof of proficiencies"
+            (click)="onSyllabusSelect(prof.name)"
+            [selected]="selectedSyllabus === prof.name">
+            {{ prof.name }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+
+        <div *ngIf="selectedSyllabus" class="subject-list">
+          <h3>Subjects in {{ selectedSyllabus }}</h3>
+          <mat-list>
+            <mat-list-item *ngFor="let subject of selectedSyllabusSubjects">
+              {{ subject.name }} — Grade: {{ subject.grade }}
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Edit">
+      <div class="tab-content-container">
+        <mat-form-field appearance="outline" color="accent" class="full-width">
+          <mat-label>Select Syllabus</mat-label>
+          <mat-select [(value)]="selectedSyllabus" (selectionChange)="onSyllabusSelect($event.value)">
+            <mat-option *ngFor="let prof of proficiencies" [value]="prof.name">
+              {{ prof.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-chip-grid #chipList aria-label="Subject selection">
+            <mat-chip
+              *ngFor="let subject of selectedSubjects"
+              (removed)="removeSubject(subject)"
+              [removable]="true">
+              {{ subject }}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+
+            <input
+              placeholder="Add subject..."
+              [matAutocomplete]="auto"
+              [matChipInputFor]="chipList"
+              (matChipInputTokenEnd)="addSubject($event)"
+            />
+          </mat-chip-grid>
+
+          <mat-autocomplete
+            #auto="matAutocomplete"
+            (optionSelected)="onAutocompleteSelected($event)">
+            <mat-option *ngFor="let subj of availableSubjects" [value]="subj">
+              {{ subj }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<div mat-dialog-actions class="dialog-actions">
+  <button mat-button (click)="dialogRef.close()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="confirmSave()">Save</button>
+</div>

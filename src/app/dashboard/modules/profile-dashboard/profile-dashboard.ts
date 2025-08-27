@@ -12,6 +12,7 @@ import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
 import { LeaveModal } from "./components/leave-modal/leave-modal";
+import { ProficiencyManagement } from './components/proficiency-management/proficiency-management';
 
 @Component({
   selector: 'app-profile-dashboard',
@@ -19,7 +20,7 @@ import { LeaveModal } from "./components/leave-modal/leave-modal";
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule
+    RoleChipRow, MatDialogModule, ProficiencyManagement
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -59,6 +60,15 @@ export class Profile implements OnInit {
       if (updatedUser) {
         this.authService.updateCurrentUserState(updatedUser);
       }
+    });
+  }
+
+  openProficiencyModal(): void {
+    this.dialog.open(ProficiencyManagement, {
+    width: 'clamp(300px, 80vw, 600px)',   // min 300px, preferred 80% of viewport, max 600px
+    height: 'clamp(400px, 60vh, 800px)',  // min 400px, preferred 60% of viewport height, max 800px
+      // You can pass data to the modal like this:
+      // data: { userProficiencies: this.user.proficiencies }
     });
   }
 }
