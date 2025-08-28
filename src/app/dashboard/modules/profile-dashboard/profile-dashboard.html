@@ -1,58 +1,74 @@
 <div class="profile-page-container">
   <ng-container *ngIf="user; else loadingTemplate">
     <div class="profile-card">
-      
-      <div class="profile-header">
-        <div class="profile-avatar-wrapper">
-          <img class="profile-avatar" [src]="user.picture || '/assets/no_profile_pic.png'" [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
-        </div>
-        <div class="profile-info">
-          <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
-          <h2 class="user-role">{{ user.type | userTypePipe }}</h2>
-          <div class="roles-container">
-            <app-role-chip-row [roles]="user.roles"></app-role-chip-row>
-          </div>
-        </div>
-        <div class="profile-actions">
-          <button mat-stroked-button color="primary" (click)="editProfile()">
-            <mat-icon>edit</mat-icon>
-            <span>Edit Profile</span>
-          </button>
 
-          <button mat-stroked-button color="primary" (click)="openLeaveModal()">
-        <mat-icon>event_busy</mat-icon>
-      <span>Request Leave</span>
-    </button>
-        </div>
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <div class="profile-details">
-        <div class="detail-item">
-          <mat-icon class="detail-icon" color="primary">mail_outline</mat-icon>
-          <div class="detail-text">
-            <span class="detail-label">Email Address</span>
-            <span class="detail-value">{{ user.email }}</span>
-          </div>
-        </div>
+      <mat-tab-group animationDuration="0ms">
         
-        <div class="detail-item">
-          <mat-icon class="detail-icon" color="primary">badge</mat-icon>
-          <div class="detail-text">
-            <span class="detail-label">User ID</span>
-            <span class="detail-value code">{{ user._id }}</span>
-          </div>
-        </div>
+        <!-- Tab 1: Contains the original profile details -->
+        <mat-tab label="Profile">
+          <div class="profile-content">
+            <div class="profile-header">
+              <div class="profile-avatar-wrapper">
+                <img class="profile-avatar" [src]="user.picture || '/assets/no_profile_pic.png'" [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
+              </div>
+              <div class="profile-info">
+                <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
+                <h2 class="user-role">{{ user.type | userTypePipe }}</h2>
+                <div class="roles-container">
+                  <app-role-chip-row [roles]="user.roles"></app-role-chip-row>
+                </div>
+              </div>
+              <div class="profile-actions">
+                <button mat-stroked-button color="primary" (click)="editProfile()">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit Profile</span>
+                </button>
+                <button mat-stroked-button color="primary" (click)="openLeaveModal()">
+                  <mat-icon>event_busy</mat-icon>
+                  <span>Request Leave</span>
+                </button>
+              </div>
+            </div>
 
-        <div class="detail-item">
-          <mat-icon class="detail-icon" color="primary">calendar_today</mat-icon>
-          <div class="detail-text">
-            <span class="detail-label">Member Since</span>
-            <span class="detail-value">{{ user.createdAt | date:'longDate' }}</span>
+            <mat-divider></mat-divider>
+
+            <div class="profile-details">
+              <div class="detail-item">
+                <mat-icon class="detail-icon" color="primary">mail_outline</mat-icon>
+                <div class="detail-text">
+                  <span class="detail-label">Email Address</span>
+                  <span class="detail-value">{{ user.email }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item">
+                <mat-icon class="detail-icon" color="primary">badge</mat-icon>
+                <div class="detail-text">
+                  <span class="detail-label">User ID</span>
+                  <span class="detail-value code">{{ user._id }}</span>
+                </div>
+              </div>
+
+              <div class="detail-item">
+                <mat-icon class="detail-icon" color="primary">calendar_today</mat-icon>
+                <div class="detail-text">
+                  <span class="detail-label">Member Since</span>
+                  <span class="detail-value">{{ user.createdAt | date:'longDate' }}</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </mat-tab>
+
+        <!-- Tab 2: Placeholder for future content -->
+        <mat-tab label="Leave History">
+          <div class="profile-content">
+            <!-- You can add a component or content for leave history here -->
+            <h2>Leave History will be displayed here.</h2>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
 
     </div>
   </ng-container>

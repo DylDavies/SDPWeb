@@ -12,14 +12,14 @@ import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
 import { LeaveModal } from "./components/leave-modal/leave-modal";
-
+import {MatTabsModule} from '@angular/material/tabs';
 @Component({
   selector: 'app-profile-dashboard',
   standalone: true,
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule
+    RoleChipRow, MatDialogModule,MatTabsModule
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'

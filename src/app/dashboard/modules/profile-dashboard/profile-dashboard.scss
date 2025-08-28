@@ -12,6 +12,10 @@
   background-color: var(--mat-sidenav-content-background-color, var(--mat-sys-background));
 }
 
+.profile-content {
+  padding: 24px;
+}
+
 .profile-card {
   width: 100%;
   max-width: 900px;

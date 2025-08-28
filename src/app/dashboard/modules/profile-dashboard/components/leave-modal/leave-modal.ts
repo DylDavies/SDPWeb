@@ -1,7 +1,7 @@
 // src/app/leave-modal/leave-modal.ts
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, Validators, FormGroup, ReactiveFormsModule, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
@@ -12,6 +12,17 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+
+export const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const startDate = control.get('startDate')?.value;
+  const endDate = control.get('endDate')?.value;
+
+  if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+    return { invalidRange: true };
+  }
+
+  return null;
+};
 
 
 @Component({
@@ -35,18 +46,17 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaveModal {
+  minDate = new Date();
   // Use a FormGroup to manage all form controls
   leaveForm = new FormGroup({
     reason: new FormControl('', [Validators.required]),
     startDate: new FormControl(null, [Validators.required]),
     endDate: new FormControl(null, [Validators.required]),
-  });
+  },
+  { validators: dateRangeValidator });
 
-  // Use the inject() function for dependency injection
   public dialogRef = inject(MatDialogRef<LeaveModal>);
   private userService = inject(UserService);
-
-  // Inject the user ID that is passed into the modal when it is opened.
   public userId: string = inject(MAT_DIALOG_DATA);
 
   /**
@@ -62,21 +72,17 @@ export class LeaveModal {
           endDate: new Date(endDate),
         };
 
-        // Use the injected userId from MAT_DIALOG_DATA to submit the request
-        console.log(this.userId);
         this.userService.requestLeave(this.userId, leaveData).subscribe({
           next: (response) => {
             console.log('Leave request submitted successfully', response);
-            this.dialogRef.close(true); // Close the modal on success
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Error submitting leave request:', error);
-            // TODO: Add user-facing error message
           },
         });
       }
     } else {
-      // Mark all controls as touched to display validation errors
       this.leaveForm.markAllAsTouched();
     }
   }
