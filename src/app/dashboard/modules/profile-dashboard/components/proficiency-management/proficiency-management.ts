@@ -11,9 +11,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatOptionModule } from '@angular/material/core';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { Observable, forkJoin } from 'rxjs';
+import { map, startWith, filter, switchMap } from 'rxjs/operators';
 import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
 import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
 import { IGrade } from '../../../../../models/interfaces/IGrade.interface';
@@ -21,6 +21,11 @@ import { ProficiencyService } from '../../../../../services/proficiency-service'
 import { AuthService } from '../../../../../services/auth-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { BackendSubject } from '../../../../../models/interfaces/IBackendSubject.interface';
+import { UserService } from '../../../../../services/user-service';
+import { NotificationService } from '../../../../../services/notification-service';
+import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
+import { IBackendProficiency } from '../../../../../models/interfaces/IBackendProficiency.interface';
+
 @Component({
   selector: 'app-proficiency-management',
   standalone: true,
@@ -50,6 +55,9 @@ export class ProficiencyManagement implements OnInit {
   public user: IUser | null = null;
 
   private profService = inject(ProficiencyService);
+  private userService = inject(UserService);
+  private notificationService = inject(NotificationService);
+  private dialog = inject(MatDialog);
 
   proficiencies: IProficiency[] = [];
   selectedSyllabus: string | null = null;
@@ -58,6 +66,7 @@ export class ProficiencyManagement implements OnInit {
   userProficiencies: IProficiency[] = [];
   selectedUserSyllabus: string | null = null;
   selectedUserSyllabusSubjects: ISubject[] = [];
+  
   syllabusSelections: Record<string, Record<string, string[]>> = {};
 
   selectedGrades: string[] = [];
@@ -209,8 +218,61 @@ export class ProficiencyManagement implements OnInit {
     }
   }
 
-  confirmSave() {
-    console.log('Final selections to be saved:', this.syllabusSelections);
-    this.dialogRef.close(this.syllabusSelections);
+  confirmSave(): void {
+    if (!this.user) return;
+  
+    const proficienciesToSave: IBackendProficiency[] = Object.keys(this.syllabusSelections).map(syllabusName => {
+      const subjectSelections = this.syllabusSelections[syllabusName];
+      const subjectsAsObject: Record<string, BackendSubject> = {};
+  
+      Object.keys(subjectSelections).forEach(subjectName => {
+        const subjectKey = subjectName.toLowerCase().replace(/\s+/g, '_');
+        subjectsAsObject[subjectKey] = {
+          name: subjectName,
+          grade: subjectSelections[subjectName],
+          grades: subjectSelections[subjectName].map(g => ({ name: g }))
+        };
+      });
+  
+      return {
+        name: syllabusName,
+        subjects: subjectsAsObject,
+      };
+    });
+  
+    if (proficienciesToSave.length === 0) {
+      this.notificationService.showInfo("No changes to save.");
+      return;
+    }
+  
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      data: {
+        title: 'Confirm Changes',
+        message: 'Are you sure you want to save these proficiency changes?',
+        confirmText: 'Save'
+      }
+    });
+  
+    dialogRef.afterClosed().pipe(
+      filter((result): result is boolean => result === true),
+      switchMap(() => {
+        const userId = this.user!._id;
+        const updateObservables = proficienciesToSave.map(prof => 
+          this.userService.updateUserProficiency(userId, prof)
+        );
+        return forkJoin(updateObservables);
+      })
+    ).subscribe({
+      next: (updatedUsers: IUser[]) => {
+        const finalUpdatedUser = updatedUsers[updatedUsers.length - 1];
+        this.authService.updateCurrentUserState(finalUpdatedUser);
+        this.notificationService.showSuccess('Proficiencies updated successfully!');
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        console.error('Failed to update proficiencies', err);
+        this.notificationService.showError('An error occurred while saving.');
+      }
+    });
   }
 }
