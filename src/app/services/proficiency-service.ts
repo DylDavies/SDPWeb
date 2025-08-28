@@ -1,9 +1,7 @@
-// src/app/services/user.service.ts
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { SocketService } from './socket-service';
-import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { IProficiency } from '../models/interfaces/IProficiency.interface';
 
 @Injectable({
