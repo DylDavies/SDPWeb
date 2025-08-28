@@ -1,3 +1,4 @@
+<!-- src/app/leave-modal/leave-modal.html -->
 <h1 mat-dialog-title>Request Leave</h1>
 <em></em>
 <form mat-dialog-content class="dialog-content" [formGroup]="leaveForm">
@@ -12,20 +13,29 @@
   <mat-form-field class="full-width" appearance="outline">
     <mat-label>Reason</mat-label>
     <textarea matInput rows="4" placeholder="Please provide a reason for your leave..." formControlName="reason"></textarea>
+    <!-- **** ADDED: Error message for the reason field **** -->
+    @if (leaveForm.get('reason')?.hasError('required') && leaveForm.get('reason')?.touched) {
+      <mat-error>A reason for leave is required.</mat-error>
+    }
   </mat-form-field>
 
-  <mat-form-field>
-  <mat-label>Enter a date range</mat-label>
-  <mat-date-range-input [rangePicker]="picker">
-    <input matStartDate placeholder="Start date" formControlName="startDate">
-    <input matEndDate placeholder="End date" formControlName="endDate">
-  </mat-date-range-input>
-  <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-  <mat-date-range-picker #picker></mat-date-range-picker>
-</mat-form-field>
+  <mat-form-field class="full-width">
+    <mat-label>Enter a date range</mat-label>
+    <mat-date-range-input [rangePicker]="picker" [min]="minDate">
+      <input matStartDate placeholder="Start date" formControlName="startDate">
+      <input matEndDate placeholder="End date" formControlName="endDate">
+    </mat-date-range-input>
+    <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker #picker></mat-date-range-picker>
+    
+    @if (leaveForm.hasError('invalidRange') && leaveForm.get('endDate')?.touched) {
+      <mat-error>The start date must be before the end date.</mat-error>
+    }
+  </mat-form-field>
 
-<div mat-dialog-actions align="end">
-  <button mat-stroked-button mat-dialog-close>Cancel</button>
-  <button mat-stroked-button  mat-dialog-close color="primary" [disabled]="leaveForm.invalid" (click)="onSubmit()">Submit Request</button>
-</div>
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button mat-dialog-close>Cancel</button>
+    <button mat-stroked-button color="primary" [disabled]="leaveForm.invalid" (click)="onSubmit()">Submit Request</button>
+  </div>
+</form>
