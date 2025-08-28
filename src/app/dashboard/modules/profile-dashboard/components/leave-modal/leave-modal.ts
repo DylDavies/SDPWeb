@@ -1,7 +1,7 @@
 // src/app/leave-modal/leave-modal.ts
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, Validators, FormGroup, ReactiveFormsModule, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
@@ -13,6 +13,17 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+
+export const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const startDate = control.get('startDate')?.value;
+  const endDate = control.get('endDate')?.value;
+
+  if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+    return { invalidRange: true };
+  }
+
+  return null;
+};
 
 
 @Component({
@@ -36,28 +47,24 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaveModal implements OnInit {
-  // Use a FormGroup to manage all form controls
+  minDate = new Date();
+
   leaveForm = new FormGroup({
-    // Add a FormControl for the name, and disable it
     name: new FormControl({ value: '', disabled: true }),
     reason: new FormControl('', [Validators.required]),
     startDate: new FormControl(null, [Validators.required]),
     endDate: new FormControl(null, [Validators.required]),
-  });
+  },
+  { validators: dateRangeValidator });
 
-  // Use the inject() function for dependency injection
   public dialogRef = inject(MatDialogRef<LeaveModal>);
   private userService = inject(UserService);
-
-  // Inject the user ID that is passed into the modal when it is opened.
   public userId: string = inject(MAT_DIALOG_DATA);
 
   ngOnInit(): void {
-    // Call a method to get the current user's profile and autofill the name
     this.userService.getUser().subscribe({
       next: (user: IUser) => {
         if (user && user.displayName) {
-          // Use setValue to set the value of the 'name' FormControl
           this.leaveForm.get('name')?.setValue(user.displayName);
         }
       },
@@ -67,9 +74,6 @@ export class LeaveModal implements OnInit {
     });
   }
 
-  /**
-   * Submits the leave request to the API.
-   */
   onSubmit(): void {
     if (this.leaveForm.valid) {
       const { reason, startDate, endDate } = this.leaveForm.value;
@@ -80,21 +84,17 @@ export class LeaveModal implements OnInit {
           endDate: new Date(endDate),
         };
 
-        // Use the injected userId from MAT_DIALOG_DATA to submit the request
-        console.log(this.userId);
         this.userService.requestLeave(this.userId, leaveData).subscribe({
           next: (response) => {
             console.log('Leave request submitted successfully', response);
-            this.dialogRef.close(true); // Close the modal on success
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Error submitting leave request:', error);
-            // TODO: Add user-facing error message
           },
         });
       }
     } else {
-      // Mark all controls as touched to display validation errors
       this.leaveForm.markAllAsTouched();
     }
   }
