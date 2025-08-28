@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common'; // <-- Import DatePipe
+import { CommonModule, DatePipe } from '@angular/common'; 
 import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,7 +20,7 @@ import { ProficiencyManagement } from './components/proficiency-management/profi
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule, ProficiencyManagement
+    RoleChipRow, MatDialogModule
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -34,7 +34,7 @@ export class Profile implements OnInit {
   openLeaveModal(): void {
     if (this.user) {
       this.dialog.open(LeaveModal, {
-        width: 'clamp(60vh, 80vw, 60vh)', // Responsive width
+        width: 'clamp(60vh, 80vw, 60vh)', 
         data: this.user._id
       });
     }
@@ -46,7 +46,6 @@ export class Profile implements OnInit {
     this.authService.currentUser$.subscribe({
       next: (user) => {
         this.user = user;
-        console.log(user);
       }
     });
   }
@@ -68,10 +67,7 @@ export class Profile implements OnInit {
 
   openProficiencyModal(): void {
     this.dialog.open(ProficiencyManagement, {
-    width: 'clamp(300px, 80vw, 600px)',   // min 300px, preferred 80% of viewport, max 600px
-    height: 'clamp(400px, 60vh, 800px)',  // min 400px, preferred 60% of viewport height, max 800px
-      // You can pass data to the modal like this:
-      // data: { userProficiencies: this.user.proficiencies }
+      panelClass: 'proficiency-dialog-container' 
     });
   }
 }
