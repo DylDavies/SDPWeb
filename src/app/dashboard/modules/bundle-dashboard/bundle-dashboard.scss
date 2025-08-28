@@ -1,54 +1,18 @@
-/**
- * Styles for the Bundle Dashboard component.
- * We're using modern CSS like flexbox and grid for layout,
- * and CSS variables for consistent theming.
- */
-
 :host {
   display: block;
   padding: 24px;
-  background-color: var(--mat-sidenav-content-background-color);
 }
 
-.tab-content-wrapper {
-  padding: 24px;
-}
-
-.create-form-wrapper {
+.bundle-dashboard-header {
   display: flex;
-  justify-content: center;
-}
-
-.bundle-card {
-  flex: 1 1 100%;
-  max-width: 800px;
-}
-
-// Styling for the group of inputs that represent a single subject.
-.subject-group {
-  display: flex;
-  gap: 16px;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
+  margin-bottom: 24px;
 
-.flex-item {
-  flex: 1 1 auto; // Allows items to grow and shrink nicely.
-}
-
-.subjects-title {
-  margin: 24px 0 8px 0;
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.button-row {
-  margin-top: 16px;
-}
-
-// Table Styles
-mat-form-field {
-  width: 100%;
+  mat-form-field {
+    max-width: 600px;
+    width: 100%;
+  }
 }
 
 .table-container {
@@ -75,16 +39,10 @@ table {
 }
 
 .mat-column-actions {
-  width: auto;
+  width: 160px;
   text-align: right;
 }
 
-.action-buttons-container {
-  display: flex;
-  justify-content: flex-end;
-}
-
-// Status Chip Styles
 .status-chip {
   padding: 4px 12px;
   border-radius: 16px;
@@ -94,12 +52,12 @@ table {
   color: #fff;
 
   &.pending {
-    background-color: #ffc107; // Amber
+    background-color: #ffc107;
   }
   &.approved {
-    background-color: #4caf50; // Green
+    background-color: #4caf50;
   }
   &.denied {
-    background-color: #f44336; // Red
+    background-color: #f44336;
   }
 }

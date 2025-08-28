@@ -1,15 +1,10 @@
 import { Component, inject, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -21,22 +16,18 @@ import { BundleService } from '../../../services/bundle-service';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { EditBundleModal } from './components/edit-bundle-modal/edit-bundle-modal';
+import { CreateBundleModal } from './components/create-bundle-modal/create-bundle-modal';
 
 @Component({
   selector: 'app-bundle-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatDividerModule,
-    MatTabsModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -48,14 +39,12 @@ import { EditBundleModal } from './components/edit-bundle-modal/edit-bundle-moda
   styleUrls: ['./bundle-dashboard.scss']
 })
 export class BundleDashboard implements OnInit, AfterViewInit {
-  private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
 
-  public createBundleForm: FormGroup;
   public isLoading = true;
-  public EBundleStatus = EBundleStatus; // Expose enum to the template
+  public EBundleStatus = EBundleStatus;
 
   // Table properties
   displayedColumns: string[] = ['student', 'status', 'isActive', 'createdAt', 'actions'];
@@ -66,18 +55,11 @@ export class BundleDashboard implements OnInit, AfterViewInit {
 
   constructor() {
     this.dataSource = new MatTableDataSource<IBundle>([]);
-    // Associate the custom filter predicate
     this.dataSource.filterPredicate = this.createFilter();
-
-    this.createBundleForm = this.fb.group({
-      student: ['', Validators.required],
-      subjects: this.fb.array([])
-    });
   }
 
   ngOnInit(): void {
     this.loadBundles();
-    this.addSubject(); // Add one subject row by default
   }
 
   ngAfterViewInit(): void {
@@ -98,54 +80,29 @@ export class BundleDashboard implements OnInit, AfterViewInit {
       }
     });
   }
-
-  get subjects(): FormArray {
-    return this.createBundleForm.get('subjects') as FormArray;
-  }
-
-  createSubjectGroup(): FormGroup {
-    return this.fb.group({
-      subject: ['', Validators.required],
-      tutor: ['', Validators.required],
-      hours: [1, [Validators.required, Validators.min(1)]]
+  
+  openCreateDialog(): void {
+    const dialogRef = this.dialog.open(CreateBundleModal, {
+      width: 'clamp(400px, 90vw, 600px)',
     });
-  }
 
-  addSubject(): void {
-    this.subjects.push(this.createSubjectGroup());
-  }
-
-  removeSubject(index: number): void {
-    this.subjects.removeAt(index);
-  }
-
-  onCreateBundle(): void {
-    if (this.createBundleForm.invalid) {
-      this.notificationService.showError('Please fill out all fields for the new bundle.');
-      return;
-    }
-    const { student, subjects } = this.createBundleForm.value;
-    this.bundleService.createBundle(student, subjects).subscribe({
-      next: (bundle) => {
-        this.notificationService.showSuccess(`Bundle created successfully! ID: ${bundle._id}`);
-        this.createBundleForm.reset();
-        this.subjects.clear();
-        this.addSubject();
-        this.loadBundles(); // Refresh the table
-      },
-      error: (err) => this.notificationService.showError(err.error?.message || 'Failed to create bundle.')
+    dialogRef.afterClosed().subscribe(result => {
+      // If the dialog returned a result, it means a new bundle was created.
+      if (result) {
+        this.loadBundles(); // Refresh the table.
+      }
     });
   }
 
   openEditDialog(bundle: IBundle): void {
     const dialogRef = this.dialog.open(EditBundleModal, {
       width: 'clamp(400px, 90vw, 600px)',
-      data: JSON.parse(JSON.stringify(bundle)) // Deep copy to prevent form affecting table
+      data: JSON.parse(JSON.stringify(bundle))
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadBundles(); // Refresh the table to show changes.
+        this.loadBundles();
       }
     });
   }
@@ -156,7 +113,7 @@ export class BundleDashboard implements OnInit, AfterViewInit {
       this.bundleService.setBundleActiveStatus(bundle._id, false).subscribe({
         next: () => {
           this.notificationService.showSuccess('Bundle deactivated successfully.');
-          this.loadBundles(); // Refresh the table
+          this.loadBundles();
         },
         error: (err) => {
           this.notificationService.showError(err.error?.message || 'Failed to deactivate bundle.');

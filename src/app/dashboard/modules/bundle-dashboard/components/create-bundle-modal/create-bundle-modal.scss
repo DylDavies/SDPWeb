@@ -1,0 +1,42 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 16px;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+.subjects-title {
+    margin: 8px 0;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.subject-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.flex-item {
+    flex: 1 1 auto;
+}
+
+.hours-field {
+    max-width: 100px;
+}
+
+.button-row {
+    margin-top: -16px;
+}
+
+mat-dialog-actions {
+    padding: 16px 24px;
+}
+
+button[mat-flat-button] {
+    min-width: 120px;
+}

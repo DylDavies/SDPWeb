@@ -1,131 +1,80 @@
-<mat-tab-group animationDuration="0ms">
-  <mat-tab label="View All Bundles">
-    <div class="tab-content-wrapper">
-      <mat-form-field appearance="outline">
-        <mat-label>Filter Bundles</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="Search by student, status, etc." #input>
-      </mat-form-field>
+<div class="bundle-dashboard-header">
+  <mat-form-field appearance="outline">
+    <mat-label>Filter Bundles</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Search by student, status, etc." #input>
+  </mat-form-field>
 
-      <div class="table-container mat-elevation-z8">
-        <div *ngIf="isLoading" class="spinner-overlay">
-          <mat-spinner></mat-spinner>
-        </div>
+  <button mat-flat-button color="primary" (click)="openCreateDialog()">
+    <mat-icon>add</mat-icon>
+    Create New Bundle
+  </button>
+</div>
 
-        <table mat-table [dataSource]="dataSource" matSort>
+<div class="table-container mat-elevation-z8">
+  <div *ngIf="isLoading" class="spinner-overlay">
+    <mat-spinner></mat-spinner>
+  </div>
 
-          <ng-container matColumnDef="student">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Student </th>
-            <td mat-cell *matCellDef="let bundle"> {{bundle.student?.displayName || 'N/A'}} </td>
-          </ng-container>
+  <table mat-table [dataSource]="dataSource" matSort>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
-            <td mat-cell *matCellDef="let bundle">
-              <span class="status-chip" [ngClass]="bundle.status">{{bundle.status | titlecase}}</span>
-            </td>
-          </ng-container>
+    <ng-container matColumnDef="student">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Student </th>
+      <td mat-cell *matCellDef="let bundle"> {{bundle.student?.displayName || 'N/A'}} </td>
+    </ng-container>
 
-          <ng-container matColumnDef="isActive">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Active </th>
-            <td mat-cell *matCellDef="let bundle">
-              <mat-icon [color]="bundle.isActive ? 'primary' : 'warn'">
-                {{ bundle.isActive ? 'check_circle' : 'cancel' }}
-              </mat-icon>
-            </td>
-          </ng-container>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+      <td mat-cell *matCellDef="let bundle">
+        <span class="status-chip" [ngClass]="bundle.status">{{bundle.status | titlecase}}</span>
+      </td>
+    </ng-container>
 
-          <ng-container matColumnDef="createdAt">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
-            <td mat-cell *matCellDef="let bundle"> {{bundle.createdAt | date:'medium'}} </td>
-          </ng-container>
+    <ng-container matColumnDef="isActive">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Active </th>
+      <td mat-cell *matCellDef="let bundle">
+        <mat-icon [color]="bundle.isActive ? 'primary' : 'warn'">
+          {{ bundle.isActive ? 'check_circle' : 'cancel' }}
+        </mat-icon>
+      </td>
+    </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Actions </th>
-            <td mat-cell *matCellDef="let bundle">
-              <ng-container *ngIf="bundle.status === EBundleStatus.Pending; else editActions">
-                <button mat-icon-button color="primary" matTooltip="Approve Bundle" aria-label="Approve bundle" (click)="approveBundle(bundle)">
-                  <mat-icon>check_circle</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Deny Bundle" aria-label="Deny bundle" (click)="denyBundle(bundle)">
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </ng-container>
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
+      <td mat-cell *matCellDef="let bundle"> {{bundle.createdAt | date:'medium'}} </td>
+    </ng-container>
 
-              <ng-template #editActions>
-                <button mat-icon-button color="primary" matTooltip="Edit Bundle" aria-label="Edit bundle" (click)="openEditDialog(bundle)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Deactivate Bundle" aria-label="Deactivate bundle" (click)="confirmAndDeactivate(bundle)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </ng-template>
-            </td>
-          </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let bundle">
+        <ng-container *ngIf="bundle.status === EBundleStatus.Pending; else editActions">
+          <button mat-icon-button color="primary" matTooltip="Approve Bundle" aria-label="Approve bundle" (click)="approveBundle(bundle)">
+            <mat-icon>check_circle</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Deny Bundle" aria-label="Deny bundle" (click)="denyBundle(bundle)">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <ng-template #editActions>
+          <button mat-icon-button color="primary" matTooltip="Edit Bundle" aria-label="Edit bundle" (click)="openEditDialog(bundle)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Deactivate Bundle" aria-label="Deactivate bundle" (click)="confirmAndDeactivate(bundle)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </ng-template>
+      </td>
+    </ng-container>
 
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="5">No data matching the filter "{{input.value}}"</td>
-          </tr>
-        </table>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons
-          aria-label="Select page of bundles">
-        </mat-paginator>
-      </div>
-    </div>
-  </mat-tab>
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="5">No data matching the filter "{{input.value}}"</td>
+    </tr>
+  </table>
 
-  <mat-tab label="Create New Bundle">
-    <div class="tab-content-wrapper create-form-wrapper">
-      <mat-card class="bundle-card" appearance="outlined">
-        <mat-card-header>
-          <mat-card-title>Create New Bundle</mat-card-title>
-          <mat-card-subtitle>Create a new tutoring bundle for a student.</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content [formGroup]="createBundleForm">
-          <mat-form-field appearance="outline">
-            <mat-label>Student ID</mat-label>
-            <input matInput formControlName="student" placeholder="Enter student ID">
-          </mat-form-field>
-
-          <mat-divider></mat-divider>
-
-          <div formArrayName="subjects">
-            <h3 class="subjects-title">Subjects</h3>
-            @for (subjectGroup of subjects.controls; track subjectGroup; let i = $index) {
-            <div [formGroupName]="i" class="subject-group">
-              <mat-form-field appearance="outline" class="flex-item">
-                <mat-label>Subject Name/Topic</mat-label>
-                <input matInput formControlName="subject">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="flex-item">
-                <mat-label>Tutor ID</mat-label>
-                <input matInput formControlName="tutor">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="flex-item">
-                <mat-label>Hours</mat-label>
-                <input matInput type="number" formControlName="hours">
-              </mat-form-field>
-              <button mat-icon-button color="warn" (click)="removeSubject(i)" aria-label="Remove subject">
-                <mat-icon>remove_circle</mat-icon>
-              </button>
-            </div>
-            }
-          </div>
-          <div class="button-row">
-            <button mat-stroked-button color="primary" (click)="addSubject()">
-              <mat-icon>add</mat-icon>
-              Add Another Subject
-            </button>
-          </div>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <button mat-flat-button color="primary" (click)="onCreateBundle()" [disabled]="createBundleForm.invalid">Create
-            Bundle</button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  </mat-tab>
-</mat-tab-group>
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons
+    aria-label="Select page of bundles">
+  </mat-paginator>
+</div>
