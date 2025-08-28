@@ -1,5 +1,5 @@
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, catchError, tap, shareReplay } from 'rxjs';
+import { DOCUMENT, inject, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of, catchError, tap, shareReplay, startWith, pairwise } from 'rxjs';
 import { Router } from '@angular/router';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { HttpService } from './http-service';
@@ -22,6 +22,9 @@ export class AuthService {
   private router = inject(Router);
   private socketService = inject(SocketService);
 
+  private document = inject(DOCUMENT);
+  private window = this.document.defaultView;
+
   constructor() {
     this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
       console.log('Received users-updated event. Refreshing logged in user.');
@@ -34,6 +37,21 @@ export class AuthService {
       this.verification$ = null; // Force re-verification
       this.verifyCurrentUser().subscribe();
     });
+
+    this.currentUser$.pipe(
+      startWith(null),
+      pairwise()
+    ).subscribe(([previousUser, currentUser]) => {
+      if (previousUser && currentUser) {
+        const statusChanged = previousUser.disabled !== currentUser.disabled || previousUser.pending !== currentUser.pending;
+
+        if (statusChanged) {
+          console.log('Critical user status changed. Forcing a page reload to re-evaluate guards.');
+          // Force a hard reload of the page.
+          this.window?.location.reload();
+        }
+      }
+    })
   }
 
   getToken(): string | null {
@@ -80,7 +98,7 @@ export class AuthService {
     this.removeToken();
     this.httpService.post('auth/logout', {}).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.router.navigateByUrl('/');
       }
     })
   }

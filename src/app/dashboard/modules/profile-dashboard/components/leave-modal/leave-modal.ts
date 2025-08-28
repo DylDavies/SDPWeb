@@ -1,5 +1,5 @@
 // src/app/leave-modal/leave-modal.ts
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, Validators, FormGroup, ReactiveFormsModule, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,7 +8,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { UserService } from '../../../../../services/user-service';
-import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -46,11 +45,10 @@ export const dateRangeValidator: ValidatorFn = (control: AbstractControl): Valid
   providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LeaveModal implements OnInit {
+export class LeaveModal {
   minDate = new Date();
-
+  // Use a FormGroup to manage all form controls
   leaveForm = new FormGroup({
-    name: new FormControl({ value: '', disabled: true }),
     reason: new FormControl('', [Validators.required]),
     startDate: new FormControl(null, [Validators.required]),
     endDate: new FormControl(null, [Validators.required]),
@@ -61,19 +59,9 @@ export class LeaveModal implements OnInit {
   private userService = inject(UserService);
   public userId: string = inject(MAT_DIALOG_DATA);
 
-  ngOnInit(): void {
-    this.userService.getUser().subscribe({
-      next: (user: IUser) => {
-        if (user && user.displayName) {
-          this.leaveForm.get('name')?.setValue(user.displayName);
-        }
-      },
-      error: (err) => {
-        console.error('Failed to get user data for autofill.', err);
-      },
-    });
-  }
-
+  /**
+   * Submits the leave request to the API.
+   */
   onSubmit(): void {
     if (this.leaveForm.valid) {
       const { reason, startDate, endDate } = this.leaveForm.value;

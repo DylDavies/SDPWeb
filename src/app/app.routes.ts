@@ -12,15 +12,22 @@ import { Profile } from './dashboard/modules/profile-dashboard/profile-dashboard
 import { profileCompletionGuard } from './guards/profile-completion-guard';
 import { permissionGuard } from './guards/permission-guard-guard';
 import { EPermission } from './models/enums/permission.enum';
+import { accountStatusGuard } from './guards/account-status-guard';
+import { AccountPending } from './status-pages/account-pending/account-pending';
+import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
+  { path: 'account', canActivate: [authGuard, accountStatusGuard], children: [
+    { path: 'pending', component: AccountPending },
+    { path: 'disabled', component: AccountDisabled  }
+  ] },
   { path: 'dashboard', component: Dashboard, children: [
       { path: '', component: ClientDashboard },
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
       { path: 'profile', component: Profile }
     ],
-    canActivate: [authGuard, profileCompletionGuard]
+    canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },
   { path: 'login/callback', component: LoginCallback },
   { path: 'logout', component: Logout },

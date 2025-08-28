@@ -45,7 +45,6 @@ export class Profile implements OnInit {
     this.authService.currentUser$.subscribe({
       next: (user) => {
         this.user = user;
-        console.log(user);
       }
     });
   }
