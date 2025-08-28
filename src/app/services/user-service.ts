@@ -42,7 +42,7 @@ export class UserService {
     );
   }
 
-  getUser(targetUserId?: string): Observable<IUser> {
+  getUser(): Observable<IUser> {
     return this.httpService.get<IUser>('user');
   }
 

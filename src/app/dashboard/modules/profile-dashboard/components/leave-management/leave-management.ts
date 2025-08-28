@@ -30,7 +30,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
 
   public displayedColumns: string[] = ['number', 'dates', 'approved','actions'];
   public dataSource: ILeave[] = [];
-  public isAdmin: boolean = false;
+  public isAdmin = false;
 
   private subscriptions = new Subscription();
   private viewedUser: IUser | null = null;
@@ -46,7 +46,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
     const targetUserId = this.userId;
     
     if (targetUserId && this.isAdmin) {
-        const userSub = this.userService.getUser(targetUserId).subscribe(profileUser => {
+        const userSub = this.userService.getUser().subscribe(profileUser => {
             if (profileUser) {
                 this.viewedUser = profileUser;
                 this.dataSource = profileUser.leave || [];
