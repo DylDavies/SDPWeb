@@ -1,6 +1,7 @@
 import { RoleNode } from "../../services/role-service";
 import { EPermission } from "../enums/permission.enum";
 import { EUserType } from "../enums/user-type.enum";
+import { IProficiency } from "./IProficiency.interface";
 
 export interface IUser {
     _id: string;
@@ -15,4 +16,5 @@ export interface IUser {
     permissions: EPermission[],
     pending: boolean,
     disabled: boolean
+    proficiencies?: IProficiency[];
 }
