@@ -27,6 +27,7 @@ export class HttpService {
     return this.http.patch<T>(`${this.apiUrl}/${endpoint}`, body);
   }
 
+  // FIX: Corrected the signature to only accept the endpoint URL.
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<T>(`${this.apiUrl}/${endpoint}`);
   }

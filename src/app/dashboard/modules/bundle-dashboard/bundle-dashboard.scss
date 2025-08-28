@@ -10,19 +10,18 @@
   background-color: var(--mat-sidenav-content-background-color);
 }
 
-.bundle-dashboard-container {
+.tab-content-wrapper {
+  padding: 24px;
+}
+
+.create-form-wrapper {
   display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
   justify-content: center;
 }
 
 .bundle-card {
-  // On larger screens, each card can take up about half the width.
-  // On smaller screens, they'll wrap and take up the full width.
-  flex: 1 1 45%;
-  min-width: 320px;
-  max-width: 600px;
+  flex: 1 1 100%;
+  max-width: 800px;
 }
 
 // Styling for the group of inputs that represent a single subject.
@@ -47,24 +46,60 @@
   margin-top: 16px;
 }
 
-// Styles for the sections inside the "Manage" card.
-.action-section {
-  padding: 16px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+// Table Styles
+mat-form-field {
+  width: 100%;
 }
 
-.sub-action {
+.table-container {
+  position: relative;
+  overflow: auto;
+  width: 100%;
+}
+
+.spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 16px;
-
-  mat-form-field {
-    flex-grow: 1;
-  }
+  z-index: 10;
 }
 
-.status-toggle {
-  padding: 16px 0;
+table {
+  width: 100%;
+}
+
+.mat-column-actions {
+  width: auto;
+  text-align: right;
+}
+
+.action-buttons-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+// Status Chip Styles
+.status-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  color: #fff;
+
+  &.pending {
+    background-color: #ffc107; // Amber
+  }
+  &.approved {
+    background-color: #4caf50; // Green
+  }
+  &.denied {
+    background-color: #f44336; // Red
+  }
 }

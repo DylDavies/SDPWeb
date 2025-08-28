@@ -25,6 +25,14 @@ export class BundleService {
   private httpService = inject(HttpService);
 
   /**
+   * Retrieves all bundles from the backend.
+   * @returns An Observable that emits an array of bundles.
+   */
+  getBundles(): Observable<IBundle[]> {
+    return this.httpService.get<IBundle[]>('bundle');
+  }
+
+  /**
    * Creates a new tutoring bundle.
    * This sends the student's ID and the list of subjects to the backend.
    * The creator is handled automatically by the backend using the user's auth token.
@@ -35,6 +43,16 @@ export class BundleService {
   createBundle(studentId: string, subjects: Partial<IBundleSubject>[]): Observable<IBundle> {
     const payload = { student: studentId, subjects };
     return this.httpService.post<IBundle>('bundle', payload);
+  }
+
+  /**
+   * Updates an existing bundle with new data.
+   * @param bundleId The ID of the bundle to update.
+   * @param updateData An object with the fields to update (e.g., { status: 'approved', subjects: [...] }).
+   * @returns An Observable that emits the updated bundle.
+   */
+  updateBundle(bundleId: string, updateData: Partial<IBundle>): Observable<IBundle> {
+    return this.httpService.patch<IBundle>(`bundle/${bundleId}`, updateData);
   }
 
   /**
@@ -53,7 +71,7 @@ export class BundleService {
    * @param subjectId The ID of the subject entry to remove.
    * @returns An Observable that emits the updated bundle.
    */
-  removeSubjectFromBundle(bundleId: string, subjectId: string): Observable<IBundle> {
+   removeSubjectFromBundle(bundleId: string, subjectId: string): Observable<IBundle> {
     return this.httpService.delete<IBundle>(`bundle/${bundleId}/subjects/${subjectId}`);
   }
 

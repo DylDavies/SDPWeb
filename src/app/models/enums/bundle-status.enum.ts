@@ -7,7 +7,7 @@
  * This helps ensure that we only use valid status values throughout the app.
  */
 export enum EBundleStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  DISAPPROVED = 'disapproved',
+  Pending = 'pending',
+  Approved = 'approved',
+  Denied = 'denied'
 }

@@ -1,9 +1,4 @@
-/**
- * @file This file contains the logic for the Bundle Dashboard component,
- * which provides a user interface for managing tutoring bundles.
- */
-
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -14,9 +9,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NotificationService } from '../../../services/notification-service';
-import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { BundleService } from '../../../services/bundle-service';
+import { IBundle } from '../../../models/interfaces/IBundle.interface';
+import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
+import { EditBundleModal } from './components/edit-bundle-modal/edit-bundle-modal';
 
 @Component({
   selector: 'app-bundle-dashboard',
@@ -31,106 +35,90 @@ import { BundleService } from '../../../services/bundle-service';
     MatIconModule,
     MatSelectModule,
     MatSlideToggleModule,
-    MatDividerModule
+    MatDividerModule,
+    MatTabsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+    MatTooltipModule
   ],
   templateUrl: './bundle-dashboard.html',
   styleUrls: ['./bundle-dashboard.scss']
 })
-export class BundleDashboard {
-  /**
-   * We're injecting all the services we need.
-   * FormBuilder helps us create complex forms.
-   * BundleService talks to our backend.
-   * NotificationService shows success/error messages.
-   */
+export class BundleDashboard implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
   private notificationService = inject(NotificationService);
+  private dialog = inject(MatDialog);
 
-  /**
-   * The form group for creating a new bundle.
-   * It includes a student ID and a FormArray for subjects.
-   */
   public createBundleForm: FormGroup;
+  public isLoading = true;
+  public EBundleStatus = EBundleStatus; // Expose enum to the template
 
-  /**
-   * A simple form for adding a subject to an existing bundle.
-   */
-  public addSubjectForm: FormGroup;
+  // Table properties
+  displayedColumns: string[] = ['student', 'status', 'isActive', 'createdAt', 'actions'];
+  dataSource: MatTableDataSource<IBundle>;
 
-  /**
-   * A form for managing an existing bundle by its ID.
-   * This is used for deleting subjects and updating statuses.
-   */
-  public manageBundleForm: FormGroup;
-
-  /**
-   * We need to access the EBundleStatus enum in our template for the status dropdown.
-   */
-  public EBundleStatus = EBundleStatus;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor() {
-    // Initialize the form to create a new bundle
+    this.dataSource = new MatTableDataSource<IBundle>([]);
+    // Associate the custom filter predicate
+    this.dataSource.filterPredicate = this.createFilter();
+
     this.createBundleForm = this.fb.group({
       student: ['', Validators.required],
-      subjects: this.fb.array([this.createSubjectGroup()])
-    });
-
-    // Initialize the form for adding a subject
-    this.addSubjectForm = this.fb.group({
-      bundleId: ['', Validators.required],
-      subject: ['', Validators.required],
-      tutor: ['', Validators.required],
-      hours: [0, [Validators.required, Validators.min(1)]]
-    });
-
-    // Initialize the form for managing a bundle
-    this.manageBundleForm = this.fb.group({
-      bundleId: ['', Validators.required],
-      subjectIdToDelete: [''],
-      status: [EBundleStatus.PENDING],
-      isActive: [true]
+      subjects: this.fb.array([])
     });
   }
 
-  /**
-   * A getter to easily access the 'subjects' FormArray from the template.
-   */
+  ngOnInit(): void {
+    this.loadBundles();
+    this.addSubject(); // Add one subject row by default
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  loadBundles(): void {
+    this.isLoading = true;
+    this.bundleService.getBundles().subscribe({
+      next: (bundles) => {
+        this.dataSource.data = bundles;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.notificationService.showError(err.error?.message || 'Failed to load bundles.');
+        this.isLoading = false;
+      }
+    });
+  }
+
   get subjects(): FormArray {
     return this.createBundleForm.get('subjects') as FormArray;
   }
 
-  /**
-   * Creates a new FormGroup for a single subject.
-   * This is used when adding a new subject to the 'createBundleForm'.
-   */
   createSubjectGroup(): FormGroup {
     return this.fb.group({
       subject: ['', Validators.required],
       tutor: ['', Validators.required],
-      hours: [0, [Validators.required, Validators.min(1)]]
+      hours: [1, [Validators.required, Validators.min(1)]]
     });
   }
 
-  /**
-   * Adds a new, empty subject form group to the 'subjects' FormArray.
-   */
   addSubject(): void {
     this.subjects.push(this.createSubjectGroup());
   }
 
-  /**
-   * Removes a subject form group from the 'subjects' FormArray at a specific index.
-   * @param index The index of the subject to remove.
-   */
   removeSubject(index: number): void {
     this.subjects.removeAt(index);
   }
 
-  /**
-   * Handles the submission of the 'Create Bundle' form.
-   * Calls the BundleService and shows a notification.
-   */
   onCreateBundle(): void {
     if (this.createBundleForm.invalid) {
       this.notificationService.showError('Please fill out all fields for the new bundle.');
@@ -143,71 +131,78 @@ export class BundleDashboard {
         this.createBundleForm.reset();
         this.subjects.clear();
         this.addSubject();
+        this.loadBundles(); // Refresh the table
       },
       error: (err) => this.notificationService.showError(err.error?.message || 'Failed to create bundle.')
     });
   }
 
-  /**
-   * Handles the submission of the 'Add Subject' form.
-   */
-  onAddSubjectToBundle(): void {
-    if (this.addSubjectForm.invalid) {
-      this.notificationService.showError('Please fill out all fields to add a subject.');
-      return;
-    }
-    const { bundleId, ...subject } = this.addSubjectForm.value;
-    this.bundleService.addSubjectToBundle(bundleId, subject).subscribe({
-      next: () => {
-        this.notificationService.showSuccess('Subject added to bundle!');
-        this.addSubjectForm.reset();
-      },
-      error: (err) => this.notificationService.showError(err.error?.message || 'Failed to add subject.')
+  openEditDialog(bundle: IBundle): void {
+    const dialogRef = this.dialog.open(EditBundleModal, {
+      width: 'clamp(400px, 90vw, 600px)',
+      data: JSON.parse(JSON.stringify(bundle)) // Deep copy to prevent form affecting table
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadBundles(); // Refresh the table to show changes.
+      }
     });
   }
 
-  /**
-   * Handles the 'Remove Subject' button click.
-   */
-  onRemoveSubjectFromBundle(): void {
-    const { bundleId, subjectIdToDelete } = this.manageBundleForm.value;
-    if (!bundleId || !subjectIdToDelete) {
-      this.notificationService.showError('Bundle ID and Subject ID are required to remove a subject.');
-      return;
+  confirmAndDeactivate(bundle: IBundle): void {
+    const studentName = typeof bundle.student === 'object' ? bundle.student.displayName : 'the student';
+    if (confirm(`Are you sure you want to deactivate the bundle for ${studentName}? It will be hidden but not permanently deleted.`)) {
+      this.bundleService.setBundleActiveStatus(bundle._id, false).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Bundle deactivated successfully.');
+          this.loadBundles(); // Refresh the table
+        },
+        error: (err) => {
+          this.notificationService.showError(err.error?.message || 'Failed to deactivate bundle.');
+        }
+      });
     }
-    this.bundleService.removeSubjectFromBundle(bundleId, subjectIdToDelete).subscribe({
-      next: () => this.notificationService.showSuccess('Subject removed from bundle!'),
-      error: (err) => this.notificationService.showError(err.error?.message || 'Failed to remove subject.')
-    });
   }
 
-  /**
-   * Handles changes to the 'isActive' slide toggle.
-   */
-  onSetBundleActiveStatus(): void {
-    const { bundleId, isActive } = this.manageBundleForm.value;
-    if (!bundleId) {
-      this.notificationService.showError('Bundle ID is required to update its active status.');
-      return;
+  approveBundle(bundle: IBundle): void {
+    if (confirm('Are you sure you want to approve this bundle?')) {
+      this.bundleService.setBundleStatus(bundle._id, EBundleStatus.Approved).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Bundle approved.');
+          this.loadBundles();
+        },
+        error: (err) => this.notificationService.showError(err.error?.message || 'Failed to approve bundle.')
+      });
     }
-    this.bundleService.setBundleActiveStatus(bundleId, isActive).subscribe({
-      next: () => this.notificationService.showSuccess(`Bundle active status set to ${isActive}`),
-      error: (err) => this.notificationService.showError(err.error?.message || 'Failed to update status.')
-    });
   }
 
-  /**
-   * Handles the 'Update Status' button click.
-   */
-  onSetBundleStatus(): void {
-    const { bundleId, status } = this.manageBundleForm.value;
-     if (!bundleId) {
-      this.notificationService.showError('Bundle ID is required to update its status.');
-      return;
+  denyBundle(bundle: IBundle): void {
+    if (confirm('Are you sure you want to deny this bundle?')) {
+      this.bundleService.setBundleStatus(bundle._id, EBundleStatus.Denied).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Bundle denied.');
+          this.loadBundles();
+        },
+        error: (err) => this.notificationService.showError(err.error?.message || 'Failed to deny bundle.')
+      });
     }
-    this.bundleService.setBundleStatus(bundleId, status).subscribe({
-      next: () => this.notificationService.showSuccess(`Bundle status updated to ${status}`),
-      error: (err) => this.notificationService.showError(err.error?.message || 'Failed to update status.')
-    });
+  }
+  
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+  
+  createFilter(): (data: IBundle, filter: string) => boolean {
+    const filterFunction = (data: IBundle, filter: string): boolean => {
+      const searchTerms = JSON.stringify(data).toLowerCase();
+      return searchTerms.indexOf(filter) !== -1;
+    };
+    return filterFunction;
   }
 }
