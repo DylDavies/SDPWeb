@@ -1,77 +1,171 @@
-<div mat-dialog-title class="modal-title">
-  <h2>Manage Proficiencies</h2>
-  <button mat-icon-button [mat-dialog-close]="true" class="close-button">
+<div class="dialog-header">
+  <mat-icon color="primary">school</mat-icon>
+  <h2 mat-dialog-title>Manage Proficiencies</h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
-<div mat-dialog-content>
-  <mat-tab-group>
-    <mat-tab label="View">
-      <div class="tab-content-container">
-        <mat-chip-listbox aria-label="Syllabus selection">
-          <mat-chip-option
-            *ngFor="let prof of proficiencies"
-            (click)="onSyllabusSelect(prof.name)"
-            [selected]="selectedSyllabus === prof.name">
-            {{ prof.name }}
-          </mat-chip-option>
-        </mat-chip-listbox>
+<mat-dialog-content class="dialog-content">
+  <mat-tab-group animationDuration="0ms">
 
-        <div *ngIf="selectedSyllabus" class="subject-list">
-          <h3>Subjects in {{ selectedSyllabus }}</h3>
-          <mat-list>
-            <mat-list-item *ngFor="let subject of selectedSyllabusSubjects">
-              {{ subject.name }} — Grade: {{ subject.grade }}
-            </mat-list-item>
-          </mat-list>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">visibility</mat-icon>
+        <span>My Proficiencies</span>
+      </ng-template>
+      <div class="tab-content-container view-tab">
+        @if (userProficiencies && userProficiencies.length > 0) {
+          <mat-chip-listbox aria-label="User Syllabi">
+            @for (prof of userProficiencies; track prof.name) {
+              <mat-chip-option (click)="onUserSyllabusSelect(prof.name)" [selected]="selectedUserSyllabus === prof.name">
+                {{ prof.name }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+
+          @if (selectedUserSyllabus) {
+            <div class="subject-list mat-elevation-z2">
+              <h3 class="subject-list-header">Subjects in {{ selectedUserSyllabus }}</h3>
+              <mat-list>
+                @for (subject of selectedUserSyllabusSubjects; track subject.name) {
+                  <mat-list-item>
+                    <mat-icon matListItemIcon>library_books</mat-icon>
+                    <div matListItemTitle>{{ subject.name }}</div>
+                    @if (getGradeNames(subject)) {
+                      <div matListItemLine>Grades: {{ getGradeNames(subject) }}</div>
+                    }
+                  </mat-list-item>
+                }
+              </mat-list>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>touch_app</mat-icon>
+              <p>Select a syllabus to view your subjects.</p>
+            </div>
+          }
+        } @else {
+          <div class="empty-state">
+            <mat-icon>sentiment_dissatisfied</mat-icon>
+            <p>You have not added any proficiencies yet.</p>
+            <p class="empty-state-subtitle">Go to the "Edit" tab to add your first one.</p>
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">edit</mat-icon>
+        <span>Edit Proficiencies</span>
+      </ng-template>
+      <div class="tab-content-container edit-tab">
+
+        <div class="edit-column">
+          <div>
+            <h3 class="column-header">1. Select a Syllabus</h3>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Syllabus</mat-label>
+              <mat-select [(value)]="selectedSyllabus" (selectionChange)="onSyllabusSelect($event.value)">
+                @for (prof of proficiencies; track prof.name) {
+                  <mat-option [value]="prof.name">{{ prof.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div>
+            <h3 class="column-header">2. Add Subjects</h3>
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Find subjects...</mat-label>
+              <input type="text" placeholder="Start typing to search" matInput [formControl]="subjectCtrl" [matAutocomplete]="auto" #subjectInput>
+              <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onAutocompleteSelected($event)">
+                @for (subj of filteredSubjects | async; track subj) {
+                  <mat-option [value]="subj">{{ subj }}</mat-option>
+                }
+                 @if ((filteredSubjects | async)?.length === 0) {
+                  <mat-option disabled>No subjects found</mat-option>
+                 }
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          @if (selectedSyllabus && selectedSubjects.length > 0) {
+            <div class="proficiency-summary">
+              <h3 class="summary-title">Current Selections for {{ selectedSyllabus }}</h3>
+              @for(subject of selectedSubjects; track subject) {
+                @if (syllabusSelections[selectedSyllabus][subject].length > 0) {
+                  <div class="summary-item">
+                    <span class="summary-subject-name">{{ subject }}</span>
+                    <mat-chip-listbox class="summary-chip-list">
+                      @for(grade of syllabusSelections[selectedSyllabus][subject]; track grade) {
+                        <mat-chip-option disabled>{{ grade }}</mat-chip-option>
+                      }
+                    </mat-chip-listbox>
+                  </div>
+                }
+              }
+            </div>
+          }
         </div>
+
+        <div class="edit-column">
+          <h3 class="column-header">3. Manage Grades</h3>
+          @if (selectedSubjects.length > 0) {
+            <div class="chips-container">
+              <mat-chip-listbox>
+                @for (subject of selectedSubjects; track subject) {
+                  <mat-chip-row (removed)="removeSubject(subject)" (click)="onChipClick(subject)" [removable]="true" [highlighted]="selectedSubject === subject">
+                    {{ subject }}
+                    <button matChipRemove [attr.aria-label]="'Remove ' + subject">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip-row>
+                }
+              </mat-chip-listbox>
+            </div>
+
+            @if (selectedSubject) {
+              <div class="grades-box">
+                <p class="grades-label">Select grades for <strong>{{ selectedSubject }}</strong></p>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Grades</mat-label>
+                  <mat-select [(ngModel)]="selectedGrades" multiple>
+                    @for (grade of availableGrades; track grade.name) {
+                      <mat-option [value]="grade.name">{{ grade.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <button mat-flat-button color="primary" class="save-grades-btn" (click)="addSubjectWithGrades()" [disabled]="!selectedGrades.length">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Confirm Grades</span>
+                </button>
+              </div>
+            } @else {
+              <div class="empty-state secondary">
+                <mat-icon>touch_app</mat-icon>
+                <p>Select a subject chip to manage its grades.</p>
+              </div>
+            }
+          } @else {
+            <div class="empty-state secondary">
+              <mat-icon>add_circle_outline</mat-icon>
+              <p>Your selected subjects will appear here.</p>
+            </div>
+          }
+        </div>
+
       </div>
     </mat-tab>
 
-    <mat-tab label="Edit">
-      <div class="tab-content-container">
-        <mat-form-field appearance="outline" color="accent" class="full-width">
-          <mat-label>Select Syllabus</mat-label>
-          <mat-select [(value)]="selectedSyllabus" (selectionChange)="onSyllabusSelect($event.value)">
-            <mat-option *ngFor="let prof of proficiencies" [value]="prof.name">
-              {{ prof.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field class="full-width" appearance="outline">
-          <mat-chip-grid #chipList aria-label="Subject selection">
-            <mat-chip
-              *ngFor="let subject of selectedSubjects"
-              (removed)="removeSubject(subject)"
-              [removable]="true">
-              {{ subject }}
-              <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
-
-            <input
-              placeholder="Add subject..."
-              [matAutocomplete]="auto"
-              [matChipInputFor]="chipList"
-              (matChipInputTokenEnd)="addSubject($event)"
-            />
-          </mat-chip-grid>
-
-          <mat-autocomplete
-            #auto="matAutocomplete"
-            (optionSelected)="onAutocompleteSelected($event)">
-            <mat-option *ngFor="let subj of availableSubjects" [value]="subj">
-              {{ subj }}
-            </mat-option>
-          </mat-autocomplete>
-        </mat-form-field>
-      </div>
-    </mat-tab>
   </mat-tab-group>
-</div>
+</mat-dialog-content>
 
-<div mat-dialog-actions class="dialog-actions">
-  <button mat-button (click)="dialogRef.close()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="confirmSave()">Save</button>
-</div>
+<mat-dialog-actions class="dialog-actions" align="end">
+  <button mat-stroked-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" (click)="confirmSave()">
+    <mat-icon>save</mat-icon>
+    <span>Save Proficiencies</span>
+  </button>
+</mat-dialog-actions>
