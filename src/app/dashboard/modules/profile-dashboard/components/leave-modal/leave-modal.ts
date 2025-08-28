@@ -13,6 +13,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
 
 export const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const startDate = control.get('startDate')?.value;
@@ -47,6 +48,8 @@ export const dateRangeValidator: ValidatorFn = (control: AbstractControl): Valid
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaveModal implements OnInit {
+
+  
   minDate = new Date();
 
   leaveForm = new FormGroup({
@@ -61,7 +64,10 @@ export class LeaveModal implements OnInit {
   private userService = inject(UserService);
   public userId: string = inject(MAT_DIALOG_DATA);
 
+  
+
   ngOnInit(): void {
+    
     this.userService.getUser().subscribe({
       next: (user: IUser) => {
         if (user && user.displayName) {
@@ -98,4 +104,5 @@ export class LeaveModal implements OnInit {
       this.leaveForm.markAllAsTouched();
     }
   }
+  
 }

@@ -10,6 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { UserService } from '../../../../../services/user-service';
 import { ELeave } from '../../../../../models/enums/ELeave.enum';
+import { MatDialog } from '@angular/material/dialog';
+import { LeaveModal } from '../leave-modal/leave-modal';
 
 
 @Component({
@@ -63,10 +65,10 @@ export class LeaveManagement implements OnInit, OnDestroy {
   }
 
 approveLeave(leave: ILeave): void {
-  if (!this.viewedUser || !leave._id) return; // <-- use _id
+  if (!this.viewedUser || !leave._id) return;
 
   this.userService
-    .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Approved) // <-- use _id
+    .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Approved) 
     .subscribe({
       next: (updatedUser) => {
         this.dataSource = updatedUser.leave;
@@ -82,10 +84,10 @@ approveLeave(leave: ILeave): void {
 }
 
 denyLeave(leave: ILeave): void {
-  if (!this.viewedUser || !leave._id) return; // <-- use _id
+  if (!this.viewedUser || !leave._id) return; 
 
   this.userService
-    .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Denied) // <-- use _id
+    .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Denied) 
     .subscribe({
       next: (updatedUser) => {
         this.dataSource = updatedUser.leave;
@@ -102,5 +104,16 @@ denyLeave(leave: ILeave): void {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+  private dialog = inject(MatDialog);
+
+  openLeaveDetails(leave: ILeave): void {
+    this.dialog.open(LeaveModal, {
+      width: '500px',
+      data: {
+        leave: leave,          // pass the clicked leave data
+        userId: this.viewedUser?._id
+      }
+    });
   }
 }
