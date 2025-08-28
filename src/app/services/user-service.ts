@@ -1,11 +1,14 @@
-// src/app/services/user.service.ts
+// src/app/services/user-service.ts
+
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
+import { ELeave } from '../models/enums/ELeave.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+
 
 @Injectable({
   providedIn: 'root'
@@ -15,10 +18,6 @@ export class UserService {
   public socketService = inject(SocketService);
 
   private users$ = new BehaviorSubject<IUser[]>([]);
-
-  /**
-   * A public observable that components can subscribe to for the user list.
-   */
   public allUsers$ = this.users$.asObservable();
 
   constructor() {
@@ -43,44 +42,48 @@ export class UserService {
     );
   }
 
-  // This method gets the profile of the currently authenticated user.
-  // Note: We already have this logic in AuthService for session management,
-  // but it's good practice to have it here too if other parts of the app
-  // need to explicitly fetch user data.
   getUser(): Observable<IUser> {
     return this.httpService.get<IUser>('user');
   }
 
-  /**
-   * Updates the profile of the currently logged-in user.
-   * @param profileData The partial user data to update.
-   * @returns An observable of the updated user.
-   */
   updateProfile(data: Partial<IUser>): Observable<IUser> {
     return this.httpService.patch<IUser>('user', data);
   }
 
-  /**
-   * Assigns a specific role to a user.
-   * @param userId The ID of the user to modify.
-   * @param roleId The ID of the role to assign.
-   * @returns An observable of the updated user.
-   */
   assignRoleToUser(userId: string, roleId: string): Observable<IUser> {
     return this.httpService.post<IUser>(`users/${userId}/roles`, { roleId }).pipe(
       tap(() => this.fetchAllUsers().subscribe())
     );
   }
 
-  /**
-   * Removes a specific role from a user.
-   * @param userId The ID of the user to modify.
-   * @param roleId The ID of the role to remove.
-   * @returns An observable of the updated user.
-   */
   removeRoleFromUser(userId: string, roleId: string): Observable<IUser> {
     return this.httpService.delete<IUser>(`users/${userId}/roles/${roleId}`).pipe(
       tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  /**
+   * Submits a new leave request for a specific user.
+   * @param userId The ID of the user requesting leave.
+   * @param leaveData The details of the leave request.
+   * @returns An observable of the updated user.
+   */
+  public requestLeave(userId: string, leaveData: { reason: string, startDate: Date, endDate: Date }): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/leave`, leaveData).pipe(
+      tap(() => this.fetchAllUsers().subscribe()) // Refresh user data after request
+    );
+  }
+
+  /**
+   * NEW: Updates the status of a leave request (e.g., approve or deny).
+   * @param userId The ID of the user whose leave request is being updated.
+   * @param leaveId The ID of the specific leave request.
+   * @param status The new status ('Approved' or 'Denied').
+   * @returns An observable of the updated user.
+   */
+  public updateLeaveStatus(userId: string, leaveId: string, status: ELeave.Approved | ELeave.Denied): Observable<IUser> {
+    return this.httpService.patch<IUser>(`users/${userId}/leave/${leaveId}`, { status }).pipe(
+      tap(() => this.fetchAllUsers().subscribe()) // Refresh user list to reflect change
     );
   }
 
