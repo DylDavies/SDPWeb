@@ -1,46 +1,106 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit,Input} from '@angular/core';
 import {MatTableModule} from '@angular/material/table';
-import { UserService } from '../../../../../services/user-service';
-import { MatDialog } from '@angular/material/dialog';
 import { NotificationService } from '../../../../../services/notification-service';
+import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
+import { Subscription} from 'rxjs';
+import { CommonModule} from '@angular/common';
+import { AuthService } from '../../../../../services/auth-service';
+import { MatButtonModule } from '@angular/material/button'; // Import MatButtonModule
+import { MatIconModule } from '@angular/material/icon'; 
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
-import { Subscription } from 'rxjs';
-
-export interface PeriodicElement {
-  dates: string;
-  number: number;
-  approved: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {number: 1, dates: "2025/08/01 - 2025/08/13", approved: "approved"}
-  
-];
+import { UserService } from '../../../../../services/user-service';
+import { ELeave } from '../../../../../models/enums/ELeave.enum';
 
 
 @Component({
   selector: 'app-leave-management',
   standalone: true,
-  imports: [MatTableModule],
+  imports: [MatTableModule, CommonModule, MatButtonModule, MatIconModule],
   templateUrl: './leave-management.html',
-  styleUrl: './leave-management.scss'
+  styleUrl: './leave-management.scss',
 })
 export class LeaveManagement implements OnInit, OnDestroy {
+  @Input() userId: string | null = null;
+   
+  private authService = inject(AuthService);
   private userService = inject(UserService);
   private notificationService = inject(NotificationService);
-  private dialog = inject(MatDialog);
 
-  displayedColumns: string[] = ['number', 'dates', 'approved'];
-  dataSource = ELEMENT_DATA;
+  public displayedColumns: string[] = ['number', 'dates', 'approved','actions'];
+  public dataSource: ILeave[] = [];
+  public isAdmin: boolean = false;
 
-  public currentUser: IUser | null = null;
-  private userSubscription: Subscription | null = null;
+  private subscriptions = new Subscription();
+  private viewedUser: IUser | null = null;
 
   ngOnInit(): void {
-    this.userService.getUser  
+    const authSub = this.authService.currentUser$.subscribe(loggedInUser => {
+      if (loggedInUser) {
+        this.isAdmin = loggedInUser.type === 'admin';
+      }
+    });
+    this.subscriptions.add(authSub);
+
+    const targetUserId = this.userId;
+    
+    if (targetUserId && this.isAdmin) {
+        const userSub = this.userService.getUser(targetUserId).subscribe(profileUser => {
+            if (profileUser) {
+                this.viewedUser = profileUser;
+                this.dataSource = profileUser.leave || [];
+            }
+        });
+        this.subscriptions.add(userSub);
+    } else {
+        const selfSub = this.authService.currentUser$.subscribe(loggedInUser => {
+            if (loggedInUser) {
+                this.viewedUser = loggedInUser;
+                this.dataSource = loggedInUser.leave || [];
+            }
+        });
+        this.subscriptions.add(selfSub);
+    }
+  }
+
+approveLeave(leave: ILeave): void {
+  if (!this.viewedUser || !leave._id) return; // <-- use _id
+
+  this.userService
+    .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Approved) // <-- use _id
+    .subscribe({
+      next: (updatedUser) => {
+        this.dataSource = updatedUser.leave;
+        this.notificationService.showSuccess(
+          `Leave for ${this.viewedUser?.displayName} approved.`
+        );
+      },
+      error: (err) => {
+        console.error('approve error', err);
+        this.notificationService.showError('Could not approve leave.');
+      },
+    });
+}
+
+denyLeave(leave: ILeave): void {
+  if (!this.viewedUser || !leave._id) return; // <-- use _id
+
+  this.userService
+    .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Denied) // <-- use _id
+    .subscribe({
+      next: (updatedUser) => {
+        this.dataSource = updatedUser.leave;
+        this.notificationService.showSuccess(
+          `Leave for ${this.viewedUser?.displayName} denied.`
+        );
+      },
+      error: (err) => {
+        console.error('deny error', err);
+        this.notificationService.showError('Could not deny leave.');
+      },
+    });
   }
 
   ngOnDestroy(): void {
-    if (this.userSubscription) this.userSubscription.unsubscribe();
+    this.subscriptions.unsubscribe();
   }
 }

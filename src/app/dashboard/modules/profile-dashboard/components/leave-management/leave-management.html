@@ -1,27 +1,48 @@
 
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-    
-
-  <!--- Note that these columns can be defined in any order.
-        The actual rendered columns are set as a property on the row definition" -->
 
   <!-- Position Column -->
-  <ng-container matColumnDef="number">
-    <th mat-header-cell *matHeaderCellDef> No. </th>
-    <td mat-cell *matCellDef="let element"> {{element.number}} </td>
-  </ng-container>
+<ng-container matColumnDef="number">
+  <th mat-header-cell *matHeaderCellDef> No. </th>
+  <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
+</ng-container>
 
-  <!-- Name Column -->
-  <ng-container matColumnDef="dates">
-    <th mat-header-cell *matHeaderCellDef> Dates </th>
-    <td mat-cell *matCellDef="let element"> {{element.dates}} </td>
-  </ng-container>
+<!-- Name Column -->
+<ng-container matColumnDef="dates">
+  <th mat-header-cell *matHeaderCellDef> Dates </th>
+  <td mat-cell *matCellDef="let element"> 
+    {{element.startDate | date:'yyyy/MM/dd'}} - {{element.endDate | date:'yyyy/MM/dd'}}
+  </td>
+</ng-container>
 
-  <!-- Weight Column -->
-  <ng-container matColumnDef="approved">
-    <th mat-header-cell *matHeaderCellDef> Approved </th>
-    <td mat-cell *matCellDef="let element"> {{element.approved}} </td>
-  </ng-container>
+<!-- Approved Column -->
+    <ng-container matColumnDef="approved">
+      <th mat-header-cell *matHeaderCellDef> Status </th>
+      <!-- Use [ngClass] to apply styles based on the 'approved' property -->
+      <td mat-cell *matCellDef="let element" [ngClass]="{
+        'status-approved': element.approved === 'approved',
+        'status-pending': element.approved === 'pending',
+        'status-denied': element.approved === 'denied'
+      }">
+        {{element.approved}}
+      </td>
+    </ng-container>
+
+    <!-- Actions Column (Visible only to Admins for Pending requests) -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let element" class="actions-cell">
+        <!-- Buttons are only rendered if the viewer is an admin AND the request is pending -->
+        <div *ngIf="isAdmin && element.approved === 'pending'">
+          <button mat-icon-button class="approve-button" (click)="approveLeave(element)" aria-label="Approve leave request">
+            <mat-icon>check_circle</mat-icon>
+          </button>
+          <button mat-icon-button class="deny-button" (click)="denyLeave(element)" aria-label="Deny leave request">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

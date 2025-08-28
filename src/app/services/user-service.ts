@@ -42,7 +42,7 @@ export class UserService {
     );
   }
 
-  getUser(): Observable<IUser> {
+  getUser(targetUserId?: string): Observable<IUser> {
     return this.httpService.get<IUser>('user');
   }
 
@@ -81,8 +81,8 @@ export class UserService {
    * @param status The new status ('Approved' or 'Denied').
    * @returns An observable of the updated user.
    */
-  public updateLeaveStatus(userId: string, leaveId: string, status: ELeave.Approved | ELeave.Denied): Observable<IUser> {
-    return this.httpService.patch<IUser>(`users/${userId}/leave/${leaveId}`, { status }).pipe(
+  public updateLeaveStatus(userId: string, leaveId: string, approved: ELeave.Approved | ELeave.Denied): Observable<IUser> {
+    return this.httpService.patch<IUser>(`users/${userId}/leave/${leaveId}`, { approved }).pipe(
       tap(() => this.fetchAllUsers().subscribe()) // Refresh user list to reflect change
     );
   }
