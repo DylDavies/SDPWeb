@@ -120,4 +120,14 @@ export class UserService {
   updateUserProficiency(userId: string, proficiencyData: IBackendProficiency): Observable<IUser> {
     return this.httpService.post<IUser>(`users/${userId}/proficiencies`, proficiencyData);
   }
+
+  /**
+   * Deletes a subject from a user's proficiency.
+   * @param userId The ID of the user.
+   * @param profName The name of the proficiency (e.g., "Cambridge").
+   * @param subjectKey The id of the subject to delete.
+   */
+  deleteSubjectFromProficiency(userId: string, profName: string, subjectId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/proficiencies/${profName}/subjects/${subjectId}`);
+  }
 }
