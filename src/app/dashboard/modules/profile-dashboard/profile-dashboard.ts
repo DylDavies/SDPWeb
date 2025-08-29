@@ -13,6 +13,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
 import { LeaveModal } from "./components/leave-modal/leave-modal";
 import {MatTabsModule} from '@angular/material/tabs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { UserService } from '../../../services/user-service';
 @Component({
   selector: 'app-profile-dashboard',
   standalone: true,
@@ -26,9 +28,46 @@ import {MatTabsModule} from '@angular/material/tabs';
 })
 export class Profile implements OnInit {
   public authService = inject(AuthService);
-  public user: IUser | null = null;
-  public dialog = inject(MatDialog); 
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  public dialog = inject(MatDialog);
+  private userService = inject(UserService);
 
+  public user: IUser | null = null;
+  public isLoading = true;
+  public isOwnProfile = false; // To control UI elements
+  public userNotFound = false;
+
+  ngOnInit(): void {
+    const userId = this.route.snapshot.paramMap.get('id');
+
+    this.authService.currentUser$.subscribe({
+      next: (currentUser) => {
+        if (userId) {
+          this.isOwnProfile = currentUser?._id == userId;
+          this.userService.getUserById(userId).subscribe({
+            next: (user) => {
+              if (user) {
+                this.user = user;
+                this.userNotFound = false;
+              } else {
+                this.userNotFound = true;
+              }
+              this.isLoading = false;
+            },
+            error: () => {
+              this.isLoading = false;
+              this.userNotFound = true;
+            }
+          });
+        } else {
+          this.isOwnProfile = true;
+          this.user = currentUser;
+          this.isLoading = false;
+        }
+      }
+    });
+  }
 
   openLeaveModal(): void {
     if (this.user) {
@@ -37,16 +76,6 @@ export class Profile implements OnInit {
         data: this.user._id
       });
     }
-  }
-
-
-  
-  ngOnInit(): void {
-    this.authService.currentUser$.subscribe({
-      next: (user) => {
-        this.user = user;
-      }
-    });
   }
 
   editProfile(): void {
@@ -62,5 +91,9 @@ export class Profile implements OnInit {
         this.authService.updateCurrentUserState(updatedUser);
       }
     });
+  }
+
+  redirectToDashboard() {
+    this.router.navigateByUrl("/dashboard");
   }
 }
