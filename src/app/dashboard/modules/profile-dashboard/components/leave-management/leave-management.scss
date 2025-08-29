@@ -33,3 +33,41 @@ table {
 .deny-button {
   color: red;
 }
+
+tr.leave-detail-row {
+  height: 0;
+}
+
+tr.leave-element-row:not(.leave-expanded-row):hover {
+  background: inherit;
+  cursor: pointer;
+}
+
+tr.leave-element-row:not(.leave-expanded-row):active {
+  background: inherit;
+}
+
+.leave-element-row td {
+  border-bottom-width: 0;
+}
+
+.leave-detail-container {
+  overflow: hidden;
+  display: flex;
+}
+
+.leave-detail-content {
+  padding: 16px;
+  background-color: inherit;
+  border-top: 1px solid inherit;
+  width: 100%;
+
+  strong {
+    font-weight: 500;
+  }
+  p {
+    margin-top: 8px;
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+}

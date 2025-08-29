@@ -13,7 +13,11 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-//import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
+import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
+import { AuthService } from '../../../../../services/auth-service';
+import { ELeave } from '../../../../../models/enums/ELeave.enum';
+import { NotificationService } from '../../../../../services/notification-service';
+import { EPermission } from '../../../../../models/enums/permission.enum';
 
 export const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const startDate = control.get('startDate')?.value;
@@ -63,11 +67,10 @@ export class LeaveModal implements OnInit {
   public dialogRef = inject(MatDialogRef<LeaveModal>);
   private userService = inject(UserService);
   public userId: string = inject(MAT_DIALOG_DATA);
-
   
-
+  public data: { leave: ILeave, user: IUser, mode: 'create' | 'view' } = inject(MAT_DIALOG_DATA);
+  public isAdmin = false;
   ngOnInit(): void {
-    
     this.userService.getUser().subscribe({
       next: (user: IUser) => {
         if (user && user.displayName) {
