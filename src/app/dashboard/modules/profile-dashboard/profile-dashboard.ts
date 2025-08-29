@@ -16,6 +16,7 @@ import { ProficiencyManagement } from './components/proficiency-management/profi
 import {MatTabsModule} from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../services/user-service';
+import { LeaveManagement } from './components/leave-management/leave-management';
 
 @Component({
   selector: 'app-profile-dashboard',
@@ -23,7 +24,7 @@ import { UserService } from '../../../services/user-service';
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule,MatTabsModule
+    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'

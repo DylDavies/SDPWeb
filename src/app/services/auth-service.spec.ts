@@ -8,6 +8,7 @@ import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
 import { EPermission } from '../models/enums/permission.enum';
 
+
 // A complete mock user for testing purposes
 const mockUser: IUser = {
   _id: 'user-123',
@@ -21,7 +22,8 @@ const mockUser: IUser = {
   roles: [],
   permissions: [EPermission.DASHBOARD_VIEW],
   pending: false,
-  disabled: false
+  disabled: false,
+  leave: [],
 };
 
 const MOCK_TOKEN = 'mock-jwt-token';
