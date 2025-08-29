@@ -1,7 +1,5 @@
-import { IGrade } from "./IGrade.interface";
-
-export interface ISubject{
+export interface ISubject {
     name: string;
-    grades: IGrade[];
+    grades: string[];
     _id?: string;
 }
