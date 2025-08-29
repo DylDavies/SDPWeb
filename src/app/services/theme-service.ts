@@ -1,8 +1,10 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, Renderer2, RendererFactory2, effect, inject, signal } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, filter, Observable } from 'rxjs';
+import { AuthService } from './auth-service';
+import { UserService } from './user-service';
 
-export type ETheme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark' | 'system';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +13,8 @@ export class ThemeService {
   private renderer: Renderer2;
   private rendererFactory = inject(RendererFactory2);
   private document = inject(DOCUMENT);
+  private authService = inject(AuthService);
+  private userService = inject(UserService);
 
   private _themeSubject: BehaviorSubject<'light' | 'dark' | null> = new BehaviorSubject<'light' | 'dark' | null>(null);
 
@@ -18,7 +22,7 @@ export class ThemeService {
 
   // Use a signal to hold the current theme preference.
   // It reads the initial value from localStorage or defaults to 'system'.
-  public theme = signal<ETheme>((localStorage.getItem('theme') as ETheme) || 'system');
+  public theme = signal<Theme>((localStorage.getItem('theme') as Theme) || 'system');
 
   constructor() {
     this.renderer = this.rendererFactory.createRenderer(null, null);
@@ -27,19 +31,28 @@ export class ThemeService {
     effect(() => {
       const newTheme = this.theme();
       localStorage.setItem('theme', newTheme);
-      this.updateTheme();
+      this.updateThemeClass();
     });
 
     // Listen for changes in the user's system preferences
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', () => this.updateTheme());
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => this.updateThemeClass());
+
+    this.authService.currentUser$.pipe(
+      filter(user => !!user && !!user.theme)
+    ).subscribe(user => {
+      const dbTheme = user!.theme;
+
+      if (dbTheme !== this.theme()) {
+        this.theme.set(dbTheme);
+      }
+    })
   }
 
   /**
    * Applies the correct theme (light or dark) to the document body
    * based on the current theme preference and system settings.
    */
-  private updateTheme(): void {
+  private updateThemeClass(): void {
     const currentTheme = this.theme();
     let isDark = false;
 
@@ -66,7 +79,11 @@ export class ThemeService {
    * Sets a new theme preference.
    * @param theme The new theme to set.
    */
-  public setTheme(theme: ETheme): void {
+  public setTheme(theme: Theme): void {
     this.theme.set(theme);
+
+    this.userService.updateUserPreferences({ theme }).subscribe({
+      error: (err) => console.error('Failed to save theme preference:', err)
+    })
   }
 }

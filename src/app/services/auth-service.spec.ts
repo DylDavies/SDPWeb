@@ -21,7 +21,8 @@ const mockUser: IUser = {
   roles: [],
   permissions: [EPermission.DASHBOARD_VIEW],
   pending: false,
-  disabled: false
+  disabled: false,
+  theme: 'system'
 };
 
 const MOCK_TOKEN = 'mock-jwt-token';
