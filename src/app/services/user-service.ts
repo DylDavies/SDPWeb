@@ -1,7 +1,7 @@
 // src/app/services/user-service.ts
 
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
@@ -9,6 +9,7 @@ import { ELeave } from '../models/enums/ELeave.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { Theme } from './theme-service';
+import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
 
 
 @Injectable({
@@ -64,6 +65,28 @@ export class UserService {
   }
 
   /**
+   * Gets a single user by ID, prioritizing the local cache.
+   * This relies on the socket service to keep the user list fresh.
+   * @param id The ID of the user to find.
+   * @returns An observable of the user, or undefined if not found after fetching.
+   */
+  public getUserById(id: string): Observable<IUser | undefined> {
+    const currentUsers = this.users$.getValue();
+    const foundUser = currentUsers.find(u => u._id === id);
+
+    if (foundUser) {
+      // If the user is already in our local cache, return them immediately.
+      return of(foundUser);
+    } else {
+      // If the user isn't in the cache (e.g., on first load),
+      // fetch all users, which updates the cache, then find and return the user.
+      return this.fetchAllUsers().pipe(
+        map(users => users.find(u => u._id === id))
+      );
+    }
+  }
+
+  /**
    * Submits a new leave request for a specific user.
    * @param userId The ID of the user requesting leave.
    * @param leaveData The details of the leave request.
@@ -82,8 +105,8 @@ export class UserService {
    * @param status The new status ('Approved' or 'Denied').
    * @returns An observable of the updated user.
    */
-  public updateLeaveStatus(userId: string, leaveId: string, status: ELeave.Approved | ELeave.Denied): Observable<IUser> {
-    return this.httpService.patch<IUser>(`users/${userId}/leave/${leaveId}`, { status }).pipe(
+  public updateLeaveStatus(userId: string, leaveId: string, approved: ELeave.Approved | ELeave.Denied): Observable<IUser> {
+    return this.httpService.patch<IUser>(`users/${userId}/leave/${leaveId}`, { approved }).pipe(
       tap(() => this.fetchAllUsers().subscribe()) // Refresh user list to reflect change
     );
   }
@@ -114,5 +137,24 @@ export class UserService {
 
   updateUserPreferences(preferences: { theme: Theme }): Observable<unknown> {
     return this.httpService.patch('user/preferences', preferences);
+  }
+
+  /**
+   * Sends proficiency data to the backend.
+   * @param userId The ID of the user to update.
+   * @param proficiencyData The proficiency data to save (using the backend-compatible interface).
+   */
+  updateUserProficiency(userId: string, proficiencyData: IBackendProficiency): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/proficiencies`, proficiencyData);
+  }
+
+  /**
+   * Deletes a subject from a user's proficiency.
+   * @param userId The ID of the user.
+   * @param profName The name of the proficiency (e.g., "Cambridge").
+   * @param subjectKey The id of the subject to delete.
+   */
+  deleteSubjectFromProficiency(userId: string, profName: string, subjectId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/proficiencies/${profName}/subjects/${subjectId}`);
   }
 }

@@ -23,6 +23,7 @@ const mockUserData: IUser = {
   permissions: [],
   pending: false,
   disabled: false,
+  leave: [],
   theme: 'system'
 };
 
