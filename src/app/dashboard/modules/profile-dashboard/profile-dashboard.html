@@ -30,7 +30,9 @@
             <div class="profile-content">
               <div class="profile-header">
                 <div class="profile-avatar-wrapper">
-                  <img class="profile-avatar" [src]="user.picture || '/assets/no_profile_pic.png'" [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
+                  <img class="profile-avatar" 
+                       [src]="user.picture || '/assets/no_profile_pic.png'" 
+                       [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
                 </div>
                 <div class="profile-info">
                   <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
@@ -47,6 +49,10 @@
                   <button mat-stroked-button color="primary" (click)="openLeaveModal()">
                     <mat-icon>event_busy</mat-icon>
                     <span>Request Leave</span>
+                  </button>
+                  <button mat-stroked-button color="primary" (click)="openProficiencyModal()">
+                    <mat-icon>school</mat-icon>
+                    <span>Manage Proficiencies</span>
                   </button>
                 </div>
               </div>
@@ -81,16 +87,14 @@
             </div>
           </mat-tab>
 
-          <!-- Tab 2: Placeholder for future content -->
+          <!-- Tab 2: Leave History -->
           <mat-tab label="Leave History">
             <div class="profile-content">
-              <!-- You can add a component or content for leave history here -->
               <h2>Leave History will be displayed here.</h2>
             </div>
           </mat-tab>
 
         </mat-tab-group>
-
       </div>
     }
   }

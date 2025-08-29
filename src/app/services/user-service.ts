@@ -8,6 +8,7 @@ import { EUserType } from '../models/enums/user-type.enum';
 import { ELeave } from '../models/enums/ELeave.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
 
 
 @Injectable({
@@ -131,5 +132,24 @@ export class UserService {
     return this.httpService.post<IUser>(`users/${userId}/type`, { type }).pipe(
       tap(() => this.fetchAllUsers().subscribe())
     );
+  }
+
+  /**
+   * Sends proficiency data to the backend.
+   * @param userId The ID of the user to update.
+   * @param proficiencyData The proficiency data to save (using the backend-compatible interface).
+   */
+  updateUserProficiency(userId: string, proficiencyData: IBackendProficiency): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/proficiencies`, proficiencyData);
+  }
+
+  /**
+   * Deletes a subject from a user's proficiency.
+   * @param userId The ID of the user.
+   * @param profName The name of the proficiency (e.g., "Cambridge").
+   * @param subjectKey The id of the subject to delete.
+   */
+  deleteSubjectFromProficiency(userId: string, profName: string, subjectId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/proficiencies/${profName}/subjects/${subjectId}`);
   }
 }

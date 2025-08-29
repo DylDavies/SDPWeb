@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common'; // <-- Import DatePipe
+import { CommonModule, DatePipe } from '@angular/common'; 
 import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,9 +12,11 @@ import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
 import { LeaveModal } from "./components/leave-modal/leave-modal";
+import { ProficiencyManagement } from './components/proficiency-management/proficiency-management';
 import {MatTabsModule} from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../services/user-service';
+
 @Component({
   selector: 'app-profile-dashboard',
   standalone: true,
@@ -72,7 +74,7 @@ export class Profile implements OnInit {
   openLeaveModal(): void {
     if (this.user) {
       this.dialog.open(LeaveModal, {
-        width: 'clamp(60vh, 80vw, 60vh)', // Responsive width
+        width: 'clamp(60vh, 80vw, 60vh)', 
         data: this.user._id
       });
     }
@@ -90,6 +92,12 @@ export class Profile implements OnInit {
       if (updatedUser) {
         this.authService.updateCurrentUserState(updatedUser);
       }
+    });
+  }
+  
+  openProficiencyModal(): void {
+    this.dialog.open(ProficiencyManagement, {
+      panelClass: 'proficiency-dialog-container' 
     });
   }
 
