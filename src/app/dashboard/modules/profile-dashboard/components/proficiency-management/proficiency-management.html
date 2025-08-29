@@ -7,7 +7,7 @@
 </div>
 
 <mat-dialog-content class="dialog-content">
-  <mat-tab-group animationDuration="0ms">
+  <mat-tab-group animationDuration="0ms" (selectedIndexChange)="selectedTabIndex = $event">
 
     <mat-tab>
       <ng-template mat-tab-label>
@@ -28,13 +28,16 @@
             <div class="subject-list mat-elevation-z2">
               <h3 class="subject-list-header">Subjects in {{ selectedUserSyllabus }}</h3>
               <mat-list>
-                @for (subject of selectedUserSyllabusSubjects; track subject.name) {
-                  <mat-list-item>
+                @for (subject of selectedUserSyllabusSubjects; track subject._id || subject.name) {
+                  <mat-list-item class="subject-list-item">
                     <mat-icon matListItemIcon>library_books</mat-icon>
                     <div matListItemTitle>{{ subject.name }}</div>
                     @if (getGradeNames(subject)) {
                       <div matListItemLine>Grades: {{ getGradeNames(subject) }}</div>
                     }
+                    <button mat-icon-button class="delete-subject-btn" (click)="deleteSubject(selectedUserSyllabus, subject)">
+                        <mat-icon>delete_outline</mat-icon>
+                    </button>
                   </mat-list-item>
                 }
               </mat-list>
@@ -95,7 +98,7 @@
             <div class="proficiency-summary">
               <h3 class="summary-title">Current Selections for {{ selectedSyllabus }}</h3>
               @for(subject of selectedSubjects; track subject) {
-                @if (syllabusSelections[selectedSyllabus][subject].length > 0) {
+                @if (selectedSyllabus && syllabusSelections[selectedSyllabus] && syllabusSelections[selectedSyllabus][subject] && syllabusSelections[selectedSyllabus][subject].length > 0) {
                   <div class="summary-item">
                     <span class="summary-subject-name">{{ subject }}</span>
                     <mat-chip-listbox class="summary-chip-list">
@@ -132,8 +135,8 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Grades</mat-label>
                   <mat-select [(ngModel)]="selectedGrades" multiple>
-                    @for (grade of availableGrades; track grade.name) {
-                      <mat-option [value]="grade.name">{{ grade.name }}</mat-option>
+                    @for (grade of availableGrades; track grade) {
+                      <mat-option [value]="grade">{{ grade }}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
@@ -164,8 +167,10 @@
 
 <mat-dialog-actions class="dialog-actions" align="end">
   <button mat-stroked-button mat-dialog-close>Cancel</button>
-  <button mat-flat-button color="primary" (click)="confirmSave()">
-    <mat-icon>save</mat-icon>
-    <span>Save Proficiencies</span>
-  </button>
+  @if(selectedTabIndex === 1) {
+    <button mat-flat-button color="primary" (click)="confirmSave()" [disabled]="isSaveDisabled()">
+      <mat-icon>save</mat-icon>
+      <span>Save Proficiencies</span>
+    </button>
+  }
 </mat-dialog-actions>
