@@ -21,21 +21,8 @@ const mockUsers: IUser[] = [
     permissions: [],
     pending: false,
     disabled: false,
-    leave: []
-  },
-  {
-    _id: '2',
-    googleId: 'google2',
-    email: 'test2@test.com',
-    displayName: 'Test User 2',
-    type: EUserType.Client,
-    firstLogin: false,
-    createdAt: new Date(),
-    roles: [],
-    permissions: [],
-    pending: true,
-    disabled: true,
-    leave: []
+    leave: [],
+    theme: 'system'
   },
 ];
 

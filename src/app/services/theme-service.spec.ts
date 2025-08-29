@@ -11,7 +11,7 @@ import { EUserType } from '../models/enums/user-type.enum';
 const mockUser: IUser = {
   _id: '1', displayName: 'Test User', email: 'active@test.com',
   pending: false, disabled: false, type: EUserType.Staff, roles: [], permissions: [],
-  picture: '', createdAt: new Date(), firstLogin: false, googleId: '', theme: 'dark'
+  picture: '', createdAt: new Date(), firstLogin: false, googleId: '', theme: 'dark', leave: []
 };
 
 // --- Mock Services and Dependencies ---
