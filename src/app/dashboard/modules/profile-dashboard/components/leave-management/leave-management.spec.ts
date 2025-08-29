@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LeaveManagement } from './leave-management';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
 
 describe('LeaveManagement', () => {
   let component: LeaveManagement;
@@ -8,7 +11,11 @@ describe('LeaveManagement', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LeaveManagement]
+      imports: [LeaveManagement],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 
