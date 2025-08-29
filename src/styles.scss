@@ -130,3 +130,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   -webkit-filter: blur(8px) brightness(0.4); /* For Safari support */
 }
 
+.proficiency-dialog-container {
+  width: 50vw;
+  height: 80vh;
+  max-width: none !important;
+  max-height: 50rem;
+}

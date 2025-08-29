@@ -30,7 +30,9 @@
             <div class="profile-content">
               <div class="profile-header">
                 <div class="profile-avatar-wrapper">
-                  <img class="profile-avatar" [src]="user.picture || '/assets/no_profile_pic.png'" [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
+                  <img class="profile-avatar" 
+                       [src]="user.picture || '/assets/no_profile_pic.png'" 
+                       [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
                 </div>
                 <div class="profile-info">
                   <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
@@ -47,6 +49,10 @@
                   <button mat-stroked-button color="primary" (click)="openLeaveModal()">
                     <mat-icon>event_busy</mat-icon>
                     <span>Request Leave</span>
+                  </button>
+                  <button mat-stroked-button color="primary" (click)="openProficiencyModal()">
+                    <mat-icon>school</mat-icon>
+                    <span>Manage Proficiencies</span>
                   </button>
                 </div>
               </div>
@@ -89,9 +95,7 @@
             <app-leave-management></app-leave-management>
           </div>
         </mat-tab>
-
         </mat-tab-group>
-
       </div>
     }
   }
