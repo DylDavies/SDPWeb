@@ -13,6 +13,7 @@ import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 import { Subscription } from 'rxjs';
 import { EPermission } from '../../../models/enums/permission.enum';
 import { EUserType } from '../../../models/enums/user-type.enum';
+import { ThemeToggleButtonComponent } from '../theme-menu/theme-menu';
 
 @Component({
   selector: 'app-sidebar',
@@ -26,7 +27,8 @@ import { EUserType } from '../../../models/enums/user-type.enum';
     RouterOutlet,
     RouterLink,
     CommonModule,
-    DisplayNamePipe
+    DisplayNamePipe,
+    ThemeToggleButtonComponent
   ],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss']
