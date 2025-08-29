@@ -31,6 +31,6 @@ export class NotFound implements OnInit {
    * Shows a snackbar notification and then navigates the user back to the home page ('/').
    */
   goHome(): void {
-    this.router.navigate(['/']);
+    this.router.navigateByUrl('/');
   }
 }

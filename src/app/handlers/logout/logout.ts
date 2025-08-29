@@ -18,6 +18,6 @@ export class Logout implements OnInit {
   ngOnInit(): void {
     this.authService.logout();
     this.notif.showSuccess("Logged out.")
-    this.router.navigate(["/"]);
+    this.router.navigateByUrl("/");
   }
 }

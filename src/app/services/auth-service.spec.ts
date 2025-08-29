@@ -28,7 +28,7 @@ const MOCK_TOKEN = 'mock-jwt-token';
 
 // Create mock objects for all dependencies
 const httpServiceSpy = jasmine.createSpyObj('HttpService', ['get', 'post']);
-const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 // The SocketService mock needs a `listen` method that returns an observable we can control
 const socketServiceSpy = {
   listen: (_eventName: string): Observable<unknown> => {
@@ -55,7 +55,7 @@ describe('AuthService', () => {
     // Reset spies and mocks before each test
     httpServiceSpy.get.calls.reset();
     httpServiceSpy.post.calls.reset();
-    routerSpy.navigate.calls.reset();
+    routerSpy.navigateByUrl.calls.reset();
     spyOn(localStorage, 'getItem').and.returnValue(null);
     spyOn(localStorage, 'setItem').and.stub();
     spyOn(localStorage, 'removeItem').and.stub();
@@ -121,7 +121,7 @@ describe('AuthService', () => {
       expect(localStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
       expect(getCurrentUser()).toBeNull();
       expect(httpServiceSpy.post).toHaveBeenCalledOnceWith('auth/logout', {});
-      expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/']);
+      expect(routerSpy.navigateByUrl).toHaveBeenCalledOnceWith('/');
     });
   });
 

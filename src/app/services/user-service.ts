@@ -1,7 +1,7 @@
 // src/app/services/user-service.ts
 
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
@@ -61,6 +61,28 @@ export class UserService {
     return this.httpService.delete<IUser>(`users/${userId}/roles/${roleId}`).pipe(
       tap(() => this.fetchAllUsers().subscribe())
     );
+  }
+
+  /**
+   * Gets a single user by ID, prioritizing the local cache.
+   * This relies on the socket service to keep the user list fresh.
+   * @param id The ID of the user to find.
+   * @returns An observable of the user, or undefined if not found after fetching.
+   */
+  public getUserById(id: string): Observable<IUser | undefined> {
+    const currentUsers = this.users$.getValue();
+    const foundUser = currentUsers.find(u => u._id === id);
+
+    if (foundUser) {
+      // If the user is already in our local cache, return them immediately.
+      return of(foundUser);
+    } else {
+      // If the user isn't in the cache (e.g., on first load),
+      // fetch all users, which updates the cache, then find and return the user.
+      return this.fetchAllUsers().pipe(
+        map(users => users.find(u => u._id === id))
+      );
+    }
   }
 
   /**
