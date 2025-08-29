@@ -1,14 +1,8 @@
-<!-- src/app/leave-modal/leave-modal.html -->
-<h1 mat-dialog-title>Request Leave</h1>
-<em></em>
 <form mat-dialog-content class="dialog-content" [formGroup]="leaveForm">
-  <mat-form-field class="full-width" appearance="outline">
-    <mat-label>Name</mat-label>
-    <input matInput formControlName="name" required cdkFocusInitial>
-    @if (leaveForm.get('name')?.hasError('required')) {
-    <mat-error>Name is required.</mat-error>
-    }
-  </mat-form-field>
+  <div class="header">
+    <mat-icon>flight_takeoff</mat-icon>
+    <h1 mat-dialog-title style="margin-bottom: 10px;">Request Leave</h1>
+  </div>
 
   <mat-form-field class="full-width" appearance="outline">
     <mat-label>Reason</mat-label>
@@ -19,14 +13,14 @@
     }
   </mat-form-field>
 
-  <mat-form-field class="full-width">
+  <mat-form-field class="full-width" appearance="outline">
     <mat-label>Enter a date range</mat-label>
     <mat-date-range-input [rangePicker]="picker" [min]="minDate">
       <input matStartDate placeholder="Start date" formControlName="startDate">
       <input matEndDate placeholder="End date" formControlName="endDate">
     </mat-date-range-input>
     <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker-toggle matIconSuffix [for]="picker" style="margin-right: 5px;"></mat-datepicker-toggle>
     <mat-date-range-picker #picker></mat-date-range-picker>
     
     @if (leaveForm.hasError('invalidRange') && leaveForm.get('endDate')?.touched) {

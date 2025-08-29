@@ -26,6 +26,6 @@ export class ProfileDropdown {
   // }
 
   onLogoutClick(){
-    this.router.navigate(["/logout"]);
+    this.router.navigateByUrl("/logout");
   }
 }

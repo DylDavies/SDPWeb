@@ -8,12 +8,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { UserService } from '../../../../../services/user-service';
-import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
+import { IUser } from '../../../../../models/interfaces/IUser.interface';
 
 export const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const startDate = control.get('startDate')?.value;
@@ -51,9 +51,9 @@ export class LeaveModal implements OnInit {
 
   
   minDate = new Date();
-
+  // Use a FormGroup to manage all form controls
   leaveForm = new FormGroup({
-    name: new FormControl({ value: '', disabled: true }),
+    name: new FormControl({ value: '', disabled: true}), 
     reason: new FormControl('', [Validators.required]),
     startDate: new FormControl(null, [Validators.required]),
     endDate: new FormControl(null, [Validators.required]),

@@ -20,11 +20,11 @@ export class LoginCallback implements OnInit {
     const token = this.route.snapshot.queryParamMap.get('token');
     if (token) {
       this.authService.saveToken(token);
-      this.router.navigate(['/dashboard']);
+      this.router.navigateByUrl('/dashboard');
       this.notif.showSuccess("Logged in.");
     } else {
       // Handle case where token is missing
-      this.router.navigate(['/']); 
+      this.router.navigateByUrl('/'); 
       this.notif.showError("An error occurred while logging in.");
     }
   }
