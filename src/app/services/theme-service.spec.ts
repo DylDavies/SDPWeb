@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { Renderer2, RendererFactory2 } from '@angular/core';
+import { RendererFactory2 } from '@angular/core';
 import { Subject, of } from 'rxjs';
 import { ThemeService, Theme } from './theme-service';
 import { AuthService } from './auth-service';
