@@ -14,10 +14,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
-import { AuthService } from '../../../../../services/auth-service';
-import { ELeave } from '../../../../../models/enums/ELeave.enum';
-import { NotificationService } from '../../../../../services/notification-service';
-import { EPermission } from '../../../../../models/enums/permission.enum';
 
 export const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const startDate = control.get('startDate')?.value;
