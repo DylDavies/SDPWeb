@@ -24,7 +24,7 @@ import { LeaveManagement } from './components/leave-management/leave-management'
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement
+    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -93,12 +93,6 @@ export class Profile implements OnInit {
       if (updatedUser) {
         this.authService.updateCurrentUserState(updatedUser);
       }
-    });
-  }
-  
-  openProficiencyModal(): void {
-    this.dialog.open(ProficiencyManagement, {
-      panelClass: 'proficiency-dialog-container' 
     });
   }
 
