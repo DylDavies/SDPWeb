@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -29,21 +29,21 @@ import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
   styleUrls: ['./admin-subject-edit-dialog.scss']
 })
 export class AdminSubjectEditDialog {
+  private fb = inject(FormBuilder);
+  public dialogRef = inject(MatDialogRef<AdminSubjectEditDialog>);
+  public data: { subject?: ISubject } = inject(MAT_DIALOG_DATA);
+
   form: FormGroup;
   isEditMode: boolean;
   grades: string[] = [];
   announcer = inject(LiveAnnouncer);
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<AdminSubjectEditDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { subject?: ISubject }
-  ) {
-    this.isEditMode = !!data.subject;
-    this.grades = data.subject?.grades ? [...data.subject.grades] : [];
+  constructor() {
+    this.isEditMode = !!this.data.subject;
+    this.grades = this.data.subject?.grades ? [...this.data.subject.grades] : [];
 
     this.form = this.fb.group({
-      name: [data.subject?.name || '', Validators.required],
+      name: [this.data.subject?.name || '', Validators.required],
     });
   }
 

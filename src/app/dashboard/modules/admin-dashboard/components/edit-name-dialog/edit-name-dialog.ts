@@ -1,6 +1,6 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,13 +21,12 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './edit-name-dialog.html',
 })
 export class EditNameDialog {
+  public dialogRef = inject(MatDialogRef<EditNameDialog>);
+  public data: { name: string } = inject(MAT_DIALOG_DATA);
   name: string;
 
-  constructor(
-    public dialogRef: MatDialogRef<EditNameDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { name: string }
-  ) {
-    this.name = data.name;
+  constructor() {
+    this.name = this.data.name;
   }
 
   onCancel(): void {
