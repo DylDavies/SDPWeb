@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSidenavModule, MatSidenav } from "@angular/material/sidenav";
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,11 +6,13 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { ISidebarItem } from '../../../models/interfaces/ISidebarItem.interface';
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
-import { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { EPermission } from '../../../models/enums/permission.enum';
+import { EUserType } from '../../../models/enums/user-type.enum';
 
 @Component({
   selector: 'app-sidebar',
@@ -24,33 +26,46 @@ import { Observable } from 'rxjs';
     RouterOutlet,
     RouterLink,
     CommonModule,
-    DisplayNamePipe,
-    AsyncPipe
+    DisplayNamePipe
   ],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss']
 })
-export class Sidebar {
+export class Sidebar implements OnInit, OnDestroy {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   /**
    * List storing information on the items on the Sidebar
    */
   sideBarLinks: ISidebarItem[] = [
-    { label: 'Home', icon: 'dashboard', route: '/dashboard/client' },
+    { label: 'Home', icon: 'dashboard', route: '/dashboard' },
     { label: 'Profile', icon: 'person', route: '/dashboard/profile' },
-    // Add the new link to the sidebar navigation.
-    { label: 'Bundles', icon: 'inventory_2', route: '/dashboard/bundles' }
+    { label: 'Calendar', icon: 'calendar_today', route: '/dashboard/calendar' },
+    { label: 'Bundles', icon: 'inventory', route: '/dashboard/bundles' },
+    { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW] }
   ]
 
   public authService = inject(AuthService);
 
-  public currentUser$: Observable<IUser | null>;
+  public user: IUser | null = null;
+  private userSubscription: Subscription | null = null;
 
-  constructor() {
-    this.currentUser$ = this.authService.currentUser$;
+  ngOnInit(): void {
+    this.userSubscription = this.authService.currentUser$.subscribe((user) => this.user = user);
+  }
+
+  ngOnDestroy(): void {
+      if (this.userSubscription) this.userSubscription.unsubscribe();
   }
   
   toggleSidenav() {
     this.sidenav.toggle();
+  }
+  
+  public canView(requiredPermissions: EPermission[] | undefined) {
+    if (!requiredPermissions || requiredPermissions.length == 0) return true;
+
+    if (this.user && this.user.type == EUserType.Admin) return true;
+
+    return requiredPermissions.every(p => this.authService.hasPermission(p));
   }
 }

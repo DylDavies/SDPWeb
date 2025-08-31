@@ -12,6 +12,10 @@
   background-color: var(--mat-sidenav-content-background-color, var(--mat-sys-background));
 }
 
+.profile-content {
+  padding: 24px;
+}
+
 .profile-card {
   width: 100%;
   max-width: 900px;
@@ -55,8 +59,14 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+.profile-actions {
+  display: flex;
+  gap: 10px; 
+}
+
 .profile-actions button {
-  min-width: 140px;
+  flex: 10; 
+  min-width: 150px;
 }
 
 .profile-details {
@@ -98,6 +108,10 @@
   font-size: 0.9rem;
 }
 
+.roles-container {
+  margin-top: 5px;
+}
+
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .profile-page-container {
@@ -123,3 +137,5 @@
     }
   }
 }
+
+  

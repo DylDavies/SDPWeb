@@ -1,0 +1,141 @@
+.user-type-button {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.user-type-button:not(:disabled):hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.user-type { font-weight: 500; }
+
+mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+mat-chip-row {
+    height: 28px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.user-management-container {
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.user-table {
+    width: 100%;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.display-name {
+    font-weight: 500;
+}
+
+.email {
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.user-type {
+    font-weight: 500;
+    color: var(--mat-sys-primary);
+}
+
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.empty-state mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+}
+
+.empty-state h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+    margin: 0;
+}
+
+.mat-column-avatar {
+    width: 80px;
+    padding-right: 24px !important;
+}
+
+.mat-column-displayName {
+    width: 30%;
+}
+
+.mat-column-userType {
+    width: 15%;
+}
+
+.mat-column-roles {
+    width: 40%;
+}
+
+.mat-column-actions {
+    width: 150px;
+    text-align: center;
+}
+
+th.mat-header-cell, td.mat-cell {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.name-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.status-pill.pending {
+  color: var(--mat-sys-on-tertiary);
+  background-color: var(--mat-sys-tertiary);
+}
+
+.status-pill.disabled {
+  color: var(--mat-sys-on-surface-variant);
+  background-color: var(--mat-sys-surface-container-highest);
+}

@@ -6,7 +6,7 @@ import { UserService } from '../../../services/user-service';
 import { NotificationService } from '../../../services/notification-service';
 import { EditProfileComponent } from './edit-profile-component';
 import { IUser } from '../../../models/interfaces/IUser.interface';
-import { EUserRole } from '../../../models/enums/user-role.enum';
+import { EUserType } from '../../../models/enums/user-type.enum';
 import { By } from '@angular/platform-browser';
 
 // Create a mock user to pass as dialog data
@@ -14,10 +14,16 @@ const mockUserData: IUser = {
   _id: 'user-123',
   email: 'test@example.com',
   displayName: 'Old Name',
-  role: EUserRole.User,
+  type: EUserType.Staff,
   picture: '',
   createdAt: new Date(),
-  firstLogin: false
+  firstLogin: false,
+  googleId: '',
+  roles: [],
+  permissions: [],
+  pending: false,
+  disabled: false,
+  leave: [],
 };
 
 // Create spies for the service dependencies

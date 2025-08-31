@@ -1,0 +1,51 @@
+<header class="dialog-header">
+    <mat-icon color="primary">manage_accounts</mat-icon>
+    <h1 mat-dialog-title>Manage Roles for {{ data.targetUser.displayName }}</h1>
+</header>
+<mat-divider></mat-divider>
+<mat-dialog-content>
+    @if (state$ | async; as state) {
+    @if (state.loading) {
+        <div class="loading-state">
+        <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+        </div>
+    } @else {
+        <p class="dialog-subtitle">Select the roles you want to assign to this user.</p>
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="role-tree">
+        <!-- Node with children -->
+        <mat-nested-tree-node *matTreeNodeDef="let node">
+            <li>
+            <div class="mat-tree-node">
+                @if (hasChild(node)) {
+                    <button mat-icon-button matTreeNodeToggle>
+                        <mat-icon class="mat-icon-rtl-mirror" [style.visibility]="'visible'">
+                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                        </mat-icon>
+                    </button>
+                } @else {
+                    <button mat-icon-button matTreeNodeToggle class="no-hover">
+                        <mat-icon class="mat-icon-rtl-mirror" [style.visibility]="'hidden'">
+                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                        </mat-icon>
+                    </button>
+                }
+                <mat-checkbox [checked]="isRoleAssigned(node._id)"
+                            (change)="toggleRole(node, $event.checked)">
+                <div class="role-info">
+                    <span class="role-color-dot" [style.background-color]="node.color"></span>
+                    <span class="role-name">{{ node.name }}</span>
+                </div>
+                </mat-checkbox>
+            </div>
+            <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
+                <ng-container matTreeNodeOutlet></ng-container>
+            </ul>
+            </li>
+        </mat-nested-tree-node>
+        </mat-tree>
+    }
+    }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" (click)="onClose()">Done</button>
+</mat-dialog-actions>

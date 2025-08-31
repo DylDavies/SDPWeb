@@ -1,0 +1,16 @@
+@if (roles && roles.length > 0) {
+    <mat-chip-set aria-label="User roles">
+    @for (role of roles.slice(0, visibleRolesLimit); track role._id) {
+        <mat-chip-row class="role-chip no-pointer-events" [style.border-color]="role.color" [style.color]="role.color">
+            {{ role.name }}
+        </mat-chip-row>
+    }
+    @if (roles.length > visibleRolesLimit) {
+        <mat-chip-row class="role-chip more-chip" [matTooltip]="getRemainingRolesTooltip(roles)">
+        +{{ roles.length - visibleRolesLimit }} more
+        </mat-chip-row>
+    }
+</mat-chip-set>
+} @else {
+    <span class="no-roles">No roles assigned</span>
+}

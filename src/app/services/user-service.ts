@@ -1,25 +1,155 @@
-// src/app/services/user.service.ts
+// src/app/services/user-service.ts
+
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
+import { EUserType } from '../models/enums/user-type.enum';
+import { ELeave } from '../models/enums/ELeave.enum';
+import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   public httpService = inject(HttpService);
+  public socketService = inject(SocketService);
 
-  // This method gets the profile of the currently authenticated user.
-  // Note: We already have this logic in AuthService for session management,
-  // but it's good practice to have it here too if other parts of the app
-  // need to explicitly fetch user data.
+  private users$ = new BehaviorSubject<IUser[]>([]);
+  public allUsers$ = this.users$.asObservable();
+
+  constructor() {
+    this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+      console.log('Received users-updated event. Refreshing user list.');
+      this.fetchAllUsers().subscribe();
+    });
+
+    this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+      console.log('Received roles-updated event. Refreshing user list to update roles.');
+      this.fetchAllUsers().subscribe();
+    });
+  }
+
+  /**
+   * Fetches all users from the API and updates the state.
+   * Any component subscribed to `allUsers$` will automatically receive the new data.
+   */
+  public fetchAllUsers(): Observable<IUser[]> {
+    return this.httpService.get<IUser[]>('users').pipe(
+      tap(users => this.users$.next(users))
+    );
+  }
+
   getUser(): Observable<IUser> {
     return this.httpService.get<IUser>('user');
   }
 
-  // Example of an update method
   updateProfile(data: Partial<IUser>): Observable<IUser> {
     return this.httpService.patch<IUser>('user', data);
+  }
+
+  assignRoleToUser(userId: string, roleId: string): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/roles`, { roleId }).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  removeRoleFromUser(userId: string, roleId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/roles/${roleId}`).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  /**
+   * Gets a single user by ID, prioritizing the local cache.
+   * This relies on the socket service to keep the user list fresh.
+   * @param id The ID of the user to find.
+   * @returns An observable of the user, or undefined if not found after fetching.
+   */
+  public getUserById(id: string): Observable<IUser | undefined> {
+    const currentUsers = this.users$.getValue();
+    const foundUser = currentUsers.find(u => u._id === id);
+
+    if (foundUser) {
+      // If the user is already in our local cache, return them immediately.
+      return of(foundUser);
+    } else {
+      // If the user isn't in the cache (e.g., on first load),
+      // fetch all users, which updates the cache, then find and return the user.
+      return this.fetchAllUsers().pipe(
+        map(users => users.find(u => u._id === id))
+      );
+    }
+  }
+
+  /**
+   * Submits a new leave request for a specific user.
+   * @param userId The ID of the user requesting leave.
+   * @param leaveData The details of the leave request.
+   * @returns An observable of the updated user.
+   */
+  public requestLeave(userId: string, leaveData: { reason: string, startDate: Date, endDate: Date }): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/leave`, leaveData).pipe(
+      tap(() => this.fetchAllUsers().subscribe()) // Refresh user data after request
+    );
+  }
+
+  /**
+   * NEW: Updates the status of a leave request (e.g., approve or deny).
+   * @param userId The ID of the user whose leave request is being updated.
+   * @param leaveId The ID of the specific leave request.
+   * @param status The new status ('Approved' or 'Denied').
+   * @returns An observable of the updated user.
+   */
+  public updateLeaveStatus(userId: string, leaveId: string, approved: ELeave.Approved | ELeave.Denied): Observable<IUser> {
+    return this.httpService.patch<IUser>(`users/${userId}/leave/${leaveId}`, { approved }).pipe(
+      tap(() => this.fetchAllUsers().subscribe()) // Refresh user list to reflect change
+    );
+  }
+
+  approveUser(userId: string): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/approve`, {}).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  disableUser(userId: string): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/disable`, {}).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  enableUser(userId: string): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/enable`, {}).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  updateUserType(userId: string, type: EUserType): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/type`, { type }).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  /**
+   * Sends proficiency data to the backend.
+   * @param userId The ID of the user to update.
+   * @param proficiencyData The proficiency data to save (using the backend-compatible interface).
+   */
+  updateUserProficiency(userId: string, proficiencyData: IBackendProficiency): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/proficiencies`, proficiencyData);
+  }
+
+  /**
+   * Deletes a subject from a user's proficiency.
+   * @param userId The ID of the user.
+   * @param profName The name of the proficiency (e.g., "Cambridge").
+   * @param subjectKey The id of the subject to delete.
+   */
+  deleteSubjectFromProficiency(userId: string, profName: string, subjectId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/proficiencies/${profName}/subjects/${subjectId}`);
   }
 }
