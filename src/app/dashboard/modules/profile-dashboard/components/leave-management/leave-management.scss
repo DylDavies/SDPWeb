@@ -1,13 +1,14 @@
-table {
-  width: 100%;
-  border: 1px solid  #bdbdbd;// Light grey border
-  border-radius: 8px;      // Rounded corners
-  overflow: hidden;
-}
+
 // Style for 'approved' status
 .status-approved {
   color: green;
   font-style: italic;
+}
+.mat-elevation-z8{
+  width: 100%;
+  border: 1px solid  #bdbdbd;// Light grey border
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 // Style for 'pending' status
