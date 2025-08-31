@@ -1,14 +1,11 @@
 @use '@angular/material' as mat;
 
-:host {
-  .user-table {
-    tr.mat-row {
-      cursor: pointer;
+::ng-deep .user-table .mat-mdc-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
 
-      &:hover {
-        background: rgba(0,0,0,0.04);
-      }
-    }
+  &:hover {
+    background-color: var(--mat-sys-state-hover-layer) !important; 
   }
 }
 
@@ -179,10 +176,6 @@ mat-chip-row {
     margin-top: -5px;
 }
 
-.user-table {
-    width: 100%;
-}
-
 .avatar {
     width: 40px;
     height: 40px;
@@ -227,28 +220,6 @@ mat-chip-row {
     font-weight: 500;
     color: var(--mat-sys-on-surface);
     margin: 0;
-}
-
-.mat-column-avatar {
-    width: 80px;
-    padding-right: 24px !important;
-}
-
-.mat-column-displayName {
-    width: 30%;
-}
-
-.mat-column-userType {
-    width: 15%;
-}
-
-.mat-column-roles {
-    width: 40%;
-}
-
-.mat-column-actions {
-    width: 150px;
-    text-align: center;
 }
 
 th.mat-header-cell, td.mat-cell {
