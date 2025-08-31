@@ -1,13 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { BehaviorSubject } from 'rxjs';
-
+import { BehaviorSubject,of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Profile } from './profile-dashboard';
 import { AuthService } from '../../../services/auth-service';
 import { UserService } from '../../../services/user-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
 
 describe('Profile', () => {
   let component: Profile;
@@ -17,7 +19,8 @@ describe('Profile', () => {
   let mockAuthService: {
     currentUser$: BehaviorSubject<IUser | null>,
     currentUserValue: IUser | null,
-    updateCurrentUserState: jasmine.Spy
+    updateCurrentUserState: jasmine.Spy,
+    hasPermission: jasmine.Spy;
   };
   let mockUserService: jasmine.SpyObj<UserService>;
   let mockRouter: jasmine.SpyObj<Router>;
@@ -30,9 +33,11 @@ describe('Profile', () => {
     mockAuthService = {
       currentUser$: new BehaviorSubject<IUser | null>(null),
       currentUserValue: null,
-      updateCurrentUserState: jasmine.createSpy('updateCurrentUserState')
+      updateCurrentUserState: jasmine.createSpy('updateCurrentUserState'),
+      hasPermission: jasmine.createSpy('hasPermission').and.returnValue(true)
     };
     mockUserService = jasmine.createSpyObj('UserService', ['getUserById']);
+    mockUserService.getUserById.and.returnValue(of(undefined));
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockActivatedRoute = {
@@ -49,6 +54,8 @@ describe('Profile', () => {
         NoopAnimationsModule // Good practice for Material components
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         // --- Provide all the mocks ---
         { provide: AuthService, useValue: mockAuthService },
         { provide: UserService, useValue: mockUserService },
