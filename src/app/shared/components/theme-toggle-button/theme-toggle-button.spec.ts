@@ -2,15 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { ProfileDropdown } from './profile-dropdown';
+import { ThemeToggleButton } from './theme-toggle-button';
 
-describe('ProfileDropdown', () => {
-  let component: ProfileDropdown;
-  let fixture: ComponentFixture<ProfileDropdown>;
+describe('ThemeToggleButton', () => {
+  let component: ThemeToggleButton;
+  let fixture: ComponentFixture<ThemeToggleButton>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProfileDropdown],
+      imports: [ThemeToggleButton],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting()
@@ -18,7 +18,7 @@ describe('ProfileDropdown', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ProfileDropdown);
+    fixture = TestBed.createComponent(ThemeToggleButton);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

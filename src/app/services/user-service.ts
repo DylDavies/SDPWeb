@@ -8,6 +8,7 @@ import { EUserType } from '../models/enums/user-type.enum';
 import { ELeave } from '../models/enums/ELeave.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
 
 
@@ -132,6 +133,10 @@ export class UserService {
     return this.httpService.post<IUser>(`users/${userId}/type`, { type }).pipe(
       tap(() => this.fetchAllUsers().subscribe())
     );
+  }
+
+  updateUserPreferences(preferences: { theme: Theme }): Observable<unknown> {
+    return this.httpService.patch('user/preferences', preferences);
   }
 
   /**

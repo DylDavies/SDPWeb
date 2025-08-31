@@ -24,6 +24,7 @@ const mockUserData: IUser = {
   pending: false,
   disabled: false,
   leave: [],
+  theme: 'system'
 };
 
 // Create spies for the service dependencies

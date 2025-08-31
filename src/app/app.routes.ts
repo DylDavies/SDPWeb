@@ -10,7 +10,7 @@ import { loginGuard } from './guards/login-guard';
 import { Logout } from './handlers/logout/logout';
 import { Profile } from './dashboard/modules/profile-dashboard/profile-dashboard';
 import { profileCompletionGuard } from './guards/profile-completion-guard';
-import { permissionGuard } from './guards/permission-guard-guard';
+import { permissionGuard } from './guards/permission-guard';
 import { EPermission } from './models/enums/permission.enum';
 import { accountStatusGuard } from './guards/account-status-guard';
 import { AccountPending } from './status-pages/account-pending/account-pending';
