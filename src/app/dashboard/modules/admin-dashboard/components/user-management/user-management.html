@@ -1,35 +1,68 @@
 <div class="user-management-container">
-    @if (users$ | async; as users) {
-      @if (users.length > 0) {
-        <table mat-table [dataSource]="users" class="mat-elevation-z2 user-table">
+  
+  <div class="table-toolbar">
+    <!-- Text Filter Input -->
+    <mat-form-field appearance="outline" class="filter-field compact-form-field">
+      <mat-label>Filter Users</mat-label>
+      <input matInput [formControl]="textFilterControl" placeholder="Search by name, email, status...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <!-- Role Filter Button and Menu -->
+    <button mat-stroked-button [matMenuTriggerFor]="roleMenu" class="role-filter-button">
+      <mat-icon>label</mat-icon>
+      <span>
+        @if (roleFilterControl.value?.length) {
+          {{ roleFilterControl.value!.length }} Role(s) Selected
+        } @else {
+          Filter by Role
+        }
+      </span>
+    </button>
+    <mat-menu #roleMenu="matMenu" class="role-filter-menu">
+      <div class="role-chip-container">
+        <mat-chip-listbox [formControl]="roleFilterControl" multiple>
+          @for (role of allRoles; track role._id) {
+            <mat-chip-option [value]="role._id" class="role-chip" [style.border-color]="role.color" [style.color]="role.color">
+              {{ role.name }}
+            </mat-chip-option>
+          }
+        </mat-chip-listbox>
+      </div>
+    </mat-menu>
+  </div>
+
+  @if (!isLoading) {
+    @if (dataSource.data.length > 0) {
+      <div class="table-responsive-wrapper">
+        <table mat-table [dataSource]="dataSource" matSort matSortActive="displayName" matSortDirection="asc" class="user-table">
+          
           <!-- Avatar Column -->
           <ng-container matColumnDef="avatar">
             <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let user"><img [src]="user.picture || '/assets/no_profile_pic.png'" class="avatar" [alt]="user.displayName"></td>
           </ng-container>
 
-          <!-- Display Name Column -->
+          <!-- Display Name Column (Sortable) -->
           <ng-container matColumnDef="displayName">
-            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
             <td mat-cell *matCellDef="let user">
               <div class="user-info">
                 <div class="name-status-line">
                   <span class="display-name">{{ user.displayName }}</span>
-                  @if (user.pending) {
-                    <span class="status-pill pending">Pending</span>
-                  }
-                  @if (user.disabled) {
-                    <span class="status-pill disabled">Disabled</span>
-                  }
+                  @if (user.pending) { <span class="status-pill pending">Pending</span> }
+                  @if (user.disabled) { <span class="status-pill disabled">Disabled</span> }
                 </div>
                 <span class="email">{{ user.email }}</span>
               </div>
             </td>
           </ng-container>
 
+          <!-- User Type Column (Sortable) -->
           <ng-container matColumnDef="userType">
-            <th mat-header-cell *matHeaderCellDef> User Type </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> User Type </th>
             <td mat-cell *matCellDef="let user">
+              <!-- Your existing user type menu button -->
               <button class="user-type-button" [matMenuTriggerFor]="userTypeMenu" [disabled]="!canManageRoles">
                 @if (user.type) {
                   <span class="user-type">{{ user.type | userTypePipe }}</span>
@@ -87,20 +120,23 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-            [class.disabled]="row.disabled" 
-            [class.pending]="row.pending">
+              [class.disabled]="row.disabled" 
+              [class.pending]="row.pending">
           </tr>
         </table>
-      } @else {
-        <div class="empty-state">
-            <mat-icon>people_outline</mat-icon>
-            <h2>No Users Found</h2>
-            <p>There are currently no other users in the system.</p>
-        </div>
-      }
+      </div>
+      <mat-paginator [pageSizeOptions]="[10, 25, 100]" showFirstLastButtons aria-label="Select page of users"></mat-paginator>
     } @else {
-      <div class="loading-state">
-          <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <h2>No Users Found</h2>
+        <p>Your search and filter criteria did not match any users.</p>
       </div>
     }
+  } @else {
+    <div class="loading-state">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    </div>
+  }
 </div>
+

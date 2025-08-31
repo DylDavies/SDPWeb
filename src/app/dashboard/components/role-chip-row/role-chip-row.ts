@@ -26,13 +26,4 @@ export class RoleChipRow {
     // Slice the array to get the roles that are hidden and join their names.
     return roles.slice(this.visibleRolesLimit).map(role => role.name).join('\n');
   }
-
-  getContrastColor(hexColor: string | undefined): 'white' | 'black' {
-    if (!hexColor) return 'black';
-    const r = parseInt(hexColor.substr(1, 2), 16);
-    const g = parseInt(hexColor.substr(3, 2), 16);
-    const b = parseInt(hexColor.substr(5, 2), 16);
-    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    return (yiq >= 128) ? 'black' : 'white';
-}
 }
