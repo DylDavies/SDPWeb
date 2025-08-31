@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { BehaviorSubject, of } from 'rxjs';
-
+import { BehaviorSubject,of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Profile } from './profile-dashboard';
 import { AuthService } from '../../../services/auth-service';
 import { UserService } from '../../../services/user-service';
@@ -53,6 +54,8 @@ describe('Profile', () => {
         NoopAnimationsModule // Good practice for Material components
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         // --- Provide all the mocks ---
         { provide: AuthService, useValue: mockAuthService },
         { provide: UserService, useValue: mockUserService },

@@ -8,6 +8,7 @@ import { EUserType } from '../models/enums/user-type.enum';
 import { ELeave } from '../models/enums/ELeave.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
 
 
@@ -134,6 +135,10 @@ export class UserService {
     );
   }
 
+  updateUserPreferences(preferences: { theme: Theme }): Observable<unknown> {
+    return this.httpService.patch('user/preferences', preferences);
+  }
+
   /**
    * Sends proficiency data to the backend.
    * @param userId The ID of the user to update.
@@ -151,5 +156,14 @@ export class UserService {
    */
   deleteSubjectFromProficiency(userId: string, profName: string, subjectId: string): Observable<IUser> {
     return this.httpService.delete<IUser>(`users/${userId}/proficiencies/${profName}/subjects/${subjectId}`);
+  }
+
+  /**
+   * Updates a user's weekly availability.
+   * @param userId The ID of the user to update.
+   * @param availability The new availability in hours.
+   */
+  updateUserAvailability(userId: string, availability: number): Observable<IUser> {
+    return this.httpService.patch<IUser>(`users/${userId}/availability`, { availability });
   }
 }

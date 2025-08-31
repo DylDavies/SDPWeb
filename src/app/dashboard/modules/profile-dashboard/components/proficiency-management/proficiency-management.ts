@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatOptionModule } from '@angular/material/core';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { map, startWith, filter, switchMap } from 'rxjs/operators';
 import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
@@ -51,7 +51,6 @@ import { lastValueFrom } from 'rxjs';
 })
 export class ProficiencyManagement implements OnInit {
   @ViewChild('subjectInput') subjectInput!: ElementRef<HTMLInputElement>;
-  public dialogRef = inject(MatDialogRef<ProficiencyManagement>);
   public authService = inject(AuthService);
   public user: IUser | null = null;
 
@@ -319,7 +318,6 @@ confirmSave(): void {
         if (finalUpdatedUser) {
           this.authService.updateCurrentUserState(finalUpdatedUser);
           this.notificationService.showSuccess('Proficiencies updated successfully!');
-          this.dialogRef.close(true);
         } else {
            this.notificationService.showError('Could not confirm proficiency updates.');
         }

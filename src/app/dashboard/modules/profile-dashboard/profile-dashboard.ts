@@ -17,6 +17,9 @@ import {MatTabsModule} from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../services/user-service';
 import { LeaveManagement } from './components/leave-management/leave-management';
+import { EditAvailabilityDialog } from './components/edit-availability-dialog/edit-availability-dialog';
+import { filter } from 'rxjs';
+import { NotificationService } from '../../../services/notification-service'; 
 
 @Component({
   selector: 'app-profile-dashboard',
@@ -24,7 +27,7 @@ import { LeaveManagement } from './components/leave-management/leave-management'
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement
+    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -35,10 +38,11 @@ export class Profile implements OnInit {
   private router = inject(Router);
   public dialog = inject(MatDialog);
   private userService = inject(UserService);
+  private notificationService = inject(NotificationService); // Inject NotificationService
 
   public user: IUser | null = null;
   public isLoading = true;
-  public isOwnProfile = false; // To control UI elements
+  public isOwnProfile = false;
   public userNotFound = false;
 
   ngOnInit(): void {
@@ -95,10 +99,28 @@ export class Profile implements OnInit {
       }
     });
   }
-  
-  openProficiencyModal(): void {
-    this.dialog.open(ProficiencyManagement, {
-      panelClass: 'proficiency-dialog-container' 
+
+  openEditAvailabilityDialog(): void {
+    if (!this.user) return;
+
+    const dialogRef = this.dialog.open(EditAvailabilityDialog, {
+      width: 'clamp(300px, 90vw, 400px)',
+      data: { availability: this.user.availability || 0 }
+    });
+
+    dialogRef.afterClosed().pipe(filter(result => typeof result === 'number')).subscribe((newAvailability: number) => {
+      this.userService.updateUserAvailability(this.user!._id, newAvailability).subscribe({
+        next: (updatedUser) => {
+          this.notificationService.showSuccess('Availability updated successfully!'); 
+          this.user = updatedUser;
+          if (this.isOwnProfile) {
+            this.authService.updateCurrentUserState(updatedUser);
+          }
+        },
+        error: () => {
+          this.notificationService.showError('Failed to update availability.');
+        }
+      });
     });
   }
 
