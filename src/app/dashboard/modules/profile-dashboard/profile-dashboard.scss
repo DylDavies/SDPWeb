@@ -80,6 +80,21 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  position: relative; // Needed for icon positioning
+}
+
+// Style for the edit icon on hover
+.detail-item.editable:hover .edit-icon {
+  opacity: 1;
+}
+
+.edit-icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .detail-icon {
@@ -137,5 +152,3 @@
     }
   }
 }
-
-  
