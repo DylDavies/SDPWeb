@@ -8,7 +8,7 @@ import { EBundleStatus } from "../enums/bundle-status.enum";
 /**
  * Represents a simplified, populated user object as returned by the backend.
  */
-export type PopulatedUser = {
+export interface IPopulatedUser {
   _id: string;
   displayName: string;
 };
@@ -20,7 +20,7 @@ export type PopulatedUser = {
 export interface IBundleSubject {
   _id: string; // The unique identifier for this subject entry in the bundle
   subject: string; // The ID of the subject being taught
-  tutor: string | PopulatedUser; // The ID of the assigned tutor, or the populated tutor object
+  tutor: string | IPopulatedUser; // The ID of the assigned tutor, or the populated tutor object
   hours: number; // The number of tutoring hours for this subject
 }
 
@@ -31,7 +31,7 @@ export interface IBundleSubject {
  */
 export interface IBundle {
   _id: string; // The unique identifier for the bundle
-  student: string | PopulatedUser; // The ID of the student this bundle is for, or the populated student object
+  student: string | IPopulatedUser; // The ID of the student this bundle is for, or the populated student object
   subjects: IBundleSubject[]; // An array of subjects included in the bundle
   creator: string; // The ID of the user who created the bundle
   status: EBundleStatus; // The current status of the bundle (e.g., pending, approved)

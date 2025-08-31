@@ -10,7 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { IBundle, IBundleSubject, PopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
+import { IBundle, IBundleSubject, IPopulatedUser} from '../../../../../models/interfaces/IBundle.interface';
 import { BundleService } from '../../../../../services/bundle-service';
 import { NotificationService } from '../../../../../services/notification-service';
 import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
@@ -86,7 +86,7 @@ export class EditBundleModal implements OnInit {
   }
 
   getStudentName(): string {
-    return (this.data.student as PopulatedUser)?.displayName || 'a Student';
+    return (this.data.student as IPopulatedUser)?.displayName || 'a Student';
   }
 
   createSubjectGroup(subject?: IBundleSubject): FormGroup {
@@ -137,7 +137,7 @@ export class EditBundleModal implements OnInit {
 
     const payload = {
         isActive: this.editForm.value.isActive,
-        subjects: this.editForm.value.subjects.map((s: any) => ({
+        subjects: this.editForm.value.subjects.map((s: IBundleSubject) => ({
             _id: s._id,
             subject: s.subject,
             tutor: s.tutor,

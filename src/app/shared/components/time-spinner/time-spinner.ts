@@ -20,18 +20,20 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class TimeSpinner implements ControlValueAccessor {
   @Input() mode: 'time' | 'duration' = 'time';
-  @Input() step: number = 1;
-  @Input() min: number = 0;
+  @Input() step = 1;
+  @Input() min = 0;
+  @Input() max = Infinity;
+
+  // For number mode
+  public numericValue = 0;
 
   // For time mode
-  public hour: number = 9;
-  public minute: number = 0;
+  public hour = 9;
+  public minute = 0;
 
-  // For duration mode
-  public durationHour: number = 0;
-  public durationMinute: number = 15;
-
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChange = (_: string | number) => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched = () => {};
 
   writeValue(value: string | number): void {
@@ -45,14 +47,17 @@ export class TimeSpinner implements ControlValueAccessor {
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: string | number) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
+  // ... rest of the component class
+  public durationHour = 0;
+  public durationMinute = 15;
   // --- Methods for Time Mode ---
   incrementHour(): void {
     this.hour = (this.hour + 1) % 24;

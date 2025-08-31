@@ -15,6 +15,7 @@ import { UserService } from '../../../../../services/user-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { Observable, combineLatest } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { IBundleSubject } from '../../../../../models/interfaces/IBundle.interface';
 
 @Component({
   selector: 'app-create-bundle-modal',
@@ -137,7 +138,7 @@ export class CreateBundleModal implements OnInit {
     // We only need student, subjects, and hours for the API call
     const payload = {
         student: this.createBundleForm.value.student,
-        subjects: this.createBundleForm.value.subjects.map((s: any) => ({
+        subjects: this.createBundleForm.value.subjects.map((s: IBundleSubject) => ({
             subject: s.subject,
             tutor: s.tutor,
             hours: s.hours
