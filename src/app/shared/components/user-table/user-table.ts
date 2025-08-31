@@ -40,7 +40,7 @@ import { Router } from '@angular/router';
   styleUrl: './user-table.scss'
 })
 export class UserTable implements OnInit {
-  @Input() isAdmin: boolean = false;
+  @Input() isAdmin = false;
   @Input() users: IUser[] = [];
 
   private authService = inject(AuthService);
