@@ -4,6 +4,7 @@ import { HttpService } from './http-service';
 import { IProficiency } from '../models/interfaces/IProficiency.interface';
 import { ISubject } from '../models/interfaces/ISubject.interface';
 import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,10 @@ export class ProficiencyService {
   public allProficiencies$ = this.proficiencies$.asObservable();
 
   constructor() {
-    // Note: You may want to add a socket listener here to auto-refresh on changes
+    this.socketService.listen<unknown>(ESocketMessage.ProficienciesUpdated).subscribe(() => {
+      console.log('Received proficiencies-updated event. Refreshing proficiency list.');
+      this.fetchAllProficiencies().subscribe();
+    });
   }
 
   /**
