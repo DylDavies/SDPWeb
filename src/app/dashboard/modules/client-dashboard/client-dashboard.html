@@ -1,1 +1,6 @@
-<app-welcome-card></app-welcome-card>
+<div class="client-dashboard-container">
+  <app-welcome-card></app-welcome-card>
+  <div class="user-table-container">
+    <app-user-table [isAdmin]="false" [users]="users" *ngIf="users.length > 0"></app-user-table>
+  </div>
+</div>

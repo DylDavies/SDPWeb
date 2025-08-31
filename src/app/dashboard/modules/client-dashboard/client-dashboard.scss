@@ -1,0 +1,16 @@
+.client-dashboard-container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.user-table-container {
+    background-color: var(--mat-sys-surface-container);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--mat-sys-surface-container-shadow);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ClientDashboard } from './client-dashboard';
 
 describe('ClientDashboard', () => {
@@ -11,7 +12,9 @@ describe('ClientDashboard', () => {
     await TestBed.configureTestingModule({
       imports: [ClientDashboard],
       providers: [
-        provideAnimationsAsync()
+        provideAnimationsAsync(),
+        provideHttpClient(),
+        provideHttpClientTesting()
       ]
     })
     .compileComponents();
