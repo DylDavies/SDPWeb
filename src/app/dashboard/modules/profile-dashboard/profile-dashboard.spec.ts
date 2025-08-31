@@ -8,7 +8,6 @@ import { AuthService } from '../../../services/auth-service';
 import { UserService } from '../../../services/user-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { EUserType } from '../../../models/enums/user-type.enum';
 
 
 describe('Profile', () => {
