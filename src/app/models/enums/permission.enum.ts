@@ -16,4 +16,5 @@ export enum EPermission {
     DASHBOARD_VIEW = 'dashboard:view',
     ADMIN_DASHBOARD_VIEW = 'admin_dashboard:view',
     PROFILE_PAGE_VIEW = 'profile_page:view',
+    LEAVE_MANAGE = "leave:manage"
 }

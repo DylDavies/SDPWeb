@@ -1,5 +1,5 @@
-import {Component, inject, OnDestroy, OnInit,Input} from '@angular/core';
-import {MatTableModule} from '@angular/material/table';
+import {Component, inject, OnDestroy, OnInit,Input, ViewChild} from '@angular/core';
+import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import { NotificationService } from '../../../../../services/notification-service';
 import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
 import { Subscription} from 'rxjs';
@@ -11,12 +11,13 @@ import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { UserService } from '../../../../../services/user-service';
 import { ELeave } from '../../../../../models/enums/ELeave.enum';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-
+import { EPermission } from '../../../../../models/enums/permission.enum';
+import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-leave-management',
   standalone: true,
-  imports: [MatTableModule, CommonModule, MatButtonModule, MatIconModule],
+  imports: [MatTableModule, CommonModule, MatButtonModule, MatIconModule, MatPaginatorModule],
   templateUrl: './leave-management.html',
   styleUrl: './leave-management.scss',
   animations: [
@@ -34,17 +35,25 @@ export class LeaveManagement implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
 
   public displayedColumns: string[] = ['expand', 'dates', 'approved'];
-  public dataSource: ILeave[] = [];
-  public isAdmin = false;
+  public dataSource = new MatTableDataSource<ILeave>([]);
+  public canManageLeave = this.authService.hasPermission(EPermission.LEAVE_MANAGE);
 
   public expandedElement: ILeave | null = null;
   private subscriptions = new Subscription();
-  private viewedUser: IUser | null = null;
+  public viewedUser: IUser | null = null;
+  public loggedInUser: IUser | null = null;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
+  
 
   ngOnInit(): void {
     const authSub = this.authService.currentUser$.subscribe(loggedInUser => {
-      if (loggedInUser?.type == 'admin') {
-        this.isAdmin = true;
+      this.loggedInUser = loggedInUser;
+      if (this.canManageLeave && loggedInUser?._id !== targetUserId) {
         this.displayedColumns = [...this.displayedColumns, 'actions']
       }
     });
@@ -52,22 +61,23 @@ export class LeaveManagement implements OnInit, OnDestroy {
 
     const targetUserId = this.userId;
   
-    if (targetUserId && this.isAdmin) {
-        const userSub = this.userService.getUser().subscribe(profileUser => {
-            if (profileUser) {
-                this.viewedUser = profileUser;
-                this.dataSource = profileUser.leave || [];
-            }
-        });
-        this.subscriptions.add(userSub);
+    if (targetUserId) {
+      const userSub = this.userService.getUserById(targetUserId).subscribe(profileUser => {
+        if (profileUser) {
+          this.viewedUser = profileUser;
+          this.dataSource.data = profileUser.leave || [];
+        }
+      });
+      this.subscriptions.add(userSub);
     } else {
-        const selfSub = this.authService.currentUser$.subscribe(loggedInUser => {
-            if (loggedInUser) {
-                this.viewedUser = loggedInUser;
-                this.dataSource = loggedInUser.leave || [];
-            }
-        });
-        this.subscriptions.add(selfSub);
+      // fallback to logged-in user
+      const selfSub = this.authService.currentUser$.subscribe(loggedInUser => {
+        if (loggedInUser) {
+          this.viewedUser = loggedInUser;
+          this.dataSource.data = loggedInUser.leave || [];
+        }
+      });
+      this.subscriptions.add(selfSub);
     }
   }
 
@@ -78,7 +88,7 @@ approveLeave(leave: ILeave): void {
     .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Approved) 
     .subscribe({
       next: (updatedUser: IUser) => {
-        this.dataSource = updatedUser.leave;
+        this.dataSource.data = updatedUser.leave;
         this.notificationService.showSuccess(
           `Leave for ${this.viewedUser?.displayName} approved.`
         );
@@ -97,7 +107,7 @@ denyLeave(leave: ILeave): void {
     .updateLeaveStatus(this.viewedUser._id, leave._id, ELeave.Denied) 
     .subscribe({
       next: (updatedUser) => {
-        this.dataSource = updatedUser.leave;
+        this.dataSource.data = updatedUser.leave;
         this.notificationService.showSuccess(
           `Leave for ${this.viewedUser?.displayName} denied.`
         );
