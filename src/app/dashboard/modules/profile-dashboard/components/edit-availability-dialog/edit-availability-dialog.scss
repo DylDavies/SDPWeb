@@ -1,0 +1,24 @@
+mat-form-field { 
+    width: 100%; 
+    margin-top: 16px; 
+}
+
+button[mat-flat-button] { 
+    min-width: 120px; 
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dialog-header mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+h1[mat-dialog-title] {
+  margin: 0;
+}
