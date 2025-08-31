@@ -1,4 +1,5 @@
 import { RoleNode } from "../../services/role-service";
+import { Theme } from "../../services/theme-service";
 import { EPermission } from "../enums/permission.enum";
 import { EUserType } from "../enums/user-type.enum";
 import { ILeave } from "./ILeave.interface";
@@ -17,6 +18,7 @@ export interface IUser {
     permissions: EPermission[],
     pending: boolean,
     disabled: boolean,
+    theme: Theme,
     leave: ILeave[],
     proficiencies?: IProficiency[]
 }

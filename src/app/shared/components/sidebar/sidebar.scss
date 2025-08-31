@@ -6,7 +6,13 @@
   height: 94vh;
   top: 6vh;
   border-radius: 0;
-  box-shadow: 5px 3px 7px 0px #111111;
+
+  box-shadow: 2px 0px 8px 0px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+body.dark-theme .custom-sidebar {
+  box-shadow: 2px 0px 8px 0px rgba(0, 0, 0, 0.4);
 }
 
 mat-toolbar {
@@ -55,4 +61,14 @@ mat-toolbar {
 .content {
   width: 100%;
   margin-top: 6vh;
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box; /* Ensures padding is included in the width */
+  display: flex;
+  justify-content: center;
 }

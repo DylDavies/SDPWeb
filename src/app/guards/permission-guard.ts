@@ -17,7 +17,7 @@ export function permissionGuard(requiredPermissions: EPermission[], requireAll =
     const notification = inject(NotificationService);
 
     // Check if the user has any of the permissions in the array
-    const hasPermission = requireAll ? requiredPermissions.some(p => authService.hasPermission(p)) : requiredPermissions.every(p => authService.hasPermission(p));
+    const hasPermission = requireAll ? requiredPermissions.every(p => authService.hasPermission(p)) : requiredPermissions.some(p => authService.hasPermission(p));
 
     if (hasPermission) {
       return true;
