@@ -51,6 +51,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
   
 
   ngOnInit(): void {
+    const targetUserId = this.userId;
     const authSub = this.authService.currentUser$.subscribe(loggedInUser => {
       this.loggedInUser = loggedInUser;
       if (this.canManageLeave && loggedInUser?._id !== targetUserId) {
@@ -59,7 +60,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
     });
     this.subscriptions.add(authSub);
 
-    const targetUserId = this.userId;
+    
   
     if (targetUserId) {
       const userSub = this.userService.getUserById(targetUserId).subscribe(profileUser => {

@@ -41,7 +41,7 @@
       <!-- Only show buttons if:
           1. The request is pending
           2. The logged-in user is NOT the same as the leave's owner -->
-      <div *ngIf="element.approved === 'pending' && loggedInUser?._id !== viewedUser?._id">
+      <div *ngIf="element.approved === 'pending' && loggedInUser?._id !== this.userId">
         <button mat-icon-button class="approve-button" (click)="approveLeave(element)" aria-label="Approve leave request">
           <mat-icon>check_circle</mat-icon>
         </button>
