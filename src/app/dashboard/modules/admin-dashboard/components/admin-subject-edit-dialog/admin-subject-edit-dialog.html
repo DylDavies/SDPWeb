@@ -1,0 +1,28 @@
+<h1 mat-dialog-title>{{ isEditMode ? 'Edit Subject' : 'Add New Subject' }}</h1>
+<div mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Subject Name</mat-label>
+      <input matInput formControlName="name" placeholder="e.g., Mathematics" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Grades</mat-label>
+      <mat-chip-grid #chipGrid aria-label="Enter grades">
+        <mat-chip-row *ngFor="let grade of grades" (removed)="removeGrade(grade)">
+          {{grade}}
+          <button matChipRemove [attr.aria-label]="'remove ' + grade">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-row>
+      </mat-chip-grid>
+      <input placeholder="New grade..."
+             [matChipInputFor]="chipGrid"
+             (matChipInputTokenEnd)="addGrade($event)"/>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="form.invalid">{{ isEditMode ? 'Save Changes' : 'Add Subject' }}</button>
+</div>

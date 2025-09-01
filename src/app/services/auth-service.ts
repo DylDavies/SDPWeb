@@ -1,8 +1,12 @@
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, catchError, tap, shareReplay } from 'rxjs';
+import { DOCUMENT, inject, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of, catchError, tap, shareReplay, startWith, pairwise } from 'rxjs';
 import { Router } from '@angular/router';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { HttpService } from './http-service';
+import { EPermission } from '../models/enums/permission.enum';
+import { EUserType } from '../models/enums/user-type.enum';
+import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
 
 const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
 
@@ -16,18 +20,51 @@ export class AuthService {
 
   private httpService = inject(HttpService);
   private router = inject(Router);
+  private socketService = inject(SocketService);
+
+  private document = inject(DOCUMENT);
+  private window = this.document.defaultView;
+
+  constructor() {
+    this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+      console.log('Received users-updated event. Refreshing logged in user.');
+      this.verification$ = null; // Force re-verification
+      this.verifyCurrentUser().subscribe();
+    });
+
+    this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+      console.log('Received roles-updated event. Refreshing logged in user.');
+      this.verification$ = null; // Force re-verification
+      this.verifyCurrentUser().subscribe();
+    });
+
+    this.currentUser$.pipe(
+      startWith(null),
+      pairwise()
+    ).subscribe(([previousUser, currentUser]) => {
+      if (previousUser && currentUser) {
+        const statusChanged = previousUser.disabled !== currentUser.disabled || previousUser.pending !== currentUser.pending;
+
+        if (statusChanged) {
+          console.log('Critical user status changed. Forcing a page reload to re-evaluate guards.');
+          // Force a hard reload of the page.
+          this.window?.location.reload();
+        }
+      }
+    })
+  }
 
   getToken(): string | null {
-    return sessionStorage.getItem(TOKEN_STORAGE_KEY);
+    return localStorage.getItem(TOKEN_STORAGE_KEY);
   }
 
   saveToken(token: string): void {
-    sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
     this.verification$ = null; // Force re-verification on next check
   }
 
   removeToken(): void {
-    sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
     this.currentUserSubject.next(null);
     this.verification$ = null;
   }
@@ -61,7 +98,7 @@ export class AuthService {
     this.removeToken();
     this.httpService.post('auth/logout', {}).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.router.navigateByUrl('/');
       }
     })
   }
@@ -70,7 +107,13 @@ export class AuthService {
     this.currentUserSubject.next(updatedUser);
   }
 
-  public get currentUserValue(): IUser | null {
-    return this.currentUserSubject.getValue();
+  /**
+   * Checks if the currently logged-in user has a specific permission.
+   * @param permission The permission to check for.
+   * @returns `true` if the user has the permission, otherwise `false`.
+   */
+  public hasPermission(permission: EPermission): boolean {
+    const user = this.currentUserSubject.getValue();
+    return (user?.permissions?.includes(permission) ?? false) || (user?.type == EUserType.Admin);
   }
 }

@@ -1,1 +1,39 @@
-<p>admin-dashboard works!</p>
+    <div class="admin-container">
+      <mat-tab-group animationDuration="300ms" color="primary">
+        <!-- User Management Tab -->
+        @if (canViewUsers) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">group</mat-icon>
+              <span>User Management</span>
+            </ng-template>
+            <div class="tab-content">
+              <app-user-management></app-user-management>
+            </div>
+          </mat-tab>
+        }
+
+        <!-- Role Management Tab -->
+        @if (canViewRoles) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">admin_panel_settings</mat-icon>
+              <span>Role Management</span>
+            </ng-template>
+            <div class="tab-content">
+              <app-role-management></app-role-management>
+            </div>
+          </mat-tab>
+        }
+
+        @if (canManageProficiencies) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">school</mat-icon>
+              <span>Proficiency Management</span>
+            </ng-template>
+            <app-admin-proficiency-management></app-admin-proficiency-management>
+          </mat-tab>
+        }
+      </mat-tab-group>
+    </div>

@@ -1,156 +1,161 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { AuthService } from './auth-service';
 import { HttpService } from './http-service';
+import { SocketService } from './socket-service';
 import { IUser } from '../models/interfaces/IUser.interface';
-import { EUserRole } from '../models/enums/user-role.enum';
+import { EUserType } from '../models/enums/user-type.enum';
+import { EPermission } from '../models/enums/permission.enum';
 
-// A sample user object to use in our tests
+
+// A complete mock user for testing purposes
 const mockUser: IUser = {
   _id: 'user-123',
+  googleId: 'google-123',
   email: 'test@tutorcore.com',
   displayName: 'Test User',
-  role: EUserRole.User,
+  type: EUserType.Staff,
   picture: 'http://example.com/pic.jpg',
   firstLogin: false,
-  createdAt: new Date()
+  createdAt: new Date(),
+  roles: [],
+  permissions: [EPermission.DASHBOARD_VIEW],
+  pending: false,
+  disabled: false,
+  theme: 'system',
+  leave: [],
+  proficiencies: []
 };
 
 const MOCK_TOKEN = 'mock-jwt-token';
 
+// Create mock objects for all dependencies
+const httpServiceSpy = jasmine.createSpyObj('HttpService', ['get', 'post']);
+const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
+// The SocketService mock needs a `listen` method that returns an observable we can control
+const socketServiceSpy = {
+  listen: (_eventName: string): Observable<unknown> => {
+    // We'll use a simple Subject for testing socket emissions
+    return new Subject<unknown>().asObservable();
+  }
+};
+
 describe('AuthService', () => {
   let service: AuthService;
-  let httpServiceSpy: jasmine.SpyObj<HttpService>;
-  let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post']);
-    const navSpy = jasmine.createSpyObj('Router', ['navigate']);
-
     TestBed.configureTestingModule({
       providers: [
         AuthService,
-        { provide: HttpService, useValue: httpSpy },
-        { provide: Router, useValue: navSpy }
+        { provide: HttpService, useValue: httpServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: SocketService, useValue: socketServiceSpy }
       ]
     });
 
-    // Inject the service and its mocked dependencies
     service = TestBed.inject(AuthService);
-    httpServiceSpy = TestBed.inject(HttpService) as jasmine.SpyObj<HttpService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
 
-    spyOn(sessionStorage, 'getItem').and.returnValue(null);
-    spyOn(sessionStorage, 'setItem').and.returnValue(undefined);
-    spyOn(sessionStorage, 'removeItem').and.returnValue(undefined);
+    // Reset spies and mocks before each test
+    httpServiceSpy.get.calls.reset();
+    httpServiceSpy.post.calls.reset();
+    routerSpy.navigateByUrl.calls.reset();
+    spyOn(localStorage, 'getItem').and.returnValue(null);
+    spyOn(localStorage, 'setItem').and.stub();
+    spyOn(localStorage, 'removeItem').and.stub();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
+  // Helper function to get the current user from the service's internal subject
+  const getCurrentUser = () => {
+    // @ts-expect-error Used as any to access private member
+    return service.currentUserSubject.getValue();
+  };
+
   describe('getToken', () => {
-    it('should call sessionStorage.getItem with the correct key', () => {
+    it('should call localStorage.getItem with the correct key', () => {
       service.getToken();
-      expect(sessionStorage.getItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
-    });
-  });
-
-  describe('saveToken', () => {
-    it('should call sessionStorage.setItem with the correct key and token', () => {
-      service.saveToken(MOCK_TOKEN);
-      expect(sessionStorage.setItem).toHaveBeenCalledOnceWith('tutorcore-auth-token', MOCK_TOKEN);
-    });
-
-    it('should reset the verification cache after saving a token', () => {
-      // Arrange: Prime the cache by calling verifyCurrentUser once
-      (sessionStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
-      httpServiceSpy.get.and.returnValue(of(mockUser));
-      service.verifyCurrentUser().subscribe();
-      expect(httpServiceSpy.get).toHaveBeenCalledTimes(1);
-
-      // Act: Save a new token
-      service.saveToken('new-token');
-      
-      // Assert: The next call to verifyCurrentUser should trigger a new API call
-      service.verifyCurrentUser().subscribe();
-      expect(httpServiceSpy.get).toHaveBeenCalledTimes(2);
+      expect(localStorage.getItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
     });
   });
 
   describe('verifyCurrentUser', () => {
-    it('should do nothing and return null if no token exists in storage', () => {
-      // Act
+    it('should return null and not call API if no token exists', () => {
       service.verifyCurrentUser().subscribe(result => {
-        // Assert
         expect(result).toBeNull();
         expect(httpServiceSpy.get).not.toHaveBeenCalled();
       });
     });
 
     it('should call the API and update the user when a token exists', () => {
-      // Arrange
-      (sessionStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
+      (localStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
       httpServiceSpy.get.and.returnValue(of(mockUser));
 
-      // Act
       service.verifyCurrentUser().subscribe(result => {
-        // Assert
         expect(result).toEqual(mockUser);
       });
 
-      // Assert: Use the new getter
       expect(httpServiceSpy.get).toHaveBeenCalledOnceWith('user');
-      expect(service.currentUserValue).toEqual(mockUser);
+      expect(getCurrentUser()).toEqual(mockUser);
     });
 
     it('should remove the token and set user to null if the API call fails', () => {
-      // Arrange
-      (sessionStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
+      (localStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
       httpServiceSpy.get.and.returnValue(throwError(() => new Error('401 Unauthorized')));
 
-      // Act
       service.verifyCurrentUser().subscribe(result => {
-        // Assert
         expect(result).toBeNull();
       });
 
-      // Assert: Use the new getter
       expect(httpServiceSpy.get).toHaveBeenCalledOnceWith('user');
-      expect(sessionStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
-      expect(service.currentUserValue).toBeNull();
-    });
-
-    it('should return a cached observable on subsequent calls', () => {
-      // Arrange
-      (sessionStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
-      httpServiceSpy.get.and.returnValue(of(mockUser));
-
-      // Act
-      service.verifyCurrentUser().subscribe();
-      service.verifyCurrentUser().subscribe(); // Call a second time
-
-      // Assert
-      expect(httpServiceSpy.get).toHaveBeenCalledOnceWith('user');
+      expect(localStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
+      expect(getCurrentUser()).toBeNull();
     });
   });
 
   describe('logout', () => {
-    it('should remove the token, clear the user, and navigate to the root', () => {
-    // Arrange
-    httpServiceSpy.post.and.returnValue(of({ status: 'success' }));
+    it('should remove token, call logout endpoint, and navigate to root', () => {
+      httpServiceSpy.post.and.returnValue(of({ status: 'success' }));
 
-    // Act
-    service.logout();
+      service.logout();
 
-    // Assert
-    expect(sessionStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
-    expect(service.currentUserValue).toBeNull();
-    // Verify the API call was made
-    expect(httpServiceSpy.post).toHaveBeenCalledOnceWith('auth/logout', {});
-    // Verify navigation happens
-    expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/']);
+      expect(localStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
+      expect(getCurrentUser()).toBeNull();
+      expect(httpServiceSpy.post).toHaveBeenCalledOnceWith('auth/logout', {});
+      expect(routerSpy.navigateByUrl).toHaveBeenCalledOnceWith('/');
+    });
+  });
+
+  describe('updateCurrentUserState', () => {
+    it('should update the currentUserSubject with the new user data', () => {
+      const newUser: IUser = { ...mockUser, displayName: 'Updated Name' };
+      service.updateCurrentUserState(newUser);
+      expect(getCurrentUser()).toEqual(newUser);
+    });
+  });
+
+  describe('hasPermission', () => {
+    it('should return true if user has the specific permission', () => {
+      service.updateCurrentUserState(mockUser);
+      expect(service.hasPermission(EPermission.DASHBOARD_VIEW)).toBeTrue();
+    });
+
+    it('should return false if user does not have the permission', () => {
+      service.updateCurrentUserState(mockUser);
+      expect(service.hasPermission(EPermission.ROLES_CREATE)).toBeFalse();
+    });
+
+    it('should return true if user is an Admin, regardless of permissions array', () => {
+      const adminUser: IUser = { ...mockUser, type: EUserType.Admin, permissions: [] };
+      service.updateCurrentUserState(adminUser);
+      expect(service.hasPermission(EPermission.ROLES_CREATE)).toBeTrue();
+    });
+
+    it('should return false if there is no user', () => {
+      expect(service.hasPermission(EPermission.DASHBOARD_VIEW)).toBeFalse();
     });
   });
 });

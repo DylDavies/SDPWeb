@@ -1,0 +1,82 @@
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+}
+
+.dialog-header mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+h1[mat-dialog-title] {
+  margin: 0;
+  padding: 0;
+  line-height: 2.6;
+}
+
+mat-dialog-content {
+  padding: 16px 24px;
+}
+
+.dialog-subtitle {
+  margin-top: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 250px;
+}
+
+.role-tree {
+  background: transparent;
+}
+
+.role-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.role-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.role-name {
+  font-weight: 500;
+}
+
+.tree-invisible {
+  display: none;
+}
+
+.mat-tree-node {
+  display: flex;
+  align-items: center;
+}
+
+mat-tree-node,
+mat-nested-tree-node {
+  list-style-type: none;
+}
+
+.role-name {
+  font-weight: 500;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+}
+
+.no-hover {
+  pointer-events: none;
+}

@@ -1,0 +1,28 @@
+@use '@angular/material' as mat;
+
+.role-chip {
+    background-color: transparent !important;
+    border: 3px solid;
+    font-weight: 500;
+
+    @include mat.chips-overrides((
+        container-shape-radius: 20px,
+        outline-width: 0px,
+        hover-state-layer-color: none
+    ));
+}
+
+.no-pointer-events {
+    pointer-events: none;
+}
+
+.no-roles {
+    font-style: italic;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.more-chip {
+  border-style: dashed !important;
+  color: var(--mat-sys-on-surface-variant) !important;
+  border-color: var(--mat-sys-on-surface-variant) !important;
+}

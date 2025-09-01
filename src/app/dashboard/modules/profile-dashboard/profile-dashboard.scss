@@ -12,6 +12,10 @@
   background-color: var(--mat-sidenav-content-background-color, var(--mat-sys-background));
 }
 
+.profile-content {
+  padding: 24px;
+}
+
 .profile-card {
   width: 100%;
   max-width: 900px;
@@ -55,8 +59,14 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+.profile-actions {
+  display: flex;
+  gap: 10px; 
+}
+
 .profile-actions button {
-  min-width: 140px;
+  flex: 10; 
+  min-width: 150px;
 }
 
 .profile-details {
@@ -70,6 +80,21 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  position: relative; // Needed for icon positioning
+}
+
+// Style for the edit icon on hover
+.detail-item.editable:hover .edit-icon {
+  opacity: 1;
+}
+
+.edit-icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .detail-icon {
@@ -96,6 +121,10 @@
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.9rem;
+}
+
+.roles-container {
+  margin-top: 5px;
 }
 
 /* Responsive adjustments for smaller screens */

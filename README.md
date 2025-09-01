@@ -455,6 +455,128 @@ The following MongoDB collections will form the core of our database. Relationsh
 - **Payslips:** Stores generated payslip data for tutors.
 - **(Additional entities:** Badges, Debriefs, Missions, etc., will be added in later sprints).
 
+The database consists of the following 5 primary collections as of right now:
+
+1.  [**Users**](#1-users-collection): Stores all user account information.
+2.  [**Roles**](#2-roles-collection): Defines the role-based access control (RBAC) hierarchy.
+3.  [**Proficiencies**](#3-proficiencies-collection): Contains the master list of all teaching syllabi and subjects.
+4.  [**Bundles**](#4-bundles-collection): Manages student lesson bundles, linking students to tutors.
+5.  [**ApiKeys**](#5-apikeys-collection): Stores hashed API keys for external system access.
+
+---
+
+## 1. `users` Collection
+
+Stores information about all registered users, including their personal details, authentication info, roles, status, and application-specific data like leave and proficiencies.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the user document. | Automatically generated. |
+| `googleId` | `String` | The unique ID provided by Google OAuth. | **Required**, **Unique** |
+| `email` | `String` | The user's email address. | **Required**, **Unique** |
+| `displayName` | `String` | The user's public display name. | **Required** |
+| `picture` | `String` | URL to the user's profile picture. | Optional |
+| `firstLogin` | `Boolean` | Flag to determine if the user needs to complete the initial profile setup. | `Default: true` |
+| `type` | `String` | The primary category of the user. | **Required**, Enum: `EUserType:[admin, staff, client]`, `Default: 'client'` |
+| `roles` | `Array<ObjectId>` | An array of ObjectIds referencing documents in the `roles` collection. | `ref: 'Role'` |
+| `leave` | `Array` | An array of embedded leave request documents. (See **Leave Sub-schema** below). | N/A |
+| `pending` | `Boolean` | If `true`, the user's account is awaiting admin approval. | **Required**, `Default: true` |
+| `disabled` | `Boolean` | If `true`, the user's account is disabled and they cannot log in. | **Required**, `Default: false` |
+| `proficiencies`| `Array` | An array of embedded proficiency documents specific to the user. | See `proficiencies` collection. |
+| `theme` | `String` | The user's preferred UI theme. | Enum: `['light', 'dark', 'system']`, `Default: 'system'` |
+| `availability` | `Number` | A field to store a tutor's availability in hours. | `Default: 0` |
+| `createdAt` | `Date` | Timestamp of when the user was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+#### Leave Sub-schema (Embedded in `users`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `reason` | `String` | The reason provided for the leave request. | **Required** |
+| `startDate` | `Date` | The starting date of the leave period. | **Required** |
+| `endDate` | `Date` | The ending date of the leave period. | **Required** |
+| `approved` | `String` | The current status of the leave request. | Enum: `ELeave: [pending, approved, denied]`, `Default: 'pending'` |
+
+---
+
+## 2. `roles` Collection
+
+Defines a hierarchical structure of roles, each with a specific set of permissions that can be assigned to users. This collection powers the Role-Based Access Control (RBAC) system.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the role document. | Automatically generated. |
+| `name` | `String` | The unique name of the role (e.g., "Senior Tutor", "Content Manager"). | **Required**, **Unique** |
+| `permissions` | `Array<String>` | A list of permission strings granted by this role. | **Required**, Enum: `EPermission:[ROLES_CREATE,ROLES_VIEW,ROLES_EDIT,ROLES_DELETE,USERS_VIEW,USERS_MANAGE_ROLES,USERS_EDIT,USERS_DELETE,VIEW_USER_PROFILE,DASHBOARD_VIEW,ADMIN_DASHBOARD_VIEW,PROFILE_PAGE_VIEW,BUNDLES_CREATE,BUNDLES_VIEW,BUNDLES_EDIT,BUNDLES_DELETEPROFICIENCIES_MANAGE,LEAVE_MANAGE]` |
+| `parent` | `ObjectId` | A self-reference to a parent role, creating a tree structure. | `ref: 'Role'`, `Default: null` (for root roles) |
+| `color` | `String` | A hex color code for displaying the role in the UI. | **Required** |
+| `createdAt` | `Date` | Timestamp of when the role was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+---
+
+## 3. `proficiencies` Collection
+
+Stores the master list of all available teaching syllabi (e.g., Cambridge, IEB) and the subjects/grades associated with each. This acts as a template from which tutors can select their own proficiencies (which are then embedded in their `user` document).
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the proficiency document. | Automatically generated. |
+| `name` | `String` | The name of the proficiency/syllabus (e.g., "Cambridge"). | **Required** |
+| `subjects`| `Map` | A map where keys are subject identifiers and values are embedded subject documents. | **Required**, `of: SubjectSchema` |
+
+#### Subject Sub-schema (Embedded in `proficiencies`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the subject within the proficiency. | `_id: true` |
+| `name` | `String` | The name of the subject (e.g., "Mathematics", "Physical Sciences"). | **Required** |
+| `grades` | `Array<String>` | A list of grades available for this subject (e.g., ["Grade 10", "Grade 11"]). | **Required**, `Default: []` |
+
+---
+
+## 4. `bundles` Collection
+
+Manages lesson bundles, linking a student to one or more tutors for specific subjects and a set number of hours.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the bundle document. | Automatically generated. |
+| `student` | `ObjectId` | A reference to the student user document. | **Required**, `ref: 'User'` |
+| `subjects` | `Array` | An array of embedded documents detailing the subjects in the bundle. | See **Bundle Subject Sub-schema** below. |
+| `isActive` | `Boolean` | A flag to quickly activate or deactivate a bundle. | `Default: true` |
+| `status` | `String` | The current status of the bundle (e.g., Pending, Active, Completed). | Enum: `EBundleStatus:[Approved, Pending, Denied]`, `Default: 'Pending'` |
+| `createdBy` | `ObjectId` | A reference to the admin/user who created the bundle. | **Required**, `ref: 'User'` |
+| `createdAt` | `Date` | Timestamp of when the bundle was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+#### Bundle Subject Sub-schema (Embedded in `bundles`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `subject` | `String` | The name of the subject for this part of the bundle. | **Required** |
+| `tutor` | `ObjectId` | A reference to the tutor user assigned to this subject. | **Required**, `ref: 'User'` |
+| `hours` | `Number` | The number of lesson hours allocated for this subject in the bundle. | **Required**, `min: 0` |
+
+---
+
+## 5. `apikeys` Collection
+
+Stores API keys for external clients, allowing secure, programmatic access to the system. Keys are hashed for security and are never stored in plain text.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the API key document. | Automatically generated. |
+| `clientName` | `String` | A unique, human-readable name for the client using the key. | **Required**, **Unique** |
+| `key` | `String` | The **hashed** API key. | **Required** |
+| `createdAt` | `Date` | Timestamp of when the key was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+#### Special Logic & Methods
+
+* **Pre-save Middleware:** A `pre('save')` hook automatically hashes the `key` field using `bcryptjs` before any document is saved to the database.
+* **`compareKey` Method:** An instance method is available on `ApiKey` documents to securely compare a plain-text key (from an incoming request) with the stored hash. It returns a `Promise<boolean>`.
+
 ---
 
 # Development Roadmap

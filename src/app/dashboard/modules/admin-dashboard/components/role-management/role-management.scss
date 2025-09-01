@@ -1,0 +1,106 @@
+.role-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.role-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+.drag-hint {
+  font-style: italic;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}
+.tree-container {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 300px;
+  box-sizing: border-box;
+}
+.mat-tree,
+.mat-nested-tree-node,
+li {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.mat-tree-node {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  flex: 1;
+  border-radius: 8px;
+  transition: background-color 200ms ease-in-out;
+}
+.role-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-grow: 1;
+}
+.role-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.role-name {
+  font-weight: 500;
+}
+.role-actions {
+  display: none;
+}
+.mat-tree-node:hover .role-actions {
+  display: flex;
+  align-items: center;
+}
+.tree-invisible {
+  display: none;
+}
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 250px;
+}
+
+[cdkDrag]:not([cdkDragDisabled]) {
+  cursor: grab;
+}
+
+.cdk-drag-preview {
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: var(--mat-sys-surface);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+  display: none;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.mat-tree-node.drop-target {
+  background-color: var(--mat-sys-primary-container);
+}
+
+.cdk-drop-list-dragging .mat-tree-node {
+  transition: none !important;
+}
+
+.mat-tree-node.cdk-drag-disabled {
+  cursor: default;
+}

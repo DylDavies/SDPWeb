@@ -1,0 +1,25 @@
+<header class="dialog-header">
+    <mat-icon color="primary">event_available</mat-icon>
+    <h1 mat-dialog-title>Edit Weekly Availability</h1>
+</header>
+<mat-dialog-content>
+    <p>Set the total number of hours you are available for tutoring this week.</p>
+    <form [formGroup]="form" (ngSubmit)="onSave()">
+    <mat-form-field appearance="outline">
+        <mat-label>Available Hours</mat-label>
+        <input matInput type="number" formControlName="availability" required cdkFocusInitial>
+        @if (form.get('availability')?.hasError('required')) {
+            <mat-error>Availability is required.</mat-error>
+        }
+        @if (form.get('availability')?.hasError('min')) {
+            <mat-error>Availability cannot be negative.</mat-error>
+        }
+    </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="form.invalid">
+        <span>Save</span>
+    </button>
+</mat-dialog-actions>
