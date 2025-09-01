@@ -8,19 +8,20 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, switchMap, tap } from 'rxjs/operators';
+import { filter, finalize, switchMap, tap } from 'rxjs/operators';
 import { EPermission } from '../../../../../models/enums/permission.enum';
 import { AuthService } from '../../../../../services/auth-service';
 import { RoleService, RoleNode } from '../../../../../services/role-service';
 import { CreateEditRole } from '../create-edit-role/create-edit-role';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { NotificationService } from '../../../../../services/notification-service';
+import { CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-role-management',
   imports: [
     CommonModule, MatTreeModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTooltipModule
+    MatProgressSpinnerModule, MatTooltipModule, DragDropModule
   ],
   templateUrl: './role-management.html',
   styleUrl: './role-management.scss'
@@ -33,6 +34,10 @@ export class RoleManagement implements OnInit {
 
   private refreshTree$ = new BehaviorSubject<void>(undefined);
   public roleTree$!: Observable<RoleNode>;
+  private flatNodeMap = new Map<string, RoleNode>();
+  
+  public dragHoveredNode: RoleNode | null = null;
+  public draggedNode: RoleNode | null = null;
 
   public treeControl = new NestedTreeControl<RoleNode>(node => node.children);
   public dataSource = new MatTreeNestedDataSource<RoleNode>();
@@ -48,12 +53,70 @@ export class RoleManagement implements OnInit {
       tap(rootNode => {
         this.dataSource.data = rootNode ? [rootNode] : [];
         this.treeControl.dataNodes = rootNode ? [rootNode] : [];
+        this.flatNodeMap.clear();
 
         if (rootNode) {
+          this.buildNodeMap(rootNode, this.flatNodeMap);
           this.treeControl.expandAll()
         }
       })
     );
+  }
+
+    private buildNodeMap(node: RoleNode, map: Map<string, RoleNode>): void {
+    map.set(node._id, node);
+    if (node.children) {
+      node.children.forEach(childNode => this.buildNodeMap(childNode, map));
+    }
+  }
+
+  dragStarted(event: CdkDragStart<RoleNode>): void {
+    this.draggedNode = event.source.data;
+  }
+
+  dragReleased(): void {
+    this.draggedNode = null;
+    this.dragHoveredNode = null;
+  }
+
+  onDrop(): void {
+    const dropTargetNode = this.dragHoveredNode;
+    const draggedNode = this.draggedNode;
+    
+    if (!dropTargetNode || !draggedNode) {
+      this.dragReleased();
+      return;
+    }
+
+    if (draggedNode._id === dropTargetNode._id || draggedNode.parent === dropTargetNode._id) {
+      this.dragReleased();
+      return;
+    }
+    
+    let parentCheck: RoleNode | null = dropTargetNode;
+    while (parentCheck) {
+      if (parentCheck._id === draggedNode._id) {
+        this.notificationService.showError('Cannot move a role into one of its own children.');
+        this.dragReleased();
+        return;
+      }
+      parentCheck = this.findParent(parentCheck);
+    }
+
+    this.roleService.updateRoleParent(draggedNode._id, dropTargetNode._id)
+      .pipe(finalize(() => {
+        this.refreshTree$.next();
+        this.dragReleased();
+      }))
+      .subscribe({
+        next: () => this.notificationService.showSuccess('Role hierarchy updated successfully.'),
+        error: (err) => this.notificationService.showError(err.error.message || 'Failed to update role parent.')
+      });
+  }
+  
+  private findParent(node: RoleNode): RoleNode | null {
+    if (!node.parent) return null;
+    return this.flatNodeMap.get(node.parent) || null;
   }
 
   openCreateRoleDialog(parentId: string | null = null): void {
@@ -94,7 +157,7 @@ export class RoleManagement implements OnInit {
           this.refreshTree$.next();
         },
         error: (err) => {
-          this.notificationService.showError(err.error?.message || 'Failed to delete role.');
+          this.notificationService.showError(err.error?.error || 'Failed to delete role.');
         }
       });
     });
