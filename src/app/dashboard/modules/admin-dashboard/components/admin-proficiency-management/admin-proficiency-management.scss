@@ -15,6 +15,12 @@
   min-height: 0; 
 }
 
+.action-buttons-container {
+  display: flex;
+  justify-content: flex-end; 
+  gap: 8px; 
+}
+
 .panel {
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 12px;

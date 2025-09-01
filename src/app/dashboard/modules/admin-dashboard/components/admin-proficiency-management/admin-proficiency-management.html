@@ -52,13 +52,15 @@
 
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
-                            <td mat-cell *matCellDef="let subject" align="end">
-                                <button mat-icon-button (click)="openSubjectDialog(subject)" matTooltip="Edit Subject">
-                                    <mat-icon>edit</mat-icon>
-                                </button>
-                                <button mat-icon-button color="warn" (click)="deleteSubject(subject)" matTooltip="Delete Subject">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
+                            <td mat-cell *matCellDef="let subject">
+                                <div class="action-buttons-container">
+                                    <button mat-icon-button (click)="openSubjectDialog(subject)" matTooltip="Edit Subject">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="deleteSubject(subject)" matTooltip="Delete Subject">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
                             </td>
                         </ng-container>
 
