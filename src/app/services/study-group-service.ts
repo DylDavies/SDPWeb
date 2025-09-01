@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { IStudyGroup } from '../models/interfaces/IStudyGroup.interface';
 import { HttpService } from './http-service';
 

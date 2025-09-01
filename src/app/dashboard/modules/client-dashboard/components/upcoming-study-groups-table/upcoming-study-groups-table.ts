@@ -54,7 +54,7 @@ export class UpcomingStudyGroupsTable implements OnInit, OnDestroy {
       this.dataSource.sortingDataAccessor = (item, property) => {
         switch (property) {
             case 'scheduled_start': return new Date(item.scheduled_start).getTime();
-            default: return (item as any)[property];
+            default: return 0;
         }
       };
     }

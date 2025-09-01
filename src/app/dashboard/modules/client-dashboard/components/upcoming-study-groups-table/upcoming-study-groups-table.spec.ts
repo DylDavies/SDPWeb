@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { UpcomingStudyGroupsTable } from './upcoming-study-groups-table';
 
@@ -8,7 +10,11 @@ describe('UpcomingStudyGroupsTable', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UpcomingStudyGroupsTable]
+      imports: [UpcomingStudyGroupsTable],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 
