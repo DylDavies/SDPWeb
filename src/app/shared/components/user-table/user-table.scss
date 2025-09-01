@@ -1,6 +1,5 @@
 @use '@angular/material' as mat;
 
-// New styles for clickable rows
 .user-table-row {
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
@@ -14,7 +13,6 @@
   color: var(--mat-sys-primary);
   text-decoration: underline;
 }
-// End of new styles
 
 .table-toolbar {
   display: flex;
@@ -119,32 +117,30 @@ th[mat-sort-header] {
   }
 }
 
-/* --- SOLUTION: Column Width Fixes --- */
 .mat-column-avatar {
-  width: 60px; /* Fixed width for the avatar */
+  width: 60px; 
   padding-right: 8px !important;
 }
 
 .mat-column-displayName {
-  /* Let this column be flexible and take up remaining space */
   flex-grow: 1; 
-  width: 30%; /* Set a base width */
+  width: 30%; 
   padding-left: 0 !important;
 }
 
 .mat-column-userType {
-  width: 150px; /* Give a more fixed width */
+  width: 150px; 
 }
 
 .mat-column-roles {
-  width: auto; /* Let this column size to its content */
+  width: auto; 
 }
 
 .mat-column-actions {
-  width: 150px; /* Keep fixed width for actions */
+  width: 150px; 
   text-align: center;
 }
-/* --- END OF SOLUTION --- */
+
 
 .user-type-button {
     display: inline-flex;

@@ -86,7 +86,6 @@ export class UserTable implements OnInit, OnDestroy {
     this.isAdminView = this.authService.hasPermission(EPermission.ADMIN_DASHBOARD_VIEW);
     this.canManageRoles = this.authService.hasPermission(EPermission.USERS_MANAGE_ROLES);
 
-    // FIX: Show the actions column if the user is an admin OR has the role management permission.
     if (this.isAdminView || this.canManageRoles) {
       if (this.displayedColumns.indexOf('actions') === -1) {
         this.displayedColumns.push('actions');
