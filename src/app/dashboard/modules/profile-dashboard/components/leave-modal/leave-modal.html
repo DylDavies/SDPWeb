@@ -7,7 +7,7 @@
   <mat-form-field class="full-width" appearance="outline">
     <mat-label>Reason</mat-label>
     <textarea matInput rows="4" placeholder="Please provide a reason for your leave..." formControlName="reason"></textarea>
-    <!-- **** ADDED: Error message for the reason field **** -->
+
     @if (leaveForm.get('reason')?.hasError('required') && leaveForm.get('reason')?.touched) {
       <mat-error>A reason for leave is required.</mat-error>
     }
