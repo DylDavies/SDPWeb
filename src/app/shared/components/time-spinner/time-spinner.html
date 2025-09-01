@@ -1,0 +1,30 @@
+<div class="spinner-container">
+  <ng-container *ngIf="mode === 'time'">
+    <div class="spinner-part">
+      <button mat-icon-button (click)="incrementHour()" type="button"><mat-icon>keyboard_arrow_up</mat-icon></button>
+      <span class="spinner-value">{{ hour.toString().padStart(2, '0') }}</span>
+      <button mat-icon-button (click)="decrementHour()" type="button"><mat-icon>keyboard_arrow_down</mat-icon></button>
+    </div>
+    <span class="spinner-separator">:</span>
+    <div class="spinner-part">
+      <button mat-icon-button (click)="incrementMinute()" type="button"><mat-icon>keyboard_arrow_up</mat-icon></button>
+      <span class="spinner-value">{{ minute.toString().padStart(2, '0') }}</span>
+      <button mat-icon-button (click)="decrementMinute()" type="button"><mat-icon>keyboard_arrow_down</mat-icon></button>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="mode === 'duration'">
+    <div class="spinner-part">
+        <button mat-icon-button (click)="incrementDurationHour()" type="button"><mat-icon>keyboard_arrow_up</mat-icon></button>
+        <span class="spinner-value">{{ durationHour.toString().padStart(2, '0') }}</span>
+        <button mat-icon-button (click)="decrementDurationHour()" type="button"><mat-icon>keyboard_arrow_down</mat-icon></button>
+    </div>
+    <span class="spinner-separator">h</span>
+    <div class="spinner-part">
+        <button mat-icon-button (click)="incrementDurationMinute()" type="button"><mat-icon>keyboard_arrow_up</mat-icon></button>
+        <span class="spinner-value">{{ durationMinute.toString().padStart(2, '0') }}</span>
+        <button mat-icon-button (click)="decrementDurationMinute()" type="button"><mat-icon>keyboard_arrow_down</mat-icon></button>
+    </div>
+    <span class="spinner-separator">m</span>
+  </ng-container>
+</div>

@@ -1,0 +1,26 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 1rem;
+}
+
+.spinners-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.labeled-spinner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    
+    .input-label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--mat-sys-on-surface-variant);
+        min-width: 120px;
+    }
+}

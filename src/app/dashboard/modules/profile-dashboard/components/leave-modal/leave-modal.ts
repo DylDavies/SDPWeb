@@ -19,7 +19,7 @@ export const dateRangeValidator: ValidatorFn = (control: AbstractControl): Valid
   const startDate = control.get('startDate')?.value;
   const endDate = control.get('endDate')?.value;
 
-  if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
     return { invalidRange: true };
   }
 
@@ -51,7 +51,6 @@ export class LeaveModal implements OnInit {
 
   
   minDate = new Date();
-  // Use a FormGroup to manage all form controls
   leaveForm = new FormGroup({
     name: new FormControl({ value: '', disabled: true}), 
     reason: new FormControl('', [Validators.required]),
