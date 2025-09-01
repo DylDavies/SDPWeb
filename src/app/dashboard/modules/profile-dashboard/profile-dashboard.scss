@@ -8,6 +8,8 @@
   justify-content: center;
   align-items: flex-start;
   padding: 2rem;
+  padding-top: 0;
+  margin-top: -55px;
   height: 100%;
   background-color: var(--mat-sidenav-content-background-color, var(--mat-sys-background));
 }

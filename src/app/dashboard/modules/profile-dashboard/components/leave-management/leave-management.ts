@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit,Input, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit,Input, ViewChild, AfterViewInit} from '@angular/core';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import { NotificationService } from '../../../../../services/notification-service';
 import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
@@ -28,7 +28,7 @@ import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
     ]),
   ],
 })
-export class LeaveManagement implements OnInit, OnDestroy {
+export class LeaveManagement implements OnInit, OnDestroy, AfterViewInit {
   @Input() userId: string | null = null;
   private authService = inject(AuthService);
   private userService = inject(UserService);

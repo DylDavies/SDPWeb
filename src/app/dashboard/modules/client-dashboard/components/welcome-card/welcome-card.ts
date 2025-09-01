@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { trigger, state, style, animate, transition } from "@angular/animations";
+import { NotificationService } from '../../../../../services/notification-service';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-welcome-card',
@@ -34,10 +36,20 @@ import { trigger, state, style, animate, transition } from "@angular/animations"
   ]
 })
 export class WelcomeCard {
+  private clipboard = inject(Clipboard);
+  private notificationService = inject(NotificationService);
+
   isWelcomeCardVisible = true;
   public cardState: "visible" | "hidden" = "visible";
 
+  public supportEmail = 'support@tutorcore.works';
+
   closeWelcomeCard(): void {
     this.cardState = "hidden";
+  }
+
+  copyEmail(): void {
+    this.clipboard.copy(this.supportEmail);
+    this.notificationService.showSuccess('Support email copied to clipboard!');
   }
 }

@@ -1,26 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { ClientDashboard } from './client-dashboard';
+import { UpcomingStudyGroupsTable } from './upcoming-study-groups-table';
 
-describe('ClientDashboard', () => {
-  let component: ClientDashboard;
-  let fixture: ComponentFixture<ClientDashboard>;
+describe('UpcomingStudyGroupsTable', () => {
+  let component: UpcomingStudyGroupsTable;
+  let fixture: ComponentFixture<UpcomingStudyGroupsTable>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClientDashboard],
+      imports: [UpcomingStudyGroupsTable],
       providers: [
-        provideAnimationsAsync(),
         provideHttpClient(),
         provideHttpClientTesting()
       ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ClientDashboard);
+    fixture = TestBed.createComponent(UpcomingStudyGroupsTable);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
