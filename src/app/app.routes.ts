@@ -15,6 +15,7 @@ import { EPermission } from './models/enums/permission.enum';
 import { accountStatusGuard } from './guards/account-status-guard';
 import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
+import { UserManagement } from './dashboard/modules/user-management/user-management';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -26,7 +27,8 @@ export const routes: Routes = [
       { path: '', component: ClientDashboard },
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
       { path: 'profile', component: Profile },
-      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] }
+      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
+      { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },
