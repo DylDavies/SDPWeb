@@ -6,7 +6,7 @@
         <mat-card-subtitle>Your account has been disabled by an administrator.</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-        <p>If you believe this is a mistake, please contact support.</p>
+        <p>If you believe this is a mistake, please contact <a class="support-email-link" (click)="copyEmail()">support@tutorcore.works</a>.</p>
     </mat-card-content>
     <mat-card-actions align="end">
         <button mat-flat-button color="primary" (click)="logout()">Log Out</button>

@@ -42,3 +42,18 @@ mat-card-header {
 .close-button {
   margin: -35px 20px 0 0;
 }
+
+.support-email-link {
+  color: var(--primary-color);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px dashed var(--primary-color);
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+
+  &:hover {
+    color: var(--primary-color-dark);
+    border-bottom-color: var(--primary-color-dark);
+    text-decoration: underline;
+  }
+}
