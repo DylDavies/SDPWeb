@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
+import { NotificationService } from '../../../../../services/notification-service';
 
 @Component({
   selector: 'app-admin-subject-edit-dialog',
@@ -32,6 +33,7 @@ export class AdminSubjectEditDialog {
   private fb = inject(FormBuilder);
   public dialogRef = inject(MatDialogRef<AdminSubjectEditDialog>);
   public data: { subject?: ISubject } = inject(MAT_DIALOG_DATA);
+  private notificationService = inject(NotificationService);
 
   form: FormGroup;
   isEditMode: boolean;
@@ -72,7 +74,12 @@ export class AdminSubjectEditDialog {
   addGrade(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     if (value) {
-      this.grades.push(value);
+      if (this.grades.includes(value)) {
+        this.notificationService.showInfo(`Grade "${value}" has already been added.`);
+      } else {
+        this.grades.push(value);
+        this.announcer.announce(`Added ${value}`);
+      }
     }
     event.chipInput!.clear();
   }
