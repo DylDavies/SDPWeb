@@ -1,0 +1,55 @@
+<h1 mat-dialog-title>Edit Bundle for {{ getStudentName() }}</h1>
+<mat-dialog-content>
+  <form [formGroup]="editForm">
+    <mat-slide-toggle formControlName="isActive" color="primary">
+      Bundle is Active
+    </mat-slide-toggle>
+
+    <mat-divider></mat-divider>
+
+    <h3 class="subjects-title">Manage Subjects</h3>
+    <div formArrayName="subjects">
+      @for (subjectGroup of subjects.controls; track subjectGroup; let i = $index) {
+      <div [formGroupName]="i" class="subject-group">
+        <mat-form-field appearance="outline" class="flex-item">
+          <mat-label>Subject Name/Topic</mat-label>
+          <input matInput formControlName="subject">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-item">
+          <mat-label>Tutor Name</mat-label>
+           <input type="text" matInput formControlName="tutorName" [matAutocomplete]="autoTutor" placeholder="Search for a tutor...">
+           <mat-autocomplete #autoTutor="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onTutorSelected($event, i)">
+            @for (tutor of filteredTutors$[i] | async; track tutor._id) {
+              <mat-option [value]="tutor">{{ tutor.displayName }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-item hours-field">
+          <mat-label>Hours</mat-label>
+          <input matInput type="number" formControlName="hours">
+        </mat-form-field>
+        <button mat-icon-button color="warn" (click)="removeSubject(i)" aria-label="Remove subject">
+          <mat-icon>remove_circle</mat-icon>
+        </button>
+      </div>
+      }
+    </div>
+    <div class="button-row">
+      <button mat-stroked-button color="primary" (click)="addSubject()">
+        <mat-icon>add</mat-icon>
+        Add Another Subject
+      </button>
+    </div>
+
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="editForm.invalid || isSaving">
+    @if (isSaving) {
+    <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+    } @else {
+    <span>Save Changes</span>
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,61 @@
+<h1 mat-dialog-title>Create New Bundle</h1>
+<mat-dialog-content>
+  <p>Create a new tutoring bundle for a student.</p>
+  <form [formGroup]="createBundleForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Student Name</mat-label>
+      <input type="text" matInput [formControl]="studentNameCtrl" [matAutocomplete]="autoStudent" placeholder="Search for a student...">
+      <mat-autocomplete #autoStudent="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onStudentSelected($event)">
+        @for (student of filteredStudents$ | async; track student._id) {
+          <mat-option [value]="student">{{ student.displayName }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-divider></mat-divider>
+
+    <div formArrayName="subjects">
+      <h3 class="subjects-title">Subjects</h3>
+      @for (subjectGroup of subjects.controls; track subjectGroup; let i = $index) {
+      <div [formGroupName]="i" class="subject-group">
+        <mat-form-field appearance="outline" class="flex-item">
+          <mat-label>Subject Name/Topic</mat-label>
+          <input matInput formControlName="subject">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-item">
+          <mat-label>Tutor Name</mat-label>
+           <input type="text" matInput formControlName="tutorName" [matAutocomplete]="autoTutor" placeholder="Search for a tutor...">
+           <mat-autocomplete #autoTutor="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onTutorSelected($event, i)">
+            @for (tutor of filteredTutors$[i] | async; track tutor._id) {
+              <mat-option [value]="tutor">{{ tutor.displayName }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-item hours-field">
+          <mat-label>Hours</mat-label>
+          <input matInput type="number" formControlName="hours">
+        </mat-form-field>
+        <button mat-icon-button color="warn" (click)="removeSubject(i)" aria-label="Remove subject">
+          <mat-icon>remove_circle</mat-icon>
+        </button>
+      </div>
+      }
+    </div>
+    <div class="button-row">
+      <button mat-stroked-button color="primary" (click)="addSubject()">
+        <mat-icon>add</mat-icon>
+        Add Another Subject
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onCreate()" [disabled]="createBundleForm.invalid || isSaving">
+    @if (isSaving) {
+    <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+    } @else {
+    <span>Create Bundle</span>
+    }
+  </button>
+</mat-dialog-actions>
