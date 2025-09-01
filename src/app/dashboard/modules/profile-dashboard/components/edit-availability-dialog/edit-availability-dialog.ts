@@ -43,7 +43,7 @@ export class EditAvailabilityDialog {
 
     const value = this.form.value.availability;
     if(value > 168){
-      let random =  Math.floor(Math.random() * 10000) + 1; // Tune user
+      const random =  Math.floor(Math.random() * 10000) + 1; // Tune user
       if(random == 1){
         this.notificationService.showError("Are you a fucking dumbass???? There are only 168 hours in a week.");
       }
