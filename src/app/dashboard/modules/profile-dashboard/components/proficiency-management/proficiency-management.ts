@@ -83,7 +83,7 @@ export class ProficiencyManagement implements OnInit {
       switchMap(user => {
         this.user = user;
         if (user.proficiencies) {
-          this.userProficiencies = user.proficiencies;
+          this.userProficiencies = user.proficiencies.filter(p => p.subjects && Object.keys(p.subjects).length > 0); // dont render profs with no subjects
           this.prepopulateSyllabusSelections();
         }
         return this.profService.fetchAllProficiencies();
