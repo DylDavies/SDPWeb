@@ -9,12 +9,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatDividerModule } from '@angular/material/divider';
 import { Observable, map, startWith, tap } from 'rxjs';
-import { EPermission } from '../../../../../models/enums/permission.enum';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { AuthService } from '../../../../../services/auth-service';
 import { NotificationService } from '../../../../../services/notification-service';
 import { RoleService, RoleNode } from '../../../../../services/role-service';
 import { UserService } from '../../../../../services/user-service';
+import { EUserType } from '../../../../../models/enums/user-type.enum';
 
 @Component({
   selector: 'app-manage-user-roles',
@@ -49,7 +49,7 @@ export class ManageUserRolesDialog implements OnInit {
         let treeData: RoleNode[];
         let assignableRoles: RoleNode[];
 
-        if (this.authService.hasPermission(EPermission.ROLES_CREATE)) {
+        if (this.data.currentUser.type == EUserType.Admin) {
           treeData = rootRole ? [rootRole] : [];
           assignableRoles = Array.from(allRolesMap.values());
         } else {
