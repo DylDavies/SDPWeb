@@ -477,14 +477,14 @@ Stores information about all registered users, including their personal details,
 | `displayName` | `String` | The user's public display name. | **Required** |
 | `picture` | `String` | URL to the user's profile picture. | Optional |
 | `firstLogin` | `Boolean` | Flag to determine if the user needs to complete the initial profile setup. | `Default: true` |
-| `type` | `String` | The primary category of the user. | **Required**, Enum: `EUserType`, `Default: 'client'` |
+| `type` | `String` | The primary category of the user. | **Required**, Enum: `EUserType:[admin, staff, client]`, `Default: 'client'` |
 | `roles` | `Array<ObjectId>` | An array of ObjectIds referencing documents in the `roles` collection. | `ref: 'Role'` |
 | `leave` | `Array` | An array of embedded leave request documents. (See **Leave Sub-schema** below). | N/A |
 | `pending` | `Boolean` | If `true`, the user's account is awaiting admin approval. | **Required**, `Default: true` |
 | `disabled` | `Boolean` | If `true`, the user's account is disabled and they cannot log in. | **Required**, `Default: false` |
 | `proficiencies`| `Array` | An array of embedded proficiency documents specific to the user. | See `proficiencies` collection. |
 | `theme` | `String` | The user's preferred UI theme. | Enum: `['light', 'dark', 'system']`, `Default: 'system'` |
-| `availability` | `Number` | A field to store a tutor's availability status or hours. | `Default: 0` |
+| `availability` | `Number` | A field to store a tutor's availability in hours. | `Default: 0` |
 | `createdAt` | `Date` | Timestamp of when the user was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
 
@@ -495,7 +495,7 @@ Stores information about all registered users, including their personal details,
 | `reason` | `String` | The reason provided for the leave request. | **Required** |
 | `startDate` | `Date` | The starting date of the leave period. | **Required** |
 | `endDate` | `Date` | The ending date of the leave period. | **Required** |
-| `approved` | `String` | The current status of the leave request. | Enum: `ELeave`, `Default: 'pending'` |
+| `approved` | `String` | The current status of the leave request. | Enum: `ELeave: [pending, approved, denied]`, `Default: 'pending'` |
 
 ---
 
@@ -507,7 +507,7 @@ Defines a hierarchical structure of roles, each with a specific set of permissio
 | :--- | :--- | :--- | :--- |
 | `_id` | `ObjectId` | Unique identifier for the role document. | Automatically generated. |
 | `name` | `String` | The unique name of the role (e.g., "Senior Tutor", "Content Manager"). | **Required**, **Unique** |
-| `permissions` | `Array<String>` | A list of permission strings granted by this role. | **Required**, Enum: `EPermission` |
+| `permissions` | `Array<String>` | A list of permission strings granted by this role. | **Required**, Enum: `EPermission:[ROLES_CREATE,ROLES_VIEW,ROLES_EDIT,ROLES_DELETE,USERS_VIEW,USERS_MANAGE_ROLES,USERS_EDIT,USERS_DELETE,VIEW_USER_PROFILE,DASHBOARD_VIEW,ADMIN_DASHBOARD_VIEW,PROFILE_PAGE_VIEW,BUNDLES_CREATE,BUNDLES_VIEW,BUNDLES_EDIT,BUNDLES_DELETEPROFICIENCIES_MANAGE,LEAVE_MANAGE]` |
 | `parent` | `ObjectId` | A self-reference to a parent role, creating a tree structure. | `ref: 'Role'`, `Default: null` (for root roles) |
 | `color` | `String` | A hex color code for displaying the role in the UI. | **Required** |
 | `createdAt` | `Date` | Timestamp of when the role was created. | `timestamps: true` |
@@ -545,7 +545,7 @@ Manages lesson bundles, linking a student to one or more tutors for specific sub
 | `student` | `ObjectId` | A reference to the student user document. | **Required**, `ref: 'User'` |
 | `subjects` | `Array` | An array of embedded documents detailing the subjects in the bundle. | See **Bundle Subject Sub-schema** below. |
 | `isActive` | `Boolean` | A flag to quickly activate or deactivate a bundle. | `Default: true` |
-| `status` | `String` | The current status of the bundle (e.g., Pending, Active, Completed). | Enum: `EBundleStatus`, `Default: 'Pending'` |
+| `status` | `String` | The current status of the bundle (e.g., Pending, Active, Completed). | Enum: `EBundleStatus:[Approved, Pending, Denied]`, `Default: 'Pending'` |
 | `createdBy` | `ObjectId` | A reference to the admin/user who created the bundle. | **Required**, `ref: 'User'` |
 | `createdAt` | `Date` | Timestamp of when the bundle was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
