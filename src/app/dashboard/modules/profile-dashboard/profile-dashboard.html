@@ -70,13 +70,16 @@
                   <mat-icon class="detail-icon" color="primary">event_available</mat-icon>
                   <div class="detail-text">
                     <span class="detail-label">Weekly Availability</span>
-                    <span class="detail-value">{{ user.availability }} hours</span>
+                    <span class="detail-value">
+                      {{ user.availability }} hours
+                    </span>
+                    @if (isOwnProfile) {
+                      <button mat-icon-button (click)="openEditAvailabilityDialog()" class="edit-icon">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
+
                   </div>
-                  @if (isOwnProfile) {
-                    <button mat-icon-button (click)="openEditAvailabilityDialog()" class="edit-icon">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                  }
                 </div>
 
                 <div class="detail-item">

@@ -80,7 +80,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  position: relative; // Needed for icon positioning
+  position: relative; 
 }
 
 // Style for the edit icon on hover
@@ -162,4 +162,25 @@
       width: 100%;
     }
   }
+}
+
+.inline-edit-icon {
+  margin-left: 0px;
+  opacity: 0;
+  vertical-align: middle;
+  transition: opacity 0.2s ease-in-out;
+  width: 24px;
+  height: 24px;
+  padding-left: 7px;
+}
+
+.detail-item.editable:hover .inline-edit-icon {
+  opacity: 1;
+}
+
+.detail-value {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
 }

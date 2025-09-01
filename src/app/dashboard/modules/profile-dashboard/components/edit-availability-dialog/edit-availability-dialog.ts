@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../../../services/notification-service';
 
 @Component({
   selector: 'app-edit-availability-dialog',
@@ -23,6 +24,7 @@ export class EditAvailabilityDialog {
   public dialogRef = inject(MatDialogRef<EditAvailabilityDialog>);
   public data: { availability: number } = inject(MAT_DIALOG_DATA);
   private fb = inject(FormBuilder);
+  private notificationService = inject(NotificationService);
 
   constructor() {
     this.form = this.fb.group({
@@ -38,6 +40,20 @@ export class EditAvailabilityDialog {
     if (this.form.invalid) {
       return;
     }
+
+    const value = this.form.value.availability;
+    if(value > 168){
+      let random =  Math.floor(Math.random() * 10000) + 1; // Tune user
+      if(random == 1){
+        this.notificationService.showError("Are you a fucking dumbass???? There are only 168 hours in a week.");
+      }
+      else{
+        this.notificationService.showError("There are only 168 hours in a week.");
+      }
+
+      return;
+    }
+
     this.dialogRef.close(this.form.value.availability);
   }
 }
