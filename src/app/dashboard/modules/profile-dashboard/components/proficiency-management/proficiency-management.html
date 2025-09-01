@@ -84,24 +84,6 @@
             </mat-autocomplete>
           </mat-form-field>
         </div>
-
-        @if (selectedSyllabus && selectedSubjects.length > 0) {
-          <div class="proficiency-summary">
-            <h3 class="summary-title">Current Selections for {{ selectedSyllabus }}</h3>
-            @for(subject of selectedSubjects; track subject) {
-              @if (selectedSyllabus && syllabusSelections[selectedSyllabus] && syllabusSelections[selectedSyllabus][subject] && syllabusSelections[selectedSyllabus][subject].length > 0) {
-                <div class="summary-item">
-                  <span class="summary-subject-name">{{ subject }}</span>
-                  <mat-chip-listbox class="summary-chip-list">
-                    @for(grade of syllabusSelections[selectedSyllabus][subject]; track grade) {
-                      <mat-chip-option disabled>{{ grade }}</mat-chip-option>
-                    }
-                  </mat-chip-listbox>
-                </div>
-              }
-            }
-          </div>
-        }
       </div>
 
       <div class="edit-column">

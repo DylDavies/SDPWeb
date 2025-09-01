@@ -88,6 +88,17 @@
   opacity: 1;
 }
 
+.editable-header {
+  position: relative;
+  display: inline-block;
+  align-items: center;
+  padding-right: 50px;
+}
+
+.editable-header:hover .edit-icon {
+  opacity: 1;
+}
+
 .edit-icon {
   position: absolute;
   right: 0;

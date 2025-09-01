@@ -41,6 +41,9 @@ export class Sidebar implements OnInit, OnDestroy {
   sideBarLinks: ISidebarItem[] = [
     { label: 'Home', icon: 'dashboard', route: '/dashboard' },
     { label: 'Profile', icon: 'person', route: '/dashboard/profile' },
+    { label: 'User Management', icon: 'people', route: '/dashboard/users', requiredPermissions: [EPermission.USERS_VIEW] },
+    { label: 'Calendar', icon: 'calendar_today', route: '/dashboard/calendar' },
+    { label: 'Bundles', icon: 'inventory', route: '/dashboard/bundles' },
     { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW] }
   ]
 
@@ -66,6 +69,6 @@ export class Sidebar implements OnInit, OnDestroy {
 
     if (this.user && this.user.type == EUserType.Admin) return true;
 
-    return requiredPermissions.every(p => this.authService.hasPermission(p));
+    return requiredPermissions.every(p => this.authService.hasPermission(p)); 
   }
 }

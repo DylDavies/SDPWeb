@@ -1,5 +1,19 @@
 @use '@angular/material' as mat;
 
+.user-table-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: var(--mat-sys-state-hover-layer) !important; 
+  }
+}
+
+.display-name:hover {
+  color: var(--mat-sys-primary);
+  text-decoration: underline;
+}
+
 .table-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -32,10 +46,9 @@
   margin-top: -20px;
 
   &:focus {
-    outline: none; // Remove default focus ring
+    outline: none;
   }
 
-  // Mimic the form field's hover state
   &:hover {
     border-color: var(--mat-sys-on-surface);
   }
@@ -61,15 +74,14 @@
 .role-chip-container {
   padding: 8px 16px;
   max-width: 400px;
-  
+
   .mat-mdc-chip-set {
     flex-wrap: wrap;
   }
 }
 
-// Use ::ng-deep to style the menu panel itself
 ::ng-deep .role-filter-menu .mdc-menu__surface {
-  max-width: none !important; // Allow the menu to size to its content
+  max-width: none !important;
 }
 
 .role-chip {
@@ -84,7 +96,6 @@
     hover-state-layer-color: transparent
   ));
 
-  // Style for when the chip is selected
   &.mat-mdc-chip-selected {
     background-color: var(--mat-sys-secondary-container) !important;
     color: var(--mat-sys-on-secondary-container) !important;
@@ -107,26 +118,29 @@ th[mat-sort-header] {
 }
 
 .mat-column-avatar {
-  width: 80px;
-  padding-right: 24px !important;
+  width: 60px; 
+  padding-right: 8px !important;
 }
 
 .mat-column-displayName {
-  width: 25%;
+  flex-grow: 1; 
+  width: 30%; 
+  padding-left: 0 !important;
 }
 
 .mat-column-userType {
-  width: 15%;
+  width: 150px; 
 }
 
 .mat-column-roles {
-  width: 35%;
+  width: auto; 
 }
 
 .mat-column-actions {
-  width: 150px;
+  width: 150px; 
   text-align: center;
 }
+
 
 .user-type-button {
     display: inline-flex;
@@ -143,7 +157,14 @@ th[mat-sort-header] {
     background-color: rgba(0,0,0,0.05);
 }
 
-.user-type { font-weight: 500; }
+.user-type { 
+  font-weight: 500;
+  color: var(--mat-sys-primary); 
+}
+
+.user-type-static {
+  padding: 4px 8px;
+}
 
 mat-chip-set {
     display: flex;
@@ -162,10 +183,6 @@ mat-chip-row {
     border-radius: 12px;
     overflow: hidden;
     margin-top: -5px;
-}
-
-.user-table {
-    width: 100%;
 }
 
 .avatar {
@@ -187,11 +204,6 @@ mat-chip-row {
 .email {
     font-size: 0.85rem;
     color: var(--mat-sys-on-surface-variant);
-}
-
-.user-type {
-    font-weight: 500;
-    color: var(--mat-sys-primary);
 }
 
 .loading-state,
@@ -217,28 +229,6 @@ mat-chip-row {
     font-weight: 500;
     color: var(--mat-sys-on-surface);
     margin: 0;
-}
-
-.mat-column-avatar {
-    width: 80px;
-    padding-right: 24px !important;
-}
-
-.mat-column-displayName {
-    width: 30%;
-}
-
-.mat-column-userType {
-    width: 15%;
-}
-
-.mat-column-roles {
-    width: 40%;
-}
-
-.mat-column-actions {
-    width: 150px;
-    text-align: center;
 }
 
 th.mat-header-cell, td.mat-cell {

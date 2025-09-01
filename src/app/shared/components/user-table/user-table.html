@@ -1,14 +1,12 @@
 <div class="user-management-container">
-  
+
   <div class="table-toolbar">
-    <!-- Text Filter Input -->
     <mat-form-field appearance="outline" class="filter-field compact-form-field">
       <mat-label>Filter Users</mat-label>
       <input matInput [formControl]="textFilterControl" placeholder="Search by name, email, status...">
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
-    <!-- Role Filter Button and Menu -->
     <button mat-stroked-button [matMenuTriggerFor]="roleMenu" class="role-filter-button">
       <mat-icon>label</mat-icon>
       <span>
@@ -36,14 +34,12 @@
     @if (dataSource.data.length > 0) {
       <div class="table-responsive-wrapper">
         <table mat-table [dataSource]="dataSource" matSort matSortActive="displayName" matSortDirection="asc" class="user-table">
-          
-          <!-- Avatar Column -->
+
           <ng-container matColumnDef="avatar">
             <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let user"><img [src]="user.picture || '/assets/no_profile_pic.png'" class="avatar" [alt]="user.displayName"></td>
           </ng-container>
 
-          <!-- Display Name Column (Sortable) -->
           <ng-container matColumnDef="displayName">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
             <td mat-cell *matCellDef="let user">
@@ -58,32 +54,27 @@
             </td>
           </ng-container>
 
-          <!-- User Type Column (Sortable) -->
           <ng-container matColumnDef="userType">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> User Type </th>
             <td mat-cell *matCellDef="let user">
-              <!-- Your existing user type menu button -->
-              <button class="user-type-button" [matMenuTriggerFor]="userTypeMenu" [disabled]="!canManageRoles">
-                @if (user.type) {
+              @if(isAdminView) {
+                <button class="user-type-button" [matMenuTriggerFor]="userTypeMenu" [disabled]="!canManageRoles" (click)="$event.stopPropagation()">
                   <span class="user-type">{{ user.type | userTypePipe }}</span>
-                } @else {
-                  <span class="no-roles">Standard</span>
-                }
-                @if (canManageRoles) {
                   <mat-icon>arrow_drop_down</mat-icon>
-                }
-              </button>
-              <mat-menu #userTypeMenu="matMenu">
-                @for (type of types; track type) {
-                  <button mat-menu-item (click)="updateUserType(user, type)">
-                    <span>{{ type | userTypePipe}}</span>
-                  </button>
-                }
-              </mat-menu>
+                </button>
+                <mat-menu #userTypeMenu="matMenu">
+                  @for (type of types; track type) {
+                    <button mat-menu-item (click)="updateUserType(user, type, $event)">
+                      <span>{{ type | userTypePipe}}</span>
+                    </button>
+                  }
+                </mat-menu>
+              } @else {
+                <span class="user-type-static user-type">{{ user.type | userTypePipe }}</span>
+              }
             </td>
           </ng-container>
 
-          <!-- Roles Column -->
           <ng-container matColumnDef="roles">
             <th mat-header-cell *matHeaderCellDef> Roles </th>
             <td mat-cell *matCellDef="let user">
@@ -91,37 +82,42 @@
             </td>
           </ng-container>
 
-          <!-- Actions Column -->
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Actions </th>
             <td mat-cell *matCellDef="let user">
-              @if (user.pending && canManageRoles) {
-                <button mat-icon-button color="accent" matTooltip="Approve User" (click)="approveUser(user)">
-                  <mat-icon>check_circle_outline</mat-icon>
-                </button>
-              }
-              @if (!user.disabled && canManageRoles) {
-                <button mat-icon-button color="warn" matTooltip="Disable User" (click)="disableUser(user)">
-                  <mat-icon>block</mat-icon>
-                </button>
-              }
-              @if (user.disabled && canManageRoles) {
-                <button mat-icon-button color="warn" matTooltip="Enable User" (click)="enableUser(user)">
-                  <mat-icon>how_to_reg</mat-icon>
-                </button>
-              }
-              @if (canManageRoles) {
-                <button mat-icon-button color="primary" matTooltip="Manage All Roles" (click)="manageRoles(user)">
-                  <mat-icon>manage_accounts</mat-icon>
-                </button>
-              }
+              <div role="group" 
+                   tabindex="0" 
+                   (click)="$event.stopPropagation()" 
+                   (keydown.enter)="$event.stopPropagation()">
+                @if (user.pending && canManageRoles && isAdminView) {
+                  <button mat-icon-button color="accent" matTooltip="Approve User" (click)="approveUser(user, $event)">
+                    <mat-icon>check_circle_outline</mat-icon>
+                  </button>
+                }
+                @if (!user.disabled && canManageRoles && isAdminView) {
+                  <button mat-icon-button color="warn" matTooltip="Disable User" (click)="disableUser(user, $event)">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                }
+                @if (user.disabled && canManageRoles && isAdminView) {
+                  <button mat-icon-button color="warn" matTooltip="Enable User" (click)="enableUser(user, $event)">
+                    <mat-icon>how_to_reg</mat-icon>
+                  </button>
+                }
+                @if (canManageRoles) {
+                  <button mat-icon-button color="primary" matTooltip="Manage All Roles" (click)="manageRoles(user, $event)">
+                    <mat-icon>manage_accounts</mat-icon>
+                  </button>
+                }
+              </div>
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-              [class.disabled]="row.disabled" 
-              [class.pending]="row.pending">
+          <tr mat-row class="user-table-row" *matRowDef="let row; columns: displayedColumns;"
+              [class.disabled]="row.disabled"
+              [class.pending]="row.pending"
+              (click)="viewProfile(row)">
           </tr>
         </table>
       </div>
@@ -139,4 +135,3 @@
     </div>
   }
 </div>
-
