@@ -53,9 +53,11 @@ export class LeaveManagement implements OnInit, OnDestroy {
   ngOnInit(): void {
     const targetUserId = this.userId;
     const authSub = this.authService.currentUser$.subscribe(loggedInUser => {
-      this.loggedInUser = loggedInUser;
+    this.loggedInUser = loggedInUser;
       if (this.canManageLeave && loggedInUser?._id !== targetUserId) {
-        this.displayedColumns = [...this.displayedColumns, 'actions']
+        if (!this.displayedColumns.includes('actions')) {
+          this.displayedColumns = [...this.displayedColumns, 'actions'];
+        }
       }
     });
     this.subscriptions.add(authSub);
@@ -66,7 +68,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
       const userSub = this.userService.getUserById(targetUserId).subscribe(profileUser => {
         if (profileUser) {
           this.viewedUser = profileUser;
-          this.dataSource.data = profileUser.leave || [];
+          this.dataSource.data = profileUser.leave?.slice().sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || [];
         }
       });
       this.subscriptions.add(userSub);
@@ -75,7 +77,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
       const selfSub = this.authService.currentUser$.subscribe(loggedInUser => {
         if (loggedInUser) {
           this.viewedUser = loggedInUser;
-          this.dataSource.data = loggedInUser.leave || [];
+          this.dataSource.data = loggedInUser.leave?.slice().sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || [];
         }
       });
       this.subscriptions.add(selfSub);
