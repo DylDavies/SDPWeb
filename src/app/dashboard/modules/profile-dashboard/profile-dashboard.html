@@ -34,17 +34,20 @@
                        [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
                 </div>
                 <div class="profile-info">
-                  <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
+                  <div class="editable-header">
+                    <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
+                    @if (isOwnProfile) {
+                      <button mat-icon-button (click)="editProfile()" class="edit-icon" matTooltip="Edit display name">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
+                  </div>
                   <h2 class="user-role">{{ user.type | userTypePipe }}</h2>
                   <div class="roles-container">
                     <app-role-chip-row [roles]="user.roles"></app-role-chip-row>
                   </div>
                 </div>
                 <div class="profile-actions">
-                  <button mat-stroked-button color="primary" (click)="editProfile()">
-                    <mat-icon>edit</mat-icon>
-                    <span>Edit Profile</span>
-                  </button>
                   <button mat-stroked-button color="primary" (click)="openLeaveModal()">
                     <mat-icon>event_busy</mat-icon>
                     <span>Request Leave</span>
