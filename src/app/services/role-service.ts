@@ -63,6 +63,16 @@ export class RoleService {
   }
 
   /**
+   * Updates the parent of a role.
+   * @param roleId The ID of the role to move.
+   * @param newParentId The ID of the new parent role.
+   * @returns An observable of the updated role.
+   */
+  updateRoleParent(roleId: string, newParentId: string): Observable<RoleNode> {
+    return this.httpService.patch<RoleNode>(`roles/${roleId}/parent`, { newParentId });
+  }
+
+  /**
    * Deletes a role by its ID and then triggers a refresh of the role tree.
    */
   deleteRole(roleId: string): Observable<{message: string}> {

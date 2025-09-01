@@ -1,59 +1,62 @@
-<div class="role-management-container">
-    <header class="role-header">
-    <h2>Role Hierarchy</h2>
-    </header>
-    
-    <div class="tree-container mat-elevation-z2">
-    @if (roleTree$ | async; as rootNode) {
-        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
-        <mat-nested-tree-node *matTreeNodeDef="let node">
-            <li>
-            <div class="mat-tree-node">
-                @if (hasChild(node)) {
-                    <button mat-icon-button matTreeNodeToggle>
-                        <mat-icon class="mat-icon-rtl-mirror" [style.visibility]="'visible'">
-                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                        </mat-icon>
-                    </button>
-                } @else {
-                    <button mat-icon-button matTreeNodeToggle class="no-hover">
-                        <mat-icon class="mat-icon-rtl-mirror" [style.visibility]="'hidden'">
-                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                        </mat-icon>
-                    </button>
-                }
-                <div class="role-info">
-                <span class="role-color-dot" [style.background-color]="node.color"></span>
-                <span class="role-name">{{ node.name }}</span>
+    <div class="role-management-container">
+      <header class="role-header">
+        <h2>Role Hierarchy</h2>
+        @if (canEditRoles) {
+          <p class="drag-hint">Drag and drop to reorganize roles.</p>
+        }
+      </header>
+      
+      <!-- The onDrop() method is correctly bound to the cdkDropListDropped event -->
+      <div class="tree-container mat-elevation-z2" cdkDropList (cdkDropListDropped)="onDrop()" cdkDropListSortingDisabled="true">
+        @if (roleTree$ | async; as rootNode) {
+          <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+            <mat-nested-tree-node *matTreeNodeDef="let node">
+              <li>
+                <!-- The (mouseleave) event has been removed to prevent race conditions -->
+                <div class="mat-tree-node"
+                     (mouseenter)="dragHoveredNode = node"
+                     [class.drop-target]="dragHoveredNode?._id === node._id && draggedNode?._id !== node._id && !!draggedNode"
+                     cdkDrag [cdkDragData]="node" [cdkDragDisabled]="!node.parent"
+                     (cdkDragStarted)="dragStarted($event)">
+                  
+                  <button mat-icon-button matTreeNodeToggle [style.visibility]="hasChild(node) ? 'visible' : 'hidden'">
+                    <mat-icon class="mat-icon-rtl-mirror">
+                      {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                    </mat-icon>
+                  </button>
+                  <div class="role-info">
+                    <span class="role-color-dot" [style.background-color]="node.color"></span>
+                    <span class="role-name">{{ node.name }}</span>
+                  </div>
+                  <div class="role-actions">
+                    @if (canCreateRoles) {
+                      <button mat-icon-button matTooltip="Add Child Role" (click)="openCreateRoleDialog(node._id)">
+                        <mat-icon>add_circle_outline</mat-icon>
+                      </button>
+                    }
+                    @if (canEditRoles) {
+                      <button mat-icon-button matTooltip="Edit Role" (click)="openEditRoleDialog(node)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
+                    @if (canDeleteRoles && node.parent) {
+                      <button mat-icon-button color="warn" matTooltip="Delete Role" (click)="deleteRole(node)">
+                        <mat-icon>delete_outline</mat-icon>
+                      </button>
+                    }
+                  </div>
                 </div>
-                <div class="role-actions">
-                @if (canCreateRoles) {
-                    <button mat-icon-button matTooltip="Add Child Role" (click)="openCreateRoleDialog(node._id)">
-                    <mat-icon>add_circle_outline</mat-icon>
-                    </button>
-                }
-                @if (canEditRoles) {
-                    <button mat-icon-button matTooltip="Edit Role" (click)="openEditRoleDialog(node)">
-                    <mat-icon>edit</mat-icon>
-                    </button>
-                }
-                @if (canDeleteRoles && node.parent) {
-                    <button mat-icon-button color="warn" matTooltip="Delete Role" (click)="deleteRole(node)">
-                    <mat-icon>delete_outline</mat-icon>
-                    </button>
-                }
-                </div>
-            </div>
-            <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
-                <ng-container matTreeNodeOutlet></ng-container>
-            </ul>
-            </li>
-        </mat-nested-tree-node>
-        </mat-tree>
-    } @else {
-        <div class="loading-state">
-        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-        </div>
-    }
+                
+                <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
+                  <ng-container matTreeNodeOutlet></ng-container>
+                </ul>
+              </li>
+            </mat-nested-tree-node>
+          </mat-tree>
+        } @else {
+          <div class="loading-state">
+            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+          </div>
+        }
+      </div>
     </div>
-</div>

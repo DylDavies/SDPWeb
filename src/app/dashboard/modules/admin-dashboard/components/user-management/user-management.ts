@@ -87,10 +87,6 @@ export class UserManagement implements OnInit, OnDestroy {
       this.userService.allUsers$.subscribe(users => {
         this.dataSource.data = users;
         this.isLoading = false;
-        // Set the initial sort
-        if (this.sort) {
-          this.sort.sort({ id: 'displayName', start: 'asc', disableClear: false });
-        }
       })
     );
     

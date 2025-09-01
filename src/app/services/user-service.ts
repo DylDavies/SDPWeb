@@ -157,4 +157,13 @@ export class UserService {
   deleteSubjectFromProficiency(userId: string, profName: string, subjectId: string): Observable<IUser> {
     return this.httpService.delete<IUser>(`users/${userId}/proficiencies/${profName}/subjects/${subjectId}`);
   }
+
+  /**
+   * Updates a user's weekly availability.
+   * @param userId The ID of the user to update.
+   * @param availability The new availability in hours.
+   */
+  updateUserAvailability(userId: string, availability: number): Observable<IUser> {
+    return this.httpService.patch<IUser>(`users/${userId}/availability`, { availability });
+  }
 }

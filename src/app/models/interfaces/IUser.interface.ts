@@ -20,5 +20,6 @@ export interface IUser {
     disabled: boolean,
     theme: Theme,
     leave: ILeave[],
-    proficiencies?: IProficiency[]
+    proficiencies?: IProficiency[],
+    availability?: number,
 }

@@ -63,12 +63,17 @@
                   </div>
                 </div>
                 
-                <div class="detail-item">
-                  <mat-icon class="detail-icon" color="primary">badge</mat-icon>
+                <div class="detail-item editable">
+                  <mat-icon class="detail-icon" color="primary">event_available</mat-icon>
                   <div class="detail-text">
-                    <span class="detail-label">User ID</span>
-                    <span class="detail-value code">{{ user._id }}</span>
+                    <span class="detail-label">Weekly Availability</span>
+                    <span class="detail-value">{{ user.availability }} hours</span>
                   </div>
+                  @if (isOwnProfile) {
+                    <button mat-icon-button (click)="openEditAvailabilityDialog()" class="edit-icon">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  }
                 </div>
 
                 <div class="detail-item">
@@ -81,11 +86,11 @@
               </div>
             </div>
           </mat-tab>
-
+          
           <mat-tab label="Leave">
             <div class="profile-content">
               <h2>Leave</h2>
-              <app-leave-management></app-leave-management>
+              <app-leave-management [userId] = "user._id"></app-leave-management>
             </div>
           </mat-tab>
 
@@ -94,6 +99,7 @@
               <app-proficiency-management></app-proficiency-management>
             </div>
           </mat-tab>
+          
         </mat-tab-group>
       </div>
     }
