@@ -28,7 +28,7 @@
         'status-pending': element.approved === 'pending',
         'status-denied': element.approved === 'denied'
       }">
-        {{element.approved}}
+        {{ element.approved | titlecase }}
       </td>
     </ng-container>
 
