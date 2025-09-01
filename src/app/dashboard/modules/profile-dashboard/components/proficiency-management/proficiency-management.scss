@@ -40,7 +40,6 @@ mat-tab-group {
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: 60vh;
 
 
   .subject-list {
@@ -111,7 +110,6 @@ mat-tab-group {
   grid-template-columns: 1fr 1.5fr;
   gap: 1.5rem;
   height: 100%;
-  max-height: 60vh;
   overflow: hidden;
 }
 
@@ -122,7 +120,7 @@ mat-tab-group {
   padding: 1rem;
   border-radius: 0.75rem;
   border: 1px solid var(--mat-sys-outline-variant);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .proficiency-summary {
@@ -227,5 +225,3 @@ mat-chip-row {
     box-sizing: border-box;
   }
 }
-
-
