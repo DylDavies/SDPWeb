@@ -42,16 +42,18 @@
                       </button>
                     }
                   </div>
-                  <h2 class="user-role">{{ user.type | userTypePipe }}</h2>
-                  <div class="roles-container">
-                    <app-role-chip-row [roles]="user.roles"></app-role-chip-row>
+                  <h2 class="user-role"  matTooltip="User type" aria-label="User ">{{ user.type | userTypePipe }}</h2>
+                  <div class="roles-container" matTooltip="User role" aria-label="User role">
+                    <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
                   </div>
                 </div>
                 <div class="profile-actions">
+                @if (isOwnProfile) {
                   <button mat-stroked-button color="primary" (click)="openLeaveModal()">
                     <mat-icon>event_busy</mat-icon>
                     <span>Request Leave</span>
                   </button>
+                }
                 </div>
               </div>
 

@@ -28,7 +28,7 @@ export class EditAvailabilityDialog {
 
   constructor() {
     this.form = this.fb.group({
-      availability: [this.data.availability, [Validators.required, Validators.min(0)]]
+      availability: [this.data.availability, [Validators.required, Validators.min(0), Validators.max(56)]]
     });
   }
 

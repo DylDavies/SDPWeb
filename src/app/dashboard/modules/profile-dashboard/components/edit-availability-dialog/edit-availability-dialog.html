@@ -14,6 +14,9 @@
         @if (form.get('availability')?.hasError('min')) {
             <mat-error>Availability cannot be negative.</mat-error>
         }
+        @if (form.get('availability')?.hasError('max')){
+            <mat-error>Availability cannot be more than 56 hours.</mat-error>
+        }
     </mat-form-field>
     </form>
 </mat-dialog-content>

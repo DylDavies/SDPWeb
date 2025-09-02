@@ -53,9 +53,9 @@
   </ng-container>
     }
 
-    <ng-container matColumnDef="expandedDetail">
+  <ng-container matColumnDef="expandedDetail">
     <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-      <div class="leave-detail-container" [@detailExpand]="element === expandedElement ? 'expanded' : 'collapsed'">
+      <div class="leave-detail-container" [@detailExpand]="element === expandedElement? 'expanded' : 'collapsed'">
         <div class="leave-detail-content">
           <strong>Reason for Leave:</strong>
           <p>{{element.reason || 'No reason provided.'}}</p>
