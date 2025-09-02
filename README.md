@@ -2,7 +2,7 @@
 
 This document provides a complete guide for setting up and running the **TutorCore platform** in a local development environment. It covers both the **backend API** (Express.js + Node.js) and the **frontend web application** (Angular), including database setup, environment configuration, and testing.
 
-(version 1.0)
+(version 2.0.0)
 
 ### Link to documentation: 
 
