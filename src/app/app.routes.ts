@@ -15,7 +15,6 @@ import { EPermission } from './models/enums/permission.enum';
 import { accountStatusGuard } from './guards/account-status-guard';
 import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
-import { CalendarDashboard } from './dashboard/modules/calendar-dashboard/calendar-dashboard';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
 
 export const routes: Routes = [
@@ -29,8 +28,16 @@ export const routes: Routes = [
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
       { path: 'profile', component: Profile },
       { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
-      { path: 'calendar', component: CalendarDashboard },
-      { path: 'bundles', component: BundleDashboard }
+      { 
+        path: 'bundles', 
+        component: BundleDashboard,
+        canActivate: [permissionGuard([
+          EPermission.BUNDLES_VIEW,
+          EPermission.BUNDLES_CREATE,
+          EPermission.BUNDLES_EDIT,
+          EPermission.BUNDLES_DELETE
+        ], true)] 
+      }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },

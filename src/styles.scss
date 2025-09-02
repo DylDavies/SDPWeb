@@ -136,3 +136,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   max-width: none !important;
   max-height: 50rem;
 }
+
+.bundle-dialog-container {
+    width: 80vw;
+    height: 80vh;
+    max-width: 900px !important;
+}

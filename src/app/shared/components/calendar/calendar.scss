@@ -1,0 +1,103 @@
+:host {
+  display: block;
+}
+
+.calendar-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 12px; 
+  background-color: var(--mat-sys-surface-container-low);
+  border-radius: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px; 
+  padding: 0 8px;
+
+  .current-month {
+    font-size: 1.25rem; 
+    font-weight: 500;
+    margin: 0;
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px; 
+}
+
+.day-name-cell {
+  font-weight: 500;
+  text-align: center;
+  padding-bottom: 4px;
+  font-size: 0.8rem; 
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.day-cell {
+  // Reset button styles
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  text-align: left;
+  
+  // Original day-cell styles
+  position: relative;
+  height: 90px; 
+  background-color: var(--mat-sys-surface);
+  border-radius: 6px; 
+  border: 1px solid var(--mat-sys-outline-variant);
+  transition: all 0.2s ease-in-out;
+  padding: 6px; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+
+  &:not(.empty-cell):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    border-color: var(--mat-sys-primary);
+  }
+}
+
+.day-number {
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 0.8rem; 
+}
+
+.empty-cell {
+  background-color: transparent;
+  border: none;
+  cursor: default;
+}
+
+.event-container {
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.event-chip {
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}

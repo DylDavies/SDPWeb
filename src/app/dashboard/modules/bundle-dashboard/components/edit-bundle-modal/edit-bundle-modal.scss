@@ -15,22 +15,37 @@ mat-form-field {
 }
 
 .subject-group {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.subject-details-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-grow: 1;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
 }
 
 .flex-item {
-  flex: 1 1 auto;
+    flex: 1;
 }
 
-.hours-field {
-  max-width: 100px;
+.small-field {
+    flex: 0.5;
 }
 
 .button-row {
   margin-top: -16px;
+  display: flex;
+  gap: 16px;
 }
 
 mat-dialog-actions {
