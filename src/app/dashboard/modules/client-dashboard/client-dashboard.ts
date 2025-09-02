@@ -9,7 +9,7 @@ import { CalendarComponent } from '../../../shared/components/calendar/calendar'
 @Component({
   selector: 'app-client-dashboard',
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatIconModule, UpcomingStudyGroupsTable, WelcomeCard],
+  imports: [CommonModule, MatTabsModule, MatIconModule, UpcomingStudyGroupsTable, WelcomeCard, CalendarComponent],
   templateUrl: './client-dashboard.html',
   styleUrl: './client-dashboard.scss'
 })

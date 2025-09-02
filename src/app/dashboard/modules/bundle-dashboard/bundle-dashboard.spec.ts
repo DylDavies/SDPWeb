@@ -15,7 +15,6 @@ describe('BundleDashboard', () => {
   let fixture: ComponentFixture<BundleDashboard>;
   let bundleServiceSpy: jasmine.SpyObj<BundleService>;
   let notificationServiceSpy: jasmine.SpyObj<NotificationService>;
-  // eslint-disable-next-line
   let dialog: MatDialog;
 
   const mockBundles: IBundle[] = [
