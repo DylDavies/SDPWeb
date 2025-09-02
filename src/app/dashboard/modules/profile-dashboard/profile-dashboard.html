@@ -42,16 +42,18 @@
                       </button>
                     }
                   </div>
-                  <h2 class="user-role">{{ user.type | userTypePipe }}</h2>
-                  <div class="roles-container">
-                    <app-role-chip-row [roles]="user.roles"></app-role-chip-row>
+                  <h2 class="user-role"  matTooltip="User type" aria-label="User ">{{ user.type | userTypePipe }}</h2>
+                  <div class="roles-container" matTooltip="User role" aria-label="User role">
+                    <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
                   </div>
                 </div>
                 <div class="profile-actions">
+                @if (isOwnProfile) {
                   <button mat-stroked-button color="primary" (click)="openLeaveModal()">
                     <mat-icon>event_busy</mat-icon>
                     <span>Request Leave</span>
                   </button>
+                }
                 </div>
               </div>
 
@@ -70,13 +72,16 @@
                   <mat-icon class="detail-icon" color="primary">event_available</mat-icon>
                   <div class="detail-text">
                     <span class="detail-label">Weekly Availability</span>
-                    <span class="detail-value">{{ user.availability }} hours</span>
+                    <span class="detail-value">
+                      {{ user.availability }} hours
+                    </span>
+                    @if (isOwnProfile) {
+                      <button mat-icon-button (click)="openEditAvailabilityDialog()" class="edit-icon ava-edit-icon">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
+
                   </div>
-                  @if (isOwnProfile) {
-                    <button mat-icon-button (click)="openEditAvailabilityDialog()" class="edit-icon">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                  }
                 </div>
 
                 <div class="detail-item">

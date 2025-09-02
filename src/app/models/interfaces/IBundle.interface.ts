@@ -20,6 +20,7 @@ export interface IPopulatedUser {
 export interface IBundleSubject {
   _id: string; // The unique identifier for this subject entry in the bundle
   subject: string; // The ID of the subject being taught
+  grade: string; // The grade for the subject
   tutor: string | IPopulatedUser; // The ID of the assigned tutor, or the populated tutor object
   hours: number; // The number of tutoring hours for this subject
 }

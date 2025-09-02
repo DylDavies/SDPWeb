@@ -20,6 +20,7 @@ import { LeaveManagement } from './components/leave-management/leave-management'
 import { EditAvailabilityDialog } from './components/edit-availability-dialog/edit-availability-dialog';
 import { filter } from 'rxjs';
 import { NotificationService } from '../../../services/notification-service'; 
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-profile-dashboard',
@@ -27,7 +28,7 @@ import { NotificationService } from '../../../services/notification-service';
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement
+    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement, MatTooltip
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -80,7 +81,7 @@ export class Profile implements OnInit {
     if (this.user) {
       this.dialog.open(LeaveModal, {
         width: 'clamp(60vh, 80vw, 60vh)', 
-        data: this.user._id
+        data: this.user
       });
     }
   }

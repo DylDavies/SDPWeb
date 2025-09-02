@@ -26,6 +26,9 @@
     @if (leaveForm.hasError('invalidRange') && leaveForm.get('endDate')?.touched) {
       <mat-error>The start date must be before the end date.</mat-error>
     }
+    @if (leaveForm.hasError('overlapRange')&& (leaveForm.get('startDate')?.touched || leaveForm.get('endDate')?.touched)){
+      <mat-error>You cannot select leave for days you have already requested leave for.</mat-error>
+    }
   </mat-form-field>
 
   <div mat-dialog-actions align="end">

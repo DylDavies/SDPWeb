@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit,Input, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit,Input, ViewChild, AfterViewInit} from '@angular/core';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import { NotificationService } from '../../../../../services/notification-service';
 import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
@@ -28,7 +28,7 @@ import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
     ]),
   ],
 })
-export class LeaveManagement implements OnInit, OnDestroy {
+export class LeaveManagement implements OnInit, OnDestroy, AfterViewInit {
   @Input() userId: string | null = null;
   private authService = inject(AuthService);
   private userService = inject(UserService);
@@ -53,9 +53,11 @@ export class LeaveManagement implements OnInit, OnDestroy {
   ngOnInit(): void {
     const targetUserId = this.userId;
     const authSub = this.authService.currentUser$.subscribe(loggedInUser => {
-      this.loggedInUser = loggedInUser;
+    this.loggedInUser = loggedInUser;
       if (this.canManageLeave && loggedInUser?._id !== targetUserId) {
-        this.displayedColumns = [...this.displayedColumns, 'actions']
+        if (!this.displayedColumns.includes('actions')) {
+          this.displayedColumns = [...this.displayedColumns, 'actions'];
+        }
       }
     });
     this.subscriptions.add(authSub);
@@ -66,7 +68,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
       const userSub = this.userService.getUserById(targetUserId).subscribe(profileUser => {
         if (profileUser) {
           this.viewedUser = profileUser;
-          this.dataSource.data = profileUser.leave || [];
+          this.dataSource.data = profileUser.leave?.slice().sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || [];
         }
       });
       this.subscriptions.add(userSub);
@@ -75,7 +77,7 @@ export class LeaveManagement implements OnInit, OnDestroy {
       const selfSub = this.authService.currentUser$.subscribe(loggedInUser => {
         if (loggedInUser) {
           this.viewedUser = loggedInUser;
-          this.dataSource.data = loggedInUser.leave || [];
+          this.dataSource.data = loggedInUser.leave?.slice().sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || [];
         }
       });
       this.subscriptions.add(selfSub);
@@ -123,4 +125,6 @@ denyLeave(leave: ILeave): void {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
+
+
 }

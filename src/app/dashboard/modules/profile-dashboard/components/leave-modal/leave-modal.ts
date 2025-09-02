@@ -15,16 +15,31 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 
-export const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+export function dateRangeValidator(existingLeave: ILeave[]): ValidatorFn {return (control: AbstractControl): ValidationErrors | null => {
   const startDate = control.get('startDate')?.value;
   const endDate = control.get('endDate')?.value;
 
-  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+  if (!startDate || !endDate) {
+      return null; 
+    }
+
+  if ((startDate && endDate && new Date(startDate) > new Date(endDate))) {
     return { invalidRange: true };
   }
+  const overlap = existingLeave.some(leave => {
+      const leaveStart = new Date(leave.startDate);
+      const leaveEnd = new Date(leave.endDate);
+
+       return startDate <= leaveEnd && endDate >= leaveStart;
+    });
+
+    if (overlap) {
+      return { overlapRange: true };
+    }
 
   return null;
 };
+}
 
 
 @Component({
@@ -48,7 +63,7 @@ export const dateRangeValidator: ValidatorFn = (control: AbstractControl): Valid
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaveModal implements OnInit {
-
+  public user: IUser = inject(MAT_DIALOG_DATA);
   
   minDate = new Date();
   leaveForm = new FormGroup({
@@ -57,11 +72,15 @@ export class LeaveModal implements OnInit {
     startDate: new FormControl(null, [Validators.required]),
     endDate: new FormControl(null, [Validators.required]),
   },
-  { validators: dateRangeValidator });
+  
+  
+   { validators: dateRangeValidator(this.user.leave || []) });
+ 
 
   public dialogRef = inject(MatDialogRef<LeaveModal>);
   private userService = inject(UserService);
-  public userId: string = inject(MAT_DIALOG_DATA);
+  public userId: string = this.user._id;
+  
   
   public data: { leave: ILeave, user: IUser, mode: 'create' | 'view' } = inject(MAT_DIALOG_DATA);
   public isAdmin = false;
