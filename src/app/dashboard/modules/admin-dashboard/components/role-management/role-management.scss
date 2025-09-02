@@ -28,6 +28,17 @@ li {
   padding: 0;
   margin: 0;
 }
+
+/* Add a border to the bottom of each list item to create separator lines */
+li {
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+/* Remove the border from the last item in a list */
+li:last-child {
+  border-bottom: none;
+}
+
 .mat-tree-node {
   display: flex;
   align-items: center;
@@ -35,7 +46,14 @@ li {
   flex: 1;
   border-radius: 8px;
   transition: background-color 200ms ease-in-out;
+  padding: 0 8px; /* Add some horizontal padding */
 }
+
+/* Add a hover effect to make the selected row even clearer */
+.mat-tree-node:hover {
+  background-color: var(--mat-sys-surface-container-high);
+}
+
 .role-info {
   display: flex;
   align-items: center;
@@ -53,6 +71,10 @@ li {
 }
 .role-actions {
   display: none;
+  /* Add a separator line and some spacing */
+  border-left: 1px solid var(--mat-sys-outline-variant);
+  margin-left: 16px;
+  padding-left: 8px;
 }
 .mat-tree-node:hover .role-actions {
   display: flex;

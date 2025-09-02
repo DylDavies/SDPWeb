@@ -21,16 +21,31 @@ mat-form-field {
     margin-bottom: 16px;
 }
 
-.flex-item {
-    flex: 1 1 auto;
+.subject-details-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-grow: 1;
 }
 
-.hours-field {
-    max-width: 100px;
+.form-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.flex-item {
+    flex: 1;
+}
+
+.small-field {
+    flex: 0.5;
 }
 
 .button-row {
     margin-top: -16px;
+    display: flex;
+    gap: 16px;
 }
 
 mat-dialog-actions {
@@ -39,4 +54,9 @@ mat-dialog-actions {
 
 button[mat-flat-button] {
     min-width: 120px;
+}
+
+.divider {
+    margin-bottom: 1rem;
+    margin-top: -1rem;
 }

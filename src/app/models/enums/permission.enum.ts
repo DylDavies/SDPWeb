@@ -22,4 +22,11 @@ export enum EPermission {
 
     // Proficiency Management Permissions
     PROFICIENCIES_MANAGE = 'proficiencies:manage',
+
+    // Bundle Management Permissions
+    BUNDLES_CREATE = 'bundles:create',
+    BUNDLES_VIEW = 'bundles:view',
+    BUNDLES_EDIT = 'bundles:edit',
+    BUNDLES_DELETE = 'bundles:delete',
+    BUNDLES_APPROVE = 'bundles:approve',
 }

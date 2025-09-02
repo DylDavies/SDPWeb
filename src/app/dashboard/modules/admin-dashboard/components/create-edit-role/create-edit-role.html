@@ -1,6 +1,15 @@
 <header class="dialog-header">
     <mat-icon color="primary">{{ data.role ? 'edit_note' : 'add_circle' }}</mat-icon>
-    <h1 mat-dialog-title>{{ data.role ? 'Edit Role' : 'Create New Role' }}</h1>
+    <!-- Conditionally render the title based on context (edit, create root, create child) -->
+    @if (data.role) {
+        <h1 mat-dialog-title>Edit Role</h1>
+    } @else {
+        @if (parentRoleName$ | async; as parentName) {
+            <h1 mat-dialog-title>Create Child Role for '{{ parentName }}'</h1>
+        } @else {
+            <h1 mat-dialog-title>Create New Role</h1>
+        }
+    }
 </header>
 <mat-dialog-content>
     <form [formGroup]="roleForm" (ngSubmit)="onSave()">

@@ -6,9 +6,13 @@
                 <span>My Dashboard</span>
             </ng-template>
             <div class="tab-content">
-                <app-welcome-card></app-welcome-card>
-                <p style="margin-top: 1rem;">TBD</p>
-            </div>
+                <div class="home-container">
+                    <div class="welcome-card-container">
+                        <app-welcome-card></app-welcome-card>
+                    </div>
+                    <app-calendar></app-calendar>
+                </div>
+                </div>
         </mat-tab>
 
         <mat-tab>
@@ -22,4 +26,3 @@
         </mat-tab>
     
     </mat-tab-group>
-</div>
