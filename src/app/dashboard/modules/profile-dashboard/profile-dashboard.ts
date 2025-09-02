@@ -81,7 +81,7 @@ export class Profile implements OnInit {
     if (this.user) {
       this.dialog.open(LeaveModal, {
         width: 'clamp(60vh, 80vw, 60vh)', 
-        data: this.user._id
+        data: this.user
       });
     }
   }

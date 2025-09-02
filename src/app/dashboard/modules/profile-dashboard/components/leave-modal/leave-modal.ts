@@ -19,6 +19,10 @@ export function dateRangeValidator(existingLeave: ILeave[]): ValidatorFn {return
   const startDate = control.get('startDate')?.value;
   const endDate = control.get('endDate')?.value;
 
+  if (!startDate || !endDate) {
+      return null; 
+    }
+
   if ((startDate && endDate && new Date(startDate) > new Date(endDate))) {
     return { invalidRange: true };
   }
@@ -26,11 +30,11 @@ export function dateRangeValidator(existingLeave: ILeave[]): ValidatorFn {return
       const leaveStart = new Date(leave.startDate);
       const leaveEnd = new Date(leave.endDate);
 
-      return startDate <= leaveEnd && endDate >= leaveStart;
+       return startDate <= leaveEnd && endDate >= leaveStart;
     });
 
     if (overlap) {
-      return { invalidRange: true };
+      return { overlapRange: true };
     }
 
   return null;
@@ -75,7 +79,7 @@ export class LeaveModal implements OnInit {
 
   public dialogRef = inject(MatDialogRef<LeaveModal>);
   private userService = inject(UserService);
-  public userId: string = inject(MAT_DIALOG_DATA);
+  public userId: string = this.user._id;
   
   
   public data: { leave: ILeave, user: IUser, mode: 'create' | 'view' } = inject(MAT_DIALOG_DATA);
