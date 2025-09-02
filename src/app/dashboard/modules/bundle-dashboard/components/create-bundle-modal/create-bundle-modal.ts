@@ -51,7 +51,7 @@ export class CreateBundleModal implements OnInit {
   public createBundleForm: FormGroup;
   public isSaving = false;
 
-  public studentNameCtrl = new FormControl('');
+  public studentNameCtrl = new FormControl('', [Validators.required]);
   public filteredStudents$: Observable<IUser[]>;
   public filteredTutors$: Observable<IUser[]>[] = [];
   public proficiencies$: Observable<IProficiency[]>;
@@ -144,13 +144,12 @@ export class CreateBundleModal implements OnInit {
   createSubjectGroup(): FormGroup {
     return this.fb.group({
       proficiency: ['', Validators.required],
-      subject: [{value: '', disabled: true}, Validators.required],
       grade: [{value: '', disabled: true}, Validators.required],
       tutor: ['', Validators.required],
       hours: [1, [Validators.required, Validators.min(1)]],
-      tutorName: new FormControl(''),
-      proficiencyName: new FormControl(''),
-      subjectName: new FormControl('')
+      tutorName: new FormControl('', [Validators.required]),
+      proficiencyName: new FormControl('', [Validators.required]),
+      subjectName: new FormControl({value: '', disabled: true}, [Validators.required])
     });
   }
 
@@ -177,8 +176,8 @@ export class CreateBundleModal implements OnInit {
         map(([subjects, searchValue]) => this._filterSubjects(subjects, searchValue))
     );
 
-    this.grades$[index] = subjectGroup.get('subject')!.valueChanges.pipe(
-        startWith(subjectGroup.get('subject')!.value),
+    this.grades$[index] = subjectGroup.get('subjectName')!.valueChanges.pipe(
+        startWith(subjectGroup.get('subjectName')!.value),
         map(subject => subject ? subject.grades : [])
     );
 
@@ -191,16 +190,38 @@ export class CreateBundleModal implements OnInit {
             return this._filterUsers(tutors, searchValue);
         })
     );
-    
-    subjectGroup.get('proficiency')!.valueChanges.subscribe(() => {
-        subjectGroup.get('subject')?.reset({value: '', disabled: true});
-        subjectGroup.get('grade')?.reset({value: '', disabled: true});
-        subjectGroup.get('subject')?.enable();
+
+    const proficiencyCtrl = subjectGroup.get('proficiency')!;
+    const proficiencyNameCtrl = subjectGroup.get('proficiencyName')!;
+    const subjectNameCtrl = subjectGroup.get('subjectName')!;
+    const gradeCtrl = subjectGroup.get('grade')!;
+
+    // When the user clears the input field, reset the backing form control.
+    proficiencyNameCtrl.valueChanges.subscribe(value => {
+        // This checks if the user has cleared the input. 
+        // An object value means an item was selected from the autocomplete.
+        if (typeof value === 'string' && value.trim() === '') {
+            proficiencyCtrl.setValue(null);
+        }
     });
-    
-    subjectGroup.get('subject')!.valueChanges.subscribe(() => {
-        subjectGroup.get('grade')?.reset({value: '', disabled: true});
-        subjectGroup.get('grade')?.enable();
+
+    // When the proficiency object changes (is set or cleared), update dependent fields.
+    proficiencyCtrl.valueChanges.subscribe(prof => {
+        subjectNameCtrl.reset({ value: '', disabled: true });
+        gradeCtrl.reset({ value: '', disabled: true });
+
+        if (prof) { // If a proficiency object exists
+            subjectNameCtrl.enable();
+        }
+    });
+
+    // When the subject object changes, update the grade field.
+    subjectNameCtrl.valueChanges.subscribe(subject => {
+        gradeCtrl.reset({ value: '', disabled: true });
+        
+        if (subject) { // If a subject object exists
+            gradeCtrl.enable();
+        }
     });
   }
 
@@ -224,7 +245,7 @@ export class CreateBundleModal implements OnInit {
   
   onSubjectSelected(event: MatAutocompleteSelectedEvent, index: number): void {
       const selectedSubject = event.option.value;
-      this.subjects.at(index).get('subject')?.setValue(selectedSubject);
+      this.subjects.at(index).get('subjectName')?.setValue(selectedSubject);
   }
 
   onCancel(): void {
@@ -239,8 +260,8 @@ export class CreateBundleModal implements OnInit {
     
     const payload = {
         student: this.createBundleForm.value.student,
-        subjects: this.createBundleForm.value.subjects.map((s: { subject: ISubject, grade: string, tutor: string, hours: number }) => ({
-            subject: s.subject.name,
+        subjects: this.createBundleForm.value.subjects.map((s: { subjectName: ISubject, grade: string, tutor: string, hours: number }) => ({
+            subject: s.subjectName.name,
             grade: s.grade,
             tutor: s.tutor,
             hours: s.hours

@@ -55,10 +55,10 @@
               <mat-label>Tutor Name</mat-label>
                <input type="text" matInput [formControl]="getFormControl(i, 'tutorName')" [matAutocomplete]="autoTutor" placeholder="Search for a tutor...">
                <mat-autocomplete #autoTutor="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onTutorSelected($event, i)">
-                @for (tutor of filteredTutors$[i] | async; track tutor._id) {
-                  <mat-option [value]="tutor">{{ tutor.displayName }}</mat-option>
-                }
-              </mat-autocomplete>
+                 @for (tutor of filteredTutors$[i] | async; track tutor._id) {
+                   <mat-option [value]="tutor">{{ tutor.displayName }}</mat-option>
+                 }
+               </mat-autocomplete>
             </mat-form-field>
             <mat-form-field appearance="outline" class="small-field">
               <mat-label>Hours</mat-label>
@@ -67,6 +67,9 @@
           </div>
         </div>
       </div>
+        @if (i !== subjects.controls.length - 1) {
+          <mat-divider class="divider"></mat-divider>
+        }
       }
     </div>
     <div class="button-row">

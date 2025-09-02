@@ -135,24 +135,21 @@ export class EditBundleModal implements OnInit {
     return (this.data.student as IPopulatedUser)?.displayName || 'a Student';
   }
 
-  createSubjectGroup(subject?: IBundleSubject): FormGroup {
-    const tutorUser = typeof subject?.tutor === 'object' ? subject.tutor : null;
-    
+  createSubjectGroup(): FormGroup {
     return this.fb.group({
-      _id: [subject?._id],
+      _id: [null],
       proficiency: ['', Validators.required],
-      subject: [{value: '', disabled: true}, Validators.required],
-      grade: [{value: subject?.grade || '', disabled: true}, Validators.required],
-      tutor: [tutorUser?._id || '', Validators.required],
-      hours: [subject?.hours || 1, [Validators.required, Validators.min(1)]],
-      tutorName: new FormControl(tutorUser || ''),
-      proficiencyName: new FormControl(''),
-      subjectName: new FormControl(subject?.subject || '')
+      grade: [{value: '', disabled: true}, Validators.required],
+      tutor: ['', Validators.required],
+      hours: [1, [Validators.required, Validators.min(1)]],
+      tutorName: new FormControl('', [Validators.required]),
+      proficiencyName: new FormControl('', [Validators.required]),
+      subjectName: new FormControl({value: '', disabled: true}, [Validators.required])
     });
   }
 
   addSubject(bundleSubject?: IBundleSubject): void {
-    const subjectGroup = this.createSubjectGroup(bundleSubject);
+    const subjectGroup = this.createSubjectGroup();
     this.subjects.push(subjectGroup);
 
     const index = this.subjects.length - 1;
@@ -185,21 +182,46 @@ export class EditBundleModal implements OnInit {
       map(([users, searchValue]) => this._filterUsers(users, searchValue))
     );
 
-    subjectGroup.get('proficiency')!.valueChanges.subscribe(() => {
-      subjectGroup.get('subject')?.reset('');
-      subjectGroup.get('subjectName')?.reset('');
-      subjectGroup.get('grade')?.reset('');
-      subjectGroup.get('subject')?.enable();
-      subjectGroup.get('grade')?.disable();
+    const proficiencyCtrl = subjectGroup.get('proficiency')!;
+    const proficiencyNameCtrl = subjectGroup.get('proficiencyName')!;
+    const subjectNameCtrl = subjectGroup.get('subjectName')!;
+    const gradeCtrl = subjectGroup.get('grade')!;
+
+    proficiencyNameCtrl.valueChanges.subscribe(value => {
+        if (typeof value === 'string' && value.trim() === '') {
+            proficiencyCtrl.setValue(null);
+        }
     });
 
-    subjectGroup.get('subject')!.valueChanges.subscribe((subject: ISubject | '') => {
-      this.grades$[index].next(subject ? (subject as ISubject).grades : []);
-      subjectGroup.get('grade')?.reset('');
-      subjectGroup.get('grade')?.enable();
+    proficiencyCtrl.valueChanges.subscribe(prof => {
+        subjectNameCtrl.reset({ value: '', disabled: true });
+        gradeCtrl.reset({ value: '', disabled: true });
+
+        if (prof) {
+            subjectNameCtrl.enable();
+        }
+    });
+
+    subjectNameCtrl.valueChanges.subscribe(subject => {
+        gradeCtrl.reset({ value: '', disabled: true });
+        
+        if (subject && typeof subject !== 'string') {
+            this.grades$[index].next(subject.grades || []);
+            gradeCtrl.enable();
+        } else {
+            this.grades$[index].next([]);
+        }
     });
 
     if (bundleSubject) {
+      const tutorUser = typeof bundleSubject?.tutor === 'object' ? bundleSubject.tutor : null;
+      subjectGroup.patchValue({
+          _id: bundleSubject._id,
+          tutor: tutorUser?._id || '',
+          hours: bundleSubject.hours || 1,
+          tutorName: tutorUser || '',
+      }, { emitEvent: false });
+
       this.proficiencies$.pipe(
         filter(profs => profs.length > 0),
         first()
@@ -219,15 +241,14 @@ export class EditBundleModal implements OnInit {
         if (matchingProf && matchingSubject) {
           this.grades$[index].next(matchingSubject.grades);
           
-          subjectGroup.get('proficiency')?.setValue(matchingProf, { emitEvent: false });
-          subjectGroup.get('proficiencyName')?.setValue(matchingProf, { emitEvent: false });
+          proficiencyCtrl.setValue(matchingProf, { emitEvent: false });
+          proficiencyNameCtrl.setValue(matchingProf, { emitEvent: false });
 
-          subjectGroup.get('subject')?.enable({ emitEvent: false });
-          subjectGroup.get('subject')?.setValue(matchingSubject, { emitEvent: false });
-          subjectGroup.get('subjectName')?.setValue(matchingSubject, { emitEvent: false });
+          subjectNameCtrl.enable({ emitEvent: false });
+          subjectNameCtrl.setValue(matchingSubject, { emitEvent: false });
 
-          subjectGroup.get('grade')?.enable({ emitEvent: false });
-          subjectGroup.get('grade')?.setValue(bundleSubject.grade);
+          gradeCtrl.enable({ emitEvent: false });
+          gradeCtrl.setValue(bundleSubject.grade);
         }
       });
     }
@@ -253,7 +274,7 @@ export class EditBundleModal implements OnInit {
 
     onSubjectSelected(event: MatAutocompleteSelectedEvent, index: number): void {
         const selectedSubject = event.option.value;
-        this.subjects.at(index).get('subject')?.setValue(selectedSubject);
+        this.subjects.at(index).get('subjectName')?.setValue(selectedSubject);
     }
 
   onCancel(): void {
@@ -267,9 +288,9 @@ export class EditBundleModal implements OnInit {
     this.isSaving = true;
 
     const payload = {
-        subjects: this.editForm.value.subjects.map((s: { _id: string, subject: ISubject, grade: string, tutor: string, hours: number }) => ({
+        subjects: this.editForm.value.subjects.map((s: { _id: string, subjectName: ISubject, grade: string, tutor: string, hours: number }) => ({
             _id: s._id,
-            subject: s.subject.name,
+            subject: s.subjectName.name,
             grade: s.grade,
             tutor: s.tutor,
             hours: s.hours
