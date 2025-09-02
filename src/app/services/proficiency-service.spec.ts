@@ -10,6 +10,8 @@ const httpServiceSpy = jasmine.createSpyObj('HttpService', ['get']);
 
 // Mock SocketService
 const socketServiceSpy = jasmine.createSpyObj('SocketService', ['listen']);
+socketServiceSpy.listen.and.returnValue(of(null)); 
+
 
 describe('ProficiencyService', () => {
   let service: ProficiencyService;
@@ -28,6 +30,9 @@ describe('ProficiencyService', () => {
         { provide: SocketService, useValue: socketServiceSpy },
       ],
     });
+    
+    httpServiceSpy.get.and.returnValue(of([]));
+
     service = TestBed.inject(ProficiencyService);
     httpService = TestBed.inject(HttpService) as jasmine.SpyObj<HttpService>;
   });
@@ -42,6 +47,7 @@ describe('ProficiencyService', () => {
 
       service.fetchAllProficiencies().subscribe((proficiencies) => {
         expect(proficiencies).toEqual(mockProficiencies);
+        
         expect(httpService.get).toHaveBeenCalledWith('proficiencies/fetchAll');
 
         service.allProficiencies$.subscribe((proficienciesFromStream) => {

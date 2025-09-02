@@ -1,9 +1,4 @@
     <div class="admin-container">
-      <header class="admin-header">
-        <h1>Admin Dashboard</h1>
-        <p>Manage users and roles for your application.</p>
-      </header>
-
       <mat-tab-group animationDuration="300ms" color="primary">
         <!-- User Management Tab -->
         @if (canViewUsers) {
@@ -13,7 +8,7 @@
               <span>User Management</span>
             </ng-template>
             <div class="tab-content">
-              <app-user-management></app-user-management>
+              <app-user-table></app-user-table>
             </div>
           </mat-tab>
         }
@@ -28,6 +23,16 @@
             <div class="tab-content">
               <app-role-management></app-role-management>
             </div>
+          </mat-tab>
+        }
+
+        @if (canManageProficiencies) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">school</mat-icon>
+              <span>Proficiency Management</span>
+            </ng-template>
+            <app-admin-proficiency-management></app-admin-proficiency-management>
           </mat-tab>
         }
       </mat-tab-group>

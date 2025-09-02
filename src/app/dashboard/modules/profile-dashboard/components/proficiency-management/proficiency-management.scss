@@ -5,35 +5,13 @@
   overflow: hidden;
 }
 
-.dialog-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.actions {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  border-top: 1px solid var(--mat-sys-outline-variant);
 
-  mat-icon {
-    font-size: 1.75rem;
-    width: 1.75rem;
-    height: 1.75rem;
+  button mat-icon {
+    margin-right: 0.5rem;
   }
-
-  h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 500;
-    line-height: 1;
-  }
-
-  .close-button {
-    margin-left: auto;
-  }
-}
-
-.dialog-content {
-  padding: 0;
-  flex-grow: 1;
-  overflow: hidden;
 }
 
 mat-tab-group {
@@ -61,6 +39,8 @@ mat-tab-group {
 .view-tab {
   display: flex;
   flex-direction: column;
+  height: 100%;
+
 
   .subject-list {
     margin-top: 1.5rem;
@@ -70,7 +50,7 @@ mat-tab-group {
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden; // This is key to making child border-radius work
+    overflow: hidden;
 
     .subject-list-header {
       padding: 1rem;
@@ -82,9 +62,8 @@ mat-tab-group {
 
     mat-list {
       overflow-y: auto;
-      padding-right: 0.5rem; // Give scrollbar space
+      padding-right: 0.5rem; 
 
-      // --- CUSTOM SCROLLBAR STYLES ---
       &::-webkit-scrollbar {
         width: 8px;
       }
@@ -141,7 +120,7 @@ mat-tab-group {
   padding: 1rem;
   border-radius: 0.75rem;
   border: 1px solid var(--mat-sys-outline-variant);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .proficiency-summary {
@@ -244,14 +223,5 @@ mat-chip-row {
     border-radius: 0.75rem;
     min-height: 12.5rem;
     box-sizing: border-box;
-  }
-}
-
-.dialog-actions {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--mat-sys-outline-variant);
-
-  button mat-icon {
-    margin-right: 0.5rem;
   }
 }

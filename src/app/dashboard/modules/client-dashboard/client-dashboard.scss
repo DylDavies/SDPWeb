@@ -1,6 +1,8 @@
-.home-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 24px;
+:host {
+    display: block;
+    padding: 0 24px; 
+}
+
+.tab-content {
+    padding-top: 24px;
 }

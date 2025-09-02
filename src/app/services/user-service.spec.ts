@@ -1,5 +1,6 @@
+// src/app/services/user-service.spec.ts
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, filter } from 'rxjs';
 import { HttpService } from './http-service';
 import { SocketService } from './socket-service';
 import { UserService } from './user-service';
@@ -21,21 +22,8 @@ const mockUsers: IUser[] = [
     permissions: [],
     pending: false,
     disabled: false,
-    leave: []
-  },
-  {
-    _id: '2',
-    googleId: 'google2',
-    email: 'test2@test.com',
-    displayName: 'Test User 2',
-    type: EUserType.Client,
-    firstLogin: false,
-    createdAt: new Date(),
-    roles: [],
-    permissions: [],
-    pending: true,
-    disabled: true,
-    leave: []
+    leave: [],
+    theme: 'system'
   },
 ];
 
@@ -220,7 +208,6 @@ describe('UserService', () => {
   describe('getUserById', () => {
     it('should return a user from the cache if available', (done: DoneFn) => {
       service['users$'].next(mockUsers); // Prime the cache
-
       httpServiceSpy.get.calls.reset();
 
       service.getUserById('1').subscribe(user => {
@@ -234,9 +221,12 @@ describe('UserService', () => {
       service['users$'].next([]); // Ensure cache is empty
       httpServiceSpy.get.and.returnValue(of(mockUsers));
 
-      service.getUserById('1').subscribe(user => {
+      // The observable will emit `undefined` first, then the user.
+      // We use filter() to ignore the first emission and only test the final result.
+      service.getUserById('1').pipe(
+        filter(user => !!user)
+      ).subscribe(user => {
         expect(user).toEqual(mockUsers[0]);
-
         expect(httpServiceSpy.get).toHaveBeenCalledWith('users');
         done();
       });

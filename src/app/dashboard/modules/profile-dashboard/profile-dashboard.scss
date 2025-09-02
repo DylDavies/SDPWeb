@@ -8,6 +8,8 @@
   justify-content: center;
   align-items: flex-start;
   padding: 2rem;
+  padding-top: 0;
+  margin-top: -55px;
   height: 100%;
   background-color: var(--mat-sidenav-content-background-color, var(--mat-sys-background));
 }
@@ -80,6 +82,32 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  position: relative; 
+}
+
+// Style for the edit icon on hover
+.detail-item.editable:hover .edit-icon {
+  opacity: 1;
+}
+
+.editable-header {
+  position: relative;
+  display: inline-block;
+  align-items: center;
+  padding-right: 50px;
+}
+
+.editable-header:hover .edit-icon {
+  opacity: 1;
+}
+
+.edit-icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .detail-icon {
@@ -138,4 +166,23 @@
   }
 }
 
-  
+.inline-edit-icon {
+  margin-left: 0px;
+  opacity: 0;
+  vertical-align: middle;
+  transition: opacity 0.2s ease-in-out;
+  width: 24px;
+  height: 24px;
+  padding-left: 7px;
+}
+
+.detail-item.editable:hover .inline-edit-icon {
+  opacity: 1;
+}
+
+.detail-value {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+}

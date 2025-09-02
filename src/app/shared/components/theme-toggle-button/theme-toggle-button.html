@@ -1,0 +1,15 @@
+<mat-button-toggle-group 
+    [value]="themeService.theme()" 
+    (change)="setTheme($event.value)" 
+    aria-label="Theme selection"
+    class="theme-toggle-group">
+    <mat-button-toggle value="light" matTooltip="Light Mode" aria-label="Light Mode">
+        <mat-icon>light_mode</mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle value="dark" matTooltip="Dark Mode" aria-label="Dark Mode">
+        <mat-icon>dark_mode</mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle value="system" matTooltip="Follow System Setting" aria-label="System theme">
+        <mat-icon>desktop_windows</mat-icon>
+    </mat-button-toggle>
+</mat-button-toggle-group>

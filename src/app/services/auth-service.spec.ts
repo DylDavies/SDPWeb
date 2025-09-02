@@ -23,7 +23,9 @@ const mockUser: IUser = {
   permissions: [EPermission.DASHBOARD_VIEW],
   pending: false,
   disabled: false,
+  theme: 'system',
   leave: [],
+  proficiencies: []
 };
 
 const MOCK_TOKEN = 'mock-jwt-token';

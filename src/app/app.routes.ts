@@ -10,11 +10,12 @@ import { loginGuard } from './guards/login-guard';
 import { Logout } from './handlers/logout/logout';
 import { Profile } from './dashboard/modules/profile-dashboard/profile-dashboard';
 import { profileCompletionGuard } from './guards/profile-completion-guard';
-import { permissionGuard } from './guards/permission-guard-guard';
+import { permissionGuard } from './guards/permission-guard';
 import { EPermission } from './models/enums/permission.enum';
 import { accountStatusGuard } from './guards/account-status-guard';
 import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
+import { UserManagement } from './dashboard/modules/user-management/user-management';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
 
 export const routes: Routes = [
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
       { path: 'profile', component: Profile },
       { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
+      { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       { 
         path: 'bundles', 
         component: BundleDashboard,

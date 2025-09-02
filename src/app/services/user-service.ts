@@ -1,13 +1,14 @@
 // src/app/services/user-service.ts
 
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
 import { ELeave } from '../models/enums/ELeave.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
 
 
@@ -70,19 +71,14 @@ export class UserService {
    * @returns An observable of the user, or undefined if not found after fetching.
    */
   public getUserById(id: string): Observable<IUser | undefined> {
-    const currentUsers = this.users$.getValue();
-    const foundUser = currentUsers.find(u => u._id === id);
-
-    if (foundUser) {
-      // If the user is already in our local cache, return them immediately.
-      return of(foundUser);
-    } else {
-      // If the user isn't in the cache (e.g., on first load),
-      // fetch all users, which updates the cache, then find and return the user.
-      return this.fetchAllUsers().pipe(
-        map(users => users.find(u => u._id === id))
-      );
-    }
+    return this.allUsers$.pipe(
+        map(users => users.find(u => u._id === id)),
+        tap(user => {
+            if (!user) {
+                this.fetchAllUsers().subscribe();
+            }
+        })
+    );
   }
 
   /**
@@ -134,6 +130,10 @@ export class UserService {
     );
   }
 
+  updateUserPreferences(preferences: { theme: Theme }): Observable<unknown> {
+    return this.httpService.patch('user/preferences', preferences);
+  }
+
   /**
    * Sends proficiency data to the backend.
    * @param userId The ID of the user to update.
@@ -151,5 +151,14 @@ export class UserService {
    */
   deleteSubjectFromProficiency(userId: string, profName: string, subjectId: string): Observable<IUser> {
     return this.httpService.delete<IUser>(`users/${userId}/proficiencies/${profName}/subjects/${subjectId}`);
+  }
+
+  /**
+   * Updates a user's weekly availability.
+   * @param userId The ID of the user to update.
+   * @param availability The new availability in hours.
+   */
+  updateUserAvailability(userId: string, availability: number): Observable<IUser> {
+    return this.httpService.patch<IUser>(`users/${userId}/availability`, { availability });
   }
 }

@@ -13,6 +13,7 @@ import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 import { Subscription } from 'rxjs';
 import { EPermission } from '../../../models/enums/permission.enum';
 import { EUserType } from '../../../models/enums/user-type.enum';
+import { ThemeToggleButton } from '../theme-toggle-button/theme-toggle-button';
 
 @Component({
   selector: 'app-sidebar',
@@ -26,7 +27,8 @@ import { EUserType } from '../../../models/enums/user-type.enum';
     RouterOutlet,
     RouterLink,
     CommonModule,
-    DisplayNamePipe
+    DisplayNamePipe,
+    ThemeToggleButton
   ],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss']
@@ -39,6 +41,7 @@ export class Sidebar implements OnInit, OnDestroy {
   sideBarLinks: ISidebarItem[] = [
     { label: 'Home', icon: 'dashboard', route: '/dashboard' },
     { label: 'Profile', icon: 'person', route: '/dashboard/profile' },
+    { label: 'User Management', icon: 'people', route: '/dashboard/users', requiredPermissions: [EPermission.USERS_VIEW] },
     { 
       label: 'Bundles', 
       icon: 'inventory', 
@@ -75,6 +78,6 @@ export class Sidebar implements OnInit, OnDestroy {
 
     if (this.user && this.user.type == EUserType.Admin) return true;
 
-    return requiredPermissions.every(p => this.authService.hasPermission(p));
+    return requiredPermissions.every(p => this.authService.hasPermission(p)); 
   }
 }

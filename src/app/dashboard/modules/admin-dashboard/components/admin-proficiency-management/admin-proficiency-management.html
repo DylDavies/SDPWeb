@@ -1,0 +1,81 @@
+<div class="proficiency-container">
+    <div class="proficiency-list panel">
+        <header class="panel-header">
+            <h3>Proficiencies (Syllabi)</h3>
+        </header>
+        <div class="panel-content">
+            <mat-form-field appearance="outline" class="add-item-form">
+                <mat-label>New Proficiency Name</mat-label>
+                <input matInput [(ngModel)]="newProficiencyName" (keyup.enter)="addProficiency()" placeholder="e.g., Cambridge">
+                <button mat-icon-button matSuffix (click)="addProficiency()" [disabled]="!newProficiencyName.trim()" matTooltip="Add Proficiency">
+                    <mat-icon>add_circle</mat-icon>
+                </button>
+            </mat-form-field>
+            <mat-selection-list #proficienciesList [multiple]="false" (selectionChange)="onProficiencySelected($event)">
+                <mat-list-option *ngFor="let prof of (proficiencies$ | async)" [value]="prof">
+                    {{ prof.name }}
+                </mat-list-option>
+            </mat-selection-list>
+        </div>
+    </div>
+
+    <div class="subject-list panel">
+        <header class="panel-header">
+            <h3 *ngIf="selectedProficiency">Subjects in {{ selectedProficiency.name }}</h3>
+            <h3 *ngIf="!selectedProficiency">Select a Proficiency</h3>
+        </header>
+        <div class="panel-content">
+            <ng-container *ngIf="selectedProficiency; else noProficiencySelected">
+                <div class="actions-bar">
+                    <button mat-stroked-button color="primary" (click)="openSubjectDialog()">
+                        <mat-icon>add</mat-icon> Add Subject
+                    </button>
+                    <button mat-icon-button (click)="editProficiencyName()" matTooltip="Edit Proficiency Name">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteProficiency()" matTooltip="Delete Proficiency">
+                        <mat-icon>delete_forever</mat-icon>
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Subject</th>
+                            <td mat-cell *matCellDef="let subject">{{ subject.name }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="grades">
+                            <th mat-header-cell *matHeaderCellDef>Grades</th>
+                            <td mat-cell *matCellDef="let subject">{{ subject.grades.join(', ') || 'N/A' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let subject">
+                                <div class="action-buttons-container">
+                                    <button mat-icon-button (click)="openSubjectDialog(subject)" matTooltip="Edit Subject">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="deleteSubject(subject)" matTooltip="Delete Subject">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                </div>
+            </ng-container>
+
+            <ng-template #noProficiencySelected>
+                <div class="empty-state">
+                    <mat-icon>rule_folder</mat-icon>
+                    <p>Select a proficiency from the list to view and manage its subjects.</p>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>

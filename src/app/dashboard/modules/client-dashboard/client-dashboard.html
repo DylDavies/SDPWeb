@@ -1,4 +1,26 @@
-<div class="home-container">
-  <app-welcome-card></app-welcome-card>
-  <app-calendar></app-calendar>
-</div>
+<div class="client-dashboard-container">
+    <mat-tab-group animationDuration="300ms" color="primary" class="dashboard-tabs">
+        <mat-tab>
+             <ng-template mat-tab-label>
+                <mat-icon class="tab-icon">dashboard</mat-icon>
+                <span>My Dashboard</span>
+            </ng-template>
+            <div class="tab-content">
+                <div class="home-container">
+                    <app-welcome-card></app-welcome-card>
+                    <app-calendar></app-calendar>
+                <p style="margin-top: 1rem;">TBD</p>
+            </div>
+        </mat-tab>
+
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <mat-icon class="tab-icon">event</mat-icon>
+                <span>Upcoming Study Groups</span>
+            </ng-template>
+            <div class="tab-content">
+                <app-upcoming-studygroups-table></app-upcoming-studygroups-table>
+            </div>
+        </mat-tab>
+    
+    </mat-tab-group>
