@@ -10,8 +10,7 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatDividerModule } from '@angular/material/divider';
 import { Observable, map, startWith, tap } from 'rxjs';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
-import { AuthService } from '../../../../../services/auth-service';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { RoleService, RoleNode } from '../../../../../services/role-service';
 import { UserService } from '../../../../../services/user-service';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
@@ -28,8 +27,7 @@ import { EUserType } from '../../../../../models/enums/user-type.enum';
 export class ManageUserRolesDialog implements OnInit {
   private roleService = inject(RoleService);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService);
-  private authService = inject(AuthService);
+  private snackbarService = inject(SnackBarService);
   public dialogRef = inject(MatDialogRef<ManageUserRolesDialog>);
   public data: { targetUser: IUser, currentUser: IUser } = inject(MAT_DIALOG_DATA);
 
@@ -129,22 +127,22 @@ export class ManageUserRolesDialog implements OnInit {
   private assignRole(roleId: string): void {
     this.userService.assignRoleToUser(this.data.targetUser._id, roleId).subscribe({
       next: (updatedUser) => {
-        this.notificationService.showSuccess('Role assigned successfully.');
+        this.snackbarService.showSuccess('Role assigned successfully.');
         this.targetUserRoles = new Set(updatedUser.roles.map(r => r._id));
         this.data.targetUser = updatedUser;
       },
-      error: () => this.notificationService.showError('Failed to assign role.')
+      error: () => this.snackbarService.showError('Failed to assign role.')
     });
   }
 
   private removeRole(roleId: string): void {
     this.userService.removeRoleFromUser(this.data.targetUser._id, roleId).subscribe({
       next: (updatedUser) => {
-        this.notificationService.showSuccess('Role removed successfully.');
+        this.snackbarService.showSuccess('Role removed successfully.');
         this.targetUserRoles = new Set(updatedUser.roles.map(r => r._id));
         this.data.targetUser = updatedUser;
       },
-      error: () => this.notificationService.showError('Failed to remove role.')
+      error: () => this.snackbarService.showError('Failed to remove role.')
     });
   }
 

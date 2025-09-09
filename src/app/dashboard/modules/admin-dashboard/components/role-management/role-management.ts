@@ -14,7 +14,7 @@ import { AuthService } from '../../../../../services/auth-service';
 import { RoleService, RoleNode } from '../../../../../services/role-service';
 import { CreateEditRole } from '../create-edit-role/create-edit-role';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
@@ -30,7 +30,7 @@ export class RoleManagement implements OnInit {
   private roleService = inject(RoleService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
 
   private refreshTree$ = new BehaviorSubject<void>(undefined);
   public roleTree$!: Observable<RoleNode>;
@@ -96,7 +96,7 @@ export class RoleManagement implements OnInit {
     let parentCheck: RoleNode | null = dropTargetNode;
     while (parentCheck) {
       if (parentCheck._id === draggedNode._id) {
-        this.notificationService.showError('Cannot move a role into one of its own children.');
+        this.snackbarService.showError('Cannot move a role into one of its own children.');
         this.dragReleased();
         return;
       }
@@ -109,8 +109,8 @@ export class RoleManagement implements OnInit {
         this.dragReleased();
       }))
       .subscribe({
-        next: () => this.notificationService.showSuccess('Role hierarchy updated successfully.'),
-        error: (err) => this.notificationService.showError(err.error.message || 'Failed to update role parent.')
+        next: () => this.snackbarService.showSuccess('Role hierarchy updated successfully.'),
+        error: (err) => this.snackbarService.showError(err.error.message || 'Failed to update role parent.')
       });
   }
   
@@ -153,11 +153,11 @@ export class RoleManagement implements OnInit {
     dialogRef.afterClosed().pipe(filter(result => result === true)).subscribe(() => {
       this.roleService.deleteRole(node._id).subscribe({
         next: () => {
-          this.notificationService.showSuccess(`Role "${node.name}" deleted successfully.`);
+          this.snackbarService.showSuccess(`Role "${node.name}" deleted successfully.`);
           this.refreshTree$.next();
         },
         error: (err) => {
-          this.notificationService.showError(err.error?.error || 'Failed to delete role.');
+          this.snackbarService.showError(err.error?.error || 'Failed to delete role.');
         }
       });
     });

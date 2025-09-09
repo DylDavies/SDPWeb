@@ -14,7 +14,7 @@ import { filter } from 'rxjs/operators';
 import { ProficiencyService } from '../../../../../services/proficiency-service';
 import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
 import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { AdminSubjectEditDialog } from '../admin-subject-edit-dialog/admin-subject-edit-dialog';
 import { EditNameDialog } from '../edit-name-dialog/edit-name-dialog';
@@ -37,7 +37,7 @@ import { EditNameDialog } from '../edit-name-dialog/edit-name-dialog';
 })
 export class AdminProficiencyManagement implements OnInit {
   private proficiencyService = inject(ProficiencyService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
 
   public proficiencies$: Observable<IProficiency[]>;
@@ -65,7 +65,7 @@ export class AdminProficiencyManagement implements OnInit {
     }
     const newProf: Partial<IProficiency> = { name: this.newProficiencyName.trim(), subjects: {} };
     this.proficiencyService.addOrUpdateProficiency(newProf).subscribe(() => {
-      this.notificationService.showSuccess(`Proficiency '${this.newProficiencyName}' added successfully.`);
+      this.snackbarService.showSuccess(`Proficiency '${this.newProficiencyName}' added successfully.`);
       this.newProficiencyName = '';
     });
   }
@@ -79,8 +79,8 @@ export class AdminProficiencyManagement implements OnInit {
 
     dialogRef.afterClosed().pipe(filter(newName => newName)).subscribe(newName => {
       this.proficiencyService.updateProficiencyName(this.selectedProficiency!._id!, newName).subscribe({
-        next: () => this.notificationService.showSuccess('Proficiency name updated.'),
-        error: () => this.notificationService.showError('Failed to update name.')
+        next: () => this.snackbarService.showSuccess('Proficiency name updated.'),
+        error: () => this.snackbarService.showError('Failed to update name.')
       });
     });
   }
@@ -100,11 +100,11 @@ export class AdminProficiencyManagement implements OnInit {
     dialogRef.afterClosed().pipe(filter(result => result)).subscribe(() => {
       this.proficiencyService.deleteProficiency(this.selectedProficiency!._id!).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Proficiency deleted.');
+          this.snackbarService.showSuccess('Proficiency deleted.');
           this.selectedProficiency = null;
           this.dataSource.data = [];
         },
-        error: () => this.notificationService.showError('Failed to delete proficiency.')
+        error: () => this.snackbarService.showError('Failed to delete proficiency.')
       });
     });
   }
@@ -121,11 +121,11 @@ export class AdminProficiencyManagement implements OnInit {
       this.proficiencyService.addOrUpdateSubject(this.selectedProficiency!._id!, result).subscribe({
         next: (updatedProf) => {
           const action = subject ? 'updated' : 'added';
-          this.notificationService.showSuccess(`Subject ${action}.`);
+          this.snackbarService.showSuccess(`Subject ${action}.`);
           this.selectedProficiency = updatedProf;
           this.dataSource.data = Object.values(updatedProf.subjects);
         },
-        error: () => this.notificationService.showError('Failed to save subject.')
+        error: () => this.snackbarService.showError('Failed to save subject.')
       });
     });
   }
@@ -146,11 +146,11 @@ export class AdminProficiencyManagement implements OnInit {
       const subjectKey = subject.name.toLowerCase().replace(/\s+/g, '_');
       this.proficiencyService.deleteSubject(this.selectedProficiency!._id!, subjectKey).subscribe({
         next: (updatedProf) => {
-          this.notificationService.showSuccess('Subject deleted.');
+          this.snackbarService.showSuccess('Subject deleted.');
           this.selectedProficiency = updatedProf;
           this.dataSource.data = Object.values(updatedProf.subjects);
         },
-        error: () => this.notificationService.showError('Failed to delete subject.')
+        error: () => this.snackbarService.showError('Failed to delete subject.')
       });
     });
   }

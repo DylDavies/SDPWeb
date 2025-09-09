@@ -1,22 +1,22 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
-import { NotificationService } from './notification-service';
+import { SnackBarService } from './snackbar-service';
 
 // Create a spy object for MatSnackBar. This is a mock that will stand in for the real service.
 const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
-describe('NotificationService', () => {
-  let service: NotificationService;
+describe('SnackBarService', () => {
+  let service: SnackBarService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        NotificationService,
+        SnackBarService,
         // Provide the mock object instead of the real MatSnackBar
         { provide: MatSnackBar, useValue: snackBarSpy }
       ]
     });
-    service = TestBed.inject(NotificationService);
+    service = TestBed.inject(SnackBarService);
 
     // Reset the spy's call history before each test to ensure a clean slate
     snackBarSpy.open.calls.reset();

@@ -13,7 +13,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
 import { IBundle, IBundleSubject, IPopulatedUser} from '../../../../../models/interfaces/IBundle.interface';
 import { BundleService } from '../../../../../services/bundle-service';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
 import { UserService } from '../../../../../services/user-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
@@ -47,7 +47,7 @@ import { EUserType } from '../../../../../models/enums/user-type.enum';
 export class EditBundleModal implements OnInit {
   private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private userService = inject(UserService);
   private proficiencyService = inject(ProficiencyService);
   public dialogRef = inject(MatDialogRef<EditBundleModal>);
@@ -300,12 +300,12 @@ export class EditBundleModal implements OnInit {
 
     this.bundleService.updateBundle(this.data._id, payload).subscribe({
       next: (updatedBundle) => {
-        this.notificationService.showSuccess('Bundle updated and set to pending for review.');
+        this.snackbarService.showSuccess('Bundle updated and set to pending for review.');
         this.dialogRef.close(updatedBundle);
       },
       error: (err) => {
         this.isSaving = false;
-        this.notificationService.showError(err.error?.message || 'Failed to update bundle.');
+        this.snackbarService.showError(err.error?.message || 'Failed to update bundle.');
       }
     });
   }

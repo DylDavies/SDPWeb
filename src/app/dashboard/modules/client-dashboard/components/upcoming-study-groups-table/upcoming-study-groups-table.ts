@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Subscription } from 'rxjs';
 import { IStudyGroup } from '../../../../../models/interfaces/IStudyGroup.interface';
 import { StudyGroupService } from '../../../../../services/study-group-service';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
@@ -34,7 +34,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 })
 export class UpcomingStudyGroupsTable implements OnInit, OnDestroy {
   private studyGroupService = inject(StudyGroupService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private liveAnnouncer = inject(LiveAnnouncer);
   private subscriptions = new Subscription();
 
@@ -74,7 +74,7 @@ export class UpcomingStudyGroupsTable implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Failed to fetch upcoming study groups', err);
-          this.notificationService.showError('Could not load upcoming study groups. Please try again later.');
+          this.snackbarService.showError('Could not load upcoming study groups. Please try again later.');
           this.isLoading = false;
         }
       })
