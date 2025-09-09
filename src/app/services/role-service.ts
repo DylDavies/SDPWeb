@@ -4,6 +4,7 @@ import { HttpService } from './http-service';
 import { EPermission } from '../models/enums/permission.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { CustomObservableService } from './custom-observable-service';
 
 export interface RoleNode {
     _id: string;
@@ -20,19 +21,26 @@ export interface RoleNode {
 export class RoleService {
   private httpService = inject(HttpService);
   private socketService = inject(SocketService);
+  private observableService = inject(CustomObservableService);
 
   private roleTree$ = new BehaviorSubject<RoleNode | null>(null);
 
   /**
    * A public observable that components can subscribe to for the role tree.
    */
-  public allRoles$ = this.roleTree$.asObservable();
+  public allRoles$: Observable<RoleNode | null>;
 
   constructor() {
     this.socketService.listen<unknown>(ESocketMessage.RolesUpdated).subscribe(() => {
       console.log('Received roles-updated event. Refreshing role tree.');
       this.getRoleTree().subscribe();
     });
+
+    this.allRoles$ = this.observableService.createManagedTopicObservable(
+      ESocketMessage.RolesUpdated,
+      this.roleTree$.asObservable(),
+      () => this.getRoleTree()
+    )
   }
 
   /**
