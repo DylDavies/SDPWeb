@@ -21,7 +21,7 @@ import { AuthService } from '../../../../../services/auth-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { BackendSubject } from '../../../../../models/interfaces/IBackendSubject.interface';
 import { UserService } from '../../../../../services/user-service';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { IBackendProficiency } from '../../../../../models/interfaces/IBackendProficiency.interface';
 
@@ -55,7 +55,7 @@ export class ProficiencyManagement implements OnInit {
 
   private profService = inject(ProficiencyService);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService);
+  private notificationService = inject(SnackBarService);
   private dialog = inject(MatDialog);
 
   proficiencies: IProficiency[] = [];
