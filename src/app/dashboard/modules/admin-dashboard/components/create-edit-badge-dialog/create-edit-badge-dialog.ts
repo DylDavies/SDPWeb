@@ -12,6 +12,7 @@ import { BadgeService } from '../../../../../services/badge-service';
 import { NotificationService } from '../../../../../services/notification-service';
 import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-create-edit-badge-dialog',
@@ -25,7 +26,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule,
     MatSlideToggleModule,
     MatDatepickerModule,
-    MatIconModule
+    MatIconModule,
+    MatTooltipModule
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './create-edit-badge-dialog.html',
@@ -57,19 +59,19 @@ export class CreateEditBadgeDialogComponent implements OnInit {
       TLA: ['', Validators.required],
       summary: ['', Validators.required],
       description: ['', Validators.required],
-      image: ['', Validators.required],
+      icon: ['', Validators.required],
       permanent: [false],
       expirationDate: [null],
       bonus: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
 
-    if (this.isEditMode) {
-      this.badgeForm.patchValue(this.data.badge as any);
+    if (this.isEditMode && this.data.badge) {
+      this.badgeForm.patchValue(this.data.badge as unknown as Record<string, unknown>);
     }
   }
 
   selectIcon(icon: string):void{
-    this.badgeForm.get('image')?.setValue(icon);
+    this.badgeForm.get('icon')?.setValue(icon);
   }
 
   onSave(): void {

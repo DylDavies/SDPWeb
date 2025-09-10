@@ -1,15 +1,6 @@
 <mat-card class="badge-card" 
           [ngClass]="context === 'admin' ? 'admin-context' : 'profile-context'" 
           (click)="viewDetails()">
-
-  <button *ngIf="context === 'profile' && canManageUserBadges" 
-          mat-icon-button 
-          color="warn" 
-          class="remove-button"
-          matTooltip="Remove badge from user"
-          (click)="removeBadgeFromUser(); $event.stopPropagation()">
-    <mat-icon>remove_circle</mat-icon>
-  </button>
   
   <div class="card-content-wrapper">
     <div class="icon-container">
@@ -21,7 +12,7 @@
     </div>
   </div>
 
-  <mat-card-actions *ngIf="context === 'admin' && canCreateOrEditBadges">
+  <mat-card-actions class="admin-actions" *ngIf="context === 'admin' && canCreateOrEditBadges">
     <button mat-button (click)="editBadge(); $event.stopPropagation()">
       <mat-icon>edit</mat-icon>
       Edit
@@ -31,4 +22,14 @@
       Delete
     </button>
   </mat-card-actions>
+
+  <mat-card-actions class="profile-actions" *ngIf="context === 'profile' && canManageUserBadges">
+    <button mat-icon-button 
+            color="warn" 
+            matTooltip="Remove badge from user"
+            (click)="removeBadgeFromUser(); $event.stopPropagation()">
+      <mat-icon>remove_circle</mat-icon>
+    </button>
+  </mat-card-actions>
+
 </mat-card>
