@@ -1,19 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { BadgeCard } from './badge-card';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { BadgeCardComponent } from './badge-card';
 
 describe('BadgeCard', () => {
-  let component: BadgeCard;
-  let fixture: ComponentFixture<BadgeCard>;
+  let component: BadgeCardComponent;
+  let fixture: ComponentFixture<BadgeCardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BadgeCard]
+      imports: [BadgeCardComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BadgeCard);
+    fixture = TestBed.createComponent(BadgeCardComponent);
     component = fixture.componentInstance;
+    component.badge = { _id: '1', name: 'Test', TLA: 'TST', image: 'star', summary: 'summary', description: 'desc', permanent: true, bonus: 0 };
     fixture.detectChanges();
   });
 

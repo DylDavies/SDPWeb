@@ -1,18 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { BadgeDetailDialog } from './badge-detail-dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BadgeDetailDialogComponent } from './badge-detail-dialog';
 
 describe('BadgeDetailDialog', () => {
-  let component: BadgeDetailDialog;
-  let fixture: ComponentFixture<BadgeDetailDialog>;
+  let component: BadgeDetailDialogComponent;
+  let fixture: ComponentFixture<BadgeDetailDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BadgeDetailDialog]
+      imports: [BadgeDetailDialogComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: { badge: {} } }
+      ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BadgeDetailDialog);
+    fixture = TestBed.createComponent(BadgeDetailDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
