@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -9,8 +9,6 @@ import { UserService } from '../../../services/user-service';
 import { BadgeService } from '../../../services/badge-service';
 import IBadge from '../../../models/interfaces/IBadge.interface';
 import { IUser } from '../../../models/interfaces/IUser.interface';
-import { Subscription } from 'rxjs';
-import { NotificationService } from '../../../services/notification-service';
 
 @Component({
   selector: 'app-add-user-badge-dialog',
@@ -30,18 +28,15 @@ export class AddUserBadgeDialogComponent implements OnInit {
   private badgeService = inject(BadgeService);
   public dialogRef = inject(MatDialogRef<AddUserBadgeDialogComponent>);
   public data: { user: IUser } = inject(MAT_DIALOG_DATA);
-  private notificationService = inject(NotificationService);
 
   public availableBadges: IBadge[] = [];
   public badgeControl = new FormControl<IBadge | null>(null, Validators.required);
 
   ngOnInit(): void {
-    // Fetch the list of all badges directly when the component loads.
-    this.badgeService.getBadges().subscribe((allBadges) => {
-      // Get the IDs of badges the user already has.
+    // fetch all badges
+    this.badgeService.getBadges().subscribe((allBadges) => { 
       const userBadgeIds = new Set(this.data.user.badges?.map(b => b._id.toString()));
-      // Filter the list to show only badges the user does not have.
-      this.availableBadges = allBadges.filter(b => !userBadgeIds.has(b._id.toString()));
+      this.availableBadges = allBadges.filter(b => !userBadgeIds.has(b._id.toString())); // filter out badges user already has
     });
   }
 
@@ -50,15 +45,11 @@ export class AddUserBadgeDialogComponent implements OnInit {
       const selectedBadge = this.badgeControl.value;
       if(selectedBadge){
           this.userService.addBadgeToUser(this.data.user._id, selectedBadge).subscribe({
-              next: () => {
-                  this.notificationService.showSuccess('Badge added to user.');
-                  this.dialogRef.close(true); // Close with a success signal
+              next: (updatedUser) => {
+                  this.dialogRef.close({ updatedUser: updatedUser });
               },
               error: (err) => {
-                  // The error is likely due to permissions, but we still close the dialog
-                  // because the operation succeeded on the backend. The UI will update.
-                  this.notificationService.showError('An error occurred, but the badge may have been added.');
-                  this.dialogRef.close(true); 
+                  this.dialogRef.close({ error: true }); 
                   console.error(err);
               }
           });

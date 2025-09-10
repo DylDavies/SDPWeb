@@ -38,6 +38,13 @@ export class AuthService {
       this.verifyCurrentUser().subscribe();
     });
 
+    // Listen for changes with the badgse 
+    this.socketService.listen(ESocketMessage.BadgesUpdated).subscribe(() =>{
+      console.log('Received badges-updated event. Refreshing logged in user.');
+      this.verification$ = null; // Force re-verification
+      this.verifyCurrentUser().subscribe();
+    })
+
     this.currentUser$.pipe(
       startWith(null),
       pairwise()

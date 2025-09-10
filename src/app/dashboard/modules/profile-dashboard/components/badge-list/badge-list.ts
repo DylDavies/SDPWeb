@@ -10,9 +10,7 @@ import { EPermission } from '../../../../../models/enums/permission.enum';
 import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { AddUserBadgeDialogComponent } from '../../../../../shared/components/add-user-badge-dialog/add-user-badge-dialog';
 import { Subscription } from 'rxjs';
-import { BadgeService } from '../../../../../services/badge-service';
 import { NotificationService } from '../../../../../services/notification-service';
-import { UserService } from '../../../../../services/user-service';
 
 @Component({
   selector: 'app-badge-list',
@@ -27,8 +25,6 @@ export class BadgeListComponent implements OnInit, OnDestroy {
 
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  private badgeService = inject(BadgeService);
-  private userService = inject(UserService);
   private notificationService = inject(NotificationService);
 
   public canManageBadges = false;
@@ -38,9 +34,12 @@ export class BadgeListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.canManageBadges = this.authService.hasPermission(EPermission.BADGES_MANAGE);
-    this.userSubscription = this.authService.currentUser$.subscribe((user) => {
-        if (user?._id === this.user?._id) {
-            this.badges = user!.badges || [];
+    
+    // Update badge list when a change occurs
+    this.userSubscription = this.authService.currentUser$.subscribe((currentUser) => {
+        if (currentUser && currentUser._id === this.user?._id) {
+            this.user = currentUser; // Update the whole user object
+            this.badges = this.user.badges || [];
         }
     });
     
@@ -58,13 +57,13 @@ export class BadgeListComponent implements OnInit, OnDestroy {
       data: { user: this.user },
     });
 
-    dialogRef.afterClosed().subscribe((result: IBadge) => {
-      if (result) {
-        // This call is now valid because the service expects an IBadge object
-        this.userService.addBadgeToUser(this.user!._id, result).subscribe(() => {
-          this.notificationService.showSuccess('Badge added to user.');
-          this.userUpdated.emit();
-        });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && result.updatedUser){
+        this.notificationService.showSuccess('Badge added to user.');
+        this.authService.updateCurrentUserState(result.updatedUser);  // update the auth state with the fresh user object
+      } 
+      else if(result && result.error){
+        this.notificationService.showError('An error occurred, but the badge may have been added.');
       }
     });
   }

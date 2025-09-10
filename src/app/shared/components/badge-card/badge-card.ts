@@ -6,10 +6,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import IBadge from '../../../models/interfaces/IBadge.interface';
 import { BadgeDetailDialogComponent } from '../badge-detail-dialog/badge-detail-dialog';
-import { BadgeService } from '../../../services/badge-service';
 import { UserService } from '../../../services/user-service';
 import { NotificationService } from '../../../services/notification-service';
 import { CreateEditBadgeDialogComponent } from '../../../dashboard/modules/admin-dashboard/components/create-edit-badge-dialog/create-edit-badge-dialog';
+import { AuthService } from '../../../services/auth-service';
+import { IUser } from '../../../models/interfaces/IUser.interface';
 
 @Component({
   selector: 'app-badge-card',
@@ -25,12 +26,10 @@ export class BadgeCardComponent {
   @Input() userId?: string;
   @Output() badgeUpdated = new EventEmitter<void>();
 
-  // Change the above dont pass is admin and what not, do this using perms
-
   private dialog = inject(MatDialog);
-  private badgeService = inject(BadgeService);
   private userService = inject(UserService);
   private notificationService = inject(NotificationService);
+  private authService = inject(AuthService); // Inject AuthService
 
   viewDetails(): void {
     this.dialog.open(BadgeDetailDialogComponent, {
@@ -54,9 +53,15 @@ export class BadgeCardComponent {
 
   removeBadgeFromUser(): void {
     if (this.userId) {
-      this.userService.removeBadgeFromUser(this.userId, this.badge._id.toString()).subscribe(() => {
-        this.notificationService.showSuccess('Badge removed from user.');
-        this.badgeUpdated.emit();
+      this.userService.removeBadgeFromUser(this.userId, this.badge._id.toString()).subscribe({
+        next: (updatedUser: IUser) => {
+          this.notificationService.showSuccess('Badge removed from user.');
+          // Manually update the auth state with the fresh user object
+          this.authService.updateCurrentUserState(updatedUser);
+        },
+        error: () => {
+          this.notificationService.showError('Failed to remove badge.');
+        }
       });
     }
   }
