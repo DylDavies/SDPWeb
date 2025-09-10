@@ -36,9 +36,10 @@ const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 // The SocketService mock needs a `listen` method that returns an observable we can control
 const socketServiceSpy = {
   listen: (_eventName: string): Observable<unknown> => {
-    // We'll use a simple Subject for testing socket emissions
     return new Subject<unknown>().asObservable();
-  }
+  },
+  authenticate: jasmine.createSpy('authenticate'),
+  connectionHook: (cb: () => void) => cb()
 };
 
 describe('AuthService', () => {
@@ -60,9 +61,16 @@ describe('AuthService', () => {
     httpServiceSpy.get.calls.reset();
     httpServiceSpy.post.calls.reset();
     routerSpy.navigateByUrl.calls.reset();
+    socketServiceSpy.authenticate.calls.reset();
+    
     spyOn(localStorage, 'getItem').and.returnValue(null);
     spyOn(localStorage, 'setItem').and.stub();
     spyOn(localStorage, 'removeItem').and.stub();
+
+    // @ts-expect-error - Accessing private members for testing purposes
+    service.verification$ = null;
+    // @ts-expect-error - Accessing private members for testing purposes
+    service.currentUserSubject.next(null);
   });
 
   it('should be created', () => {
@@ -71,7 +79,7 @@ describe('AuthService', () => {
 
   // Helper function to get the current user from the service's internal subject
   const getCurrentUser = () => {
-    // @ts-expect-error Used as any to access private member
+    // @ts-expect-error - Accessing private members for testing purposes
     return service.currentUserSubject.getValue();
   };
 
@@ -83,36 +91,42 @@ describe('AuthService', () => {
   });
 
   describe('verifyCurrentUser', () => {
-    it('should return null and not call API if no token exists', () => {
+    it('should return null and not call API if no token exists', (done) => {
       service.verifyCurrentUser().subscribe(result => {
         expect(result).toBeNull();
         expect(httpServiceSpy.get).not.toHaveBeenCalled();
+        done();
       });
     });
 
-    it('should call the API and update the user when a token exists', () => {
+    it('should call the API and update the user when a token exists', (done) => {
       (localStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
       httpServiceSpy.get.and.returnValue(of(mockUser));
 
       service.verifyCurrentUser().subscribe(result => {
         expect(result).toEqual(mockUser);
+        // Assert the final state inside the subscription to ensure async operations complete
+        expect(getCurrentUser()).toEqual(mockUser);
+        expect(socketServiceSpy.authenticate).toHaveBeenCalledWith(MOCK_TOKEN);
+        done();
       });
 
+      // Assert initial call
       expect(httpServiceSpy.get).toHaveBeenCalledOnceWith('user');
-      expect(getCurrentUser()).toEqual(mockUser);
     });
 
-    it('should remove the token and set user to null if the API call fails', () => {
+    it('should remove the token and set user to null if the API call fails', (done) => {
       (localStorage.getItem as jasmine.Spy).and.returnValue(MOCK_TOKEN);
       httpServiceSpy.get.and.returnValue(throwError(() => new Error('401 Unauthorized')));
 
       service.verifyCurrentUser().subscribe(result => {
         expect(result).toBeNull();
+        expect(localStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
+        expect(getCurrentUser()).toBeNull();
+        done();
       });
 
       expect(httpServiceSpy.get).toHaveBeenCalledOnceWith('user');
-      expect(localStorage.removeItem).toHaveBeenCalledOnceWith('tutorcore-auth-token');
-      expect(getCurrentUser()).toBeNull();
     });
   });
 
@@ -155,7 +169,10 @@ describe('AuthService', () => {
     });
 
     it('should return false if there is no user', () => {
+      // @ts-expect-error - Accessing private members for testing purposes
+      service.currentUserSubject.next(null);
       expect(service.hasPermission(EPermission.DASHBOARD_VIEW)).toBeFalse();
     });
   });
 });
+

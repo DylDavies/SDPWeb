@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarConfig, MatSnackBarRef } from '@angular/material/snack-bar';
 
 /**
  * A service for displaying snack bar notifications.
@@ -18,7 +18,7 @@ export class SnackBarService {
    */
   showSuccess(message: string): void {
     const duration = 3000;
-    this.show(message, {
+    this.show(message, undefined, {
       panelClass: ['success-snackbar', `duration-${duration}`],
       duration: duration,
     });
@@ -30,7 +30,7 @@ export class SnackBarService {
    */
   showError(message: string): void {
     const duration = 5000;
-    this.show(message, {
+    this.show(message, undefined, {
       panelClass: ['error-snackbar', `duration-${duration}`],
       duration: duration, // Errors might need more time to be read
     });
@@ -42,9 +42,24 @@ export class SnackBarService {
    */
   showInfo(message: string): void {
     const duration = 3000;
-    this.show(message, {
+    this.show(message, undefined, {
       panelClass: ['info-snackbar', `duration-${duration}`],
       duration: duration,
+    });
+  }
+
+  /**
+   * NEW: Displays a notification with a clickable action.
+   * Returns a reference to the snackbar to allow subscribing to the action.
+   * @param message The message to display.
+   * @param action The text for the action button (e.g., 'Undo').
+   * @returns MatSnackBarRef<unknown>
+   */
+  showWithAction(message: string, action: string): MatSnackBarRef<unknown> {
+    const duration = 5000; // Give users enough time to click the action
+    return this.show(message, action, {
+        panelClass: ['info-snackbar', `duration-${duration}`], // Or a new custom class
+        duration: duration,
     });
   }
 
@@ -53,7 +68,7 @@ export class SnackBarService {
    * @param message The message to display in the snack bar.
    * @param config The configuration object for the MatSnackBar.
    */
-  private show(message: string, config: MatSnackBarConfig): void {
+  private show(message: string, action: string | undefined, config: MatSnackBarConfig): MatSnackBarRef<unknown> {
     // Default configuration for all snackbars
     const defaultConfig: MatSnackBarConfig = {
       horizontalPosition: 'end',
@@ -61,6 +76,6 @@ export class SnackBarService {
       ...config // Merge default and provided configs
     };
     // Pass 'undefined' for the action to remove the button
-    this.snackBar.open(message, undefined, defaultConfig);
+    return this.snackBar.open(message, action, defaultConfig);
   }
 }

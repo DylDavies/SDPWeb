@@ -17,6 +17,7 @@ import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
 import { UserManagement } from './dashboard/modules/user-management/user-management';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
+import { NotificationCenterComponent } from './notification-center/notification-center';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -27,8 +28,8 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard, children: [
       { path: '', component: ClientDashboard },
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
-      { path: 'profile', component: Profile },
-      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
+      { path: 'profile', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
+      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       { 
         path: 'bundles', 
@@ -39,6 +40,11 @@ export const routes: Routes = [
           EPermission.BUNDLES_EDIT,
           EPermission.BUNDLES_DELETE
         ], true)] 
+      },
+      {
+        path: 'notifications',
+        component: NotificationCenterComponent,
+        canActivate: [permissionGuard([EPermission.NOTIFICATIONS_VIEW])]
       }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
