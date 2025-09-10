@@ -21,6 +21,7 @@ import { EditAvailabilityDialog } from './components/edit-availability-dialog/ed
 import { filter } from 'rxjs';
 import { NotificationService } from '../../../services/notification-service'; 
 import { MatTooltip } from '@angular/material/tooltip';
+import { BadgeListComponent } from './components/badge-list/badge-list';
 
 @Component({
   selector: 'app-profile-dashboard',
@@ -28,7 +29,7 @@ import { MatTooltip } from '@angular/material/tooltip';
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement, MatTooltip
+    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement, MatTooltip, BadgeListComponent
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'
@@ -39,7 +40,7 @@ export class Profile implements OnInit {
   private router = inject(Router);
   public dialog = inject(MatDialog);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService); // Inject NotificationService
+  private notificationService = inject(NotificationService); 
 
   public user: IUser | null = null;
   public isLoading = true;
@@ -47,32 +48,44 @@ export class Profile implements OnInit {
   public userNotFound = false;
 
   ngOnInit(): void {
-    const userId = this.route.snapshot.paramMap.get('id');
+    this.loadUser();
+  }
+  
+  loadUser(): void {
+    this.isLoading = true;
+    const userIdFromRoute = this.route.snapshot.paramMap.get('id');
 
     this.authService.currentUser$.subscribe({
       next: (currentUser) => {
-        if (userId) {
-          this.isOwnProfile = currentUser?._id == userId;
-          this.userService.getUserById(userId).subscribe({
-            next: (user) => {
-              if (user) {
-                this.user = user;
-                this.userNotFound = false;
-              } else {
-                this.userNotFound = true;
-              }
-              this.isLoading = false;
-            },
-            error: () => {
-              this.isLoading = false;
-              this.userNotFound = true;
-            }
-          });
+        const idToFetch = userIdFromRoute || currentUser?._id;
+        
+        if (idToFetch) {
+          this.isOwnProfile = !userIdFromRoute || userIdFromRoute === currentUser?._id;
+          this.fetchUserById(idToFetch);
         } else {
-          this.isOwnProfile = true;
-          this.user = currentUser;
+          // This handles the case where there is no route ID and the currentUser$ is initially null
           this.isLoading = false;
+          this.userNotFound = !currentUser;
+          this.user = currentUser;
         }
+      }
+    });
+  }
+
+  private fetchUserById(id: string): void {
+    this.userService.getUserById(id).subscribe({
+      next: (user) => {
+        if (user) {
+          this.user = user;
+          this.userNotFound = false;
+        } else {
+          this.userNotFound = true;
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.userNotFound = true;
       }
     });
   }
@@ -96,7 +109,10 @@ export class Profile implements OnInit {
 
     dialogRef.afterClosed().subscribe(updatedUser => {
       if (updatedUser) {
-        this.authService.updateCurrentUserState(updatedUser);
+        if (this.isOwnProfile) {
+          this.authService.updateCurrentUserState(updatedUser);
+        }
+        this.loadUser(); // Refresh user data
       }
     });
   }

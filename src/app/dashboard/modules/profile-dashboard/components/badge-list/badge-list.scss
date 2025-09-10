@@ -1,0 +1,25 @@
+.badge-list-container {
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+  padding: 2rem;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  margin-top: 1rem;
+}

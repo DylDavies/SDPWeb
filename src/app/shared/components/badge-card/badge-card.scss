@@ -1,0 +1,12 @@
+.badge-card {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.badge-card:hover {
+  transform: translateY(-5px);
+}
+
+.badge-image-avatar {
+  background-size: cover;
+}

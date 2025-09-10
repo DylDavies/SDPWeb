@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>{{ data.badge.name }}</h2>
+<mat-dialog-content>
+  <img [src]="data.badge.image" [alt]="data.badge.name" class="badge-image-large">
+  <p><strong>Summary:</strong> {{ data.badge.summary }}</p>
+  <p><strong>Description:</strong> {{ data.badge.description }}</p>
+  <p><strong>Bonus:</strong> {{ data.badge.bonus }}</p>
+  <p *ngIf="data.badge.expirationDate"><strong>Expires:</strong> {{ data.badge.expirationDate | date }}</p>
+</mat-dialog-content>
