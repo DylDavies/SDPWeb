@@ -7,6 +7,7 @@ import IBadge from '../models/interfaces/IBadge.interface';
   providedIn: 'root'
 })
 export class BadgeService {
+  // change this to use sockets -- NBBBB
   private httpService = inject(HttpService);
 
   getBadges(): Observable<IBadge[]> {
@@ -21,11 +22,4 @@ export class BadgeService {
     return this.httpService.delete<void>(`badges/${badgeId}`);
   }
 
-  addBadgeToUser(userId: string, badgeId: string): Observable<any> {
-    return this.httpService.post(`users/${userId}/badges`, { badgeId });
-  }
-
-  removeBadgeFromUser(userId: string, badgeId: string): Observable<any> {
-    return this.httpService.delete(`users/${userId}/badges/${badgeId}`);
-  }
 }
