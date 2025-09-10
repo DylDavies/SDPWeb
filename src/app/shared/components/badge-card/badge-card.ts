@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,25 +11,38 @@ import { NotificationService } from '../../../services/notification-service';
 import { CreateEditBadgeDialogComponent } from '../../../dashboard/modules/admin-dashboard/components/create-edit-badge-dialog/create-edit-badge-dialog';
 import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
+import { EPermission } from '../../../models/enums/permission.enum';
+import { BadgeService } from '../../../services/badge-service';
+import { ConfirmationDialog } from '../confirmation-dialog/confirmation-dialog';
+import { filter } from 'rxjs/operators';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-badge-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './badge-card.html',
   styleUrls: ['./badge-card.scss'],
 })
-export class BadgeCardComponent {
+export class BadgeCardComponent implements OnInit {
   @Input() badge!: IBadge;
-  @Input() isAdminView = false;
-  @Input() canManage = false;
   @Input() userId?: string;
+  @Input() context: 'admin' | 'profile' = 'profile';
   @Output() badgeUpdated = new EventEmitter<void>();
 
   private dialog = inject(MatDialog);
   private userService = inject(UserService);
   private notificationService = inject(NotificationService);
-  private authService = inject(AuthService); // Inject AuthService
+  private authService = inject(AuthService);
+  private badgeService = inject(BadgeService);
+
+  public canCreateOrEditBadges = false;
+  public canManageUserBadges = false;
+
+  ngOnInit(): void {
+    this.canCreateOrEditBadges = this.authService.hasPermission(EPermission.BADGES_CREATE);
+    this.canManageUserBadges = this.authService.hasPermission(EPermission.BADGES_MANAGE);
+  }
 
   viewDetails(): void {
     this.dialog.open(BadgeDetailDialogComponent, {
@@ -51,12 +64,34 @@ export class BadgeCardComponent {
     });
   }
 
+  deleteBadge(): void {
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      data: {
+        title: 'Delete Badge',
+        message: `Are you sure you want to permanently delete the "${this.badge.name}" badge? This will not remove it from users who have already earned it, but it will no longer be available to award.`,
+        confirmText: 'Delete',
+        color: 'warn'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(filter(result => result === true)).subscribe(() => {
+      this.badgeService.deleteBadge(this.badge._id).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Badge deleted successfully.');
+          this.badgeUpdated.emit();
+        },
+        error: (err) => {
+          this.notificationService.showError(err.error?.message || 'Failed to delete badge.');
+        }
+      });
+    });
+  }
+
   removeBadgeFromUser(): void {
     if (this.userId) {
       this.userService.removeBadgeFromUser(this.userId, this.badge._id.toString()).subscribe({
         next: (updatedUser: IUser) => {
           this.notificationService.showSuccess('Badge removed from user.');
-          // Manually update the auth state with the fresh user object
           this.authService.updateCurrentUserState(updatedUser);
         },
         error: () => {

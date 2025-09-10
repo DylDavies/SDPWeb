@@ -1,12 +1,100 @@
 .badge-card {
   cursor: pointer;
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  position: relative; 
+  padding: 16px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    
+    .remove-button {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 }
 
-.badge-card:hover {
-  transform: translateY(-5px);
+.badge-card.profile-context {
+  background-color: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-surface-container-high);
+  &:hover {
+    background-color: var(--mat-sys-surface-container);
+  }
 }
 
-.badge-image-avatar {
-  background-size: cover;
+.badge-card.admin-context {
+  background-color: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  &:hover {
+    background-color: var(--mat-sys-surface-container-high);
+  }
+}
+
+.remove-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0; 
+  transform: scale(0.5); 
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  background-color: rgba(0,0,0,0.2);
+}
+
+.card-content-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-primary);
+  box-shadow: 0 0 12px rgba(var(--mat-sys-primary-rgb), 0.3); 
+
+  mat-icon {
+    font-size: 32px;
+    height: 32px;
+    width: 32px;
+  }
+}
+
+
+.text-content {
+  flex-grow: 1;
+}
+
+.badge-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.badge-tla {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--mat-sys-on-surface-variant);
+  margin-left: 4px;
+}
+
+.badge-summary {
+  font-size: 0.9rem;
+  margin: 4px 0 0 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0 0 0;
+  margin-top: 8px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
 }

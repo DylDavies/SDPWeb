@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,9 +7,6 @@ import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { BadgeService } from '../../../../../services/badge-service';
 import { CreateEditBadgeDialogComponent } from '../create-edit-badge-dialog/create-edit-badge-dialog';
 import { BadgeCardComponent } from '../../../../../shared/components/badge-card/badge-card';
-import { IUser } from '../../../../../models/interfaces/IUser.interface';
-import { Subscription } from 'rxjs';
-import { AuthService } from '../../../../../services/auth-service';
 
 @Component({
   selector: 'app-badge-management',

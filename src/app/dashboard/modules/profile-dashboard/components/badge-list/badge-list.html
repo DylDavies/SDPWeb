@@ -12,8 +12,8 @@
     <div class="badge-grid">
       @for (badge of badges; track badge._id) {
         <app-badge-card 
-          [badge]="badge" 
-          [canManage]="canManageBadges" 
+          [badge]="badge"
+          [context]="'profile'"
           [userId]="user!._id">
         </app-badge-card>
       }

@@ -11,10 +11,20 @@
       <input matInput formControlName="TLA">
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Image URL</mat-label>
-      <input matInput formControlName="image">
-    </mat-form-field>
+    <div class="icon-selector-container">
+      <label class="icon-selector-label">Badge Icon</label>
+      <div class="icon-grid">
+        <button type="button" mat-icon-button *ngFor="let icon of availableIcons" 
+                (click)="selectIcon(icon)"
+                [class.selected]="badgeForm.get('image')?.value === icon"
+                >
+          <mat-icon>{{icon}}</mat-icon>
+        </button>
+      </div>
+       @if (badgeForm.get('icon')?.hasError('required') && badgeForm.get('icon')?.touched) {
+        <mat-error>An icon is required.</mat-error>
+      }
+    </div>
 
     <mat-form-field appearance="outline">
       <mat-label>Summary</mat-label>
@@ -28,7 +38,13 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Bonus</mat-label>
-      <input matInput type="number" formControlName="bonus">
+      <input matInput type="number" formControlName="bonus" min="0" max="100">
+        @if (badgeForm.get('bonus')?.hasError('min')) {
+          <mat-error>Bonus cannot be less than 0.</mat-error>
+        }
+        @if (badgeForm.get('bonus')?.hasError('max')) {
+          <mat-error>Bonus cannot be greater than 100.</mat-error>
+        }
     </mat-form-field>
 
     <mat-slide-toggle formControlName="permanent">Permanent Badge</mat-slide-toggle>

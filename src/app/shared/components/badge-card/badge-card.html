@@ -1,18 +1,34 @@
-<mat-card class="badge-card" (click)="viewDetails()">
-  <mat-card-header>
-    <div mat-card-avatar [style.backgroundImage]="'url(' + badge.image + ')'" class="badge-image-avatar"></div>
-    <mat-card-title>{{ badge.name }}</mat-card-title>
-    <mat-card-subtitle>{{ badge.TLA }}</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <p>{{ badge.summary }}</p>
-  </mat-card-content>
-  <mat-card-actions *ngIf="isAdminView || canManage">
-    <button *ngIf="isAdminView" mat-icon-button (click)="editBadge(); $event.stopPropagation()">
+<mat-card class="badge-card" 
+          [ngClass]="context === 'admin' ? 'admin-context' : 'profile-context'" 
+          (click)="viewDetails()">
+
+  <button *ngIf="context === 'profile' && canManageUserBadges" 
+          mat-icon-button 
+          color="warn" 
+          class="remove-button"
+          matTooltip="Remove badge from user"
+          (click)="removeBadgeFromUser(); $event.stopPropagation()">
+    <mat-icon>remove_circle</mat-icon>
+  </button>
+  
+  <div class="card-content-wrapper">
+    <div class="icon-container">
+      <mat-icon>{{ badge.image }}</mat-icon>
+    </div>
+    <div class="text-content">
+      <h3 class="badge-title">{{ badge.name }} <span class="badge-tla">({{ badge.TLA }})</span></h3>
+      <p class="badge-summary">{{ badge.summary }}</p>
+    </div>
+  </div>
+
+  <mat-card-actions *ngIf="context === 'admin' && canCreateOrEditBadges">
+    <button mat-button (click)="editBadge(); $event.stopPropagation()">
       <mat-icon>edit</mat-icon>
+      Edit
     </button>
-    <button *ngIf="canManage" mat-icon-button color="warn" (click)="removeBadgeFromUser(); $event.stopPropagation()">
-      <mat-icon>remove_circle</mat-icon>
+    <button mat-button color="warn" (click)="deleteBadge(); $event.stopPropagation()">
+      <mat-icon>delete_forever</mat-icon>
+      Delete
     </button>
   </mat-card-actions>
 </mat-card>

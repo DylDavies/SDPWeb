@@ -5,20 +5,48 @@
   padding-top: 1rem;
 }
 
-.dialog-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem 1.5rem 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+.icon-selector-container {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 4px;
+  padding: 1rem;
+}
 
-    mat-icon {
-        font-size: 2rem;
-        width: 2rem;
-        height: 2rem;
-    }
+.icon-selector-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface-variant);
+}
 
-    h2 {
-        margin: 0;
-    }
+.icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.icon-grid button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+  padding: 0; 
+
+  border: 2px solid transparent;
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+}
+
+.icon-grid button.selected {
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  border-color: var(--mat-sys-primary);
+}
+
+mat-error {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
 }

@@ -41,6 +41,14 @@ export class CreateEditBadgeDialogComponent implements OnInit {
   public badgeForm!: FormGroup;
   public isEditMode = false;
 
+  // List of icons to choose from 
+  public availableIcons: string[] = [
+    'military_tech', 'workspace_premium', 'verified', 'star', 'emoji_events', 
+    'school', 'auto_stories', 'rocket_launch', 'thumb_up', 'favorite',
+    'support_agent', 'biotech', 'build_circle', 'code', 'psychology',
+    'bolt', 'local_fire_department', 'shield', 'public', 'diamond', 'accessible'
+  ];
+
   ngOnInit(): void {
     this.isEditMode = !!this.data?.badge;
 
@@ -52,12 +60,16 @@ export class CreateEditBadgeDialogComponent implements OnInit {
       image: ['', Validators.required],
       permanent: [false],
       expirationDate: [null],
-      bonus: [0, Validators.required],
+      bonus: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
 
     if (this.isEditMode) {
       this.badgeForm.patchValue(this.data.badge as any);
     }
+  }
+
+  selectIcon(icon: string):void{
+    this.badgeForm.get('image')?.setValue(icon);
   }
 
   onSave(): void {
