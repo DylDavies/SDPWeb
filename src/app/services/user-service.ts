@@ -10,6 +10,7 @@ import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
+import IBadge from '../models/interfaces/IBadge.interface';
 
 
 @Injectable({
@@ -161,4 +162,16 @@ export class UserService {
   updateUserAvailability(userId: string, availability: number): Observable<IUser> {
     return this.httpService.patch<IUser>(`users/${userId}/availability`, { availability });
   }
-}
+
+  addBadgeToUser(userId: string, badgeData: IBadge): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/badges`, { badgeData }).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  removeBadgeFromUser(userId: string, badgeId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/badges/${badgeId}`).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+} 
