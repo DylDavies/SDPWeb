@@ -10,8 +10,8 @@ import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
+import { CustomObservableService } from './custom-observable-service';
 import IBadge from '../models/interfaces/IBadge.interface';
-
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +19,10 @@ import IBadge from '../models/interfaces/IBadge.interface';
 export class UserService {
   public httpService = inject(HttpService);
   public socketService = inject(SocketService);
+  public observableService = inject(CustomObservableService);
 
   private users$ = new BehaviorSubject<IUser[]>([]);
-  public allUsers$ = this.users$.asObservable();
+  public allUsers$: Observable<IUser[]>;
 
   constructor() {
     this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
@@ -33,6 +34,13 @@ export class UserService {
       console.log('Received roles-updated event. Refreshing user list to update roles.');
       this.fetchAllUsers().subscribe();
     });
+
+    // Initialize the managed observable
+    this.allUsers$ = this.observableService.createManagedTopicObservable(
+      ESocketMessage.UsersUpdated,
+      this.users$.asObservable(),
+      () => this.fetchAllUsers()
+    );
   }
 
   /**

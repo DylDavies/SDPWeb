@@ -5,6 +5,7 @@ import { IProficiency } from '../models/interfaces/IProficiency.interface';
 import { ISubject } from '../models/interfaces/ISubject.interface';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { CustomObservableService } from './custom-observable-service';
 
 
 @Injectable({
@@ -13,15 +14,22 @@ import { ESocketMessage } from '../models/enums/socket-message.enum';
 export class ProficiencyService {
   public httpService = inject(HttpService);
   public socketService = inject(SocketService);
+  public observableService = inject(CustomObservableService);
 
   private proficiencies$ = new BehaviorSubject<IProficiency[]>([]);
-  public allProficiencies$ = this.proficiencies$.asObservable();
+  public allProficiencies$: Observable<IProficiency[]>;
 
   constructor() {
     this.socketService.listen<unknown>(ESocketMessage.ProficienciesUpdated).subscribe(() => {
       console.log('Received proficiencies-updated event. Refreshing proficiency list.');
       this.fetchAllProficiencies().subscribe();
     });
+
+    this.allProficiencies$ = this.observableService.createManagedTopicObservable(
+      ESocketMessage.ProficienciesUpdated,
+      this.proficiencies$.asObservable(),
+      () => this.fetchAllProficiencies()
+    )
   }
 
   /**

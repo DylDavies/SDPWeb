@@ -29,6 +29,26 @@ export class SocketService implements OnDestroy {
     });
   }
 
+  authenticate(token: string) {
+    this.socket.emit('authenticate', token);
+  }
+
+  /**
+   * Subscribes to a specific topic.
+   * @param topic The name of the topic to subscribe to.
+   */
+  subscribe(topic: ESocketMessage) {
+    this.socket.emit('subscribe', topic);
+  }
+
+  /**
+   * Unsubscribes from a specific topic.
+   * @param topic The name of the topic to unsubscribe from.
+   */
+  unsubscribe(topic: ESocketMessage) {
+    this.socket.emit('unsubscribe', topic);
+  }
+
   /**
    * Listens for a specific event from the server.
    * @param eventName The name of the event to listen for (e.g., 'users-updated').
