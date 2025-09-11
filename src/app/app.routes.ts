@@ -17,33 +17,44 @@ import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
 import { UserManagement } from './dashboard/modules/user-management/user-management';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
+import { ExtraWorkDashboard } from './dashboard/modules/extra-work-dashboard/extra-work-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
+
   { path: 'account', canActivate: [authGuard, accountStatusGuard], children: [
     { path: 'pending', component: AccountPending },
     { path: 'disabled', component: AccountDisabled  }
   ] },
+
   { path: 'dashboard', component: Dashboard, children: [
       { path: '', component: ClientDashboard },
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
       { path: 'profile', component: Profile },
       { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
-      { 
-        path: 'bundles', 
+      {
+        path: 'bundles',
         component: BundleDashboard,
         canActivate: [permissionGuard([
           EPermission.BUNDLES_VIEW,
           EPermission.BUNDLES_CREATE,
           EPermission.BUNDLES_EDIT,
           EPermission.BUNDLES_DELETE
-        ], true)] 
+        ], true)]
+      },
+
+      {
+        path: 'extrawork',
+        component: ExtraWorkDashboard,
+        canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])]
       }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },
+
   { path: 'login/callback', component: LoginCallback },
   { path: 'logout', component: Logout },
+  
   { path: '**', component: NotFound }
 ];

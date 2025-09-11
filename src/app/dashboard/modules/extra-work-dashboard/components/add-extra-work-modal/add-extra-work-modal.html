@@ -1,0 +1,74 @@
+<header class="dialog-header">
+    <mat-icon color="primary">add_circle</mat-icon>
+    <h1 mat-dialog-title>Add New Extra Work</h1>
+</header>
+<mat-dialog-content>
+    <form [formGroup]="addWorkForm" (ngSubmit)="onSave()">
+        <mat-form-field appearance="outline">
+            <mat-label>Student</mat-label>
+            <mat-select formControlName="studentId">
+                @for (student of students$ | async; track student._id) {
+                    <mat-option [value]="student._id">{{ student.displayName }}</mat-option>
+                }
+            </mat-select>
+            @if (addWorkForm.get('studentId')?.hasError('required')) {
+                <mat-error>Student is required.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Commissioned By</mat-label>
+            <mat-select formControlName="commissionerId">
+                @for (commissioner of commissioners$ | async; track commissioner._id) {
+                    <mat-option [value]="commissioner._id">{{ commissioner.displayName }}</mat-option>
+                }
+            </mat-select>
+            @if (addWorkForm.get('commissionerId')?.hasError('required')) {
+                <mat-error>Commissioner is required.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Work Type</mat-label>
+            <mat-select formControlName="workType">
+                @for (type of workTypes; track type) {
+                    <mat-option [value]="type">{{ type }}</mat-option>
+                }
+            </mat-select>
+            @if (addWorkForm.get('workType')?.hasError('required')) {
+                <mat-error>Work type is required.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Details</mat-label>
+            <textarea matInput formControlName="details" rows="3" placeholder="Enter a short description of the work..."></textarea>
+            <mat-hint align="end">{{addWorkForm.get('details')?.value?.length || 0}} / 280</mat-hint>
+            @if (addWorkForm.get('details')?.hasError('required')) {
+                <mat-error>Details are required.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Remuneration</mat-label>
+            <span matPrefix>R&nbsp;</span>
+            <input matInput type="number" formControlName="remuneration" placeholder="0.00">
+             @if (addWorkForm.get('remuneration')?.hasError('required')) {
+                <mat-error>Remuneration is required.</mat-error>
+            }
+             @if (addWorkForm.get('remuneration')?.hasError('min')) {
+                <mat-error>Value cannot be negative.</mat-error>
+            }
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="addWorkForm.invalid || isSaving">
+        @if (isSaving) {
+            <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+        } @else {
+            <span>Create Entry</span>
+        }
+    </button>
+</mat-dialog-actions>

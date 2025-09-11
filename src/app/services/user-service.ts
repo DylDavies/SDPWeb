@@ -11,6 +11,7 @@ import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
 import { CustomObservableService } from './custom-observable-service';
+import { EPermission } from '../models/enums/permission.enum';
 
 
 @Injectable({
@@ -48,10 +49,24 @@ export class UserService {
    * Any component subscribed to `allUsers$` will automatically receive the new data.
    */
   public fetchAllUsers(): Observable<IUser[]> {
-    return this.httpService.get<IUser[]>('users').pipe(
-      tap(users => this.users$.next(users))
-    );
-  }
+  return this.httpService.get<IUser[]>('users').pipe(
+    map(users => {
+      return users.map(user => {
+        const permissions = new Set<EPermission>();
+        if (user.roles) {
+          for (const role of user.roles) {
+            for (const permission of role.permissions) {
+              permissions.add(permission);
+            }
+          }
+        }
+        return { ...user, permissions: Array.from(permissions) };
+      });
+    }),
+    // This part stays the same
+    tap(processedUsers => this.users$.next(processedUsers))
+  );
+}
 
   getUser(): Observable<IUser> {
     return this.httpService.get<IUser>('user');
