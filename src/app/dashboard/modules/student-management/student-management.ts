@@ -12,11 +12,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NotificationService } from '../../../services/notification-service';
-import { AuthService } from '../../../services/auth-service';
 import { BundleService } from '../../../services/bundle-service';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
-import { EPermission } from '../../../models/enums/permission.enum';
+
 
 @Component({
   selector: 'app-student-management',
@@ -38,9 +37,10 @@ import { EPermission } from '../../../models/enums/permission.enum';
 export class StudentManagement implements OnInit, AfterViewInit {
     private bundleService = inject(BundleService);
     private notificationService = inject(NotificationService);
-  
+
     public isLoading = true;
     public EBundleStatus = EBundleStatus; 
+
 
     // Table properties
     displayedColumns: string[] = ['student'];

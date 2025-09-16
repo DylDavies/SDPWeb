@@ -1,0 +1,26 @@
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.student-info-card {
+  width: 100%;
+  max-width: 700px;
+}
+
+mat-card-header {
+  margin-bottom: 16px;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px !important;
+}
+
+img[mat-card-avatar] {
+  width: 60px;
+  height: 60px;
+}
