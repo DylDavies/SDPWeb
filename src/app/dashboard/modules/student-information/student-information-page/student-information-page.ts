@@ -1,51 +1,51 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { UserService } from '../../../../services/user-service';
-import { IUser } from '../../../../models/interfaces/IUser.interface';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { BundleService } from '../../../../services/bundle-service';
+import { IBundle, IPopulatedUser } from '../../../../models/interfaces/IBundle.interface';
+import { MatTabsModule } from "@angular/material/tabs";
 
 @Component({
   selector: 'app-student-information-page',
-  imports: [CommonModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
-    MatButtonModule],
+  imports: [CommonModule, DatePipe, TitleCasePipe, MatCardModule, MatProgressSpinnerModule,
+    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule],
   templateUrl: './student-information-page.html',
   styleUrl: './student-information-page.scss'
 })
 export class StudentInformationPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private userService = inject(UserService);
+  private bundleService = inject(BundleService);
 
-  public student: IUser | null = null;
+  public bundle: IBundle | null = null;
   public isLoading = true;
-  public studentNotFound = false;
+  public bundleNotFound = false;
 
   ngOnInit(): void {
-    const studentId = this.route.snapshot.paramMap.get('id');
-    if (!studentId) {
-      this.studentNotFound = true;
+    const bundleId = this.route.snapshot.paramMap.get('id');
+    if (!bundleId) {
+      this.bundleNotFound = true;
       this.isLoading = false;
       return;
     }
 
-    this.userService.getUserById(studentId).subscribe({
-      next: (user) => {
-        if (user) {
-          this.student = user;
+    this.bundleService.getBundleById(bundleId).subscribe({
+      next: (bundle) => {
+        if (bundle) {
+          this.bundle = bundle;
         } else {
-          this.studentNotFound = true;
+          this.bundleNotFound = true;
         }
         this.isLoading = false;
       },
       error: () => {
-        this.studentNotFound = true;
+        this.bundleNotFound = true;
         this.isLoading = false;
       }
     });
@@ -53,6 +53,13 @@ export class StudentInformationPage implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/dashboard/students']);
+  }
+  getDisplayName(user: string | IPopulatedUser): string {
+    if (typeof user === 'object' && user.displayName) {
+      return user.displayName;
+    }
+    // You can decide what to show if it's just a string ID, e.g., the ID itself or a placeholder.
+    return 'N/A';
   }
 
 }
