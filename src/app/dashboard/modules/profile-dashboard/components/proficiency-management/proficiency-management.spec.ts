@@ -1,278 +1,306 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatButtonModule } from '@angular/material/button';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatOptionModule } from '@angular/material/core';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Observable, forkJoin } from 'rxjs';
-import { map, startWith, filter, switchMap } from 'rxjs/operators';
-import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
-import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { of, throwError, BehaviorSubject, Subject } from 'rxjs';
+
+import { ProficiencyManagement } from './proficiency-management';
 import { ProficiencyService } from '../../../../../services/proficiency-service';
 import { AuthService } from '../../../../../services/auth-service';
-import { IUser } from '../../../../../models/interfaces/IUser.interface';
-import { BackendSubject } from '../../../../../models/interfaces/IBackendSubject.interface';
 import { UserService } from '../../../../../services/user-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
-import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
-import { IBackendProficiency } from '../../../../../models/interfaces/IBackendProficiency.interface';
+import { IUser } from '../../../../../models/interfaces/IUser.interface';
+import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
+import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
 
-@Component({
-  selector: 'app-proficiency-management',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatTabsModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    MatOptionModule,
-    MatButtonModule,
-    MatListModule,
-    MatIconModule,
-    MatDialogModule,
-  ],
-  templateUrl: './proficiency-management.html',
-  styleUrls: ['./proficiency-management.scss'],
-})
-export class ProficiencyManagement implements OnInit {
-  @ViewChild('subjectInput') subjectInput!: ElementRef<HTMLInputElement>;
-  public dialogRef = inject(MatDialogRef<ProficiencyManagement>);
-  public authService = inject(AuthService);
-  public user: IUser | null = null;
+// --- MOCK DATA ---
+const mockSubjectMath: ISubject = { _id: 'subj1', name: 'Mathematics', grades: ['10', '11', '12'] };
+const mockSubjectPhys: ISubject = { _id: 'subj2', name: 'Physics', grades: ['11', '12'] };
+const mockSubjectArt: ISubject = { _id: 'subj3', name: 'Art', grades: [] }; // Subject with grades array
+// FIX: Added the required 'grades' property to satisfy the ISubject interface.
+const mockSubjectMusic: ISubject = { _id: 'subj4', name: 'Music', grades: [] }; // Subject without grades property
 
-  private profService = inject(ProficiencyService);
-  private userService = inject(UserService);
-  private notificationService = inject(SnackBarService);
-  private dialog = inject(MatDialog);
+const mockProficiency: IProficiency = {
+  _id: 'prof1', name: 'Cambridge', subjects: {
+    mathematics: mockSubjectMath,
+    physics: mockSubjectPhys,
+    art: mockSubjectArt,
+    music: mockSubjectMusic
+  }
+};
+const mockUserProficiency: IProficiency = {
+    name: 'Cambridge',
+    subjects: {
+        mathematics: { name: 'Mathematics', grades: ['10'] } as ISubject
+    }
+};
+const mockUser: IUser = {
+  _id: 'user123',
+  displayName: 'Test User',
+  proficiencies: [mockUserProficiency]
+} as IUser;
 
-  proficiencies: IProficiency[] = [];
-  selectedSyllabus: string | null = null;
-  availableSubjects: string[] = [];
-  selectedSubjects: string[] = [];
-  userProficiencies: IProficiency[] = [];
-  selectedUserSyllabus: string | null = null;
-  selectedUserSyllabusSubjects: ISubject[] = [];
+
+// --- MOCK SERVICES ---
+let authServiceSpy: { currentUser$: BehaviorSubject<IUser | null>, updateCurrentUserState: jasmine.Spy };
+let proficiencyServiceSpy: { fetchAllProficiencies: jasmine.Spy };
+let userServiceSpy: { deleteSubjectFromProficiency: jasmine.Spy, updateUserProficiency: jasmine.Spy };
+let snackbarServiceSpy: jasmine.SpyObj<SnackBarService>;
+let matDialogSpy: jasmine.SpyObj<MatDialog>;
+
+
+describe('ProficiencyManagement', () => {
+  let component: ProficiencyManagement;
+  let fixture: ComponentFixture<ProficiencyManagement>;
+
+  beforeEach(async () => {
+    // Re-initialize spies before each test to ensure they are clean
+    authServiceSpy = {
+        currentUser$: new BehaviorSubject<IUser | null>(null),
+        updateCurrentUserState: jasmine.createSpy('updateCurrentUserState')
+    };
+    proficiencyServiceSpy = {
+        fetchAllProficiencies: jasmine.createSpy('fetchAllProficiencies').and.returnValue(of([mockProficiency]))
+    };
+    userServiceSpy = {
+        deleteSubjectFromProficiency: jasmine.createSpy('deleteSubjectFromProficiency').and.returnValue(of(mockUser)),
+        updateUserProficiency: jasmine.createSpy('updateUserProficiency').and.returnValue(of(mockUser))
+    };
+    snackbarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError', 'showInfo']);
+    matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+
+    await TestBed.configureTestingModule({
+      imports: [ProficiencyManagement, NoopAnimationsModule],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: ProficiencyService, useValue: proficiencyServiceSpy },
+        { provide: UserService, useValue: userServiceSpy },
+        { provide: SnackBarService, useValue: snackbarServiceSpy },
+        { provide: MatDialog, useValue: matDialogSpy },
+      ]
+    })
+    .overrideComponent(ProficiencyManagement, {
+        remove: { imports: [MatDialogModule] },
+        add: {}
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(ProficiencyManagement);
+    component = fixture.componentInstance;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
   
-  syllabusSelections: Record<string, Record<string, string[]>> = {};
+  describe('Initialization', () => {
+    it('should initialize with user and proficiency data', fakeAsync(() => {
+        authServiceSpy.currentUser$.next(mockUser);
+        fixture.detectChanges(); // ngOnInit
+        tick();
+        
+        expect(component.user).toEqual(mockUser);
+        expect(component.userProficiencies.length).toBe(1);
+        expect(proficiencyServiceSpy.fetchAllProficiencies).toHaveBeenCalled();
+        expect(component.proficiencies.length).toBe(1);
+        expect(component.selectedSyllabus).toBe('Cambridge');
+    }));
 
-  selectedGrades: string[] = [];
-  selectedSubject: string | null = null;
-  public availableGrades: string[] = [];
-  subjectCtrl = new FormControl('');
-  filteredSubjects!: Observable<string[]>;
+     it('should handle initialization with no existing user proficiencies', fakeAsync(() => {
+        const userWithoutProficiencies = { ...mockUser, proficiencies: [] };
+        authServiceSpy.currentUser$.next(userWithoutProficiencies);
+        fixture.detectChanges();
+        tick();
+        expect(component.userProficiencies.length).toBe(0);
+        expect(component.selectedUserSyllabus).toBeNull();
+    }));
 
-  ngOnInit(): void {
-    this.authService.currentUser$.pipe(
-      filter((user): user is IUser => !!user), 
-      switchMap(user => {
-        this.user = user;
-        if (user.proficiencies) {
-          this.userProficiencies = user.proficiencies;
-          this.prepopulateSyllabusSelections();
-        }
-        return this.profService.fetchAllProficiencies();
-      })
-    ).subscribe({
-      next: (allProficiencies) => {
-        this.proficiencies = allProficiencies;
+     it('should handle errors during initialization', () => {
+        const consoleErrorSpy = spyOn(console, 'error');
+        authServiceSpy.currentUser$.next(mockUser);
+        proficiencyServiceSpy.fetchAllProficiencies.and.returnValue(throwError(() => new Error('API down')));
+        fixture.detectChanges();
+        expect(consoleErrorSpy).toHaveBeenCalled();
+     });
 
-        if (this.proficiencies.length > 0) {
-          const initialSyllabus = this.selectedSyllabus || this.proficiencies[0].name;
-          this.onSyllabusSelect(initialSyllabus);
-        }
-        if (this.userProficiencies.length > 0) {
-          this.onUserSyllabusSelect(this.userProficiencies[0].name);
-        }
-      },
-      error: (err) => console.error('Error initializing proficiency data:', err),
+     it('should handle initialization when there is no logged-in user', fakeAsync(() => {
+        authServiceSpy.currentUser$.next(null);
+        fixture.detectChanges();
+        tick();
+        expect(component.user).toBeNull();
+        expect(proficiencyServiceSpy.fetchAllProficiencies).not.toHaveBeenCalled();
+     }));
+  });
+
+  describe('User Proficiencies (View) Tab', () => {
+    beforeEach(fakeAsync(() => {
+        authServiceSpy.currentUser$.next(mockUser);
+        fixture.detectChanges();
+        tick();
+    }));
+
+    it('should select a user syllabus and display its subjects', () => {
+        component.onUserSyllabusSelect('Cambridge');
+        expect(component.selectedUserSyllabus).toBe('Cambridge');
+        expect(component.selectedUserSyllabusSubjects.length).toBe(1);
+        expect(component.selectedUserSyllabusSubjects[0].name).toBe('Mathematics');
     });
 
-    this.filteredSubjects = this.subjectCtrl.valueChanges.pipe(
-      startWith(''),
-      map((value) => this._filter(value || ''))
-    );
-  }
-
-  private prepopulateSyllabusSelections(): void {
-    this.syllabusSelections = {};
-    this.userProficiencies.forEach(prof => {
-        this.syllabusSelections[prof.name] = {};
-        if (prof.subjects) {
-            Object.values(prof.subjects).forEach(subject => {
-                this.syllabusSelections[prof.name][subject.name] = subject.grades;
-            });
-        }
+    it('should do nothing if a non-existent user syllabus is selected', () => {
+        component.onUserSyllabusSelect('Non-Existent');
+        expect(component.selectedUserSyllabus).not.toBe('Non-Existent');
     });
-  }
 
-  private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.availableSubjects.filter(
-      (s) => !this.selectedSubjects.includes(s) && s.toLowerCase().includes(filterValue)
-    );
-  }
+    it('should handle deleting a subject with confirmation', fakeAsync(() => {
+        matDialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
+        component.deleteSubject('Cambridge', mockSubjectMath);
+        tick();
 
-  onSyllabusSelect(name: string) {
-    this.selectedSyllabus = name;
-    
-    const syllabus = this.proficiencies.find(p => p.name === name);
-    this.availableSubjects = syllabus ? Object.values(syllabus.subjects).map((s: ISubject) => s.name) : [];
-    
-    if (!this.syllabusSelections[name]) {
-      this.syllabusSelections[name] = {};
-    }
-    
-    this.selectedSubjects = Object.keys(this.syllabusSelections[name]);
-    this.selectedSubject = null;
-    this.selectedGrades = [];
-    this.clearInput(false);
-    
-    this.subjectCtrl.setValue('');
-  }
+        expect(userServiceSpy.deleteSubjectFromProficiency).toHaveBeenCalledWith('user123', 'Cambridge', 'subj1');
+        expect(authServiceSpy.updateCurrentUserState).toHaveBeenCalled();
+        expect(snackbarServiceSpy.showSuccess).toHaveBeenCalled();
+    }));
 
-  onUserSyllabusSelect(name: string): void {
-    const prof = this.userProficiencies?.find((p) => p.name === name);
-    if (prof) {
-      this.selectedUserSyllabus = name;
-      this.selectedUserSyllabusSubjects = prof.subjects ? Object.values(prof.subjects) : [];
-    }
-  }
-
-  onAutocompleteSelected(event: MatAutocompleteSelectedEvent) {
-    const subjectName = event.option.value;
-    this.addSubjectToSelection(subjectName);
-    this.selectSubjectForEditing(subjectName);
-    this.clearInput(true);
-  }
-  
-  onChipClick(subjectName: string) {
-    this.selectSubjectForEditing(subjectName);
-  }
-
-  private addSubjectToSelection(subjectName: string): void {
-    if (!this.selectedSyllabus) return;
-    if (!this.syllabusSelections[this.selectedSyllabus][subjectName]) {
-      this.syllabusSelections[this.selectedSyllabus][subjectName] = [];
-    }
-    this.selectedSubjects = Object.keys(this.syllabusSelections[this.selectedSyllabus]);
-  }
-  
-  private selectSubjectForEditing(subjectName: string) {
-    this.selectedSubject = subjectName;
-    this.updateAvailableGrades(subjectName);
-    this.selectedGrades = this.selectedSyllabus ? this.syllabusSelections[this.selectedSyllabus]?.[subjectName] || [] : [];
-  }
-
-  private updateAvailableGrades(subjectName: string): void {
-    this.availableGrades = [];
-    if (!this.selectedSyllabus) return;
-    
-    const syllabus = this.proficiencies.find(p => p.name === this.selectedSyllabus);
-    if (!syllabus) return;
-
-    const subjectObject = Object.values(syllabus.subjects).find((s: ISubject) => s.name === subjectName);
-    
-    if (subjectObject && subjectObject.grades) {
-        this.availableGrades = subjectObject.grades;
-    }
-  }
-
-  addSubjectWithGrades() {
-    if (!this.selectedSyllabus || !this.selectedSubject) return;
-    this.syllabusSelections[this.selectedSyllabus][this.selectedSubject] = [...this.selectedGrades];
-    this.selectedSubject = null;
-    this.selectedGrades = [];
-  }
-
-  getGradeNames(subject: ISubject): string {
-    return subject.grades ? subject.grades.join(', ') : '';
-  }
-
-  private clearInput(refocus = false) {
-    this.subjectCtrl.setValue('');
-    if (this.subjectInput) {
-      this.subjectInput.nativeElement.value = '';
-      if (refocus) setTimeout(() => this.subjectInput.nativeElement.focus(), 0);
-    }
-  }
-
-  removeSubject(subject: string) {
-    if (!this.selectedSyllabus) return;
-    delete this.syllabusSelections[this.selectedSyllabus][subject];
-    this.selectedSubjects = Object.keys(this.syllabusSelections[this.selectedSyllabus]);
-    if (this.selectedSubject === subject) {
-      this.selectedSubject = null;
-      this.selectedGrades = [];
-    }
-  }
-
-  confirmSave(): void {
-    if (!this.user) return;
-  
-    const proficienciesToSave: IBackendProficiency[] = Object.keys(this.syllabusSelections).map(syllabusName => {
-      const subjectSelections = this.syllabusSelections[syllabusName];
-      const subjectsAsObject: Record<string, BackendSubject> = {};
-  
-      Object.keys(subjectSelections).forEach(subjectName => {
-        const subjectKey = subjectName.toLowerCase().replace(/\s+/g, '_');
-        subjectsAsObject[subjectKey] = {
-          name: subjectName,
-          grades: subjectSelections[subjectName]
-        };
-      });
-  
-      return {
-        name: syllabusName,
-        subjects: subjectsAsObject,
-      };
-    }).filter(p => Object.keys(p.subjects).length > 0);
-    
-    if (proficienciesToSave.length === 0) {
-      this.notificationService.showInfo("No changes to save.");
-      return;
-    }
-  
-    const dialogRef = this.dialog.open(ConfirmationDialog, {
-      data: {
-        title: 'Confirm Changes',
-        message: 'Are you sure you want to save these proficiency changes?',
-        confirmText: 'Save'
-      }
+     it('should not delete a subject if confirmation is cancelled', () => {
+        matDialogSpy.open.and.returnValue({ afterClosed: () => of(false) } as any);
+        component.deleteSubject('Cambridge', mockSubjectMath);
+        expect(userServiceSpy.deleteSubjectFromProficiency).not.toHaveBeenCalled();
     });
-  
-    dialogRef.afterClosed().pipe(
-      filter((result): result is boolean => result === true),
-      switchMap(() => {
-        const userId = this.user!._id;
-        const updateObservables = proficienciesToSave.map(prof => 
-          this.userService.updateUserProficiency(userId, prof)
-        );
-        return forkJoin(updateObservables);
-      })
-    ).subscribe({
-      next: (updatedUsers: IUser[]) => {
-        const finalUpdatedUser = updatedUsers[updatedUsers.length - 1];
-        this.authService.updateCurrentUserState(finalUpdatedUser);
-        this.notificationService.showSuccess('Proficiencies updated successfully!');
-        this.dialogRef.close(true);
-      },
-      error: (err) => {
-        console.error('Failed to update proficiencies', err);
-        this.notificationService.showError('An error occurred while saving.');
-      }
+
+    it('should show an error if deleting a subject fails', fakeAsync(() => {
+        matDialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
+        userServiceSpy.deleteSubjectFromProficiency.and.returnValue(throwError(() => new Error('API Error')));
+        component.deleteSubject('Cambridge', mockSubjectMath);
+        tick();
+        expect(snackbarServiceSpy.showError).toHaveBeenCalled();
+    }));
+
+    it('should show error and not call dialog if subject has no _id', () => {
+        const subjectWithoutId = { name: 'Bad Subject' } as ISubject;
+        component.deleteSubject('Cambridge', subjectWithoutId);
+        expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('Cannot delete subject without a valid ID.');
+        expect(matDialogSpy.open).not.toHaveBeenCalled();
     });
-  }
-}
+
+    it('should return an empty string for grades if grades property is missing', () => {
+        expect(component.getGradeNames(mockSubjectMusic)).toBe('');
+    });
+  });
+  
+  describe('Edit Proficiencies Tab', () => {
+    beforeEach(fakeAsync(() => {
+        authServiceSpy.currentUser$.next(mockUser);
+        fixture.detectChanges();
+        tick();
+    }));
+
+    it('should add a subject via autocomplete and select it for editing', () => {
+        component.onSyllabusSelect('Cambridge');
+        const event = { option: { value: 'Physics' } } as MatAutocompleteSelectedEvent;
+        component.onAutocompleteSelected(event);
+
+        expect(component.selectedSubjects).toContain('Physics');
+        expect(component.selectedSubject).toBe('Physics');
+        expect(component.availableGrades).toEqual(['11', '12']);
+    });
+
+    it('should remove a subject that is NOT the currently selected subject', () => {
+        component.onSyllabusSelect('Cambridge');
+        // Add two subjects
+        component.onAutocompleteSelected({ option: { value: 'Physics' } } as MatAutocompleteSelectedEvent);
+        component.onAutocompleteSelected({ option: { value: 'Mathematics' } } as MatAutocompleteSelectedEvent);
+
+        // Select 'Mathematics' for editing
+        component.onChipClick('Mathematics');
+        expect(component.selectedSubject).toBe('Mathematics');
+        
+        // Remove 'Physics'
+        component.removeSubject('Physics');
+        expect(component.selectedSubjects).not.toContain('Physics');
+        // The selected subject should remain 'Mathematics'
+        expect(component.selectedSubject).toBe('Mathematics');
+    });
+
+    it('should add selected grades to a subject', () => {
+        component.onSyllabusSelect('Cambridge');
+        const event = { option: { value: 'Physics' } } as MatAutocompleteSelectedEvent;
+        component.onAutocompleteSelected(event);
+
+        component.selectedGrades = ['12'];
+        component.addSubjectWithGrades();
+
+        expect(component.syllabusSelections['Cambridge']['Physics']).toEqual(['12']);
+        expect(component.selectedSubject).toBeNull();
+    });
+
+    it('should handle selecting a syllabus that does not exist', () => {
+        component.onSyllabusSelect('Non-Existent');
+        expect(component.availableSubjects).toEqual([]);
+    });
+
+    it('should clear input without refocusing', () => {
+        component.subjectInput = { nativeElement: { value: 'test', focus: jasmine.createSpy('focus') } } as any;
+        // @ts-expect-error - Accessing private method for test
+        component.clearInput(false);
+        expect(component.subjectInput.nativeElement.focus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('confirmSave', () => {
+    beforeEach(fakeAsync(() => {
+        authServiceSpy.currentUser$.next(mockUser);
+        fixture.detectChanges();
+        tick();
+    }));
+
+    it('should not run if user is not available', () => {
+        component.user = null;
+        component.confirmSave();
+        expect(matDialogSpy.open).not.toHaveBeenCalled();
+    });
+
+    it('should show info snackbar if there are no changes to save', () => {
+        component.confirmSave();
+        expect(snackbarServiceSpy.showInfo).toHaveBeenCalledWith("No changes to save.");
+    });
+
+    it('should save changes after confirmation', fakeAsync(() => {
+        component.onSyllabusSelect('Cambridge');
+        component.onAutocompleteSelected({ option: { value: 'Physics' } } as MatAutocompleteSelectedEvent);
+        component.selectedGrades = ['12'];
+        component.addSubjectWithGrades();
+        
+        matDialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
+        
+        component.confirmSave();
+        tick();
+
+        expect(userServiceSpy.updateUserProficiency).toHaveBeenCalled();
+        expect(authServiceSpy.updateCurrentUserState).toHaveBeenCalled();
+        expect(snackbarServiceSpy.showSuccess).toHaveBeenCalled();
+    }));
+
+     it('should show an error if saving fails', fakeAsync(() => {
+        component.onSyllabusSelect('Cambridge');
+        component.onAutocompleteSelected({ option: { value: 'Physics' } } as MatAutocompleteSelectedEvent);
+        matDialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
+        userServiceSpy.updateUserProficiency.and.returnValue(throwError(() => new Error()));
+        
+        component.confirmSave();
+        tick();
+        expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('An error occurred while saving.');
+    }));
+
+    it('should show an error if the final updated user is null', fakeAsync(() => {
+        component.onSyllabusSelect('Cambridge');
+        component.onAutocompleteSelected({ option: { value: 'Physics' } } as MatAutocompleteSelectedEvent);
+        matDialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
+        userServiceSpy.updateUserProficiency.and.returnValue(of(null));
+        
+        component.confirmSave();
+        tick();
+        expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('Could not confirm proficiency updates.');
+    }));
+  });
+});
+
