@@ -15,6 +15,7 @@ import { NotificationService } from '../../../services/notification-service';
 import { BundleService } from '../../../services/bundle-service';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -37,7 +38,7 @@ import { IBundle } from '../../../models/interfaces/IBundle.interface';
 export class StudentManagement implements OnInit, AfterViewInit {
     private bundleService = inject(BundleService);
     private notificationService = inject(NotificationService);
-
+    private router = inject(Router);
     public isLoading = true;
     public EBundleStatus = EBundleStatus; 
 
@@ -89,5 +90,8 @@ export class StudentManagement implements OnInit, AfterViewInit {
     };
     return filterFunction;
   }
+  viewStudentInfo(student: IBundle): void {
+      this.router.navigate(['/dashboard/student-info', student._id]);
+    }
 
 }

@@ -18,6 +18,7 @@ import { AccountDisabled } from './status-pages/account-disabled/account-disable
 import { UserManagement } from './dashboard/modules/user-management/user-management';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
 import { StudentManagement } from './dashboard/modules/student-management/student-management';
+import { StudentInformationPage } from './dashboard/modules/student-information/student-information-page/student-information-page';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -32,6 +33,7 @@ export const routes: Routes = [
       { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       {path: 'students', component: StudentManagement},
+      {path: 'student-info/:id',component: StudentInformationPage},
       { 
         path: 'bundles', 
         component: BundleDashboard,
