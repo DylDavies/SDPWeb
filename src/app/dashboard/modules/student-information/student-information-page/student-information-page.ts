@@ -10,11 +10,13 @@ import { MatListModule } from '@angular/material/list';
 import { BundleService } from '../../../../services/bundle-service';
 import { IBundle, IPopulatedUser } from '../../../../models/interfaces/IBundle.interface';
 import { MatTabsModule } from "@angular/material/tabs";
+import { MissionsModal } from '../components/missions-modal/missions-modal';
+import { MissionsTable } from '../components/missions-table/missions-table';
 
 @Component({
   selector: 'app-student-information-page',
   imports: [CommonModule, DatePipe, TitleCasePipe, MatCardModule, MatProgressSpinnerModule,
-    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule],
+    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsModal, MissionsTable],
   templateUrl: './student-information-page.html',
   styleUrl: './student-information-page.scss'
 })
