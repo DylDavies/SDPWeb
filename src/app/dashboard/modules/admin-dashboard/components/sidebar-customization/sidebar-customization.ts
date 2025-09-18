@@ -10,10 +10,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { ISidebarLinkDefinition, AVAILABLE_SIDEBAR_LINKS, ISidebarRemovable } from '../../../../../config/sidebar-links.config';
 import { ISidebarItem } from '../../../../../models/interfaces/ISidebarItem.interface';
-import { NotificationService } from '../../../../../services/notification-service';
 import { SidebarService } from '../../../../../services/sidebar-service';
 import { EditCategoryDialog } from './components/edit-category-dialog/edit-category-dialog';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-sidebar-customization',
@@ -33,7 +33,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 })
 export class SidebarCustomization implements OnInit, OnDestroy {
   private sidebarService = inject(SidebarService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
 
   public availableLinks: ISidebarLinkDefinition[] = [];
@@ -158,7 +158,7 @@ export class SidebarCustomization implements OnInit, OnDestroy {
       }
     } else if (event.previousContainer !== event.container) {
       if (draggedItem.stopRemove) {
-        this.notificationService.showError("That item must always be in the Sidebar Layout.");
+        this.snackbarService.showError("That item must always be in the Sidebar Layout.");
         return;
       }
 
@@ -238,7 +238,7 @@ export class SidebarCustomization implements OnInit, OnDestroy {
 
   removeItem(itemToRemove: ISidebarItem & ISidebarRemovable): void {
     if (itemToRemove.stopRemove) {
-      this.notificationService.showError("That item must always be in the Sidebar Layout.");
+      this.snackbarService.showError("That item must always be in the Sidebar Layout.");
       return;
     }
 
@@ -272,15 +272,15 @@ export class SidebarCustomization implements OnInit, OnDestroy {
   saveChanges(): void {
     const emptyCategory = this.findEmptyCategory(this.currentSidebarItems);
     if (emptyCategory) {
-      this.notificationService.showError(`Category "${emptyCategory.label}" cannot be empty. Please add items to it or remove it.`);
+      this.snackbarService.showError(`Category "${emptyCategory.label}" cannot be empty. Please add items to it or remove it.`);
       return;
     }
 
     this.currentSidebarItems = this.orderItems(this.currentSidebarItems);
     this.sidebarService.updateSidebarItems(this.currentSidebarItems).subscribe({
-      next: () => this.notificationService.showSuccess('Sidebar updated successfully!'),
+      next: () => this.snackbarService.showSuccess('Sidebar updated successfully!'),
       error: (err) => {
-        this.notificationService.showError('Failed to update sidebar.');
+        this.snackbarService.showError('Failed to update sidebar.');
         console.error(err);
       },
     });
