@@ -1,0 +1,105 @@
+:host {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dialog-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.header-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.badge-name-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 400;
+}
+
+mat-dialog-content {
+  flex-grow: 1; 
+  overflow-y: auto; 
+  min-height: 0; 
+  padding: 0;
+  margin: 16px 24px;
+}
+
+form {
+  padding-top: 8px;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  min-height: 150px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.empty-state mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+}
+
+.requirements-text-container {
+  padding-right: 8px; 
+}
+
+pre.requirements-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.7;
+  font-family: 'Roboto', sans-serif;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.95rem;
+  padding: 16px;
+  background-color: var(--mat-sys-surface-container-low);
+  border-radius: 8px;
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+
+.edit-textarea {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  flex-shrink: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
