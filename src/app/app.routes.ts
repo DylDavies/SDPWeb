@@ -17,6 +17,7 @@ import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
 import { UserManagement } from './dashboard/modules/user-management/user-management';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
+import { BadgeLibrary } from './dashboard/modules/badge-library/badge-library';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -39,7 +40,8 @@ export const routes: Routes = [
           EPermission.BUNDLES_EDIT,
           EPermission.BUNDLES_DELETE
         ], true)] 
-      }
+      },
+      { path: 'badges', component: BadgeLibrary, canActivate: [permissionGuard([EPermission.BADGES_VIEW])] },
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },
