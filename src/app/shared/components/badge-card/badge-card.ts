@@ -16,6 +16,7 @@ import { BadgeService } from '../../../services/badge-service';
 import { ConfirmationDialog } from '../confirmation-dialog/confirmation-dialog';
 import { filter } from 'rxjs/operators';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BadgeRequirementDialogComponent } from '../badge-requirement-dialog/badge-requirement-dialog';
 
 @Component({
   selector: 'app-badge-card',
@@ -27,7 +28,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class BadgeCardComponent implements OnInit {
   @Input() badge!: IBadge;
   @Input() userId?: string;
-  @Input() context: 'admin' | 'profile' = 'profile';
+  @Input() context: 'admin' | 'profile' | 'library' = 'profile';
   @Output() badgeUpdated = new EventEmitter<void>();
 
   private dialog = inject(MatDialog);
@@ -38,16 +39,29 @@ export class BadgeCardComponent implements OnInit {
 
   public canCreateOrEditBadges = false;
   public canManageUserBadges = false;
+  public canViewRequirements = false;
+  public canManageRequirements = false;
 
   ngOnInit(): void {
     this.canCreateOrEditBadges = this.authService.hasPermission(EPermission.BADGES_CREATE);
     this.canManageUserBadges = this.authService.hasPermission(EPermission.BADGES_MANAGE);
+    this.canViewRequirements = this.authService.hasPermission(EPermission.BADGES_VIEW_REQUIREMENTS);
+    this.canManageRequirements = this.authService.hasPermission(EPermission.BADGES_MANAGE_REQUIREMENTS);
   }
 
   viewDetails(): void {
     this.dialog.open(BadgeDetailDialogComponent, {
       width: '400px',
       data: { badge: this.badge },
+    });
+  }
+  openRequirementsDialog(): void {
+    this.dialog.open(BadgeRequirementDialogComponent, {
+      width: 'clamp(500px, 50vw, 600px)',
+      data: { 
+        badge: this.badge,
+        isEditable: this.context === 'admin' && this.canManageRequirements
+      }
     });
   }
 
