@@ -11,7 +11,6 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NotificationService } from '../../../services/notification-service';
 import { BundleService } from '../../../services/bundle-service';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
