@@ -9,6 +9,7 @@ import { UserService } from '../../../services/user-service';
 import { BadgeService } from '../../../services/badge-service';
 import IBadge from '../../../models/interfaces/IBadge.interface';
 import { IUser } from '../../../models/interfaces/IUser.interface';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-add-user-badge-dialog',
@@ -20,8 +21,10 @@ import { IUser } from '../../../models/interfaces/IUser.interface';
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './add-user-badge-dialog.html',
+  styleUrls: ['./add-user-badge-dialog.scss'],
 })
 export class AddUserBadgeDialogComponent implements OnInit {
   private userService = inject(UserService);
@@ -33,26 +36,25 @@ export class AddUserBadgeDialogComponent implements OnInit {
   public badgeControl = new FormControl<IBadge | null>(null, Validators.required);
 
   ngOnInit(): void {
-    // fetch all badges
-    this.badgeService.getBadges().subscribe((allBadges) => { 
+    this.badgeService.getBadges().subscribe((allBadges) => {
       const userBadgeIds = new Set(this.data.user.badges?.map(b => b._id.toString()));
-      this.availableBadges = allBadges.filter(b => !userBadgeIds.has(b._id.toString())); // filter out badges user already has
+      this.availableBadges = allBadges.filter(b => !userBadgeIds.has(b._id.toString()));
     });
   }
 
   onAdd(): void {
     if (this.badgeControl.valid && this.badgeControl.value) {
       const selectedBadge = this.badgeControl.value;
-      if(selectedBadge){
-          this.userService.addBadgeToUser(this.data.user._id, selectedBadge).subscribe({
-              next: (updatedUser) => {
-                  this.dialogRef.close({ updatedUser: updatedUser });
-              },
-              error: (err) => {
-                  this.dialogRef.close({ error: true }); 
-                  console.error(err);
-              }
-          });
+      if (selectedBadge) {
+        this.userService.addBadgeToUser(this.data.user._id, selectedBadge).subscribe({
+          next: (updatedUser) => {
+            this.dialogRef.close({ updatedUser: updatedUser });
+          },
+          error: (err) => {
+            this.dialogRef.close({ error: true });
+            console.error(err);
+          }
+        });
       }
     }
   }
