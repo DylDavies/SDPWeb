@@ -26,6 +26,12 @@ export class AuthService {
   private window = this.document.defaultView;
 
   constructor() {
+    this.socketService.connectionHook(() => {
+      const token = this.getToken();
+
+      if (token) this.socketService.authenticate(token);
+    })
+
     this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
       console.log('Received users-updated event. Refreshing logged in user.');
       this.verification$ = null; // Force re-verification
@@ -83,6 +89,8 @@ export class AuthService {
     this.verification$ = this.httpService.get<IUser>('user').pipe(
       tap(user => {
         this.currentUserSubject.next(user);
+
+        this.socketService.authenticate(token);
       }),
       catchError(() => {
         this.removeToken();

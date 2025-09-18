@@ -119,6 +119,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   color: white;
 }
 
+.mat-mdc-snack-bar-container.info-snackbar button.mdc-snackbar__action {
+  color: white !important;
+}
+
 .image-backdrop {
   background-color: transparent;
 }

@@ -6,7 +6,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { BundleDashboard } from './bundle-dashboard';
 import { BundleService } from '../../../services/bundle-service';
-import { NotificationService } from '../../../services/notification-service';
+import { SnackBarService } from '../../../services/snackbar-service';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
 
@@ -14,7 +14,7 @@ describe('BundleDashboard', () => {
   let component: BundleDashboard;
   let fixture: ComponentFixture<BundleDashboard>;
   let bundleServiceSpy: jasmine.SpyObj<BundleService>;
-  let notificationServiceSpy: jasmine.SpyObj<NotificationService>;
+  let notificationServiceSpy: jasmine.SpyObj<SnackBarService>;
   let dialog: MatDialog;
 
   const mockBundles: IBundle[] = [
@@ -24,7 +24,7 @@ describe('BundleDashboard', () => {
 
   beforeEach(async () => {
     bundleServiceSpy = jasmine.createSpyObj('BundleService', ['getBundles', 'setBundleActiveStatus', 'setBundleStatus']);
-    notificationServiceSpy = jasmine.createSpyObj('NotificationService', ['showSuccess', 'showError']);
+    notificationServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
     
     await TestBed.configureTestingModule({
       imports: [BundleDashboard, NoopAnimationsModule, MatDialogModule],
@@ -32,7 +32,7 @@ describe('BundleDashboard', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: BundleService, useValue: bundleServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: SnackBarService, useValue: notificationServiceSpy },
       ]
     })
     .compileComponents();
