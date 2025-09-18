@@ -42,6 +42,7 @@ export class Sidebar implements OnInit, OnDestroy {
     { label: 'Home', icon: 'dashboard', route: '/dashboard' },
     { label: 'Profile', icon: 'person', route: '/dashboard/profile' },
     { label: 'User Management', icon: 'people', route: '/dashboard/users', requiredPermissions: [EPermission.USERS_VIEW] },
+    {label: 'Students', icon: 'school', route: '/dashboard/students' },
     { 
       label: 'Bundles', 
       icon: 'inventory', 

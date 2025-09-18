@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatSelectModule } from '@angular/material/select';
 import { BundleService } from '../../../../../services/bundle-service';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { UserService } from '../../../../../services/user-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { Observable, combineLatest } from 'rxjs';
@@ -43,7 +43,7 @@ import { EUserType } from '../../../../../models/enums/user-type.enum';
 export class CreateBundleModal implements OnInit {
   private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private userService = inject(UserService);
   private proficiencyService = inject(ProficiencyService);
   public dialogRef = inject(MatDialogRef<CreateBundleModal>);
@@ -270,12 +270,12 @@ export class CreateBundleModal implements OnInit {
 
     this.bundleService.createBundle(payload.student, payload.subjects).subscribe({
       next: (newBundle) => {
-        this.notificationService.showSuccess('Bundle created successfully!');
+        this.snackbarService.showSuccess('Bundle created successfully!');
         this.dialogRef.close(newBundle);
       },
       error: (err) => {
         this.isSaving = false;
-        this.notificationService.showError(err.error?.message || 'Failed to create bundle.');
+        this.snackbarService.showError(err.error?.message || 'Failed to create bundle.');
       }
     });
   }

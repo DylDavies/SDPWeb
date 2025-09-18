@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { filter } from 'rxjs/operators';
-import { NotificationService } from '../../../services/notification-service';
+import { SnackBarService } from '../../../services/snackbar-service';
 import { BundleService } from '../../../services/bundle-service';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
@@ -44,7 +44,7 @@ import { ConfirmationDialog } from '../../../shared/components/confirmation-dial
 })
 export class BundleDashboard implements OnInit, AfterViewInit {
   private bundleService = inject(BundleService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
   private authService = inject(AuthService);
 
@@ -90,7 +90,7 @@ export class BundleDashboard implements OnInit, AfterViewInit {
         this.isLoading = false;
       },
       error: (err) => {
-        this.notificationService.showError(err.error?.message || 'Failed to load bundles.');
+        this.snackbarService.showError(err.error?.message || 'Failed to load bundles.');
         this.isLoading = false;
       }
     });
@@ -135,11 +135,11 @@ export class BundleDashboard implements OnInit, AfterViewInit {
     dialogRef.afterClosed().pipe(filter(result => result === true)).subscribe(() => {
       this.bundleService.setBundleActiveStatus(bundle._id, false).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Bundle deactivated successfully.');
+          this.snackbarService.showSuccess('Bundle deactivated successfully.');
           this.loadBundles();
         },
         error: (err) => {
-          this.notificationService.showError(err.error?.message || 'Failed to deactivate bundle.');
+          this.snackbarService.showError(err.error?.message || 'Failed to deactivate bundle.');
         }
       });
     });
@@ -158,10 +158,10 @@ export class BundleDashboard implements OnInit, AfterViewInit {
     dialogRef.afterClosed().pipe(filter(result => result === true)).subscribe(() => {
       this.bundleService.setBundleStatus(bundle._id, EBundleStatus.Approved).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Bundle approved.');
+          this.snackbarService.showSuccess('Bundle approved.');
           this.loadBundles();
         },
-        error: (err) => this.notificationService.showError(err.error?.message || 'Failed to approve bundle.')
+        error: (err) => this.snackbarService.showError(err.error?.message || 'Failed to approve bundle.')
       });
     });
   }
@@ -179,10 +179,10 @@ export class BundleDashboard implements OnInit, AfterViewInit {
     dialogRef.afterClosed().pipe(filter(result => result === true)).subscribe(() => {
       this.bundleService.setBundleStatus(bundle._id, EBundleStatus.Denied).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Bundle denied.');
+          this.snackbarService.showSuccess('Bundle denied.');
           this.loadBundles();
         },
-        error: (err) => this.notificationService.showError(err.error?.message || 'Failed to deny bundle.')
+        error: (err) => this.snackbarService.showError(err.error?.message || 'Failed to deny bundle.')
       });
     });
   }

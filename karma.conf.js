@@ -22,9 +22,21 @@ module.exports = function (config) {
       subdir: '.',
       reporters: [
         { type: 'html' },
-        { type: 'lcovonly' }, 
+        { type: 'lcovonly' },
         { type: 'text-summary' }
-      ]
+      ],
+      include: [
+        'src/**/*.ts',
+        '!src/**/*.spec.ts'
+      ],
+      check: {
+        global: {
+          statements: 60,
+          branches: 60,
+          functions: 60,
+          lines: 60
+        }
+      }
     },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
