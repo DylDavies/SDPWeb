@@ -35,5 +35,17 @@
             <app-admin-proficiency-management></app-admin-proficiency-management>
           </mat-tab>
         }
+
+        @if (canManageSidebar) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">view_sidebar</mat-icon>
+              <span>Sidebar Layout</span>
+            </ng-template>
+            <div class="tab-content">
+              <app-sidebar-customization></app-sidebar-customization>
+            </div>
+          </mat-tab>
+        }
       </mat-tab-group>
     </div>

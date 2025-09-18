@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>Edit Category</h2>
+
+<mat-dialog-content class="dialog-content">
+  <mat-form-field appearance="outline">
+    <mat-label>Label</mat-label>
+    <input matInput 
+           [(ngModel)]="formData.label" 
+           #labelInput="ngModel" 
+           required
+           cdkFocusInitial
+           [appForbiddenLabel]="dialogData.forbiddenLabels">
+    @if (labelInput.hasError('required')) {
+      <mat-error>A label is required.</mat-error>
+    }
+    @if (labelInput.hasError('forbiddenLabel')) {
+      <mat-error>This label is already in use.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Icon Name</mat-label>
+    <input matInput [(ngModel)]="formData.icon">
+    <mat-icon matSuffix>{{formData.icon}}</mat-icon>
+  </mat-form-field>
+  </mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button 
+          color="primary" 
+          (click)="onSave()" 
+          [disabled]="labelInput.invalid">Save</button>
+</mat-dialog-actions>

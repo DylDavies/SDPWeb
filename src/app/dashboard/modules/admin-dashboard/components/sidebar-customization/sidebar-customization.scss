@@ -1,0 +1,199 @@
+.customization-container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.panels-container {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+}
+
+// --- CARD & PANEL STRUCTURE ---
+.list-panel, .tree-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.list-panel mat-card-content,
+.tree-panel mat-card-content {
+  padding: 24px 16px 12px 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+// --- DROP ZONE STYLES ---
+.item-list, mat-tree {
+  height: 100%;
+  padding: 10px;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease-in-out;
+  overflow-y: auto;
+  background-color: var(--mat-sys-surface-container);
+
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// --- ROW & ITEM STYLES (Inconsistent Spacing Fix) ---
+.draggable-item, .tree-node {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 10px;
+  background: var(--mat-sys-surface-container-high);
+  border-radius: 4px;
+  // By applying the margin here, we guarantee consistent spacing.
+  margin-bottom: 8px;
+}
+
+// Margin is removed from the `li` to prevent the spacing bug.
+li {
+  list-style-type: none;
+}
+
+ul {
+  padding-left: 24px;
+  margin-top: 8px;
+}
+
+.tree-node:hover {
+  background-color: rgba(var(--mat-sys-on-surface-rgb), 0.08);
+}
+
+.tree-invisible {
+  display: none;
+}
+
+.tree-node.drop-target {
+  background-color: rgba(var(--mat-sys-color-primary-rgb), 0.12);
+  border: 1px solid var(--mat-sys-color-primary);
+}
+
+.item-icon {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.tree-node-expander {
+  width: 24px;
+  height: 24px;
+  margin-right: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.action-button {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// --- DRAG HANDLE ---
+.drag-handle {
+  cursor: grab;
+  color: var(--mat-sys-on-surface-variant);
+  padding: 4px;
+  margin-top: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: rgba(var(--mat-sys-on-surface-rgb), 0.08);
+  }
+}
+
+.cdk-drag-dragging .drag-handle {
+  cursor: grabbing;
+}
+
+// --- ACTIONS BAR ---
+.actions-bar {
+  padding-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+// --- EMPTY STATE & DRAG VISUALS ---
+.empty-list-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+}
+
+.cdk-drop-list-dragging .item-list,
+mat-tree.cdk-drop-list-dragging {
+  border-color: var(--mat-sys-color-primary);
+}
+
+.cdk-drag-preview {
+  opacity: 0.7;
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+  height: 0;
+  min-height: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  transform: none !important;
+}
+
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder):not(.cdk-drag-preview) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  transform: none !important;
+}
+
+// --- DROP INDICATOR (Trigger Area Fix) ---
+.drop-indicator {
+  height: 2px;
+  width: 100%;
+  padding: 4px 0;
+  margin-top: -8px;
+  margin-bottom: 4px;
+  transition: background-color 0.1s ease-in-out;
+  border-radius: 2px;
+}
+
+.cdk-drop-list-dragging .drop-indicator.drop-target-before {
+  background-color: var(--mat-sys-primary);
+}
+
+.cdk-drop-list-dragging .tree-node.drop-target-on:not(.cdk-drag-preview) {
+  background-color: rgba(var(--mat-sys-color-primary-rgb), 0.08);
+  border: 1px solid var(--mat-sys-color-primary);
+}
+
+// This hides the unwanted "double indicator"
+.cdk-drag-placeholder + .drop-indicator {
+  display: none;
+}
+
+.sublist-end-indicator {
+  margin-top: 4px;
+}

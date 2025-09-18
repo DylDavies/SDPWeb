@@ -7,6 +7,7 @@ import { EPermission } from '../models/enums/permission.enum';
 import { EUserType } from '../models/enums/user-type.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { SidebarService } from './sidebar-service';
 
 const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
 
@@ -21,6 +22,7 @@ export class AuthService {
   private httpService = inject(HttpService);
   private router = inject(Router);
   private socketService = inject(SocketService);
+  private sidebarService = inject(SidebarService);
 
   private document = inject(DOCUMENT);
   private window = this.document.defaultView;
@@ -67,6 +69,8 @@ export class AuthService {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     this.currentUserSubject.next(null);
     this.verification$ = null;
+
+    this.sidebarService.clearCache();
   }
 
   verifyCurrentUser(): Observable<IUser | null> {
@@ -83,6 +87,8 @@ export class AuthService {
     this.verification$ = this.httpService.get<IUser>('user').pipe(
       tap(user => {
         this.currentUserSubject.next(user);
+
+        this.sidebarService.fetchAndCacheSidebarItems();
       }),
       catchError(() => {
         this.removeToken();

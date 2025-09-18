@@ -31,7 +31,8 @@
                 <div class="profile-avatar-wrapper">
                   <img class="profile-avatar" 
                        [src]="user.picture || '/assets/no_profile_pic.png'" 
-                       [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
+                       [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')"
+                       referrerpolicy="no-referrer">
                 </div>
                 <div class="profile-info">
                   <div class="editable-header">

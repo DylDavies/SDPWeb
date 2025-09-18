@@ -1,0 +1,13 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Optional: Ensures the link isn't crammed against the input */
+mat-hint {
+  margin-bottom: 10px;
+}
+
+mat-form-field {
+    margin-top: 10px !important;
+}

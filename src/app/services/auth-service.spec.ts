@@ -98,7 +98,8 @@ describe('AuthService', () => {
         expect(result).toEqual(mockUser);
       });
 
-      expect(httpServiceSpy.get).toHaveBeenCalledOnceWith('user');
+      expect(httpServiceSpy.get).toHaveBeenCalledWith('user');
+      expect(httpServiceSpy.get).toHaveBeenCalledWith('sidebar');
       expect(getCurrentUser()).toEqual(mockUser);
     });
 
