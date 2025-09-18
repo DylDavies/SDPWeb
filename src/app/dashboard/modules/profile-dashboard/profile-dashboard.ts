@@ -19,7 +19,7 @@ import { UserService } from '../../../services/user-service';
 import { LeaveManagement } from './components/leave-management/leave-management';
 import { EditAvailabilityDialog } from './components/edit-availability-dialog/edit-availability-dialog';
 import { filter } from 'rxjs';
-import { NotificationService } from '../../../services/notification-service'; 
+import { SnackBarService } from '../../../services/snackbar-service'; 
 import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
@@ -39,7 +39,7 @@ export class Profile implements OnInit {
   private router = inject(Router);
   public dialog = inject(MatDialog);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService); // Inject NotificationService
+  private snackbarService = inject(SnackBarService);
 
   public user: IUser | null = null;
   public isLoading = true;
@@ -112,14 +112,14 @@ export class Profile implements OnInit {
     dialogRef.afterClosed().pipe(filter(result => typeof result === 'number')).subscribe((newAvailability: number) => {
       this.userService.updateUserAvailability(this.user!._id, newAvailability).subscribe({
         next: (updatedUser) => {
-          this.notificationService.showSuccess('Availability updated successfully!'); 
+          this.snackbarService.showSuccess('Availability updated successfully!'); 
           this.user = updatedUser;
           if (this.isOwnProfile) {
             this.authService.updateCurrentUserState(updatedUser);
           }
         },
         error: () => {
-          this.notificationService.showError('Failed to update availability.');
+          this.snackbarService.showError('Failed to update availability.');
         }
       });
     });

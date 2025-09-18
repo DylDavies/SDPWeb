@@ -31,5 +31,7 @@ export enum EPermission {
     BUNDLES_APPROVE = 'bundles:approve',
 
     // Sidebar Management
-    SIDEBAR_MANAGE = 'sidebar:manage'
+    SIDEBAR_MANAGE = 'sidebar:manage',
+
+    NOTIFICATIONS_VIEW = 'notifications:view'
 }

@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RoleNode, RoleService } from '../../../../../services/role-service';
 import { EPermission } from '../../../../../models/enums/permission.enum';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -28,7 +28,7 @@ import { map } from 'rxjs/operators';
 export class CreateEditRole implements OnInit {
   private fb = inject(FormBuilder);
   private roleService = inject(RoleService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   public dialogRef = inject(MatDialogRef<CreateEditRole>);
   public data: { parentId: string | null; role?: RoleNode } = inject(MAT_DIALOG_DATA);
 
@@ -116,12 +116,12 @@ export class CreateEditRole implements OnInit {
     apiCall.subscribe({
       next: () => {
         const action = isEditing ? 'updated' : 'created';
-        this.notificationService.showSuccess(`Role "${formData.name}" ${action} successfully.`);
+        this.snackbarService.showSuccess(`Role "${formData.name}" ${action} successfully.`);
         this.dialogRef.close(true);
       },
       error: (err) => {
         const action = isEditing ? 'update' : 'create';
-        this.notificationService.showError(`Failed to ${action} role.`);
+        this.snackbarService.showError(`Failed to ${action} role.`);
         console.error(err);
         this.isSaving = false;
       }

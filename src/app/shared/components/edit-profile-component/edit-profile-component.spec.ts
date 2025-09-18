@@ -3,7 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { UserService } from '../../../services/user-service';
-import { NotificationService } from '../../../services/notification-service';
+import { SnackBarService } from '../../../services/snackbar-service';
 import { EditProfileComponent } from './edit-profile-component';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { EUserType } from '../../../models/enums/user-type.enum';
@@ -45,7 +45,7 @@ describe('EditProfileComponent', () => {
       providers: [
         // Provide mock implementations for all dependencies
         { provide: UserService, useValue: userServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: SnackBarService, useValue: notificationServiceSpy },
         { provide: MatDialogRef, useValue: dialogRefSpy },
         // THIS IS THE FIX: Provide a mock value for MAT_DIALOG_DATA
         { provide: MAT_DIALOG_DATA, useValue: mockUserData }
