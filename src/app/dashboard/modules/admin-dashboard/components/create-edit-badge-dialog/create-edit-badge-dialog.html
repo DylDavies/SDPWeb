@@ -57,11 +57,13 @@
       }
     </mat-form-field>
     
-    <mat-form-field appearance="outline">
-      <mat-label>Requirements</mat-label>
-      <textarea matInput formControlName="requirements" rows="6"
-                placeholder="Describe how to earn this badge. You can use Markdown."></textarea>
-    </mat-form-field>
+    @if(!isEditMode) {
+      <mat-form-field appearance="outline">
+        <mat-label>Requirements</mat-label>
+        <textarea matInput formControlName="requirements" rows="6"
+                  placeholder="Describe how to earn this badge. You can use Markdown."></textarea>
+      </mat-form-field>
+    }
 
     <mat-form-field appearance="outline">
       <mat-label>Bonus</mat-label>

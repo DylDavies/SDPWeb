@@ -75,8 +75,11 @@ export class CreateEditBadgeDialogComponent implements OnInit {
       permanent: [false],
       expirationDate: [null, [futureDateValidator()]],
       bonus: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      requirements: ['']
     });
+
+    if (!this.isEditMode) {
+      this.badgeForm.addControl('requirements', this.fb.control(''));
+    }
 
     this.badgeForm.get('permanent')?.valueChanges.subscribe(isPermanent => {
       const expirationDateControl = this.badgeForm.get('expirationDate');
@@ -92,14 +95,9 @@ export class CreateEditBadgeDialogComponent implements OnInit {
       expirationDateControl?.updateValueAndValidity();
     });
 
-
     if (this.isEditMode && this.data.badge) {
       this.badgeForm.patchValue(this.data.badge);
       this.badgeForm.get('permanent')?.updateValueAndValidity();
-      
-      this.badgeService.getBadgeRequirements(this.data.badge._id).subscribe(res => {
-        this.badgeForm.get('requirements')?.setValue(res.requirements);
-      });
     }
   }
 
