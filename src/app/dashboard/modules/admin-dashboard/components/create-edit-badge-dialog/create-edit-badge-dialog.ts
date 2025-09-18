@@ -9,10 +9,10 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { BadgeService } from '../../../../../services/badge-service';
-import { NotificationService } from '../../../../../services/notification-service';
 import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 export function futureDateValidator(): ValidatorFn {
   return (control: AbstractControl): Record<string, unknown> | null => {
@@ -49,7 +49,7 @@ export function futureDateValidator(): ValidatorFn {
 export class CreateEditBadgeDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private badgeService = inject(BadgeService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   public dialogRef = inject(MatDialogRef<CreateEditBadgeDialogComponent>);
   public data: { badge?: IBadge } = inject(MAT_DIALOG_DATA);
 
@@ -116,7 +116,7 @@ export class CreateEditBadgeDialogComponent implements OnInit {
     }
 
     this.badgeService.addOrUpdateBadge(badgeData).subscribe(() => {
-      this.notificationService.showSuccess(`Badge ${this.isEditMode ? 'updated' : 'created'} successfully.`);
+      this.snackbarService.showSuccess(`Badge ${this.isEditMode ? 'updated' : 'created'} successfully.`);
       this.dialogRef.close(true);
     });
   }

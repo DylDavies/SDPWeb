@@ -10,8 +10,8 @@ import { EPermission } from '../../../../../models/enums/permission.enum';
 import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { AddUserBadgeDialogComponent } from '../../../../../shared/components/add-user-badge-dialog/add-user-badge-dialog';
 import { Subscription } from 'rxjs';
-import { NotificationService } from '../../../../../services/notification-service';
 import { RouterModule } from '@angular/router';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-badge-list',
@@ -26,7 +26,7 @@ export class BadgeListComponent implements OnInit, OnDestroy {
 
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
 
   public canManageBadges = false;
   public badges: IBadge[] = [];
@@ -60,11 +60,11 @@ export class BadgeListComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && result.updatedUser){
-        this.notificationService.showSuccess('Badge added to user.');
+        this.snackbarService.showSuccess('Badge added to user.');
         this.authService.updateCurrentUserState(result.updatedUser);  // update the auth state with the fresh user object
       } 
       else if(result && result.error){
-        this.notificationService.showError('An error occurred, but the badge may have been added.');
+        this.snackbarService.showError('An error occurred, but the badge may have been added.');
       }
     });
   }

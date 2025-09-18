@@ -7,7 +7,6 @@ import { MatDialog } from '@angular/material/dialog';
 import IBadge from '../../../models/interfaces/IBadge.interface';
 import { BadgeDetailDialogComponent } from '../badge-detail-dialog/badge-detail-dialog';
 import { UserService } from '../../../services/user-service';
-import { NotificationService } from '../../../services/notification-service';
 import { CreateEditBadgeDialogComponent } from '../../../dashboard/modules/admin-dashboard/components/create-edit-badge-dialog/create-edit-badge-dialog';
 import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
@@ -17,6 +16,7 @@ import { ConfirmationDialog } from '../confirmation-dialog/confirmation-dialog';
 import { filter } from 'rxjs/operators';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BadgeRequirementDialogComponent } from '../badge-requirement-dialog/badge-requirement-dialog';
+import { SnackBarService } from '../../../services/snackbar-service';
 
 @Component({
   selector: 'app-badge-card',
@@ -33,7 +33,7 @@ export class BadgeCardComponent implements OnInit {
 
   private dialog = inject(MatDialog);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private authService = inject(AuthService);
   private badgeService = inject(BadgeService);
 
@@ -91,11 +91,11 @@ export class BadgeCardComponent implements OnInit {
     dialogRef.afterClosed().pipe(filter(result => result === true)).subscribe(() => {
       this.badgeService.deleteBadge(this.badge._id).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Badge deleted successfully.');
+          this.snackbarService.showSuccess('Badge deleted successfully.');
           this.badgeUpdated.emit();
         },
         error: (err) => {
-          this.notificationService.showError(err.error?.message || 'Failed to delete badge.');
+          this.snackbarService.showError(err.error?.message || 'Failed to delete badge.');
         }
       });
     });
@@ -105,11 +105,11 @@ export class BadgeCardComponent implements OnInit {
     if (this.userId) {
       this.userService.removeBadgeFromUser(this.userId, this.badge._id.toString()).subscribe({
         next: (updatedUser: IUser) => {
-          this.notificationService.showSuccess('Badge removed from user.');
+          this.snackbarService.showSuccess('Badge removed from user.');
           this.authService.updateCurrentUserState(updatedUser);
         },
         error: () => {
-          this.notificationService.showError('Failed to remove badge.');
+          this.snackbarService.showError('Failed to remove badge.');
         }
       });
     }

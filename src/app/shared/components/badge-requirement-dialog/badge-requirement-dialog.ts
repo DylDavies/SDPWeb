@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import IBadge from '../../../models/interfaces/IBadge.interface';
 import { BadgeService } from '../../../services/badge-service';
-import { NotificationService } from '../../../services/notification-service';
+import { SnackBarService } from '../../../services/snackbar-service';
 
 @Component({
   selector: 'app-badge-requirement-dialog',
@@ -25,7 +25,7 @@ export class BadgeRequirementDialogComponent implements OnInit {
   public data: { badge: IBadge, isEditable: boolean } = inject(MAT_DIALOG_DATA);
   public dialogRef = inject(MatDialogRef<BadgeRequirementDialogComponent>);
   private badgeService = inject(BadgeService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private fb = inject(FormBuilder);
 
   public isLoading = true;
@@ -56,11 +56,11 @@ export class BadgeRequirementDialogComponent implements OnInit {
     
     this.badgeService.updateBadgeRequirements(this.data.badge._id, newRequirements).subscribe({
       next: () => {
-        this.notificationService.showSuccess("Requirements updated successfully.");
+        this.snackbarService.showSuccess("Requirements updated successfully.");
         this.dialogRef.close(true);
       },
       error: () => {
-        this.notificationService.showError("Failed to update requirements.");
+        this.snackbarService.showError("Failed to update requirements.");
         this.isLoading = false;
       }
     });
