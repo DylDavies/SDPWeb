@@ -11,11 +11,12 @@ import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { AddUserBadgeDialogComponent } from '../../../../../shared/components/add-user-badge-dialog/add-user-badge-dialog';
 import { Subscription } from 'rxjs';
 import { NotificationService } from '../../../../../services/notification-service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-badge-list',
   standalone: true,
-  imports: [CommonModule, BadgeCardComponent, MatButtonModule, MatIconModule],
+  imports: [CommonModule, BadgeCardComponent, MatButtonModule, MatIconModule, RouterModule],
   templateUrl: './badge-list.html',
   styleUrls: ['./badge-list.scss'],
 })

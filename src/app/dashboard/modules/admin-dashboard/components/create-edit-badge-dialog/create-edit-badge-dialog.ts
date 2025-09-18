@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,6 +13,19 @@ import { NotificationService } from '../../../../../services/notification-servic
 import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
+export function futureDateValidator(): ValidatorFn {
+  return (control: AbstractControl): Record<string, unknown> | null => {
+    if (!control.value) {
+      return null; 
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(control.value);
+
+    return selectedDate < today ? { pastDate: true } : null;
+  };
+}
 
 @Component({
   selector: 'app-create-edit-badge-dialog',
@@ -43,7 +56,6 @@ export class CreateEditBadgeDialogComponent implements OnInit {
   public badgeForm!: FormGroup;
   public isEditMode = false;
 
-  // List of icons to choose from 
   public availableIcons: string[] = [
     'military_tech', 'workspace_premium', 'verified', 'star', 'emoji_events', 
     'school', 'auto_stories', 'rocket_launch', 'thumb_up', 'favorite',
@@ -55,23 +67,44 @@ export class CreateEditBadgeDialogComponent implements OnInit {
     this.isEditMode = !!this.data?.badge;
 
     this.badgeForm = this.fb.group({
-      name: ['', Validators.required],
-      TLA: ['', Validators.required],
-      summary: ['', Validators.required],
+      name: ['', [Validators.required, Validators.maxLength(40)]],
+      TLA: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]],
+      summary: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', Validators.required],
-      icon: ['', Validators.required],
+      image: ['', Validators.required],
       permanent: [false],
-      expirationDate: [null],
+      expirationDate: [null, [futureDateValidator()]],
       bonus: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      requirements: ['']
     });
 
+    this.badgeForm.get('permanent')?.valueChanges.subscribe(isPermanent => {
+      const expirationDateControl = this.badgeForm.get('expirationDate');
+      if (!isPermanent) {
+        expirationDateControl?.setValidators([Validators.required, futureDateValidator()]);
+      }
+      else{
+
+        expirationDateControl?.setValidators([futureDateValidator()]);
+        expirationDateControl?.setValue(null); 
+      }
+
+      expirationDateControl?.updateValueAndValidity();
+    });
+
+
     if (this.isEditMode && this.data.badge) {
-      this.badgeForm.patchValue(this.data.badge as unknown as Record<string, unknown>);
+      this.badgeForm.patchValue(this.data.badge);
+      this.badgeForm.get('permanent')?.updateValueAndValidity();
+      
+      this.badgeService.getBadgeRequirements(this.data.badge._id).subscribe(res => {
+        this.badgeForm.get('requirements')?.setValue(res.requirements);
+      });
     }
   }
 
-  selectIcon(icon: string):void{
-    this.badgeForm.get('icon')?.setValue(icon);
+  selectIcon(icon: string): void {
+    this.badgeForm.get('image')?.setValue(icon);
   }
 
   onSave(): void {

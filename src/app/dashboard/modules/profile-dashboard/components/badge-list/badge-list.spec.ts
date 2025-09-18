@@ -2,6 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BadgeListComponent } from './badge-list';
+import { ActivatedRoute } from '@angular/router'; 
+
+const mockActivatedRoute = {
+  snapshot: {
+    paramMap: {
+      get: (key: string) => {
+        return null; 
+      }
+    }
+  }
+};
 
 describe('BadgeList', () => {
   let component: BadgeListComponent;
@@ -12,7 +23,8 @@ describe('BadgeList', () => {
       imports: [BadgeListComponent],
       providers: [
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        { provide: ActivatedRoute, useValue: mockActivatedRoute } 
       ]
     })
     .compileComponents();

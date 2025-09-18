@@ -1,12 +1,18 @@
 <div class="badge-list-container">
   <div class="header">
     <h3>Earned Badges</h3>
-    @if (canManageBadges) {
-      <button mat-stroked-button color="primary" (click)="openAddBadgeDialog()">
-        <mat-icon>add</mat-icon>
-        Add Badge
-      </button>
-    }
+    <div class="header-actions">
+        <button mat-stroked-button routerLink="/dashboard/badges">
+            <mat-icon>inventory_2</mat-icon>
+            View Badge Library
+        </button>
+      @if (canManageBadges) {
+        <button mat-stroked-button color="primary" (click)="openAddBadgeDialog()">
+          <mat-icon>add</mat-icon>
+          Add Badge
+        </button>
+      }
+    </div>
   </div>
   @if (badges && badges.length > 0) {
     <div class="badge-grid">
