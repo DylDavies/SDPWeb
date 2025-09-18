@@ -16,6 +16,7 @@ import { BundleService } from '../../../services/bundle-service';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
 import { Router } from '@angular/router';
+import { SnackBarService } from '../../../services/snackbar-service';
 
 
 @Component({
@@ -37,7 +38,7 @@ import { Router } from '@angular/router';
 })
 export class StudentManagement implements OnInit, AfterViewInit {
     private bundleService = inject(BundleService);
-    private notificationService = inject(NotificationService);
+    private snackbarService = inject(SnackBarService);
     private router = inject(Router);
     public isLoading = true;
     public EBundleStatus = EBundleStatus; 
@@ -69,7 +70,7 @@ export class StudentManagement implements OnInit, AfterViewInit {
         this.isLoading = false;
       },
       error: (err) => {
-        this.notificationService.showError(err.error?.message || 'Failed to load bundles.');
+        this.snackbarService.showError(err.error?.message || 'Failed to load bundles.');
         this.isLoading = false;
       }
     });
