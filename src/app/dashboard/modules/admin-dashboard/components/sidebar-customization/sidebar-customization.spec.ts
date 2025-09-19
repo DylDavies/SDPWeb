@@ -26,7 +26,7 @@ const createMockItems = (): ISidebarItem[] => JSON.parse(JSON.stringify([
 ]));
 
 // NEW Helper to create mock CdkDragDrop events
-const createMockDropEvent = (draggedData: any, containerId: string, previousContainerId: string = containerId, currentIndex: number = 0, previousIndex: number = 0): CdkDragDrop<any> => {
+const createMockDropEvent = (draggedData: any, containerId: string, previousContainerId: string = containerId, currentIndex = 0, previousIndex = 0): CdkDragDrop<any> => {
   return {
     item: { data: draggedData },
     container: { id: containerId, data: [] },
