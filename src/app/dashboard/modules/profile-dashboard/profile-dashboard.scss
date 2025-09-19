@@ -30,8 +30,15 @@
 .profile-header {
   display: flex;
   align-items: center;
+  justify-content: space-between; 
   gap: 24px;
   margin-bottom: 24px;
+}
+
+.profile-avatar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .profile-avatar {
@@ -41,6 +48,7 @@
   object-fit: cover;
   border: 4px solid var(--mat-sys-surface);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  flex-shrink: 0; 
 }
 
 .profile-info {
@@ -85,7 +93,6 @@
   position: relative; 
 }
 
-// Style for the edit icon on hover
 .detail-item.editable:hover .edit-icon {
   opacity: 1;
 }
@@ -140,16 +147,25 @@
   margin-top: 5px;
 }
 
-/* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
-  .profile-page-container {
-    padding: 1rem;
-  }
-
   .profile-header {
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+    align-items: center;
+  }
+
+  .profile-avatar-wrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .editable-header {
+    padding-right: 0;
   }
 
   .display-name {
@@ -189,4 +205,23 @@
 
 .ava-edit-icon {
   margin-right: 4rem;
+}
+
+@media (max-width: 576px) {
+  .profile-page-container {
+    padding: 0.5rem;
+    margin-top: 0;
+  }
+
+  .profile-card {
+    padding: 12px;
+  }
+
+  .profile-content {
+    padding: 12px;
+  }
+
+  .profile-header {
+    gap: 16px;
+  }
 }
