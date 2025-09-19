@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, ViewChild} from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe, SlicePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +22,11 @@ import { ExtraWorkService } from '../../../services/extra-work';
 import { IExtraWork, EExtraWorkStatus } from '../../../models/interfaces/IExtraWork.interface';
 import { IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
 import { AddExtraWorkModal } from './components/add-extra-work-modal/add-extra-work-modal';
+import { MatTabsModule } from '@angular/material/tabs';
+import { Subscription } from 'rxjs';
+import { IUser } from '../../../models/interfaces/IUser.interface';
+import { SocketService } from '../../../services/socket-service';
+import { ESocketMessage } from '../../../models/enums/socket-message.enum';
 
 @Component({
   selector: 'app-extra-work-dashboard',
@@ -43,26 +48,37 @@ import { AddExtraWorkModal } from './components/add-extra-work-modal/add-extra-w
     MatTooltipModule,
     MatMenuModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatTabsModule
   ],
   templateUrl: './extra-work-dashboard.html',
   styleUrl: './extra-work-dashboard.scss'
 })
-export class ExtraWorkDashboard implements OnInit, AfterViewInit {
+export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   private extraWorkService = inject(ExtraWorkService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   private authService = inject(AuthService);
+  private socketService = inject(SocketService);
 
   public isLoading = true;
+  public isCommissionedLoading = true;
   public today = new Date();
   public EExtraWorkStatus = EExtraWorkStatus;
+  public currentUser: IUser | null = null;
+  private subscriptions = new Subscription();
 
-  displayedColumns: string[] = ['student', 'workType', 'details', 'remuneration', 'commissioner', 'dateCompleted', 'status', 'actions'];
+
+  myWorkDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'details', 'remuneration', 'commissioner', 'dateCompleted', 'status'];
+  commissionedDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'details', 'remuneration', 'commissioner', 'dateCompleted', 'status', 'actions'];
+
   dataSource: MatTableDataSource<IExtraWork>;
+  commissionedDataSource: MatTableDataSource<IExtraWork>;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('myWorkPaginator') paginator!: MatPaginator;
+  @ViewChild('myWorkSort') sort!: MatSort;
+  @ViewChild('commissionedPaginator') commissionedPaginator!: MatPaginator;
+  @ViewChild('commissionedSort') commissionedSort!: MatSort;
 
   public canCreate = this.authService.hasPermission(EPermission.EXTRA_WORK_CREATE);
   public canEdit = this.authService.hasPermission(EPermission.EXTRA_WORK_EDIT);
@@ -70,10 +86,29 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit {
 
   constructor() {
     this.dataSource = new MatTableDataSource<IExtraWork>([]);
+    this.commissionedDataSource = new MatTableDataSource<IExtraWork>([]);
   }
 
   ngOnInit(): void {
-    this.loadExtraWork();
+    this.subscriptions.add(
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+        this.loadExtraWork();
+      })
+    );
+
+    this.socketService.subscribe(ESocketMessage.ExtraWorkUpdated);
+    this.subscriptions.add(
+      this.socketService.listen(ESocketMessage.ExtraWorkUpdated).subscribe(() => {
+        console.log('Received extra-work-updated event. Refreshing lists.');
+        this.loadExtraWork();
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.socketService.unsubscribe(ESocketMessage.ExtraWorkUpdated);
   }
 
   ngAfterViewInit(): void {
@@ -81,6 +116,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
     this.dataSource.sortingDataAccessor = (item, property) => {
         switch (property) {
+            case 'createdAt': return new Date(item.createdAt).getTime();
             case 'student':
                 return (item.studentId as IPopulatedUser)?.displayName || '';
             case 'dateCompleted':
@@ -96,21 +132,66 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit {
             default: return 0;
         }
     };
+
+    if (this.canApprove) {
+      this.commissionedDataSource.paginator = this.commissionedPaginator;
+      this.commissionedDataSource.sort = this.commissionedSort;
+      this.commissionedDataSource.sortingDataAccessor = (item, property) => {
+          switch (property) {
+              case 'createdAt': return new Date(item.createdAt).getTime();
+              case 'student':
+                  return (item.studentId as IPopulatedUser)?.displayName || '';
+              case 'dateCompleted':
+                  return item.dateCompleted ? new Date(item.dateCompleted).getTime() : 0;
+              case 'workType':
+                  return item.workType;
+              case 'remuneration':
+                  return item.remuneration;
+              case 'commissioner':
+                  return (item.commissionerId as IPopulatedUser)?.displayName || '';
+              case 'status':
+                  return item.status;
+              default: return 0;
+          }
+      };
+    }
   }
 
   loadExtraWork(): void {
+    if (!this.currentUser) return;
+
     this.isLoading = true;
-    this.extraWorkService.getMyExtraWork().subscribe({
-      next: (workItems: IExtraWork[]) => {
-        this.dataSource.data = workItems;
-        this.isLoading = false;
-      },
-      error: (err: HttpErrorResponse) => {
-        this.notificationService.showError(err.error?.message || 'Failed to load extra work.');
-        this.isLoading = false;
-      }
+    this.isCommissionedLoading = true;
+
+    this.extraWorkService.getAllExtraWork().subscribe({
+        next: (workItems: IExtraWork[]) => {
+            const userId = this.currentUser?._id;
+
+            const myWork = workItems.filter(item => {
+                const itemUserId = (typeof item.userId === 'object' && item.userId !== null) ? item.userId._id : item.userId;
+                return itemUserId === userId;
+            });
+
+            this.dataSource.data = myWork;
+            this.isLoading = false;
+
+            if (this.canApprove) {
+                const commissionedWork = workItems.filter(item => {
+                    const itemCommissionerId = (typeof item.commissionerId === 'object' && item.commissionerId !== null) ? item.commissionerId._id : item.commissionerId;
+                    return itemCommissionerId === userId;
+                });
+                this.commissionedDataSource.data = commissionedWork;
+            }
+            this.isCommissionedLoading = false;
+        },
+        error: (err: HttpErrorResponse) => {
+            this.notificationService.showError(err.error?.message || 'Failed to load extra work.');
+            this.isLoading = false;
+            this.isCommissionedLoading = false;
+        }
     });
-  }
+}
+
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -120,7 +201,16 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit {
       this.dataSource.paginator.firstPage();
     }
   }
-  
+
+  applyCommissionedFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.commissionedDataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.commissionedDataSource.paginator) {
+      this.commissionedDataSource.paginator.firstPage();
+    }
+  }
+
   getStudentName(item: IExtraWork): string {
     const student = item.studentId as IPopulatedUser;
     return student?.displayName || 'N/A';
@@ -143,13 +233,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit {
       }
     });
   }
-  
-  /**
-   * Handles the date selection from the calendar menu.
-   * @param selectedDate The date selected from the mat-calendar.
-   * @param item The extra work item being updated.
-   * @param menu The MatMenu instance to close it after selection.
-   */
+
   onDateSelected(selectedDate: Date | null, item: IExtraWork, menu: MatMenu): void {
     menu.closed.emit(); // Close the menu
     if (!selectedDate) return;
@@ -161,6 +245,30 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit {
       },
       error: (err: HttpErrorResponse) => {
         this.notificationService.showError(err.error?.message || 'Failed to update item.');
+      }
+    });
+  }
+
+  approveWork(item: IExtraWork): void {
+    this.extraWorkService.setExtraWorkStatus(item._id, EExtraWorkStatus.Approved).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Work item approved!');
+        this.loadExtraWork();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.notificationService.showError(err.error?.message || 'Failed to approve item.');
+      }
+    });
+  }
+
+  denyWork(item: IExtraWork): void {
+    this.extraWorkService.setExtraWorkStatus(item._id, EExtraWorkStatus.Denied).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Work item denied!');
+        this.loadExtraWork();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.notificationService.showError(err.error?.message || 'Failed to deny item.');
       }
     });
   }

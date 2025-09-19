@@ -1,13 +1,16 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
-import { IExtraWork } from '../models/interfaces/IExtraWork.interface';
+import { IExtraWork, EExtraWorkStatus } from '../models/interfaces/IExtraWork.interface';
+import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExtraWorkService {
   private httpService = inject(HttpService);
+  private socketService = inject(SocketService);
 
   /**
    * Retrieves all extra work entries from the backend (for admins).
@@ -39,7 +42,13 @@ export class ExtraWorkService {
    * @param dateCompleted The date it was completed.
    * @returns An Observable of the updated work item.
    */
-  completeExtraWork(workId: string, dateCompleted: Date): Observable<IExtraWork> {
-    return this.httpService.patch<IExtraWork>(`extrawork/${workId}/complete`, { dateCompleted });
+  completeExtraWork(workId: string, dateCompleted: Date | null): Observable<IExtraWork> {
+    return this.httpService.patch<IExtraWork>(`extrawork/${workId}/complete`, { dateCompleted }).pipe(
+      tap(() => this.socketService.subscribe(ESocketMessage.ExtraWorkUpdated))
+    );
+  }
+
+  setExtraWorkStatus(workId: string, status: EExtraWorkStatus): Observable<IExtraWork> {
+    return this.httpService.patch<IExtraWork>(`extrawork/${workId}/status`, { status });
   }
 }

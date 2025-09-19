@@ -4,6 +4,7 @@ export enum EExtraWorkStatus {
     InProgress = 'In Progress',
     Completed = 'Completed',
     Approved = 'Approved',
+    Denied = 'Denied' // Added the new Denied status
 }
 
 export interface IExtraWork {
