@@ -1,0 +1,32 @@
+<div class="badge-list-container">
+  <div class="header">
+    <h3>Earned Badges</h3>
+    <div class="header-actions">
+        <button mat-stroked-button routerLink="/dashboard/badges">
+            <mat-icon>inventory_2</mat-icon>
+            View Badge Library
+        </button>
+      @if (canManageBadges) {
+        <button mat-stroked-button color="primary" (click)="openAddBadgeDialog()">
+          <mat-icon>add</mat-icon>
+          Add Badge
+        </button>
+      }
+    </div>
+  </div>
+  @if (badges && badges.length > 0) {
+    <div class="badge-grid">
+      @for (badge of badges; track badge._id) {
+        <app-badge-card 
+          [badge]="badge"
+          [context]="'profile'"
+          [userId]="user!._id">
+        </app-badge-card>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p>This user hasn't earned any badges yet.</p>
+    </div>
+  }
+</div>

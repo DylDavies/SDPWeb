@@ -8,10 +8,11 @@ import { RoleManagement } from './components/role-management/role-management';
 import { AdminProficiencyManagement } from './components/admin-proficiency-management/admin-proficiency-management';
 import { UserTable } from '../../../shared/components/user-table/user-table';
 import { SidebarCustomization } from './components/sidebar-customization/sidebar-customization';
+import { BadgeManagement } from "./components/badge-management/badge-management";
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement, SidebarCustomization],
+  imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement, BadgeManagement, SidebarCustomization],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
@@ -22,4 +23,5 @@ export class AdminDashboard {
   public canViewRoles = this.authService.hasPermission(EPermission.ROLES_VIEW);
   public canManageProficiencies = this.authService.hasPermission(EPermission.PROFICIENCIES_MANAGE);
   public canManageSidebar = this.authService.hasPermission(EPermission.SIDEBAR_MANAGE);
+  public canManageBadges = this.authService.hasPermission(EPermission.BADGES_CREATE);
 }

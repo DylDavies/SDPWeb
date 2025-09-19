@@ -1,0 +1,53 @@
+<mat-card class="badge-card" 
+          [ngClass]="context + '-context'" 
+          (click)="viewDetails()">
+  
+  <div class="card-content-wrapper">
+    <div class="icon-container">
+      <mat-icon>{{ badge.image }}</mat-icon>
+    </div>
+    <div class="text-content">
+      <h3 class="badge-title">{{ badge.name }} <span class="badge-tla">({{ badge.TLA }})</span></h3>
+      <p class="badge-summary">{{ badge.summary }}</p>
+    </div>
+  </div>
+
+  <mat-card-actions class="admin-actions" *ngIf="context === 'admin' && canCreateOrEditBadges">
+    <button mat-button (click)="openRequirementsDialog(); $event.stopPropagation()">
+      <mat-icon>checklist</mat-icon>
+      Requirements
+    </button>
+    <button mat-button (click)="editBadge(); $event.stopPropagation()">
+      <mat-icon>edit</mat-icon>
+      Edit
+    </button>
+    <button mat-button color="warn" (click)="deleteBadge(); $event.stopPropagation()">
+      <mat-icon>delete_forever</mat-icon>
+      Delete
+    </button>
+  </mat-card-actions>
+
+  <mat-card-actions class="profile-actions" *ngIf="context === 'profile'">
+     <button mat-icon-button
+            *ngIf="canViewRequirements"
+            matTooltip="View requirements"
+            (click)="openRequirementsDialog(); $event.stopPropagation()">
+      <mat-icon>checklist</mat-icon>
+    </button>
+    <button mat-icon-button 
+            *ngIf="canManageUserBadges"
+            color="warn" 
+            matTooltip="Remove badge from user"
+            (click)="removeBadgeFromUser(); $event.stopPropagation()">
+      <mat-icon>remove_circle</mat-icon>
+    </button>
+  </mat-card-actions>
+  
+  <mat-card-actions class="library-actions" *ngIf="context === 'library' && canViewRequirements">
+    <button mat-button (click)="openRequirementsDialog(); $event.stopPropagation()">
+      <mat-icon>checklist</mat-icon>
+      View Requirements
+    </button>
+  </mat-card-actions>
+
+</mat-card>

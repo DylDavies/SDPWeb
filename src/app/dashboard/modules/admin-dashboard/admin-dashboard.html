@@ -47,5 +47,17 @@
             </div>
           </mat-tab>
         }
+
+        @if (canManageBadges){
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">military_tech</mat-icon>
+              <span>Badge Management</span>
+            </ng-template>
+            <div class="tab-content">
+               <app-badge-management></app-badge-management>
+            </div>
+          </mat-tab>
+        }
       </mat-tab-group>
     </div>

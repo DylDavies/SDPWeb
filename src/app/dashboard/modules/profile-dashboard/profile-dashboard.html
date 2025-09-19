@@ -14,7 +14,7 @@
             </div>
             <div class="profile-actions">
               <button mat-stroked-button color="primary" (click)="redirectToDashboard()">
-                <mat-icon>event_busy</mat-icon>
+                <mat-icon>arrow_back</mat-icon>
                 <span>Return to Dashboard</span>
               </button>
             </div>
@@ -43,8 +43,8 @@
                       </button>
                     }
                   </div>
-                  <h2 class="user-role"  matTooltip="User type" aria-label="User ">{{ user.type | userTypePipe }}</h2>
-                  <div class="roles-container" matTooltip="User role" aria-label="User role">
+                  <h2 class="user-role"  matTooltip="User type" aria-label="User type">{{ user.type | userTypePipe }}</h2>
+                  <div class="roles-container" matTooltip="User roles" aria-label="User roles">
                     <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
                   </div>
                 </div>
@@ -74,7 +74,7 @@
                   <div class="detail-text">
                     <span class="detail-label">Weekly Availability</span>
                     <span class="detail-value">
-                      {{ user.availability }} hours
+                      {{ (user.availability || 0) }} hours
                     </span>
                     @if (isOwnProfile) {
                       <button mat-icon-button (click)="openEditAvailabilityDialog()" class="edit-icon ava-edit-icon">
@@ -98,14 +98,20 @@
           
           <mat-tab label="Leave">
             <div class="profile-content">
-              <h2>Leave</h2>
-              <app-leave-management [userId] = "user._id"></app-leave-management>
+              <h2>Leave Requests</h2>
+              <app-leave-management [userId]="user._id"></app-leave-management>
             </div>
           </mat-tab>
 
           <mat-tab label="Proficiencies">
             <div class="profile-content">
               <app-proficiency-management></app-proficiency-management>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Badges">
+            <div class="profile-content">
+              <app-badge-list [user]="user" (userUpdated)="loadUser()"></app-badge-list>
             </div>
           </mat-tab>
           
