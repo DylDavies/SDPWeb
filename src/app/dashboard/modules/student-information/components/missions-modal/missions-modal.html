@@ -1,7 +1,7 @@
-<h1 mat-dialog-title>Create New Mission</h1>
+<h1 mat-dialog-title>{{ isEditMode ? 'Edit Mission' : 'Create New Mission' }}</h1>
 <mat-dialog-content>
-  <p>Upload a new mission document for the selected student.</p>
-  <form [formGroup]="createMissionForm" (ngSubmit)="onCreate()">
+  <p>{{ isEditMode ? 'Update the details for this mission.' : 'Upload a new mission document for the selected student.' }}</p>
+  <form [formGroup]="createMissionForm" (ngSubmit)="onSave()">
     
     <mat-form-field appearance="outline">
       <mat-label>Student Name</mat-label>
@@ -29,6 +29,17 @@
         <input matInput type="number" formControlName="remuneration" placeholder="e.g., 150">
     </mat-form-field>
 
+    @if(isEditMode) {
+      <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for(status of missionStatuses; track status) {
+              <mat-option [value]="status">{{ status | titlecase }}</mat-option>
+            }
+          </mat-select>
+      </mat-form-field>
+    }
+
     <div class="file-upload-container">
       <button mat-stroked-button type="button" class="upload-button" (click)="fileInput.click()">
         <mat-icon>attach_file</mat-icon>
@@ -41,11 +52,12 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="onCreate()" [disabled]="createMissionForm.invalid || isSaving">
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="createMissionForm.invalid || isSaving">
     @if (isSaving) {
       <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
     } @else {
-      <span>Create Mission</span>
+      <span>{{ isEditMode ? 'Save Changes' : 'Create Mission' }}</span>
     }
   </button>
 </mat-dialog-actions>
+

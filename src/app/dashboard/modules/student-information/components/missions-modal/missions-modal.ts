@@ -18,6 +18,8 @@ import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interfa
 import { map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AuthService } from '../../../../../services/auth-service';
+import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
+import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
 
 @Component({
   selector: 'app-missions-modal',
@@ -32,20 +34,23 @@ import { AuthService } from '../../../../../services/auth-service';
   styleUrls: ['./missions-modal.scss']
 })
 export class MissionsModal implements OnInit {
+  
   private fb = inject(FormBuilder);
   private missionService = inject(MissionService);
   private bundleService = inject(BundleService);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService); // Inject AuthService
   public dialogRef = inject(MatDialogRef<MissionsModal>);
-  public data: { student: IUser } = inject(MAT_DIALOG_DATA);
+  public data: { student: IUser | IPopulatedUser, mission?: IMissions, bundleId: string } = inject(MAT_DIALOG_DATA);
 
   public createMissionForm: FormGroup;
   public isSaving = false;
+  public isEditMode = false;
   public tutors$: Observable<IPopulatedUser[]> = of([]);
   public selectedFile: File | null = null;
   public fileName: string | null = null;
   private currentUser: IUser | null = null;
+  public missionStatuses = Object.values(EMissionStatus);
 
   constructor() {
     this.createMissionForm = this.fb.group({
@@ -53,20 +58,38 @@ export class MissionsModal implements OnInit {
       tutorId: ['', Validators.required],
       dateCompleted: ['', Validators.required],
       remuneration: ['', [Validators.required, Validators.min(0)]],
+      status: [EMissionStatus.Active, Validators.required],
       document: [null, Validators.required]
     });
   }
 
   ngOnInit(): void {
     // Get the current user to use as the commissioner
-    this.authService.currentUser$.subscribe(user => {
+      this.isEditMode = !!this.data.mission;
+      this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
+    
 
     if (this.data.student) {
       this.createMissionForm.get('studentName')?.setValue(this.data.student.displayName);
       this.fetchTutorsForStudent(this.data.student._id);
     }
+    if (this.isEditMode && this.data.mission) {
+        this.fileName = this.data.mission.documentName;
+        const tutor = this.data.mission.tutor;
+        const tutorId = typeof tutor === 'object' ? tutor._id : tutor;
+
+        this.createMissionForm.patchValue({
+            tutorId: tutorId,
+            dateCompleted: this.data.mission.dateCompleted,
+            remuneration: this.data.mission.remuneration,
+            status: this.data.mission.status
+        });
+    } else {
+        this.createMissionForm.get('document')?.setValidators(Validators.required);
+    }
+    
   }
 
   private fetchTutorsForStudent(studentId: string): void {
@@ -100,15 +123,32 @@ export class MissionsModal implements OnInit {
   onCancel(): void {
     this.dialogRef.close();
   }
+  onSave(): void {
+    if (this.createMissionForm.invalid || this.isSaving) {
+      return;
+    }
+    console.log("Clicked");
+    console.log(this.data.bundleId);
 
-  onCreate(): void {
+    if (this.isEditMode) {
+      console.log("update");
+      this.updateMission();
+    } else {
+      console.log("create");
+      this.createMission();
+    }
+  }
+
+  private createMission(): void {
     if (this.createMissionForm.invalid || this.isSaving || !this.currentUser || !this.selectedFile) {
+      console.log("broken");
       return;
     }
     this.isSaving = true;
-
+    console.log(this.data.bundleId);
     const formData = new FormData();
     formData.append('document', this.selectedFile, this.fileName!);
+    formData.append('bundleId', this.data.bundleId);
     formData.append('studentId', this.data.student._id);
     formData.append('tutorId', this.createMissionForm.value.tutorId);
     formData.append('remuneration', this.createMissionForm.value.remuneration);
@@ -124,5 +164,24 @@ export class MissionsModal implements OnInit {
         this.notificationService.showError(err.error?.message || 'Failed to create mission.');
       }
     });
+  }
+  private updateMission(): void {
+      const payload: Partial<IMissions> = {
+          tutor: this.createMissionForm.value.tutorId,
+          dateCompleted: this.createMissionForm.value.dateCompleted,
+          remuneration: this.createMissionForm.value.remuneration,
+           status: this.createMissionForm.value.status,
+      };
+
+      this.missionService.updateMission(this.data.mission!._id, payload).subscribe({
+          next: (updatedMission) => {
+              this.notificationService.showSuccess('Mission updated successfully!');
+              this.dialogRef.close(updatedMission);
+          },
+          error: (err) => {
+              this.isSaving = false;
+              this.notificationService.showError(err.error?.message || 'Failed to update mission.');
+          }
+      });
   }
 }
