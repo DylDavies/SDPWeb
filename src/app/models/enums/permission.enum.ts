@@ -30,5 +30,13 @@ export enum EPermission {
     BUNDLES_DELETE = 'bundles:delete',
     BUNDLES_APPROVE = 'bundles:approve',
 
+    // Badge Management Permissions
+    BADGES_CREATE = 'badges:create',
+    BADGES_MANAGE = 'badges:manage',
+    BADGES_VIEW = 'badges:view',
+    BADGES_VIEW_REQUIREMENTS = 'badges:view_requirements', 
+    BADGES_MANAGE_REQUIREMENTS = 'badges:manage_requirements',
+
     NOTIFICATIONS_VIEW = 'notifications:view'
+
 }

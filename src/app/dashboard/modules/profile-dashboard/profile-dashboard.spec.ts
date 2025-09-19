@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { BehaviorSubject,of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Profile } from './profile-dashboard';
@@ -10,40 +10,33 @@ import { UserService } from '../../../services/user-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-
 describe('Profile', () => {
   let component: Profile;
   let fixture: ComponentFixture<Profile>;
 
-  // --- Mocks for all injected services ---
   let mockAuthService: {
     currentUser$: BehaviorSubject<IUser | null>,
-    currentUserValue: IUser | null,
     updateCurrentUserState: jasmine.Spy,
     hasPermission: jasmine.Spy;
   };
   let mockUserService: jasmine.SpyObj<UserService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockDialog: jasmine.SpyObj<MatDialog>;
-
-  let mockActivatedRoute;
+  let mockActivatedRoute: object;
 
   beforeEach(async () => {
-    // --- Initialize Mocks ---
     mockAuthService = {
       currentUser$: new BehaviorSubject<IUser | null>(null),
-      currentUserValue: null,
       updateCurrentUserState: jasmine.createSpy('updateCurrentUserState'),
       hasPermission: jasmine.createSpy('hasPermission').and.returnValue(true)
     };
-    mockUserService = jasmine.createSpyObj('UserService', ['getUserById']);
-    mockUserService.getUserById.and.returnValue(of(undefined));
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockUserService = jasmine.createSpyObj('UserService', ['getUserById', 'updateUserAvailability']); 
+    mockRouter = jasmine.createSpyObj('Router', ['navigateByUrl']); 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockActivatedRoute = {
       snapshot: {
         paramMap: {
-          get: (_key: string) => null // Default to no 'id' param
+          get: (_key: string) => null
         }
       }
     };
@@ -51,12 +44,11 @@ describe('Profile', () => {
     await TestBed.configureTestingModule({
       imports: [
         Profile,
-        NoopAnimationsModule // Good practice for Material components
+        NoopAnimationsModule
       ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        // --- Provide all the mocks ---
         { provide: AuthService, useValue: mockAuthService },
         { provide: UserService, useValue: mockUserService },
         { provide: Router, useValue: mockRouter },
@@ -67,16 +59,16 @@ describe('Profile', () => {
 
     fixture = TestBed.createComponent(Profile);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // You can add more specific tests now, for example:
   it('should load the current user when no ID is in the route', () => {
     const testUser = { _id: '123', displayName: 'Test User' } as IUser;
+    mockUserService.getUserById.withArgs('123').and.returnValue(of(testUser));
+    
     mockAuthService.currentUser$.next(testUser);
     fixture.detectChanges();
     

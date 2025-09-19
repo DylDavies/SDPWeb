@@ -17,6 +17,7 @@ import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
 import { UserManagement } from './dashboard/modules/user-management/user-management';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
+import { BadgeLibrary } from './dashboard/modules/badge-library/badge-library';
 import { NotificationCenterComponent } from './notification-center/notification-center';
 import { StudentManagement } from './dashboard/modules/student-management/student-management';
 import { StudentInformationPage } from './dashboard/modules/student-information/student-information-page/student-information-page';
@@ -45,6 +46,7 @@ export const routes: Routes = [
           EPermission.BUNDLES_DELETE
         ], true)] 
       },
+      { path: 'badges', component: BadgeLibrary, canActivate: [permissionGuard([EPermission.BADGES_VIEW])] },
       {
         path: 'notifications',
         component: NotificationCenterComponent,
