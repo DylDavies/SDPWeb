@@ -8,7 +8,8 @@ export interface IPopulatedStudent {
 
 export interface IMissions{
     _id: string;
-    document: string;
+    documentPath: string;
+    documentName: string;
     student: string | IPopulatedStudent; // The ID of the student this bundle is for, or the populated student object
     tutor: string;
     createdAt: Date;

@@ -56,8 +56,12 @@
                 </mat-card-actions>
             </mat-tab>
             <mat-tab label="Missions">
-                <p>Missions stuff will go here</p>
-                <app-missions-modal></app-missions-modal>
+                <div class = missions-dashboard-header>
+                    <button mat-flat-button color="primary" (click)="openCreateDialog()">
+                      <mat-icon>add</mat-icon>
+                      Add New Mission
+                    </button>
+                </div>
                 <app-missions-table></app-missions-table>
             </mat-tab>
         </mat-tab-group>

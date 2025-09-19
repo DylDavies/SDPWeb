@@ -12,6 +12,8 @@ import { IBundle, IPopulatedUser } from '../../../../models/interfaces/IBundle.i
 import { MatTabsModule } from "@angular/material/tabs";
 import { MissionsModal } from '../components/missions-modal/missions-modal';
 import { MissionsTable } from '../components/missions-table/missions-table';
+import { MatDialog } from '@angular/material/dialog';
+import { IUser } from '../../../../models/interfaces/IUser.interface';
 
 @Component({
   selector: 'app-student-information-page',
@@ -24,7 +26,7 @@ export class StudentInformationPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private bundleService = inject(BundleService);
-
+  private dialog = inject(MatDialog);
   public bundle: IBundle | null = null;
   public isLoading = true;
   public bundleNotFound = false;
@@ -51,6 +53,19 @@ export class StudentInformationPage implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+  openCreateDialog(): void {
+    // Ensure you have a valid, populated student object before opening
+    if (this.bundle?.student && typeof this.bundle.student === 'object') {
+      this.dialog.open(MissionsModal, {
+        width: '500px', // Or your preferred width
+        panelClass: 'missions-dialog-container',
+        data: {
+          // Pass the student object to the modal
+          student: this.bundle.student as IUser
+        }
+      });
+    }
   }
 
   goBack(): void {

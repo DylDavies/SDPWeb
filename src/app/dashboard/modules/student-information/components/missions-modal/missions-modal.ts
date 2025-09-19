@@ -1,122 +1,127 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatSelectModule } from '@angular/material/select';
-import { BundleService } from '../../../../../services/bundle-service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { NotificationService } from '../../../../../services/notification-service';
-import { UserService } from '../../../../../services/user-service';
-import { IUser } from '../../../../../models/interfaces/IUser.interface';
-import { Observable, combineLatest } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
-import { ProficiencyService } from '../../../../../services/proficiency-service';
-import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
-import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
-import { EUserType } from '../../../../../models/enums/user-type.enum';
 import { MissionService } from '../../../../../services/missions-service';
+import { BundleService } from '../../../../../services/bundle-service';
+import { IUser } from '../../../../../models/interfaces/IUser.interface';
+import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
+import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { AuthService } from '../../../../../services/auth-service';
 
 @Component({
   selector: 'app-missions-modal',
-  imports: [CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDividerModule,
-    MatProgressSpinnerModule,
-    MatAutocompleteModule,
-    MatSelectModule],
+  standalone: true,
+  imports: [
+    CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
+    MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    MatSelectModule, MatDatepickerModule
+  ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './missions-modal.html',
-  styleUrl: './missions-modal.scss'
+  styleUrls: ['./missions-modal.scss']
 })
 export class MissionsModal implements OnInit {
   private fb = inject(FormBuilder);
   private missionService = inject(MissionService);
+  private bundleService = inject(BundleService);
   private notificationService = inject(NotificationService);
-  private userService = inject(UserService);
+  private authService = inject(AuthService); // Inject AuthService
   public dialogRef = inject(MatDialogRef<MissionsModal>);
+  public data: { student: IUser } = inject(MAT_DIALOG_DATA);
 
   public createMissionForm: FormGroup;
   public isSaving = false;
-
-  public studentNameCtrl = new FormControl('', [Validators.required]);
-  public filteredStudents$: Observable<IUser[]>;
-  public filteredTutors$: Observable<IUser[]>[] = [];
+  public tutors$: Observable<IPopulatedUser[]> = of([]);
+  public selectedFile: File | null = null;
+  public fileName: string | null = null;
+  private currentUser: IUser | null = null;
 
   constructor() {
     this.createMissionForm = this.fb.group({
-      student: ['', Validators.required],
+      studentName: [{ value: '', disabled: true }, Validators.required],
+      tutorId: ['', Validators.required],
+      dateCompleted: ['', Validators.required],
+      remuneration: ['', [Validators.required, Validators.min(0)]],
+      document: [null, Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    // Get the current user to use as the commissioner
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
     });
 
-    this.filteredStudents$ = combineLatest([
-      this.userService.allUsers$,
-      this.studentNameCtrl.valueChanges.pipe(startWith(''))
-    ]).pipe(
-      map(([users, searchValue]) => {
-        const clients = users.filter(user => user.type === EUserType.Client);
-        return this._filterUsers(clients, searchValue);
+    if (this.data.student) {
+      this.createMissionForm.get('studentName')?.setValue(this.data.student.displayName);
+      this.fetchTutorsForStudent(this.data.student._id);
+    }
+  }
+
+  private fetchTutorsForStudent(studentId: string): void {
+    this.tutors$ = this.bundleService.getBundles().pipe(
+      map(bundles => {
+        const tutors = new Map<string, IPopulatedUser>();
+        bundles
+          .filter(bundle => (bundle.student as IPopulatedUser)?._id === studentId)
+          .forEach(bundle => {
+            bundle.subjects.forEach(subject => {
+              if (typeof subject.tutor === 'object') {
+                tutors.set(subject.tutor._id, subject.tutor);
+              }
+            });
+          });
+        return Array.from(tutors.values());
       })
     );
   }
-  ngOnInit(): void {
-    this.userService.fetchAllUsers().subscribe();
-  }
 
-  private _filterUsers(users: IUser[], value: string | IUser | null): IUser[] {
-    let filterValue = '';
-    if (typeof value === 'string') {
-        filterValue = value.toLowerCase();
-    } else if (value) {
-        filterValue = value.displayName.toLowerCase();
+  onFileSelected(event: Event): void {
+    const element = event.currentTarget as HTMLInputElement;
+    const fileList: FileList | null = element.files;
+    if (fileList && fileList.length > 0) {
+      this.selectedFile = fileList[0];
+      this.fileName = this.selectedFile.name;
+      this.createMissionForm.patchValue({ document: this.selectedFile });
     }
+  }
 
-    return users.filter(user => user.displayName.toLowerCase().includes(filterValue));
-  }
-  displayUser(user: IUser): string {
-    return user && user.displayName ? user.displayName : '';
-  }
-  onStudentSelected(event: MatAutocompleteSelectedEvent): void {
-    const selectedStudentId = event.option.value._id;
-    this.createMissionForm.get('student')?.setValue(selectedStudentId);
-  }
-  onTutorSelected(event: MatAutocompleteSelectedEvent, index: number): void {
-    const selectedTutorId = event.option.value._id;
-    this.createMissionForm.get('tutor')?.setValue(selectedTutorId);
-  }
-  nCancel(): void {
+  onCancel(): void {
     this.dialogRef.close();
   }
 
   onCreate(): void {
-    if (this.createMissionForm.invalid || this.isSaving) {
+    if (this.createMissionForm.invalid || this.isSaving || !this.currentUser || !this.selectedFile) {
       return;
     }
     this.isSaving = true;
-    
-    const payload = {
-        student: this.createMissionForm.value.student,
-        tutor: this.createMissionForm.value.tutor,
-        dateCompleted: this.createMissionForm.value.dateCompleted,
-        document: this.createMissionForm.value.document
-    };
 
-    this.missionService.createMission(payload.student).subscribe({
+    const formData = new FormData();
+    formData.append('document', this.selectedFile, this.fileName!);
+    formData.append('studentId', this.data.student._id);
+    formData.append('tutorId', this.createMissionForm.value.tutorId);
+    formData.append('remuneration', this.createMissionForm.value.remuneration);
+    formData.append('dateCompleted', this.createMissionForm.value.dateCompleted.toISOString());
+
+    this.missionService.createMission(formData).subscribe({
       next: (newMission) => {
-        this.notificationService.showSuccess('Mission added successfully!');
+        this.notificationService.showSuccess('Mission created successfully!');
         this.dialogRef.close(newMission);
       },
       error: (err) => {
         this.isSaving = false;
-        this.notificationService.showError(err.error?.message || 'Failed to add mission.');
+        this.notificationService.showError(err.error?.message || 'Failed to create mission.');
       }
     });
   }
