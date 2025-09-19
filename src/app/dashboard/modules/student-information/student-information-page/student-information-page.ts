@@ -18,7 +18,7 @@ import { IUser } from '../../../../models/interfaces/IUser.interface';
 @Component({
   selector: 'app-student-information-page',
   imports: [CommonModule, DatePipe, TitleCasePipe, MatCardModule, MatProgressSpinnerModule,
-    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsModal, MissionsTable],
+    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsTable],
   templateUrl: './student-information-page.html',
   styleUrl: './student-information-page.scss'
 })
@@ -30,13 +30,18 @@ export class StudentInformationPage implements OnInit {
   public bundle: IBundle | null = null;
   public isLoading = true;
   public bundleNotFound = false;
+  public bundleId: string | null = null;
 
   ngOnInit(): void {
+    
     const bundleId = this.route.snapshot.paramMap.get('id');
+
     if (!bundleId) {
       this.bundleNotFound = true;
       this.isLoading = false;
       return;
+    }else{
+      this.bundleId = bundleId;
     }
 
     this.bundleService.getBundleById(bundleId).subscribe({
@@ -46,6 +51,7 @@ export class StudentInformationPage implements OnInit {
         } else {
           this.bundleNotFound = true;
         }
+        //console.log("Bundle data received:", this.bundle);
         this.isLoading = false;
       },
       error: () => {
@@ -54,15 +60,26 @@ export class StudentInformationPage implements OnInit {
       }
     });
   }
+
   openCreateDialog(): void {
-    // Ensure you have a valid, populated student object before opening
-    if (this.bundle?.student && typeof this.bundle.student === 'object') {
-      this.dialog.open(MissionsModal, {
-        width: '500px', // Or your preferred width
+    if (this.bundle?.student && typeof this.bundle.student === 'object' && this.bundleId) {
+      const dialogRef = this.dialog.open(MissionsModal, {
+        width: '500px',
         panelClass: 'missions-dialog-container',
         data: {
-          // Pass the student object to the modal
-          student: this.bundle.student as IUser
+          student: this.bundle.student as IUser,
+          bundleId: this.bundleId // Pass the bundleId to the modal
+        }
+      });
+      
+      // When the dialog closes, reload the missions table
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+            // We need a way to tell the child component to reload.
+            // A simple but effective way is to quickly set the bundleId to null and then back.
+            const currentId = this.bundleId;
+            this.bundleId = null;
+            setTimeout(() => this.bundleId = currentId, 0);
         }
       });
     }

@@ -36,6 +36,18 @@ export class MissionService {
   getMissions(): Observable<IMissions[]> {
     return this.httpService.get<IMissions[]>('missions');
   }
+  /**
+   * Retrieves all missions for a specific student from the backend.
+   * @param studentId The ID of the student.
+   * @returns An Observable that emits an array of the student's missions.
+   */
+  getMissionsByStudentId(studentId: string): Observable<IMissions[]> {
+    return this.httpService.get<IMissions[]>(`missions/student/${studentId}`);
+  }
+
+  getMissionsByBundleId(bundleId: string): Observable<IMissions[]> {
+    return this.httpService.get<IMissions[]>(`missions/bundle/${bundleId}`);
+  }
 
   /**
    * Retrieves a single mission by its unique ID.
