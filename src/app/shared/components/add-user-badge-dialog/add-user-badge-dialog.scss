@@ -1,0 +1,44 @@
+.dialog-container {
+    padding: 24px;
+}
+
+.dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dialog-header mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+}
+
+h2[mat-dialog-title] {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.dialog-content p {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.full-width {
+    width: 100%;
+}
+
+
+.badge-option {
+    display: flex;
+    align-items: center;
+    gap: 12px; 
+
+    mat-icon {
+        color: var(--mat-sys-primary);
+    }
+}
+
+mat-dialog-actions {
+    padding-top: 16px;
+}

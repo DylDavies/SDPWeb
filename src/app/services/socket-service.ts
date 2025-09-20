@@ -29,6 +29,10 @@ export class SocketService implements OnDestroy {
     });
   }
 
+  public connectionHook(cb: () => void) {
+    this.socket.on('connect', cb);
+  }
+
   authenticate(token: string) {
     this.socket.emit('authenticate', token);
   }

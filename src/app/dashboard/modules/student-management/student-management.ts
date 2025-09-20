@@ -11,7 +11,6 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NotificationService } from '../../../services/notification-service';
 import { BundleService } from '../../../services/bundle-service';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { IBundle} from '../../../models/interfaces/IBundle.interface';
@@ -19,6 +18,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth-service'; // Import AuthService
 import { IUser } from '../../../models/interfaces/IUser.interface'; // Import IUser
 import { EUserType } from '../../../models/enums/user-type.enum'; // Import EUserType
+import { SnackBarService } from '../../../services/snackbar-service';
 
 
 @Component({
@@ -40,7 +40,7 @@ import { EUserType } from '../../../models/enums/user-type.enum'; // Import EUse
 })
 export class StudentManagement implements OnInit, AfterViewInit {
     private bundleService = inject(BundleService);
-    private notificationService = inject(NotificationService);
+    private snackbarService = inject(SnackBarService);
     private router = inject(Router);
     private authService = inject(AuthService); // Inject AuthService
     public isLoading = true;
@@ -93,7 +93,7 @@ export class StudentManagement implements OnInit, AfterViewInit {
         this.isLoading = false;
       },
       error: (err) => {
-        this.notificationService.showError(err.error?.message || 'Failed to load bundles.');
+        this.snackbarService.showError(err.error?.message || 'Failed to load bundles.');
         this.isLoading = false;
       }
     });

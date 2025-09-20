@@ -3,7 +3,7 @@ import { MatCardModule } from "@angular/material/card";
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { trigger, state, style, animate, transition } from "@angular/animations";
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
@@ -37,7 +37,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 })
 export class WelcomeCard {
   private clipboard = inject(Clipboard);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
 
   isWelcomeCardVisible = true;
   public cardState: "visible" | "hidden" = "visible";
@@ -50,6 +50,6 @@ export class WelcomeCard {
 
   copyEmail(): void {
     this.clipboard.copy(this.supportEmail);
-    this.notificationService.showSuccess('Support email copied to clipboard!');
+    this.snackbarService.showSuccess('Support email copied to clipboard!');
   }
 }

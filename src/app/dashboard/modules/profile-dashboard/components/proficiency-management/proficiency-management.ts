@@ -21,7 +21,7 @@ import { AuthService } from '../../../../../services/auth-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { BackendSubject } from '../../../../../models/interfaces/IBackendSubject.interface';
 import { UserService } from '../../../../../services/user-service';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { IBackendProficiency } from '../../../../../models/interfaces/IBackendProficiency.interface';
 import * as _ from 'lodash'; 
@@ -56,7 +56,7 @@ export class ProficiencyManagement implements OnInit {
 
   private profService = inject(ProficiencyService);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
 
   proficiencies: IProficiency[] = [];
@@ -228,7 +228,7 @@ export class ProficiencyManagement implements OnInit {
 
   deleteSubject(profName: string, subjectToDelete: ISubject): void {
     if (!this.user || !subjectToDelete._id) {
-      this.notificationService.showError("Cannot delete subject without a valid ID.");
+      this.snackbarService.showError("Cannot delete subject without a valid ID.");
       return;
     }
 
@@ -258,12 +258,12 @@ export class ProficiencyManagement implements OnInit {
         }
         
         this.prepopulateSyllabusSelections();
-        this.notificationService.showSuccess(`Subject "${subjectToDelete.name}" deleted.`);
+        this.snackbarService.showSuccess(`Subject "${subjectToDelete.name}" deleted.`);
 
       },
       error: (err) => {
         console.error('Failed to delete subject', err);
-        this.notificationService.showError('An error occurred while deleting the subject.');
+        this.snackbarService.showError('An error occurred while deleting the subject.');
       }
     });
   }
@@ -290,7 +290,7 @@ confirmSave(): void {
     }).filter(p => Object.keys(p.subjects).length > 0);
 
     if (this.isSaveDisabled()) {
-      this.notificationService.showInfo("No changes to save.");
+      this.snackbarService.showInfo("No changes to save.");
       return;
     }
 
@@ -317,14 +317,14 @@ confirmSave(): void {
       next: (finalUpdatedUser) => {
         if (finalUpdatedUser) {
           this.authService.updateCurrentUserState(finalUpdatedUser);
-          this.notificationService.showSuccess('Proficiencies updated successfully!');
+          this.snackbarService.showSuccess('Proficiencies updated successfully!');
         } else {
-           this.notificationService.showError('Could not confirm proficiency updates.');
+           this.snackbarService.showError('Could not confirm proficiency updates.');
         }
       },
       error: (err) => {
         console.error('Failed to update proficiencies', err);
-        this.notificationService.showError('An error occurred while saving.');
+        this.snackbarService.showError('An error occurred while saving.');
       }
     });
 }
