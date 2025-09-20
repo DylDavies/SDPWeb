@@ -1,0 +1,49 @@
+<div class="dialog-container">
+  <header class="dialog-header">
+    <h1 mat-dialog-title>{{ data.badge.name }}</h1>
+    <span class="tla-chip" matTooltip="Acronym">{{ data.badge.TLA }}</span>
+  </header>
+
+  <mat-dialog-content class="dialog-content">
+    <div class="icon-display-container">
+      <mat-icon class="badge-icon-large">{{ data.badge.image }}</mat-icon>
+    </div>
+
+    <div class="details-section">
+      <div class="detail-item">
+        <span class="detail-label">Summary</span>
+        <p class="detail-value summary">{{ data.badge.summary }}</p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="detail-item">
+        <span class="detail-label">Description</span>
+        <p class="detail-value">{{ data.badge.description }}</p>
+      </div>
+      
+      <mat-divider></mat-divider>
+
+      <div class="detail-item-row">
+        <div class="detail-item">
+          <span class="detail-label">Bonus</span>
+          <span class="detail-value bonus">R {{ data.badge.bonus }}.00 / h</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Type</span>
+          <span class="detail-value">{{ data.badge.permanent ? 'Permanent' : 'Temporary' }}</span>
+        </div>
+        @if (!data.badge.permanent && data.badge.expirationDate) {
+          <div class="detail-item">
+            <span class="detail-label">Expires</span>
+            <span class="detail-value">{{ data.badge.expirationDate | date:'longDate' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" (click)="dialogRef.close()">Close</button>
+  </mat-dialog-actions>
+</div>

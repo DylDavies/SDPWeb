@@ -1,0 +1,17 @@
+.badge-library-container {
+    padding: 24px;
+}
+
+.header {
+    margin-bottom: 16px;
+}
+
+.filter-chips {
+    margin-bottom: 24px;
+}
+
+.badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1rem;
+}

@@ -54,7 +54,8 @@ export class Sidebar implements OnInit, OnDestroy {
         EPermission.BUNDLES_DELETE
       ] 
     },
-    { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW] }
+    { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW] },
+    { label: 'Badge Library', icon: 'military_tech', route: '/dashboard/badges', requiredPermissions: [EPermission.BADGES_VIEW] },
   ]
 
   public authService = inject(AuthService);
