@@ -1,17 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-// --- Angular Material Imports ---
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-
-// --- Needed for ngModel ---
 import { FormsModule } from '@angular/forms';
-
-// --- Define the shape of data we expect ---
 import { ISidebarItem } from '../../../../../../../models/interfaces/ISidebarItem.interface';
 import { ForbiddenLabelValidatorDirective } from '../../../../../../../directives/forbidden-label-validator';
 
@@ -25,7 +19,7 @@ export interface IEditCategoryDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule, // <-- Import FormsModule
+    FormsModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
