@@ -2,9 +2,9 @@
 
   <div class="table-toolbar">
     <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Filter Missions</mat-label>
+      <mat-label>Filter Missions by tutor</mat-label>
       <input matInput (keyup)="applyFilter($event)" placeholder="Search...">
-      <mat-icon matSuffix>search</mat-icon>
+      <mat-icon matSuffix>search by tutor name</mat-icon>
     </mat-form-field>
   </div>
 
@@ -19,7 +19,7 @@
             <td mat-cell *matCellDef="let mission">
               <button mat-button color="primary" (click)="viewDocument(mission)">
                 <mat-icon>description</mat-icon>
-                {{ mission.documentName }}
+                mission
               </button>
             </td>
           </ng-container>
@@ -45,7 +45,7 @@
           <!-- Hours Completed Column -->
           <ng-container matColumnDef="hoursCompleted">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Hours Completed </th>
-            <td mat-cell *matCellDef="let mission"> {{ mission.hoursCompleted }}h </td>
+            <td mat-cell *matCellDef="let mission"> {{ mission.hoursCompleted }} </td>
           </ng-container>
 
           <!-- Date Completed Column -->

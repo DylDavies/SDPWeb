@@ -15,7 +15,9 @@ describe('MissionService', () => {
   // Mock data for use in tests
   const mockMission: IMissions = {
     _id: 'mission1',
-    document: 'doc.pdf',
+    bundleId: 'bundle1',
+    documentPath: 'doc.pdf',
+    documentName: 'doc.pdf',
     student: 'student1',
     tutor: 'tutor1',
     remuneration: 100,
@@ -77,14 +79,14 @@ describe('MissionService', () => {
 
   describe('createMission', () => {
     it('should send a POST request to the /missions endpoint', () => {
-      const newMissionData = {
-        document: 'new_doc.pdf',
-        studentId: 'student2',
-        tutorId: 'tutor2',
-        remuneration: 200,
-        commissionedById: 'commissioner2',
-        dateCompleted: new Date(),
-      };
+      const newMissionData = new FormData();
+      newMissionData.append('document', new File([], 'doc.pdf'));
+      newMissionData.append('studentId', 'student2');
+      newMissionData.append('tutorId', 'tutor2');
+      newMissionData.append('remuneration', '200');
+      newMissionData.append('commissionedById', 'commissioner2');
+      newMissionData.append('dateCompleted', new Date().toISOString());
+
 
       service.createMission(newMissionData).subscribe(mission => {
         expect(mission).toBeDefined();

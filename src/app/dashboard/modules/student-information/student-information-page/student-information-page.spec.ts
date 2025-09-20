@@ -19,7 +19,6 @@ describe('StudentInformationPage', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              // Provide a default empty map for URL parameters
               paramMap: convertToParamMap({})
             }
           }

@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { EPermission } from '../../../../../models/enums/permission.enum';
 import { IMissions} from '../../../../../models/interfaces/IMissions.interface';
-import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
+import { IBundle, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { AuthService } from '../../../../../services/auth-service';
 import { MissionService } from '../../../../../services/missions-service';
 import { NotificationService } from '../../../../../services/notification-service';
@@ -49,6 +49,10 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
 
   private subscriptions = new Subscription();
 
+  constructor() {
+    this.dataSource.filterPredicate = this.createFilter();
+  }
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -76,7 +80,7 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
     
     this.isLoading = true;
     this.subscriptions.add(
-      // **FIX 1: Call the correct service method**
+     
       this.missionService.getMissionsByBundleId(this.bundleId).subscribe(missions => {
         this.dataSource.data = missions;
         this.dataSource.paginator = this.paginator;
@@ -94,6 +98,13 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
       this.dataSource.paginator.firstPage();
     }
   }
+  createFilter(): (data: IMissions, filter: string) => boolean {
+      const filterFunction = (data: IMissions, filter: string): boolean => {
+        const searchTerms = JSON.stringify(data.tutor).toLowerCase();
+        return searchTerms.indexOf(filter) !== -1;
+      };
+      return filterFunction;
+    }
 
   viewDocument(mission: IMissions): void {
     this.dialog.open(ViewMissionModal, {
@@ -106,7 +117,6 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
   editMission(mission: IMissions): void {
     const dialogRef = this.dialog.open(MissionsModal, {
       width: 'clamp(500px, 80vw, 700px)',
-      // **FIX 2: Pass the bundleId when opening the dialog for editing**
       data: { mission, student: mission.student, bundleId: this.bundleId }
     });
 

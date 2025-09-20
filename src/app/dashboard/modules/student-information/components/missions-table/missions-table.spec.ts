@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MissionsTable } from './missions-table';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('MissionsTable', () => {
   let component: MissionsTable;
@@ -8,7 +10,12 @@ describe('MissionsTable', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MissionsTable]
+      imports: [MissionsTable],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        
+      ]
     })
     .compileComponents();
 

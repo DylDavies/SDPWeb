@@ -14,6 +14,8 @@ import { MissionsModal } from '../components/missions-modal/missions-modal';
 import { MissionsTable } from '../components/missions-table/missions-table';
 import { MatDialog } from '@angular/material/dialog';
 import { IUser } from '../../../../models/interfaces/IUser.interface';
+import { EPermission } from '../../../../models/enums/permission.enum';
+import { AuthService } from '../../../../services/auth-service';
 
 @Component({
   selector: 'app-student-information-page',
@@ -26,15 +28,18 @@ export class StudentInformationPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private bundleService = inject(BundleService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   public bundle: IBundle | null = null;
   public isLoading = true;
   public bundleNotFound = false;
   public bundleId: string | null = null;
+  public canCreateMissions = false;
 
   ngOnInit(): void {
     
     const bundleId = this.route.snapshot.paramMap.get('id');
+    this.canCreateMissions = this.authService.hasPermission(EPermission.MISSIONS_CREATE);
 
     if (!bundleId) {
       this.bundleNotFound = true;
@@ -51,7 +56,6 @@ export class StudentInformationPage implements OnInit {
         } else {
           this.bundleNotFound = true;
         }
-        //console.log("Bundle data received:", this.bundle);
         this.isLoading = false;
       },
       error: () => {
@@ -68,15 +72,11 @@ export class StudentInformationPage implements OnInit {
         panelClass: 'missions-dialog-container',
         data: {
           student: this.bundle.student as IUser,
-          bundleId: this.bundleId // Pass the bundleId to the modal
+          bundleId: this.bundleId 
         }
-      });
-      
-      // When the dialog closes, reload the missions table
+      });  
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-            // We need a way to tell the child component to reload.
-            // A simple but effective way is to quickly set the bundleId to null and then back.
             const currentId = this.bundleId;
             this.bundleId = null;
             setTimeout(() => this.bundleId = currentId, 0);
@@ -92,7 +92,6 @@ export class StudentInformationPage implements OnInit {
     if (typeof user === 'object' && user.displayName) {
       return user.displayName;
     }
-    // You can decide what to show if it's just a string ID, e.g., the ID itself or a placeholder.
     return 'N/A';
   }
 

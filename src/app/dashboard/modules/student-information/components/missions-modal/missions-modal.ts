@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,6 +20,19 @@ import { Observable, of } from 'rxjs';
 import { AuthService } from '../../../../../services/auth-service';
 import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
 import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
+
+export function futureDateValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const selectedDate = control.value as Date;
+    if (!selectedDate) {
+      return null; 
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+
+    return selectedDate < today ? { pastDate: true } : null;
+  };
+}
 
 @Component({
   selector: 'app-missions-modal',
@@ -51,12 +64,14 @@ export class MissionsModal implements OnInit {
   public fileName: string | null = null;
   private currentUser: IUser | null = null;
   public missionStatuses = Object.values(EMissionStatus);
+  public minDate: Date;
 
   constructor() {
+    this.minDate = new Date(); 
     this.createMissionForm = this.fb.group({
       studentName: [{ value: '', disabled: true }, Validators.required],
       tutorId: ['', Validators.required],
-      dateCompleted: ['', Validators.required],
+       dateCompleted: ['', [Validators.required, futureDateValidator()]],
       remuneration: ['', [Validators.required, Validators.min(0)]],
       status: [EMissionStatus.Active, Validators.required],
       document: [null, Validators.required]
@@ -87,6 +102,7 @@ export class MissionsModal implements OnInit {
             status: this.data.mission.status
         });
     } else {
+        this.createMissionForm.get('document')?.clearValidators();
         this.createMissionForm.get('document')?.setValidators(Validators.required);
     }
     

@@ -57,10 +57,14 @@
             </mat-tab>
             <mat-tab label="Missions">
                 <div class = missions-dashboard-header>
-                    <button mat-flat-button color="primary" (click)="openCreateDialog()">
+                  @if(canCreateMissions){
+                     <button mat-flat-button color="primary" (click)="openCreateDialog()">
                       <mat-icon>add</mat-icon>
                       Add New Mission
                     </button>
+
+                  }
+                   
                 </div>
                   <app-missions-table [bundleId]="bundleId"></app-missions-table>
             </mat-tab>

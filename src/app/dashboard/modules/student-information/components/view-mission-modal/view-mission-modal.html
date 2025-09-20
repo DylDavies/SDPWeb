@@ -1,7 +1,7 @@
 <div class="dialog-header">
   <h1 mat-dialog-title>{{ pdfFilename }}</h1>
   <div class="header-actions">
-    <button mat-icon-button (click)="downloadDocument()" matTooltip="Download PDF">
+    <button mat-icon-button (click)="downloadDocument()" matTooltip="Download PDF" [disabled]="isLoading || !pdfUrl">
       <mat-icon>download</mat-icon>
     </button>
     <button mat-icon-button (click)="close()" matTooltip="Close">
@@ -10,10 +10,19 @@
   </div>
 </div>
 <mat-dialog-content>
-  @if(pdfUrl) {
-    <iframe [src]="pdfUrl" frameborder="0"></iframe>
+  @if(isLoading) {
+    <div class="message-container">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <p>Loading document...</p>
+    </div>
   } @else {
-    <p>Could not load PDF.</p>
+    @if(pdfUrl) {
+        <iframe [src]="pdfUrl" frameborder="0"></iframe>
+    } @else {
+        <div class="message-container error">
+            <mat-icon>error_outline</mat-icon>
+            <p>Could not load PDF.</p>
+        </div>
+    }
   }
 </mat-dialog-content>
-
