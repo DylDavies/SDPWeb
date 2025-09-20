@@ -4,11 +4,9 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 @Directive({
   selector: '[appForbiddenLabel]',
   standalone: true,
-  // This tells Angular that this directive provides a validation function
   providers: [{ provide: NG_VALIDATORS, useExisting: ForbiddenLabelValidatorDirective, multi: true }]
 })
-export class ForbiddenLabelValidatorDirective implements Validator {
-  // We'll pass the array of forbidden labels to this input
+export class ForbiddenLabelValidatorDirective implements Validator {t
   @Input('appForbiddenLabel') forbiddenLabels: string[] = [];
 
   /**
