@@ -13,7 +13,6 @@
   min-height: 0;
 }
 
-// --- CARD & PANEL STRUCTURE ---
 .list-panel, .tree-panel {
   flex: 1;
   display: flex;
@@ -45,7 +44,6 @@
   }
 }
 
-// --- ROW & ITEM STYLES (Inconsistent Spacing Fix) ---
 .draggable-item, .tree-node {
   display: flex;
   align-items: center;
@@ -53,11 +51,9 @@
   padding: 8px 10px;
   background: var(--mat-sys-surface-container-high);
   border-radius: 4px;
-  // By applying the margin here, we guarantee consistent spacing.
   margin-bottom: 8px;
 }
 
-// Margin is removed from the `li` to prevent the spacing bug.
 li {
   list-style-type: none;
 }
@@ -169,7 +165,7 @@ mat-tree.cdk-drop-list-dragging {
   transform: none !important;
 }
 
-// --- DROP INDICATOR (Trigger Area Fix) ---
+// --- DROP INDICATOR ---
 .drop-indicator {
   height: 2px;
   width: 100%;
