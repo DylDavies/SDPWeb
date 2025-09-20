@@ -30,6 +30,9 @@ export enum EPermission {
     BUNDLES_DELETE = 'bundles:delete',
     BUNDLES_APPROVE = 'bundles:approve',
 
+    // Sidebar Management
+    SIDEBAR_MANAGE = 'sidebar:manage',
+
     // Badge Management Permissions
     BADGES_CREATE = 'badges:create',
     BADGES_MANAGE = 'badges:manage',

@@ -32,21 +32,21 @@
                 <div class="profile-avatar-wrapper">
                   <img class="profile-avatar" 
                        [src]="user.picture || '/assets/no_profile_pic.png'" 
-                       [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')">
-         
-                  <div class="profile-info">
-                    <div class="editable-header">
-                      <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
-                      @if (isOwnProfile) {
-                        <button mat-icon-button (click)="editProfile()" class="edit-icon" matTooltip="Edit display name">
-                          <mat-icon>edit</mat-icon>
-                        </button>
-                      }
-                    </div>
-                    <h2 class="user-role"  matTooltip="User type" aria-label="User ">{{ user.type | userTypePipe }}</h2>
-                    <div class="roles-container" matTooltip="User role" aria-label="User role">
-                      <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
-                    </div>
+                       [alt]="'Profile picture of ' + ((user.displayName | displayNamePipe) || 'user')"
+                       referrerpolicy="no-referrer">
+                </div>
+                <div class="profile-info">
+                  <div class="editable-header">
+                    <h1 class="display-name">{{ (user.displayName | displayNamePipe) || 'User' }}</h1>
+                    @if (isOwnProfile) {
+                      <button mat-icon-button (click)="editProfile()" class="edit-icon" matTooltip="Edit display name">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
+                  </div>
+                  <h2 class="user-role"  matTooltip="User type" aria-label="User type">{{ user.type | userTypePipe }}</h2>
+                  <div class="roles-container" matTooltip="User roles" aria-label="User roles">
+                    <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
                   </div>
                 </div>
 
