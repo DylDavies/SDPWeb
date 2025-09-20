@@ -6,7 +6,7 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
   standalone: true,
   providers: [{ provide: NG_VALIDATORS, useExisting: ForbiddenLabelValidatorDirective, multi: true }]
 })
-export class ForbiddenLabelValidatorDirective implements Validator {t
+export class ForbiddenLabelValidatorDirective implements Validator {
   @Input('appForbiddenLabel') forbiddenLabels: string[] = [];
 
   /**
