@@ -14,8 +14,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NotificationService } from '../../../services/notification-service';
 import { BundleService } from '../../../services/bundle-service';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
-import { IBundle } from '../../../models/interfaces/IBundle.interface';
+import { IBundle} from '../../../models/interfaces/IBundle.interface';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth-service'; // Import AuthService
+import { IUser } from '../../../models/interfaces/IUser.interface'; // Import IUser
+import { EUserType } from '../../../models/enums/user-type.enum'; // Import EUserType
 
 
 @Component({
@@ -39,8 +42,10 @@ export class StudentManagement implements OnInit, AfterViewInit {
     private bundleService = inject(BundleService);
     private notificationService = inject(NotificationService);
     private router = inject(Router);
+    private authService = inject(AuthService); // Inject AuthService
     public isLoading = true;
     public EBundleStatus = EBundleStatus; 
+    private currentUser: IUser | null = null;
 
 
     // Table properties
@@ -55,17 +60,36 @@ export class StudentManagement implements OnInit, AfterViewInit {
     this.dataSource.filterPredicate = this.createFilter();
   }
   ngOnInit(): void {
-      this.loadBundles();
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+        this.loadBundles();
+      });
   }
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
   loadBundles(): void {
+    if (!this.currentUser) {
+        this.isLoading = false;
+        return;
+    }
+
     this.isLoading = true;
     this.bundleService.getBundles().subscribe({
       next: (bundles) => {
-        this.dataSource.data = bundles.filter(b => b.isActive);
+        let filteredBundles = bundles.filter(b => b.isActive);
+
+        if (this.currentUser?.type === EUserType.Staff) {
+          filteredBundles = filteredBundles.filter(bundle => 
+            bundle.subjects.some(subject => {
+              const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
+              return tutorId === this.currentUser?._id;
+            })
+          );
+        }
+
+        this.dataSource.data = filteredBundles;
         this.isLoading = false;
       },
       error: (err) => {
@@ -85,8 +109,11 @@ export class StudentManagement implements OnInit, AfterViewInit {
   
   createFilter(): (data: IBundle, filter: string) => boolean {
     const filterFunction = (data: IBundle, filter: string): boolean => {
-      const searchTerms = JSON.stringify(data.student).toLowerCase();
-      return searchTerms.indexOf(filter) !== -1;
+      // Ensure student is populated before accessing displayName
+      const studentName = (typeof data.student === 'object' && data.student.displayName) 
+        ? data.student.displayName.toLowerCase() 
+        : '';
+      return studentName.includes(filter);
     };
     return filterFunction;
   }

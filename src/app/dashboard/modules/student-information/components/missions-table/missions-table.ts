@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { EPermission } from '../../../../../models/enums/permission.enum';
 import { IMissions} from '../../../../../models/interfaces/IMissions.interface';
-import { IBundle, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
+import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { AuthService } from '../../../../../services/auth-service';
 import { MissionService } from '../../../../../services/missions-service';
 import { NotificationService } from '../../../../../services/notification-service';
