@@ -111,8 +111,8 @@ describe('AuthService', () => {
         done();
       });
 
-      // Assert initial call
-      expect(httpServiceSpy.get).toHaveBeenCalledOnceWith('user');
+      expect(httpServiceSpy.get).toHaveBeenCalledWith('user');
+      expect(httpServiceSpy.get).toHaveBeenCalledWith('sidebar');
     });
 
     it('should remove the token and set user to null if the API call fails', (done) => {
