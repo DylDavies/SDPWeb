@@ -11,7 +11,6 @@ import { IMissions} from '../../../../../models/interfaces/IMissions.interface';
 import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { AuthService } from '../../../../../services/auth-service';
 import { MissionService } from '../../../../../services/missions-service';
-import { NotificationService } from '../../../../../services/notification-service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { filter } from 'rxjs/operators';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
@@ -22,6 +21,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-missions-table',
@@ -37,7 +37,7 @@ import { MatInputModule } from '@angular/material/input';
 export class MissionsTable implements OnInit, OnDestroy, OnChanges {
   @Input() bundleId: string | null = null;
   private authService = inject(AuthService);
-  private notificationService = inject(NotificationService);
+  private snackBarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
   private missionService = inject(MissionService);
 
@@ -140,10 +140,10 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
     dialogRef.afterClosed().pipe(filter(result => result === true)).subscribe(() => {
       this.missionService.setMissionStatus(mission._id, EMissionStatus.InActive).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Mission deactivated successfully.');
+          this.snackBarService.showSuccess('Mission deactivated successfully.');
           this.loadMissions();
         },
-        error: (err) => this.notificationService.showError(err.error?.message || 'Failed to deactivate mission.')
+        error: (err) => this.snackBarService.showError(err.error?.message || 'Failed to deactivate mission.')
       });
     });
   }

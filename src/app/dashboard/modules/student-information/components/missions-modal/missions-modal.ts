@@ -10,7 +10,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { NotificationService } from '../../../../../services/notification-service';
 import { MissionService } from '../../../../../services/missions-service';
 import { BundleService } from '../../../../../services/bundle-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
@@ -20,6 +19,7 @@ import { Observable, of } from 'rxjs';
 import { AuthService } from '../../../../../services/auth-service';
 import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
 import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 export function futureDateValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -51,7 +51,7 @@ export class MissionsModal implements OnInit {
   private fb = inject(FormBuilder);
   private missionService = inject(MissionService);
   private bundleService = inject(BundleService);
-  private notificationService = inject(NotificationService);
+  private snackBarService = inject(SnackBarService);
   private authService = inject(AuthService); // Inject AuthService
   public dialogRef = inject(MatDialogRef<MissionsModal>);
   public data: { student: IUser | IPopulatedUser, mission?: IMissions, bundleId: string } = inject(MAT_DIALOG_DATA);
@@ -172,12 +172,12 @@ export class MissionsModal implements OnInit {
 
     this.missionService.createMission(formData).subscribe({
       next: (newMission) => {
-        this.notificationService.showSuccess('Mission created successfully!');
+        this.snackBarService.showSuccess('Mission created successfully!');
         this.dialogRef.close(newMission);
       },
       error: (err) => {
         this.isSaving = false;
-        this.notificationService.showError(err.error?.message || 'Failed to create mission.');
+        this.snackBarService.showError(err.error?.message || 'Failed to create mission.');
       }
     });
   }
@@ -191,12 +191,12 @@ export class MissionsModal implements OnInit {
 
       this.missionService.updateMission(this.data.mission!._id, payload).subscribe({
           next: (updatedMission) => {
-              this.notificationService.showSuccess('Mission updated successfully!');
+              this.snackBarService.showSuccess('Mission updated successfully!');
               this.dialogRef.close(updatedMission);
           },
           error: (err) => {
               this.isSaving = false;
-              this.notificationService.showError(err.error?.message || 'Failed to update mission.');
+              this.snackBarService.showError(err.error?.message || 'Failed to update mission.');
           }
       });
   }

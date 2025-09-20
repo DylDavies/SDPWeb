@@ -6,8 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
 import { MissionService } from '../../../../../services/missions-service';
-import { NotificationService } from '../../../../../services/notification-service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-view-mission-modal',
@@ -23,7 +23,7 @@ export class ViewMissionModal implements OnInit, OnDestroy {
   public data: IMissions = inject(MAT_DIALOG_DATA);
   private sanitizer = inject(DomSanitizer);
   private missionService = inject(MissionService);
-  private notificationService = inject(NotificationService);
+  private snackBarService = inject(SnackBarService);
 
   public pdfUrl: SafeResourceUrl | null = null;
   public pdfFilename = '';
@@ -44,7 +44,7 @@ export class ViewMissionModal implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Failed to load PDF document:', err);
-          this.notificationService.showError('Could not load the mission document.');
+          this.snackBarService.showError('Could not load the mission document.');
           this.isLoading = false;
         }
       });
@@ -72,7 +72,7 @@ export class ViewMissionModal implements OnInit, OnDestroy {
         URL.revokeObjectURL(objectUrl);
       }, 
       error: error => {
-        this.notificationService.showError('Error downloading file.');
+        this.snackBarService.showError('Error downloading file.');
         console.error(error);
       }
     });
