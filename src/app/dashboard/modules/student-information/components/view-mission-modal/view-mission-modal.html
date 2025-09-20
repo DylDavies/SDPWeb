@@ -1,11 +1,8 @@
 <div class="dialog-header">
   <h1 mat-dialog-title>{{ pdfFilename }}</h1>
   <div class="header-actions">
-    <button mat-icon-button (click)="downloadDocument()" matTooltip="Download PDF" [disabled]="isLoading || !pdfUrl">
-      <mat-icon>download</mat-icon>
-    </button>
-    <button mat-icon-button (click)="close()" matTooltip="Close">
-      <mat-icon>close</mat-icon>
+    <button  mat-icon-button (click)="close()" matTooltip="Close" class="close-button">
+      <mat-icon >close</mat-icon>
     </button>
   </div>
 </div>
