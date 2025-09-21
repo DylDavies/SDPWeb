@@ -10,7 +10,6 @@ import { UserTable } from '../../../shared/components/user-table/user-table';
 import { SidebarCustomization } from './components/sidebar-customization/sidebar-customization';
 import { BadgeManagement } from "./components/badge-management/badge-management";
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { result } from 'lodash';
 
 @Component({
   selector: 'app-admin-dashboard',
