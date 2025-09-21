@@ -185,11 +185,20 @@ mat-tree.cdk-drop-list-dragging {
   border: 1px solid var(--mat-sys-color-primary);
 }
 
-// This hides the unwanted "double indicator"
 .cdk-drag-placeholder + .drop-indicator {
   display: none;
 }
 
 .sublist-end-indicator {
   margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .panels-container {
+    flex-direction: column;
+  }
+
+  .customization-container {
+    padding: 16px;
+  }
 }
