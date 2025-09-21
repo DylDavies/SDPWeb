@@ -52,6 +52,12 @@
   background: var(--mat-sys-surface-container-high);
   border-radius: 4px;
   margin-bottom: 8px;
+  
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 li {
@@ -78,6 +84,7 @@ ul {
 
 .item-icon {
   color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0;
 }
 
 .tree-node-expander {
@@ -87,11 +94,12 @@ ul {
 }
 
 .spacer {
-  flex: 1 1 auto;
+  flex-grow: 1; 
 }
 
 .action-button {
   color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0; // NEW: Prevent button from shrinking
 }
 
 // --- DRAG HANDLE ---
@@ -102,6 +110,7 @@ ul {
   margin-top: 4px;
   border-radius: 50%;
   transition: background-color 0.2s ease-in-out;
+  flex-shrink: 0; 
 
   &:hover {
     background-color: rgba(var(--mat-sys-on-surface-rgb), 0.08);
