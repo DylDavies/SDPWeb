@@ -68,11 +68,11 @@ export class MissionService {
     return this.http.post<IMissions>(`${this.apiUrl}/missions`, missionData);
   }
 
-  downloadMissionDocument(filename: string): Observable<Blob> {
+  /*downloadMissionDocument(filename: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/missions/document/${filename}`, {
       responseType: 'blob' // This is important for handling file downloads
     });
-  }
+  }*/
 
   /**
    * Updates an existing mission with new data.

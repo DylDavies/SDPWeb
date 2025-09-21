@@ -15,7 +15,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { filter } from 'rxjs/operators';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
-import { ViewMissionModal } from '../view-mission-modal/view-mission-modal';
+//import { ViewMissionModal } from '../view-mission-modal/view-mission-modal';
 import { MissionsModal } from '../missions-modal/missions-modal';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -42,7 +42,7 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
   private missionService = inject(MissionService);
 
   public dataSource = new MatTableDataSource<IMissions>();
-  public displayedColumns: string[] = ['documentName', 'tutor', 'createdAt', 'remuneration', 'hoursCompleted', 'dateCompleted'];
+  public displayedColumns: string[] = ['tutor', 'createdAt', 'remuneration', 'hoursCompleted', 'dateCompleted'];
   public canEditMissions = false;
   public canDeleteMissions = false;
   public isLoading = true;
@@ -106,13 +106,13 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
       return filterFunction;
     }
 
-  viewDocument(mission: IMissions): void {
+  /*viewDocument(mission: IMissions): void {
     this.dialog.open(ViewMissionModal, {
       width: '80vw',
       height: '90vh',
       data: mission
     });
-  }
+  }*/
 
   editMission(mission: IMissions): void {
     const dialogRef = this.dialog.open(MissionsModal, {

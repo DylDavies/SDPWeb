@@ -161,7 +161,6 @@ export class MissionsModal implements OnInit {
       return;
     }
     this.isSaving = true;
-    console.log(this.data.bundleId);
     const formData = new FormData();
     formData.append('document', this.selectedFile, this.fileName!);
     formData.append('bundleId', this.data.bundleId);

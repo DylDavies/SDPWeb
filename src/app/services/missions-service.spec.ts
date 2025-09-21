@@ -16,7 +16,7 @@ describe('MissionService', () => {
   const mockMission: IMissions = {
     _id: 'mission1',
     bundleId: 'bundle1',
-    documentPath: 'doc.pdf',
+    documentPath: 'path/to/doc.pdf',
     documentName: 'doc.pdf',
     student: 'student1',
     tutor: 'tutor1',
@@ -42,7 +42,6 @@ describe('MissionService', () => {
   });
 
   afterEach(() => {
-    // Ensure that there are no outstanding requests after each test
     httpMock.verify();
   });
 
@@ -54,11 +53,40 @@ describe('MissionService', () => {
     it('should send a GET request to the /missions endpoint', () => {
       const mockMissionsArray = [mockMission];
       service.getMissions().subscribe(missions => {
-        expect(missions.length).toBe(1);
         expect(missions).toEqual(mockMissionsArray);
       });
 
       const req = httpMock.expectOne(`${apiUrl}/missions`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockMissionsArray);
+    });
+  });
+
+  describe('getMissionsByStudentId', () => {
+    it('should send a GET request to the /missions/student/:studentId endpoint', () => {
+      const studentId = 'student1';
+      const mockMissionsArray = [mockMission];
+      
+      service.getMissionsByStudentId(studentId).subscribe(missions => {
+        expect(missions).toEqual(mockMissionsArray);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/student/${studentId}`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockMissionsArray);
+    });
+  });
+
+  describe('getMissionsByBundleId', () => {
+    it('should send a GET request to the /missions/bundle/:bundleId endpoint', () => {
+      const bundleId = 'bundle1';
+      const mockMissionsArray = [mockMission];
+      
+      service.getMissionsByBundleId(bundleId).subscribe(missions => {
+        expect(missions).toEqual(mockMissionsArray);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/bundle/${bundleId}`);
       expect(req.request.method).toBe('GET');
       req.flush(mockMissionsArray);
     });
@@ -79,25 +107,40 @@ describe('MissionService', () => {
 
   describe('createMission', () => {
     it('should send a POST request to the /missions endpoint', () => {
-      const newMissionData = new FormData();
-      newMissionData.append('document', new File([], 'doc.pdf'));
-      newMissionData.append('studentId', 'student2');
-      newMissionData.append('tutorId', 'tutor2');
-      newMissionData.append('remuneration', '200');
-      newMissionData.append('commissionedById', 'commissioner2');
-      newMissionData.append('dateCompleted', new Date().toISOString());
+      const missionData = new FormData();
+      missionData.append('document', new File([], 'doc.pdf'));
+      missionData.append('studentId', 'student1');
+      missionData.append('tutorId', 'tutor1');
+      missionData.append('remuneration', '100');
+      missionData.append('commissionedById', 'commissioner1');
+      missionData.append('dateCompleted', new Date().toISOString());
 
-
-      service.createMission(newMissionData).subscribe(mission => {
+      service.createMission(missionData).subscribe(mission => {
         expect(mission).toBeDefined();
       });
 
       const req = httpMock.expectOne(`${apiUrl}/missions`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual(newMissionData);
-      req.flush({ ...newMissionData, _id: 'newMissionId' });
+      expect(req.request.body).toEqual(missionData);
+      req.flush(mockMission);
     });
   });
+
+  /*describe('downloadMissionDocument', () => {
+    it('should send a GET request to the /missions/document/:filename endpoint', () => {
+      const filename = 'path/to/doc.pdf';
+      const mockBlob = new Blob(['test content'], { type: 'application/pdf' });
+
+      service.downloadMissionDocument(filename).subscribe(blob => {
+        expect(blob).toEqual(mockBlob);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/document/${filename}`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(mockBlob);
+    });
+  });*/
 
   describe('updateMission', () => {
     it('should send a PATCH request to the /missions/:id endpoint', () => {
@@ -138,7 +181,7 @@ describe('MissionService', () => {
 
       const req = httpMock.expectOne(`${apiUrl}/missions/${missionId}`);
       expect(req.request.method).toBe('DELETE');
-      req.flush(null); // A successful delete often returns no body
+      req.flush(null);
     });
   });
 });
