@@ -209,16 +209,16 @@
 
 @media (max-width: 576px) {
   .profile-page-container {
-    padding: 0.5rem;
     margin-top: 0;
   }
 
   .profile-card {
-    padding: 12px;
+    max-width: 100%;
+    padding: 8px;
   }
 
   .profile-content {
-    padding: 12px;
+    padding: 8px;
   }
 
   .profile-header {
