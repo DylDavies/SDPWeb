@@ -29,4 +29,7 @@ export enum EPermission {
     BUNDLES_EDIT = 'bundles:edit',
     BUNDLES_DELETE = 'bundles:delete',
     BUNDLES_APPROVE = 'bundles:approve',
+
+    // Remark Management Permissions
+    REMARKS_MANAGE = 'remarks:manage',
 }

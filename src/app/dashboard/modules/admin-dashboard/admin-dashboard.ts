@@ -7,10 +7,11 @@ import { AuthService } from '../../../services/auth-service';
 import { RoleManagement } from './components/role-management/role-management';
 import { AdminProficiencyManagement } from './components/admin-proficiency-management/admin-proficiency-management';
 import { UserTable } from '../../../shared/components/user-table/user-table';
+import { RemarkTemplateManagement } from './components/remark-template-management/remark-template-management';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement],
+  imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement, RemarkTemplateManagement],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
@@ -20,4 +21,5 @@ export class AdminDashboard {
   public canViewUsers = this.authService.hasPermission(EPermission.USERS_VIEW);
   public canViewRoles = this.authService.hasPermission(EPermission.ROLES_VIEW);
   public canManageProficiencies = this.authService.hasPermission(EPermission.PROFICIENCIES_MANAGE);
+  public canManageRemarks = this.authService.hasPermission(EPermission.REMARKS_MANAGE);
 }

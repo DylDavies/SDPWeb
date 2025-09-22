@@ -1,28 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CreateBundleModal } from './create-bundle-modal';
+import { RemarkModal } from './remark-modal';
 
-describe('CreateBundleModal', () => {
-  let component: CreateBundleModal;
-  let fixture: ComponentFixture<CreateBundleModal>;
+describe('RemarkModal', () => {
+  let component: RemarkModal;
+  let fixture: ComponentFixture<RemarkModal>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateBundleModal, NoopAnimationsModule],
+      imports: [RemarkModal, NoopAnimationsModule],
       providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
         { provide: MatDialogRef, useValue: {} },
-        { provide: MAT_DIALOG_DATA, useValue: {} }
+        { provide: MAT_DIALOG_DATA, useValue: { event: {} } }
       ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CreateBundleModal);
+    fixture = TestBed.createComponent(RemarkModal);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

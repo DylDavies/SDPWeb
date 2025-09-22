@@ -1,0 +1,44 @@
+<h1 mat-dialog-title>{{ isEditMode ? 'Edit' : 'Add' }} Remark for {{ data.event.subject }}</h1>
+<mat-dialog-content>
+  <div *ngIf="isLoading; else formContent" class="loading-container">
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+  </div>
+
+  <ng-template #formContent>
+    <form [formGroup]="remarkForm" (ngSubmit)="onSave()">
+      <div class="form-row">
+        <ng-container *ngFor="let field of template?.fields">
+          <div *ngIf="field.type === 'time'" class="time-spinner-container">
+            <label class="time-spinner-label">{{ field.name }}</label>
+            <app-time-spinner mode="time" [formControlName]="field.name"></app-time-spinner>
+          </div>
+        </ng-container>
+      </div>
+
+      <ng-container *ngFor="let field of template?.fields">
+        <div *ngIf="field.type === 'boolean'" class="toggle-field">
+          <mat-slide-toggle [formControlName]="field.name">{{ field.name }}</mat-slide-toggle>
+        </div>
+      </ng-container>
+
+      <h2 class="section-title">Remark Questions</h2>
+      <ng-container *ngFor="let field of template?.fields">
+        <mat-form-field *ngIf="field.type === 'string'" appearance="outline" class="full-width">
+          <mat-label>{{ field.name }}</mat-label>
+          <textarea matInput
+                    rows="4"
+                    cdkTextareaAutosize
+                    [formControlName]="field.name"></textarea>
+        </mat-form-field>
+      </ng-container>
+    </form>
+  </ng-template>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="remarkForm.invalid || isSaving || isLoading">
+    <mat-progress-spinner *ngIf="isSaving" mode="indeterminate" diameter="24"></mat-progress-spinner>
+    <span *ngIf="!isSaving">{{ isEditMode ? 'Save Changes' : 'Save Remark' }}</span>
+  </button>
+</mat-dialog-actions>

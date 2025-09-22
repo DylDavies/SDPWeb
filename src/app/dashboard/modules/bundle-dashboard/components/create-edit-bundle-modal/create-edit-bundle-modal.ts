@@ -9,12 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
-import { IBundle, IBundleSubject, IPopulatedUser} from '../../../../../models/interfaces/IBundle.interface';
 import { BundleService } from '../../../../../services/bundle-service';
 import { NotificationService } from '../../../../../services/notification-service';
-import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
 import { UserService } from '../../../../../services/user-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
@@ -23,39 +20,36 @@ import { ProficiencyService } from '../../../../../services/proficiency-service'
 import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
 import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
+import { IBundle, IBundleSubject, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
+import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
+import { TimeSpinner } from '../../../../../shared/components/time-spinner/time-spinner';
 
 @Component({
-  selector: 'app-edit-bundle-modal',
+  selector: 'app-create-edit-bundle-modal', // Updated selector
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDividerModule,
-    MatProgressSpinnerModule,
-    MatAutocompleteModule,
-    MatSlideToggleModule,
-    MatSelectModule
+    CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
+    MatInputModule, MatButtonModule, MatIconModule, MatDividerModule,
+    MatProgressSpinnerModule, MatAutocompleteModule, MatSelectModule, TimeSpinner
   ],
-  templateUrl: './edit-bundle-modal.html',
-  styleUrls: ['./edit-bundle-modal.scss']
+  templateUrl: './create-edit-bundle-modal.html', // Updated template URL
+  styleUrls: ['./create-edit-bundle-modal.scss'] // Updated style URL
 })
-export class EditBundleModal implements OnInit {
+export class CreateEditBundleModal implements OnInit {
   private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
   private notificationService = inject(NotificationService);
   private userService = inject(UserService);
   private proficiencyService = inject(ProficiencyService);
-  public dialogRef = inject(MatDialogRef<EditBundleModal>);
-  public data: IBundle = inject(MAT_DIALOG_DATA);
+  public dialogRef = inject(MatDialogRef<CreateEditBundleModal>);
+  public data: { bundle?: IBundle } = inject(MAT_DIALOG_DATA);
 
-  public editForm: FormGroup;
+  public bundleForm: FormGroup;
   public isSaving = false;
-  
+  public isEditMode = false;
+
+  public studentNameCtrl = new FormControl({ value: '', disabled: false }, [Validators.required]);
+  public filteredStudents$: Observable<IUser[]>;
   public filteredTutors$: Observable<IUser[]>[] = [];
   public proficiencies$: Observable<IProficiency[]>;
   public filteredProficiencies$: Observable<IProficiency[]>[] = [];
@@ -63,25 +57,46 @@ export class EditBundleModal implements OnInit {
   public grades$: BehaviorSubject<string[]>[] = [];
 
   constructor() {
-    this.editForm = this.fb.group({
+    this.isEditMode = !!this.data?.bundle;
+
+    this.bundleForm = this.fb.group({
+      student: ['', Validators.required],
       subjects: this.fb.array([])
     });
+
+    if (this.isEditMode) {
+      this.studentNameCtrl.disable();
+    }
+
+    this.filteredStudents$ = combineLatest([
+      this.userService.allUsers$,
+      this.studentNameCtrl.valueChanges.pipe(startWith(''))
+    ]).pipe(
+      map(([users, searchValue]) => {
+        const clients = users.filter(user => user.type === EUserType.Client);
+        return this._filterUsers(clients, searchValue);
+      })
+    );
     this.proficiencies$ = this.proficiencyService.allProficiencies$;
   }
 
   ngOnInit(): void {
     this.userService.fetchAllUsers().subscribe();
     this.proficiencyService.fetchAllProficiencies().subscribe(() => {
-        this.data.subjects.forEach(subject => {
-            this.addSubject(subject);
-        });
+        if (this.isEditMode && this.data.bundle) {
+            this.bundleForm.get('student')?.setValue((this.data.bundle.student as IPopulatedUser)._id);
+            this.studentNameCtrl.setValue((this.data.bundle.student as IPopulatedUser).displayName);
+            this.data.bundle.subjects.forEach(subject => this.addSubject(subject));
+        } else {
+            this.addSubject();
+        }
     });
   }
 
   get subjects(): FormArray {
-    return this.editForm.get('subjects') as FormArray;
+    return this.bundleForm.get('subjects') as FormArray;
   }
-
+  
   getFormControl(index: number, controlName: string): FormControl {
     return (this.subjects.at(index) as FormGroup).get(controlName) as FormControl;
   }
@@ -93,10 +108,10 @@ export class EditBundleModal implements OnInit {
     } else if (value) {
         filterValue = value.displayName.toLowerCase();
     }
-    
+
     return users.filter(user => user.displayName.toLowerCase().includes(filterValue));
   }
-
+  
   private _filterProficiencies(profs: IProficiency[], value: string | IProficiency | null): IProficiency[] {
     let filterValue = '';
     if(typeof value === 'string') {
@@ -107,32 +122,33 @@ export class EditBundleModal implements OnInit {
     
     return profs.filter(prof => prof.name.toLowerCase().includes(filterValue));
   }
-
-    private _filterSubjects(subjects: ISubject[], value: string | ISubject | null): ISubject[] {
-        let filterValue = '';
-        if(typeof value === 'string') {
-            filterValue = value.toLowerCase();
-        } else if (value) {
-            filterValue = value.name.toLowerCase();
-        }
-        
-        return subjects.filter(subject => subject.name.toLowerCase().includes(filterValue));
-    }
   
+  private _filterSubjects(subjects: ISubject[], value: string | ISubject | null): ISubject[] {
+      let filterValue = '';
+      if(typeof value === 'string') {
+          filterValue = value.toLowerCase();
+      } else if (value) {
+          filterValue = value.name.toLowerCase();
+      }
+      
+      return subjects.filter(subject => subject.name.toLowerCase().includes(filterValue));
+  }
+
   displayUser(user: IUser): string {
     return user && user.displayName ? user.displayName : '';
   }
-
-    displayProf(prof: IProficiency): string {
-        return prof && prof.name ? prof.name : '';
-    }
-
-    displaySubject(subject: ISubject): string {
+  
+  displayProf(prof: IProficiency): string {
+      return prof && prof.name ? prof.name : '';
+  }
+  
+  displaySubject(subject: ISubject): string {
         return subject && subject.name ? subject.name : '';
-    }
+  }
 
-  getStudentName(): string {
-    return (this.data.student as IPopulatedUser)?.displayName || 'a Student';
+  onStudentSelected(event: MatAutocompleteSelectedEvent): void {
+    const selectedStudentId = event.option.value._id;
+    this.bundleForm.get('student')?.setValue(selectedStudentId);
   }
 
   createSubjectGroup(): FormGroup {
@@ -141,7 +157,7 @@ export class EditBundleModal implements OnInit {
       proficiency: ['', Validators.required],
       grade: [{value: '', disabled: true}, Validators.required],
       tutor: ['', Validators.required],
-      hours: [1, [Validators.required, Validators.min(1)]],
+      duration: [60, [Validators.required, Validators.min(15)]],
       tutorName: new FormControl('', [Validators.required]),
       proficiencyName: new FormControl('', [Validators.required]),
       subjectName: new FormControl({value: '', disabled: true}, [Validators.required])
@@ -218,7 +234,7 @@ export class EditBundleModal implements OnInit {
       subjectGroup.patchValue({
           _id: bundleSubject._id,
           tutor: tutorUser?._id || '',
-          hours: bundleSubject.hours || 1,
+          duration: bundleSubject.durationMinutes || 60,
           tutorName: tutorUser || '',
       }, { emitEvent: false });
 
@@ -267,46 +283,64 @@ export class EditBundleModal implements OnInit {
     this.subjects.at(index).get('tutor')?.setValue(selectedTutorId);
   }
 
-    onProficiencySelected(event: MatAutocompleteSelectedEvent, index: number): void {
-        const selectedProf = event.option.value;
-        this.subjects.at(index).get('proficiency')?.setValue(selectedProf);
-    }
+  onProficiencySelected(event: MatAutocompleteSelectedEvent, index: number): void {
+      const selectedProf = event.option.value;
+      this.subjects.at(index).get('proficiency')?.setValue(selectedProf);
+  }
 
-    onSubjectSelected(event: MatAutocompleteSelectedEvent, index: number): void {
-        const selectedSubject = event.option.value;
-        this.subjects.at(index).get('subjectName')?.setValue(selectedSubject);
-    }
+  onSubjectSelected(event: MatAutocompleteSelectedEvent, index: number): void {
+      const selectedSubject = event.option.value;
+      this.subjects.at(index).get('subjectName')?.setValue(selectedSubject);
+  }
 
   onCancel(): void {
     this.dialogRef.close();
   }
 
   onSave(): void {
-    if (this.editForm.invalid || this.isSaving) {
+    if (this.bundleForm.invalid || this.isSaving) {
       return;
     }
     this.isSaving = true;
+    
+    const subjectsPayload = this.bundleForm.value.subjects.map((s: { _id: string, subjectName: ISubject, grade: string, tutor: string, duration: number }) => ({
+        _id: s._id,
+        subject: s.subjectName.name,
+        grade: s.grade,
+        tutor: s.tutor,
+        durationMinutes: s.duration
+    }));
 
-    const payload = {
-        subjects: this.editForm.value.subjects.map((s: { _id: string, subjectName: ISubject, grade: string, tutor: string, hours: number }) => ({
-            _id: s._id,
-            subject: s.subjectName.name,
-            grade: s.grade,
-            tutor: s.tutor,
-            hours: s.hours
-        })),
+    if (this.isEditMode) {
+      const payload = {
+        subjects: subjectsPayload,
         status: EBundleStatus.Pending
-    };
-
-    this.bundleService.updateBundle(this.data._id, payload).subscribe({
-      next: (updatedBundle) => {
-        this.notificationService.showSuccess('Bundle updated and set to pending for review.');
-        this.dialogRef.close(updatedBundle);
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.notificationService.showError(err.error?.message || 'Failed to update bundle.');
-      }
-    });
+      };
+      this.bundleService.updateBundle(this.data.bundle!._id, payload).subscribe({
+        next: (updatedBundle) => {
+          this.notificationService.showSuccess('Bundle updated and set to pending for review.');
+          this.dialogRef.close(updatedBundle);
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.notificationService.showError(err.error?.message || 'Failed to update bundle.');
+        }
+      });
+    } else {
+        const payload = {
+            student: this.bundleForm.value.student,
+            subjects: subjectsPayload
+        };
+      this.bundleService.createBundle(payload.student, payload.subjects).subscribe({
+        next: (newBundle) => {
+          this.notificationService.showSuccess('Bundle created successfully!');
+          this.dialogRef.close(newBundle);
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.notificationService.showError(err.error?.message || 'Failed to create bundle.');
+        }
+      });
+    }
   }
 }
