@@ -18,3 +18,62 @@
     width: 100%;
   }
 }
+
+.dashboard-header {
+  margin-top: 10px;
+  margin-bottom: 0;
+
+  button {
+    margin-bottom: 1rem;
+  }
+}
+
+mat-tab-group {
+  margin-top: -5rem;
+}
+
+.static-table-widths {
+  // This is the key property to stop widths from changing on sort ✅
+  table-layout: fixed;
+  width: 100%; // Ensure the table takes up the full container width
+}
+
+// Now, define the specific widths for your columns.
+// It's best to set the width on the header cells (th).
+// Using percentages is great for responsiveness.
+
+.static-table-widths th {
+  &.mat-column-createdAt {
+    width: 9%;
+  }
+  &.mat-column-student {
+    width: 12%;
+  }
+  &.mat-column-commissioner {
+    width: 15%;
+  }
+  &.mat-column-workType {
+    width: 10%;
+  }
+  &.mat-column-details {
+    // Let this column take the remaining space
+  }
+  &.mat-column-remuneration {
+    width: 12%;
+  }
+  &.mat-column-dateCompleted {
+    width: 9%;
+  }
+  &.mat-column-status {
+    width: 10%;
+  }
+  &.mat-column-actions {
+    width: 8%;
+  }
+}
+
+.static-table-widths td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

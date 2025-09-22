@@ -27,6 +27,7 @@ import { Subscription } from 'rxjs';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
+import { take } from 'lodash';
 
 @Component({
   selector: 'app-extra-work-dashboard',
@@ -75,10 +76,29 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   dataSource: MatTableDataSource<IExtraWork>;
   commissionedDataSource: MatTableDataSource<IExtraWork>;
 
-  @ViewChild('myWorkPaginator') paginator!: MatPaginator;
-  @ViewChild('myWorkSort') sort!: MatSort;
-  @ViewChild('commissionedPaginator') commissionedPaginator!: MatPaginator;
-  @ViewChild('commissionedSort') commissionedSort!: MatSort;
+  @ViewChild('myWorkPaginator') set myWorkPaginator(paginator: MatPaginator) {
+    if (paginator) {
+      this.dataSource.paginator = paginator;
+    }
+  }
+
+  @ViewChild('myWorkSort') set myWorkSort(sort: MatSort) {
+    if (sort) {
+      this.dataSource.sort = sort;
+    }
+  }
+
+  @ViewChild('commissionedPaginator') set commissionedPaginator(paginator: MatPaginator) {
+    if (paginator) {
+      this.commissionedDataSource.paginator = paginator;
+    }
+  }
+
+  @ViewChild('commissionedSort') set commissionedSort(sort: MatSort) {
+    if (sort) {
+      this.commissionedDataSource.sort = sort;
+    }
+  }
 
   public canCreate = this.authService.hasPermission(EPermission.EXTRA_WORK_CREATE);
   public canEdit = this.authService.hasPermission(EPermission.EXTRA_WORK_EDIT);
@@ -88,6 +108,9 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   constructor() {
     this.dataSource = new MatTableDataSource<IExtraWork>([]);
     this.commissionedDataSource = new MatTableDataSource<IExtraWork>([]);
+
+    this.dataSource.filterPredicate = this.createFilterPredicate();
+    this.commissionedDataSource.filterPredicate = this.createFilterPredicate();
   }
 
   ngOnInit(): void {
@@ -113,8 +136,6 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
     this.dataSource.sortingDataAccessor = (item, property) => {
         switch (property) {
             case 'createdAt': return new Date(item.createdAt).getTime();
@@ -135,26 +156,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     };
 
     if (this.canApprove) {
-      this.commissionedDataSource.paginator = this.commissionedPaginator;
-      this.commissionedDataSource.sort = this.commissionedSort;
-      this.commissionedDataSource.sortingDataAccessor = (item, property) => {
-          switch (property) {
-              case 'createdAt': return new Date(item.createdAt).getTime();
-              case 'student':
-                  return (item.studentId as IPopulatedUser)?.displayName || '';
-              case 'dateCompleted':
-                  return item.dateCompleted ? new Date(item.dateCompleted).getTime() : 0;
-              case 'workType':
-                  return item.workType;
-              case 'remuneration':
-                  return item.remuneration;
-              case 'commissioner':
-                  return (item.commissionerId as IPopulatedUser)?.displayName || '';
-              case 'status':
-                  return item.status;
-              default: return 0;
-          }
-      };
+      this.commissionedDataSource.sortingDataAccessor = this.dataSource.sortingDataAccessor;
     }
   }
 
@@ -167,8 +169,6 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.extraWorkService.allExtraWork$.subscribe({
         next: (workItems: IExtraWork[]) => {
             const userId = this.currentUser?._id;
-
-            console.log(workItems);
 
             if (this.canViewAll) {
               this.dataSource.data = workItems;
@@ -198,6 +198,19 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
         }
     });
 }
+
+  createFilterPredicate(): (data: IExtraWork, filter: string) => boolean {
+    return (data: IExtraWork, filter: string): boolean => {
+      const dataStr = (
+        this.getStudentName(data) +
+        this.getCommissionerName(data) +
+        data.workType +
+        data.status +
+        data.remuneration
+      ).toLowerCase();
+      return dataStr.includes(filter);
+    };
+  }
 
 
   applyFilter(event: Event) {

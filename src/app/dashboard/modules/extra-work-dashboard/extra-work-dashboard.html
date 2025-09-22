@@ -16,7 +16,7 @@
     </div>
 
     <div class="table-container mat-elevation-z8">
-      <table mat-table [dataSource]="dataSource" matSort #myWorkSort="matSort" matSortActive="createdAt" matSortDirection="desc">
+      <table mat-table [dataSource]="dataSource" matSort #myWorkSort="matSort" matSortActive="createdAt" matSortDirection="desc" class="static-table-widths">
 
         <ng-container matColumnDef="createdAt">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
@@ -109,7 +109,7 @@
       </div>
 
     <div class="table-container mat-elevation-z8">
-      <table mat-table [dataSource]="commissionedDataSource" matSort #commissionedSort="matSort" matSortActive="createdAt" matSortDirection="desc">
+      <table mat-table [dataSource]="commissionedDataSource" matSort #commissionedSort="matSort" matSortActive="createdAt" matSortDirection="desc" class="static-table-widths">
 
           <ng-container matColumnDef="createdAt">
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>

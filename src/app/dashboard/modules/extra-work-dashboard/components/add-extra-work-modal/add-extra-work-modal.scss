@@ -47,7 +47,7 @@ mat-form-field {
     }
 
     // When the form field IS focused (i.e., clicked on)...
-    &.mat-focused {
+    &.mat-focused, &.ng-valid {
         // ...make the prefix visible again.
         span[matPrefix] {
             visibility: visible;
