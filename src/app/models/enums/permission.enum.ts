@@ -32,6 +32,7 @@ export enum EPermission {
 
     EXTRA_WORK_CREATE = 'extra_work:create',
     EXTRA_WORK_VIEW = 'extra_work:view',
+    EXTRA_WORK_VIEW_ALL = 'extra_work:view_all',
     EXTRA_WORK_EDIT = 'extra_work:edit',
     EXTRA_WORK_APPROVE = 'extra_work:approve'
 

@@ -83,6 +83,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   public canCreate = this.authService.hasPermission(EPermission.EXTRA_WORK_CREATE);
   public canEdit = this.authService.hasPermission(EPermission.EXTRA_WORK_EDIT);
   public canApprove = this.authService.hasPermission(EPermission.EXTRA_WORK_APPROVE);
+  public canViewAll = this.authService.hasPermission(EPermission.EXTRA_WORK_VIEW_ALL);
 
   constructor() {
     this.dataSource = new MatTableDataSource<IExtraWork>([]);
@@ -163,26 +164,32 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.isCommissionedLoading = true;
 
-    this.extraWorkService.getAllExtraWork().subscribe({
+    this.extraWorkService.allExtraWork$.subscribe({
         next: (workItems: IExtraWork[]) => {
             const userId = this.currentUser?._id;
 
-            const myWork = workItems.filter(item => {
-                const itemUserId = (typeof item.userId === 'object' && item.userId !== null) ? item.userId._id : item.userId;
-                return itemUserId === userId;
-            });
+            console.log(workItems);
 
-            this.dataSource.data = myWork;
-            this.isLoading = false;
+            if (this.canViewAll) {
+              this.dataSource.data = workItems;
 
-            if (this.canApprove) {
-                const commissionedWork = workItems.filter(item => {
-                    const itemCommissionerId = (typeof item.commissionerId === 'object' && item.commissionerId !== null) ? item.commissionerId._id : item.commissionerId;
-                    return itemCommissionerId === userId;
-                });
-                this.commissionedDataSource.data = commissionedWork;
+              this.isLoading = false;
+
+              if (this.canApprove) {
+                this.commissionedDataSource.data = workItems;
+
+                this.isCommissionedLoading = false;
+              }
+            } else {
+              this.dataSource.data = workItems.filter(v => v.commissionerId !== userId);
+              this.isLoading = false;
+
+              if (this.canApprove) {
+                  this.commissionedDataSource.data = workItems.filter(v => v.userId !== userId);
+
+                  this.isCommissionedLoading = false;
+              }
             }
-            this.isCommissionedLoading = false;
         },
         error: (err: HttpErrorResponse) => {
             this.notificationService.showError(err.error?.message || 'Failed to load extra work.');

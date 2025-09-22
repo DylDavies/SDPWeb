@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IExtraWork, EExtraWorkStatus } from '../models/interfaces/IExtraWork.interface';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { CustomObservableService } from './custom-observable-service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,21 +12,32 @@ import { ESocketMessage } from '../models/enums/socket-message.enum';
 export class ExtraWorkService {
   private httpService = inject(HttpService);
   private socketService = inject(SocketService);
+  private observableService = inject(CustomObservableService);
+
+  private allExtraWorkSubject$ = new BehaviorSubject<IExtraWork[]>([]);
+  public allExtraWork$: Observable<IExtraWork[]>;
+
+  constructor() {
+    this.socketService.listen(ESocketMessage.ExtraWorkUpdated).subscribe(() => {
+      console.log('Received extra-work-updated event. Refreshing user list.');
+      this.getAllExtraWork().subscribe();
+    });
+
+    this.allExtraWork$ = this.observableService.createManagedTopicObservable(
+      ESocketMessage.ExtraWorkUpdated,
+      this.allExtraWorkSubject$,
+      () => this.getAllExtraWork()
+    )
+  }
 
   /**
    * Retrieves all extra work entries from the backend (for admins).
    * @returns An Observable that emits an array of all extra work entries.
    */
   getAllExtraWork(): Observable<IExtraWork[]> {
-    return this.httpService.get<IExtraWork[]>('extrawork');
-  }
-
-  /**
-   * Retrieves extra work entries for the currently logged-in user.
-   * @returns An Observable that emits an array of the user's work entries.
-   */
-  getMyExtraWork(): Observable<IExtraWork[]> {
-    return this.httpService.get<IExtraWork[]>('extrawork/mywork');
+    return this.httpService.get<IExtraWork[]>('extrawork').pipe(
+      tap(allExtraWork => this.allExtraWorkSubject$.next(allExtraWork))
+    );
   }
 
   /**

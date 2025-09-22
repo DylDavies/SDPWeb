@@ -8,7 +8,7 @@ import { EUserType } from '../models/enums/user-type.enum';
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 
-const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
+export const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
 
 @Injectable({
   providedIn: 'root'
