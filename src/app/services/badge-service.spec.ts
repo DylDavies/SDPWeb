@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { BadgeService } from './badge-service';
 import { HttpService } from './http-service';
 import { SocketService } from './socket-service';
@@ -28,7 +28,7 @@ describe('BadgeService', () => {
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch', 'delete']);
     const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
-    
+
     socketListener$ = new Subject<unknown>();
 
     TestBed.configureTestingModule({
@@ -46,7 +46,7 @@ describe('BadgeService', () => {
 
     socketServiceSpy.listen.and.returnValue(socketListener$.asObservable());
     httpServiceSpy.get.and.returnValue(of(mockBadges));
-    
+
     customObservableServiceSpy.createManagedTopicObservable.and.callFake((topic, source$) => {
       return source$;
     });
@@ -62,7 +62,7 @@ describe('BadgeService', () => {
     it('should fetch all badges via GET and update the badges$ subject', (done: DoneFn) => {
       service.getBadges().subscribe(badges => {
         expect(badges).toEqual(mockBadges);
-        
+
         service.allBadges$.subscribe(badgesFromStream => {
           expect(badgesFromStream).toEqual(mockBadges);
           done();
@@ -81,11 +81,24 @@ describe('BadgeService', () => {
 
       service.addOrUpdateBadge(newBadge).subscribe(() => {
         expect(httpServiceSpy.post).toHaveBeenCalledWith('badges', newBadge);
-        expect(httpServiceSpy.get).toHaveBeenCalledWith('badges'); 
+        expect(httpServiceSpy.get).toHaveBeenCalledWith('badges');
         done();
       });
     });
+
+    it('should handle errors when adding or updating a badge', (done: DoneFn) => {
+      const newBadge: IBadge = { _id: '3', name: 'New Badge', TLA: 'NEW', image: 'rocket', summary: 'New Summary', description: 'New Desc', permanent: true, bonus: 0 };
+      httpServiceSpy.post.and.returnValue(throwError(() => new Error('API Error')));
+
+      service.addOrUpdateBadge(newBadge).subscribe({
+        error: (err) => {
+          expect(err).toBeDefined();
+          done();
+        }
+      });
+    });
   });
+
 
   describe('deleteBadge', () => {
     it('should send a DELETE request and then refresh the badge list', (done: DoneFn) => {
@@ -95,7 +108,7 @@ describe('BadgeService', () => {
 
       service.deleteBadge(badgeIdToDelete).subscribe(() => {
         expect(httpServiceSpy.delete).toHaveBeenCalledWith(`badges/${badgeIdToDelete}`);
-        expect(httpServiceSpy.get).toHaveBeenCalledWith('badges'); 
+        expect(httpServiceSpy.get).toHaveBeenCalledWith('badges');
         done();
       });
     });
@@ -123,7 +136,7 @@ describe('BadgeService', () => {
   describe('Socket Integration', () => {
     it('should call getBadges when a BadgesUpdated event is received', () => {
       spyOn(service, 'getBadges').and.returnValue(of(mockBadges));
-      
+
       socketListener$.next({ event: ESocketMessage.BadgesUpdated });
 
       expect(service.getBadges).toHaveBeenCalled();

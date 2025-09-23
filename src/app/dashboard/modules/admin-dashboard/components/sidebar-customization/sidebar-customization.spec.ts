@@ -9,14 +9,14 @@ import { SidebarService } from '../../../../../services/sidebar-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ISidebarItem } from '../../../../../models/interfaces/ISidebarItem.interface';
 
-// Helper function to create mock sidebar items
+
 const createMockItems = (): ISidebarItem[] => JSON.parse(JSON.stringify([
   { _id: '1', label: 'Home', icon: 'home', route: '/dashboard', order: 1, stopRemove: true },
   { _id: '2', label: 'Profile', icon: 'person', route: '/dashboard/profile', order: 2 },
-  { 
-    _id: '3', 
-    label: 'Category 1', 
-    icon: 'folder', 
+  {
+    _id: '3',
+    label: 'Category 1',
+    icon: 'folder',
     order: 3,
     children: [
       { _id: '4', label: 'User Management', icon: 'people', route: '/dashboard/users', order: 1 }
@@ -25,7 +25,6 @@ const createMockItems = (): ISidebarItem[] => JSON.parse(JSON.stringify([
   { _id: '5', label: 'Admin', icon: 'shield', route: '/dashboard/admin', order: 4 }
 ]));
 
-// NEW Helper to create mock CdkDragDrop events
 const createMockDropEvent = (draggedData: any, containerId: string, previousContainerId: string = containerId, currentIndex = 0, previousIndex = 0): CdkDragDrop<any> => {
   return {
     item: { data: draggedData },
@@ -44,7 +43,7 @@ const createMockDropEvent = (draggedData: any, containerId: string, previousCont
 describe('SidebarCustomization', () => {
   let component: SidebarCustomization;
   let fixture: ComponentFixture<SidebarCustomization>;
-  
+
   let mockSidebarService: jasmine.SpyObj<SidebarService>;
   let mockSnackbarService: jasmine.SpyObj<SnackBarService>;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
@@ -52,13 +51,13 @@ describe('SidebarCustomization', () => {
 
   beforeEach(async () => {
     sidebarItemsSubject = new BehaviorSubject<ISidebarItem[]>(createMockItems());
-    
+
     mockSidebarService = jasmine.createSpyObj('SidebarService', ['updateSidebarItems'], {
       sidebarItems$: sidebarItemsSubject.asObservable()
     });
-    
+
     mockSnackbarService = jasmine.createSpyObj('SnackBarService', ['showError', 'showSuccess']);
-    
+
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
@@ -76,14 +75,13 @@ describe('SidebarCustomization', () => {
 
     fixture = TestBed.createComponent(SidebarCustomization);
     component = fixture.componentInstance;
-    fixture.detectChanges(); 
+    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // --- EXISTING TESTS ---
   describe('Initialization (ngOnInit)', () => {
     it('should load and process initial sidebar items', () => {
       expect(component.currentSidebarItems.length).toBe(4);
@@ -122,7 +120,7 @@ describe('SidebarCustomization', () => {
       expect(component.currentSidebarItems.find(i => i._id === '2')).toBeUndefined();
       expect(component.availableLinks.some(l => l.route === '/dashboard/profile')).toBeTrue();
     });
-    
+
     it('should promote children when a parent item is removed', () => {
       const parentToRemove = component.currentSidebarItems[2];
       const child = parentToRemove.children![0];
@@ -180,7 +178,7 @@ describe('SidebarCustomization', () => {
       expect(mockSidebarService.updateSidebarItems).toHaveBeenCalled();
       expect(mockSnackbarService.showSuccess).toHaveBeenCalledWith('Sidebar updated successfully!');
     });
-    
+
     it('should call updateSidebarItems and show error on failed save', () => {
       mockSidebarService.updateSidebarItems.and.returnValue(throwError(() => new Error('API Error')));
       component.saveChanges();
@@ -189,16 +187,15 @@ describe('SidebarCustomization', () => {
     });
   });
 
-  // --- NEW TESTS FOR HIGHER COVERAGE ---
 
   describe('Utility Methods', () => {
     it('should collapse a node in isExpanded if it has no children but is expanded', () => {
       const node: ISidebarItem = { _id: '2', label: 'Profile', icon: 'person', order: 2 };
       spyOn(component.treeControl, 'isExpanded').and.returnValue(true);
       spyOn(component.treeControl, 'collapse');
-      
+
       const result = component.isExpanded(node);
-      
+
       expect(component.treeControl.collapse).toHaveBeenCalledWith(node);
       expect(result).toBeFalse();
     });
@@ -232,7 +229,7 @@ describe('SidebarCustomization', () => {
     });
 
     it('dragReleased should reset all drag states', () => {
-      component.isDragging = true; // Set some initial state
+      component.isDragging = true; 
       component.dragReleased();
       expect(component.isDragging).toBeFalse();
       expect(component.draggedNode).toBeNull();
@@ -252,14 +249,13 @@ describe('SidebarCustomization', () => {
 
   describe('drop', () => {
     beforeEach(() => {
-      // Start dragging 'Profile' for most tests
       component.dragStarted(component.currentSidebarItems[1]);
     });
 
     it('should nest an item when dropped "on" a category', () => {
       const profile = component.currentSidebarItems[1];
       const category = component.currentSidebarItems[2];
-      
+
       component.dragHover(category, 'on');
       const mockEvent = createMockDropEvent(profile, 'sidebar');
       component.drop(mockEvent);
@@ -267,7 +263,7 @@ describe('SidebarCustomization', () => {
       expect(category.children?.length).toBe(2);
       expect(category.children?.[1].label).toBe('Profile');
     });
-    
+
     it('should move item to end of sublist when dropped on sublist-end indicator', () => {
       const profile = component.currentSidebarItems[1];
       const category = component.currentSidebarItems[2];
@@ -275,15 +271,15 @@ describe('SidebarCustomization', () => {
       component.dragHoverSublistEnd(category);
       const mockEvent = createMockDropEvent(profile, 'sidebar');
       component.drop(mockEvent);
-      
+
       expect(category.children?.length).toBe(2);
       expect(category.children?.[1].label).toBe('Profile');
     });
-    
+
     it('should reorder an item when dropped "before" another item', () => {
-      const admin = component.currentSidebarItems[3]; // Item to move
+      const admin = component.currentSidebarItems[3]; 
       const home = component.currentSidebarItems[0];
-      
+
       component.dragStarted(admin);
       component.dragHover(home, 'before');
       const mockEvent = createMockDropEvent(admin, 'sidebar');
@@ -296,9 +292,9 @@ describe('SidebarCustomization', () => {
     it('should move an item to the available list', () => {
       const profile = component.currentSidebarItems[1];
       const mockEvent = createMockDropEvent(profile, 'available', 'sidebar');
-      
+
       component.drop(mockEvent);
-      
+
       expect(component.currentSidebarItems.find(i => i.label === 'Profile')).toBeUndefined();
       expect(component.availableLinks.some(l => l.label === 'Profile')).toBeTrue();
     });
@@ -306,9 +302,9 @@ describe('SidebarCustomization', () => {
     it('should show error when trying to move a stopRemove item to available list', () => {
       const home = component.currentSidebarItems[0];
       const mockEvent = createMockDropEvent(home, 'available', 'sidebar');
-      
+
       component.drop(mockEvent);
-      
+
       expect(mockSnackbarService.showError).toHaveBeenCalledWith('That item must always be in the Sidebar Layout.');
       expect(component.currentSidebarItems.find(i => i.label === 'Home')).toBeDefined();
     });

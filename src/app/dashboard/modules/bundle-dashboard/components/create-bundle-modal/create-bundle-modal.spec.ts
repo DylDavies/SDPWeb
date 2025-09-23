@@ -4,7 +4,6 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { of, throwError, BehaviorSubject } from 'rxjs';
-
 import { CreateBundleModal } from './create-bundle-modal';
 import { BundleService } from '../../../../../services/bundle-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
@@ -13,9 +12,7 @@ import { ProficiencyService } from '../../../../../services/proficiency-service'
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
-import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
 
-// --- MOCK DATA ---
 const mockStudent: IUser = { _id: 'student1', displayName: 'Jane Smith', type: EUserType.Client } as IUser;
 const mockTutor: IUser = { _id: 'tutor1', displayName: 'John Doe', type: EUserType.Staff } as IUser;
 const mockProficiency: IProficiency = {
@@ -24,7 +21,6 @@ const mockProficiency: IProficiency = {
   }
 };
 
-// --- MOCK SERVICES ---
 let bundleServiceSpy: jasmine.SpyObj<BundleService>;
 let snackbarServiceSpy: jasmine.SpyObj<SnackBarService>;
 let userServiceSpy: { allUsers$: BehaviorSubject<IUser[]>, fetchAllUsers: jasmine.Spy };
@@ -158,16 +154,15 @@ describe('CreateBundleModal', () => {
   describe('onCreate', () => {
     beforeEach(() => {
         fixture.detectChanges();
-        // FIX: Set all required form controls, including the autocomplete display controls
         component.createBundleForm.get('student')?.setValue(mockStudent._id);
-        component.studentNameCtrl.setValue(mockStudent.displayName); // This was missing
+        component.studentNameCtrl.setValue(mockStudent.displayName); 
 
         const subjectGroup = component.subjects.at(0);
         subjectGroup.get('tutor')?.setValue(mockTutor._id);
-        subjectGroup.get('tutorName')?.setValue(mockTutor.displayName); // This was missing
+        subjectGroup.get('tutorName')?.setValue(mockTutor.displayName); 
 
         subjectGroup.get('proficiency')?.setValue(mockProficiency);
-        subjectGroup.get('proficiencyName')?.setValue(mockProficiency.name); // This was missing
+        subjectGroup.get('proficiencyName')?.setValue(mockProficiency.name); 
 
         subjectGroup.get('subjectName')?.setValue(mockProficiency.subjects['math']);
         subjectGroup.get('grade')?.setValue('10');
@@ -225,4 +220,3 @@ describe('CreateBundleModal', () => {
     expect(dialogRefSpy.close).toHaveBeenCalled();
   });
 });
-

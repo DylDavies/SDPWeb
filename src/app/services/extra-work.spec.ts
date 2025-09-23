@@ -45,6 +45,7 @@ describe('ExtraWorkService', () => {
   let socketListener$: Subject<unknown>;
 
   beforeEach(() => {
+    // Create spy objects for the services
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch']);
     const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
@@ -64,11 +65,13 @@ describe('ExtraWorkService', () => {
     socketServiceSpy = TestBed.inject(SocketService) as jasmine.SpyObj<SocketService>;
     customObservableServiceSpy = TestBed.inject(CustomObservableService) as jasmine.SpyObj<CustomObservableService>;
 
+    // Default spy implementations
     socketServiceSpy.listen.and.returnValue(socketListener$.asObservable());
     httpServiceSpy.get.and.returnValue(of(mockExtraWork));
     httpServiceSpy.post.and.returnValue(of(mockExtraWork[0]));
     httpServiceSpy.patch.and.returnValue(of(mockExtraWork[0]));
 
+    // Bypass the logic of the custom observable service for this unit test
     customObservableServiceSpy.createManagedTopicObservable.and.callFake((topic, source$) => {
       return source$;
     });
