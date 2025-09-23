@@ -9,7 +9,7 @@
       <div class="form-row">
         <ng-container *ngFor="let field of template?.fields">
           <div *ngIf="field.type === 'time'" class="time-spinner-container">
-            <label class="time-spinner-label">{{ field.name }}</label>
+            <label [for]="field.name" class="time-spinner-label">{{ field.name }}</label>
             <app-time-spinner mode="time" [formControlName]="field.name"></app-time-spinner>
           </div>
         </ng-container>

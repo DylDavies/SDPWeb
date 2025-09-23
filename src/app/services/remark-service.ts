@@ -17,11 +17,11 @@ export class RemarkService {
     return this.httpService.post<IRemarkTemplate>(`remarks/templates`, { fields });
   }
 
-  createRemark(eventId: string, entries: { field: string, value: any }[]): Observable<IRemark> {
+  createRemark(eventId: string, entries: { field: string, value: string | number | boolean }[]): Observable<IRemark> {
     return this.httpService.post<IRemark>(`remarks/${eventId}`, { entries });
   }
 
-  updateRemark(remarkId: string, entries: { field: string, value: any }[]): Observable<IRemark> {
+  updateRemark(remarkId: string, entries: { field: string, value: string | number | boolean }[]): Observable<IRemark> {
     return this.httpService.patch<IRemark>(`remarks/${remarkId}`, { entries });
   }
 

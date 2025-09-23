@@ -63,27 +63,27 @@ export class AddRemarkModal implements OnInit {
         this.template = template;
         this.template.fields.forEach(field => {
             const existingEntry = this.data.remark?.entries.find(e => e.field === field.name);
-            let defaultValue: any = '';
+            let defaultValue: string | number | boolean = '';
 
-            // This is the main logic change
             if (!this.isEditMode) {
                 switch (field.type) {
-                    case 'boolean':
+                    case 'boolean': {
                         defaultValue = false;
                         break;
-                    case 'number':
+                    }
+                    case 'number': {
                         defaultValue = 0;
                         break;
-                    case 'time':
-                        // If creating a new remark, get the time from the event
+                    }
+                    case 'time': {
                         const eventDate = new Date(this.data.event.startTime);
                         const hours = eventDate.getHours().toString().padStart(2, '0');
                         const minutes = eventDate.getMinutes().toString().padStart(2, '0');
                         defaultValue = `${hours}:${minutes}`;
                         break;
+                    }
                 }
             }
-            // If editing, existingEntry.value will be used. Otherwise, the new defaultValue is used.
             this.remarkForm.addControl(field.name, this.fb.control(existingEntry?.value ?? defaultValue, Validators.required));
         });
     }

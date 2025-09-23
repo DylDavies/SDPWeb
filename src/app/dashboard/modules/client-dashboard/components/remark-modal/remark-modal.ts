@@ -55,7 +55,7 @@ export class RemarkModal implements OnInit {
     });
   }
 
-  onClose(result?: any): void {
+  onClose(result?: boolean): void {
     this.dialogRef.close(result);
   }
 

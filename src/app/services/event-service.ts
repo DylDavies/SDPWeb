@@ -17,7 +17,7 @@ export class EventService {
    * @param {any} eventData - The data for the event to create.
    * @returns {Observable<IEvent>} The created event.
    */
-  createEvent(eventData: any): Observable<IEvent> {
+  createEvent(eventData: Partial<IEvent>): Observable<IEvent> {
     return this.httpService.post<IEvent>('events', eventData);
   }
 
@@ -35,7 +35,7 @@ export class EventService {
    * @param {any} eventData - The data to update the event with.
    * @returns {Observable<IEvent>} The updated event.
    */
-  updateEvent(eventId: string, eventData: any): Observable<IEvent> {
+  updateEvent(eventId: string, eventData: Partial<IEvent>): Observable<IEvent> {
     return this.httpService.patch<IEvent>(`events/${eventId}`, eventData);
   }
 
