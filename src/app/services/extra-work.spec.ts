@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { ExtraWorkService } from './extra-work';
 import { HttpService } from './http-service';
 import { SocketService } from './socket-service';
@@ -45,7 +45,6 @@ describe('ExtraWorkService', () => {
   let socketListener$: Subject<unknown>;
 
   beforeEach(() => {
-    // Create spy objects for the services
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch']);
     const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
@@ -65,13 +64,11 @@ describe('ExtraWorkService', () => {
     socketServiceSpy = TestBed.inject(SocketService) as jasmine.SpyObj<SocketService>;
     customObservableServiceSpy = TestBed.inject(CustomObservableService) as jasmine.SpyObj<CustomObservableService>;
 
-    // Default spy implementations
     socketServiceSpy.listen.and.returnValue(socketListener$.asObservable());
     httpServiceSpy.get.and.returnValue(of(mockExtraWork));
     httpServiceSpy.post.and.returnValue(of(mockExtraWork[0]));
     httpServiceSpy.patch.and.returnValue(of(mockExtraWork[0]));
 
-    // Bypass the logic of the custom observable service for this unit test
     customObservableServiceSpy.createManagedTopicObservable.and.callFake((topic, source$) => {
       return source$;
     });
@@ -95,6 +92,18 @@ describe('ExtraWorkService', () => {
       });
 
       expect(httpServiceSpy.get).toHaveBeenCalledWith('extrawork');
+    });
+
+    it('should handle API error when fetching extra work', (done: DoneFn) => {
+      const errorResponse = { status: 500, statusText: 'Server Error' };
+      httpServiceSpy.get.and.returnValue(throwError(() => errorResponse));
+
+      service.getAllExtraWork().subscribe({
+        error: (error) => {
+          expect(error).toEqual(errorResponse);
+          done();
+        },
+      });
     });
   });
 
