@@ -1,0 +1,65 @@
+<div class="page-container">
+  @if (isLoading) {
+    <mat-spinner></mat-spinner>
+  } @else {
+    @if (bundleNotFound) {
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Bundle Not Found</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Sorry, we couldn't find the bundle you were looking for.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-stroked-button color="primary" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            <span>Back to Bundle List</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    } @else if (bundle) {
+      <mat-card class="bundle-info-card">
+        <mat-tab-group animationDuration="0ms">
+            <mat-tab label="Student Information">
+                <mat-card-header>
+                <mat-card-title>Bundle for {{ getDisplayName(bundle.student) }}</mat-card-title>
+                <mat-card-subtitle>Created on {{ bundle.createdAt | date:'longDate' }}</mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                <div class="detail-item">
+                    <mat-icon class="detail-icon">check_circle_outline</mat-icon>
+                    <div>
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">{{ bundle.status | titlecase }}</div>
+                    </div>
+                </div>
+
+                <mat-divider></mat-divider>
+                
+                <h2>Subjects</h2>
+                <mat-list>
+                    @for (subject of bundle.subjects; track subject._id) {
+                    <mat-list-item>
+                        <mat-icon matListItemIcon>school</mat-icon>
+                        <div matListItemTitle>{{ subject.subject }} ({{ subject.grade }})</div>
+                    </mat-list-item>
+                    }
+                </mat-list>
+
+                </mat-card-content>
+                <mat-card-actions>
+                <button mat-stroked-button color="primary" (click)="goBack()">
+                    <mat-icon>arrow_back</mat-icon>
+                    <span>Back to Bundle List</span>
+                </button>
+                </mat-card-actions>
+            </mat-tab>
+            <mat-tab label="Missions">
+                <p>Missions stuff will go here</p>
+            </mat-tab>
+        </mat-tab-group>
+       </mat-card>
+    }
+  }
+</div>

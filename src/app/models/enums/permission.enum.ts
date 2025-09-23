@@ -34,7 +34,18 @@ export enum EPermission {
     EXTRA_WORK_VIEW = 'extra_work:view',
     EXTRA_WORK_VIEW_ALL = 'extra_work:view_all',
     EXTRA_WORK_EDIT = 'extra_work:edit',
-    EXTRA_WORK_APPROVE = 'extra_work:approve'
+    EXTRA_WORK_APPROVE = 'extra_work:approve',
 
+    // Sidebar Management
+    SIDEBAR_MANAGE = 'sidebar:manage',
+
+    // Badge Management Permissions
+    BADGES_CREATE = 'badges:create',
+    BADGES_MANAGE = 'badges:manage',
+    BADGES_VIEW = 'badges:view',
+    BADGES_VIEW_REQUIREMENTS = 'badges:view_requirements', 
+    BADGES_MANAGE_REQUIREMENTS = 'badges:manage_requirements',
+
+    NOTIFICATIONS_VIEW = 'notifications:view'
 
 }

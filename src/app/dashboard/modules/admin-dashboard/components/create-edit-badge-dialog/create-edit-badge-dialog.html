@@ -1,0 +1,97 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit Badge' : 'Create Badge' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="badgeForm" class="badge-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+      @if (badgeForm.get('name')?.hasError('required')) {
+        <mat-error>Badge name is required.</mat-error>
+      }
+      @if (badgeForm.get('name')?.hasError('maxlength')) {
+        <mat-error>Name cannot be longer than 40 characters.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>TLA (Three Letter Acronym)</mat-label>
+      <input matInput formControlName="TLA">
+      @if (badgeForm.get('TLA')?.hasError('required')) {
+        <mat-error>TLA is required.</mat-error>
+      }
+      @if (badgeForm.get('TLA')?.hasError('minlength') || badgeForm.get('TLA')?.hasError('maxlength')) {
+        <mat-error>TLA must be exactly 3 characters.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="icon-selector-container">
+      <label class="icon-selector-label" for="icon-grid">Badge Icon</label>
+      <div class="icon-grid" id="icon-grid" role="radiogroup">
+        <button type="button" mat-icon-button *ngFor="let icon of availableIcons" 
+                (click)="selectIcon(icon)"
+                [class.selected]="badgeForm.get('image')?.value === icon"
+                [matTooltip]="icon">
+          <mat-icon>{{icon}}</mat-icon>
+        </button>
+      </div>
+       @if (badgeForm.get('image')?.hasError('required') && badgeForm.get('image')?.touched) {
+        <mat-error>An icon is required.</mat-error>
+      }
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Summary</mat-label>
+      <textarea matInput formControlName="summary"></textarea>
+      @if (badgeForm.get('summary')?.hasError('required')) {
+        <mat-error>A summary is required.</mat-error>
+      }
+      @if (badgeForm.get('summary')?.hasError('maxlength')) {
+        <mat-error>Summary cannot be longer than 100 characters.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+      @if (badgeForm.get('description')?.hasError('required')) {
+        <mat-error>A description is required.</mat-error>
+      }
+    </mat-form-field>
+    
+    @if(!isEditMode) {
+      <mat-form-field appearance="outline">
+        <mat-label>Requirements</mat-label>
+        <textarea matInput formControlName="requirements" rows="6"
+                  placeholder="Describe how to earn this badge. You can use Markdown."></textarea>
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Bonus</mat-label>
+      <input matInput type="number" formControlName="bonus" min="0">
+        @if (badgeForm.get('bonus')?.hasError('min')) {
+          <mat-error>Bonus cannot be less than 0.</mat-error>
+        }
+        @if (badgeForm.get('bonus')?.hasError('max')) {
+          <mat-error>Bonus cannot be greater than 100.</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-slide-toggle formControlName="permanent">Permanent Badge</mat-slide-toggle>
+
+    <mat-form-field appearance="outline" *ngIf="!badgeForm.get('permanent')?.value">
+      <mat-label>Expiration Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="expirationDate">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      @if (badgeForm.get('expirationDate')?.hasError('pastDate')) {
+        <mat-error>Expiration date cannot be in the past.</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" [disabled]="badgeForm.invalid" (click)="onSave()">
+    {{ isEditMode ? 'Save Changes' : 'Create Badge' }}
+  </button>
+</mat-dialog-actions>

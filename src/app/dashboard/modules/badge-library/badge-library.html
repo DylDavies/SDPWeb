@@ -1,0 +1,18 @@
+<div class="badge-library-container">
+    <div class="header">
+    <h1>Badge Library</h1>
+    <p>Explore all available badges and see what it takes to earn them.</p>
+    </div>
+
+    <mat-chip-listbox class="filter-chips" [formControl]="filterCtrl" aria-label="Badge filter">
+    <mat-chip-option selected value="all">All Badges</mat-chip-option>
+    <mat-chip-option value="my">My Badges</mat-chip-option>
+    </mat-chip-listbox>
+
+    <div class="badge-grid">
+    <app-badge-card *ngFor="let badge of (filteredBadges$ | async)"
+                    [badge]="badge"
+                    [context]="'library'">
+    </app-badge-card>
+    </div>
+</div>

@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth-service';
 import { Router } from '@angular/router';
-import { NotificationService } from '../../services/notification-service';
+import { SnackBarService } from '../../services/snackbar-service';
 
 @Component({
   selector: 'app-logout',
@@ -13,11 +13,11 @@ import { NotificationService } from '../../services/notification-service';
 export class Logout implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
-  private notif = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
 
   ngOnInit(): void {
     this.authService.logout();
-    this.notif.showSuccess("Logged out.")
+    this.snackbarService.showSuccess("Logged out.")
     this.router.navigateByUrl("/");
   }
 }

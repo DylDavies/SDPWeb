@@ -10,10 +10,11 @@ import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common'; 
 import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 import { ThemeService } from '../../../services/theme-service';
+import { NotificationBell } from './components/notification-bell/notification-bell';
 
 @Component({
   selector: 'app-topbar',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, ProfileDropdown, UserTypePipe, AsyncPipe, DisplayNamePipe],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, ProfileDropdown, UserTypePipe, AsyncPipe, DisplayNamePipe, NotificationBell],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss'
 })

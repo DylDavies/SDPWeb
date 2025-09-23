@@ -69,8 +69,8 @@ export class LeaveModal implements OnInit {
   leaveForm = new FormGroup({
     name: new FormControl({ value: '', disabled: true}), 
     reason: new FormControl('', [Validators.required]),
-    startDate: new FormControl(null, [Validators.required]),
-    endDate: new FormControl(null, [Validators.required]),
+    startDate: new FormControl<Date | null>(null, [Validators.required]),
+    endDate: new FormControl<Date | null>(null, [Validators.required]),
   },
   
   
