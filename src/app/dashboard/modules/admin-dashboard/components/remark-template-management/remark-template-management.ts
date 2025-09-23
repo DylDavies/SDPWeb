@@ -9,9 +9,9 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { RemarkService } from '../../../../../services/remark-service';
 import { IRemarkTemplate, IRemarkField, RemarkFieldType } from '../../../../../models/interfaces/IRemark.interface';
-import { NotificationService } from '../../../../../services/notification-service';
 import * as _ from 'lodash';
 import { MatSelectModule } from '@angular/material/select';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-remark-template-management',
@@ -32,7 +32,7 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class RemarkTemplateManagement implements OnInit {
   private remarkService = inject(RemarkService);
-  private notificationService = inject(NotificationService);
+  private snackBarService = inject(SnackBarService);
 
   public template: IRemarkTemplate | null = null;
   public fields: IRemarkField[] = [];
@@ -68,7 +68,7 @@ export class RemarkTemplateManagement implements OnInit {
       this.newFieldName = '';
       this.newFieldType = 'string';
     } else if (fieldName) {
-      this.notificationService.showError(`Field "${fieldName}" already exists.`);
+      this.snackBarService.showError(`Field "${fieldName}" already exists.`);
     }
   }
 
@@ -86,11 +86,11 @@ export class RemarkTemplateManagement implements OnInit {
       console.log("has a template");
       this.remarkService.updateTemplate(this.fields).subscribe({
         next: () => {
-          this.notificationService.showSuccess('New remark template version created successfully!');
+          this.snackBarService.showSuccess('New remark template version created successfully!');
           this.loadActiveTemplate();
         },
         error: (err) => {
-          this.notificationService.showError(err.error?.message || 'Failed to update template.');
+          this.snackBarService.showError(err.error?.message || 'Failed to update template.');
         }
       });
     }

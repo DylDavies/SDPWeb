@@ -37,7 +37,7 @@
 
           <ng-container matColumnDef="avatar">
             <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let user"><img [src]="user.picture || '/assets/no_profile_pic.png'" class="avatar" [alt]="user.displayName"></td>
+            <td mat-cell *matCellDef="let user"><img [src]="user.picture || '/assets/no_profile_pic.png'" class="avatar" [alt]="user.displayName" referrerpolicy="no-referrer"></td>
           </ng-container>
 
           <ng-container matColumnDef="displayName">

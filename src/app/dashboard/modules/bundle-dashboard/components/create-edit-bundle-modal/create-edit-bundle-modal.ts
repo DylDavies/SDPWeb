@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatSelectModule } from '@angular/material/select';
 import { BundleService } from '../../../../../services/bundle-service';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { UserService } from '../../../../../services/user-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
@@ -38,7 +38,7 @@ import { TimeSpinner } from '../../../../../shared/components/time-spinner/time-
 export class CreateEditBundleModal implements OnInit {
   private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private userService = inject(UserService);
   private proficiencyService = inject(ProficiencyService);
   public dialogRef = inject(MatDialogRef<CreateEditBundleModal>);
@@ -318,12 +318,12 @@ export class CreateEditBundleModal implements OnInit {
       };
       this.bundleService.updateBundle(this.data.bundle!._id, payload).subscribe({
         next: (updatedBundle) => {
-          this.notificationService.showSuccess('Bundle updated and set to pending for review.');
+          this.snackbarService.showSuccess('Bundle updated and set to pending for review.');
           this.dialogRef.close(updatedBundle);
         },
         error: (err) => {
           this.isSaving = false;
-          this.notificationService.showError(err.error?.message || 'Failed to update bundle.');
+          this.snackbarService.showError(err.error?.message || 'Failed to update bundle.');
         }
       });
     } else {
@@ -333,12 +333,12 @@ export class CreateEditBundleModal implements OnInit {
         };
       this.bundleService.createBundle(payload.student, payload.subjects).subscribe({
         next: (newBundle) => {
-          this.notificationService.showSuccess('Bundle created successfully!');
+          this.snackbarService.showSuccess('Bundle created successfully!');
           this.dialogRef.close(newBundle);
         },
         error: (err) => {
           this.isSaving = false;
-          this.notificationService.showError(err.error?.message || 'Failed to create bundle.');
+          this.snackbarService.showError(err.error?.message || 'Failed to create bundle.');
         }
       });
     }

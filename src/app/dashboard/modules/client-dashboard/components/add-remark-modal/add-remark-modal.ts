@@ -9,9 +9,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RemarkService } from '../../../../../services/remark-service';
 import { IEvent } from '../../../../../models/interfaces/IEvent.interface';
 import { IRemark, IRemarkTemplate } from '../../../../../models/interfaces/IRemark.interface';
-import { NotificationService } from '../../../../../services/notification-service';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TimeSpinner } from '../../../../../shared/components/time-spinner/time-spinner';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-add-remark-modal',
@@ -33,7 +33,7 @@ import { TimeSpinner } from '../../../../../shared/components/time-spinner/time-
 export class AddRemarkModal implements OnInit {
   private fb = inject(FormBuilder);
   private remarkService = inject(RemarkService);
-  private notificationService = inject(NotificationService);
+  private snackBarService = inject(SnackBarService);
   public dialogRef = inject(MatDialogRef<AddRemarkModal>);
   public data: { event: IEvent, remark?: IRemark } = inject(MAT_DIALOG_DATA);
 
@@ -111,11 +111,11 @@ export class AddRemarkModal implements OnInit {
 
     apiCall.subscribe({
       next: () => {
-        this.notificationService.showSuccess('Remark saved successfully!');
+        this.snackBarService.showSuccess('Remark saved successfully!');
         this.dialogRef.close(true);
       },
       error: (err) => {
-        this.notificationService.showError(err.error?.message || 'Failed to save remark.');
+        this.snackBarService.showError(err.error?.message || 'Failed to save remark.');
         this.isSaving = false;
       }
     });

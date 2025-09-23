@@ -11,7 +11,7 @@ import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
 import { CustomObservableService } from './custom-observable-service';
-
+import IBadge from '../models/interfaces/IBadge.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -170,4 +170,30 @@ export class UserService {
   updateUserAvailability(userId: string, availability: number): Observable<IUser> {
     return this.httpService.patch<IUser>(`users/${userId}/availability`, { availability });
   }
-}
+
+    /**
+   * Assigns a badge to a specific user.
+   * After a successful API call, it triggers a refresh of the local user list.
+   * @param userId - The ID of the user to whom the badge will be added.
+   * @param badgeData - The full badge object to be added.
+   * @returns An Observable that emits the updated user document.
+   */
+  addBadgeToUser(userId: string, badgeData: IBadge): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/badges`, { badgeData }).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+    /**
+   * Removes a badge from a specific user.
+   * After a successful API call, it triggers a refresh of the local user list.
+   * @param userId - The ID of the user from whom the badge will be removed.
+   * @param badgeId - The ID of the badge to remove.
+   * @returns An Observable that emits the updated user document.
+   */
+  removeBadgeFromUser(userId: string, badgeId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/badges/${badgeId}`).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+} 

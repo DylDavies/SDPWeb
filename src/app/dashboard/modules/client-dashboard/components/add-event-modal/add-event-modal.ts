@@ -9,11 +9,11 @@ import { TimeSpinner } from '../../../../../shared/components/time-spinner/time-
 import { MatSelectModule } from '@angular/material/select';
 import { BundleService } from '../../../../../services/bundle-service';
 import { IBundle, IBundleSubject, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
-import { NotificationService } from '../../../../../services/notification-service';
 import { IEvent } from '../../../../../models/interfaces/IEvent.interface';
 import { combineLatest } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import { EventService } from '../../../../../services/event-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-add-event-modal',
@@ -35,7 +35,7 @@ export class AddEventModal implements OnInit {
   private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
   public eventService = inject(EventService); // Made public for template access
-  private notificationService = inject(NotificationService);
+  private snackBarService = inject(SnackBarService);
   public dialogRef = inject(MatDialogRef<AddEventModal>);
   public data: { date: Date, event?: IEvent } = inject(MAT_DIALOG_DATA);
 
@@ -155,11 +155,11 @@ export class AddEventModal implements OnInit {
         };
         this.eventService.updateEvent(this.data.event!._id, eventData).subscribe({
             next: (updatedEvent) => {
-                this.notificationService.showSuccess('Event updated successfully!');
+                this.snackBarService.showSuccess('Event updated successfully!');
                 this.dialogRef.close(updatedEvent);
             },
             error: (err) => {
-                this.notificationService.showError(err.error?.message || 'Failed to update event.');
+                this.snackBarService.showError(err.error?.message || 'Failed to update event.');
             }
         });
     } else {
@@ -175,11 +175,11 @@ export class AddEventModal implements OnInit {
     
         this.eventService.createEvent(eventData).subscribe({
           next: (newEvent) => {
-            this.notificationService.showSuccess('Event created successfully!');
+            this.snackBarService.showSuccess('Event created successfully!');
             this.dialogRef.close(newEvent);
           },
           error: (err) => {
-            this.notificationService.showError(err.error?.message || 'Failed to create event.');
+            this.snackBarService.showError(err.error?.message || 'Failed to create event.');
           }
         });
     }

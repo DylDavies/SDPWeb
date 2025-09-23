@@ -4,7 +4,7 @@
     <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
   </mat-card-header>
 
-  <img *ngIf="imageUrl" mat-card-image [src]="imageUrl" [alt]="imageAlt">
+  <img *ngIf="imageUrl" mat-card-image [src]="imageUrl" [alt]="imageAlt" referrerpolicy="no-referrer">
 
   <mat-card-content>
     <ng-content></ng-content>

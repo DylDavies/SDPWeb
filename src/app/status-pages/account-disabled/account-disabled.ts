@@ -3,7 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth-service';
-import { NotificationService } from '../../services/notification-service';
+import { SnackBarService } from '../../services/snackbar-service';
 import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
@@ -16,7 +16,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 export class AccountDisabled {
   private authService = inject(AuthService);
   private clipboard = inject(Clipboard);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
 
   public supportEmail = 'support@tutorcore.works';
 
@@ -26,6 +26,6 @@ export class AccountDisabled {
 
   copyEmail(): void {
     this.clipboard.copy(this.supportEmail);
-    this.notificationService.showSuccess('Support email copied to clipboard!');
+    this.snackbarService.showSuccess('Support email copied to clipboard!');
   }
 }

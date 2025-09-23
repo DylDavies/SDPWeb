@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { IEvent } from '../../../../../models/interfaces/IEvent.interface';
 import { MatDividerModule } from '@angular/material/divider';
 import { EventService } from '../../../../../services/event-service';
-import { NotificationService } from '../../../../../services/notification-service';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { filter } from 'rxjs';
 import { AddEventModal } from '../add-event-modal/add-event-modal';
@@ -15,6 +14,7 @@ import { IRemark } from '../../../../../models/interfaces/IRemark.interface';
 import { RemarkService } from '../../../../../services/remark-service';
 import { AuthService } from '../../../../../services/auth-service';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-remark-modal',
@@ -35,7 +35,7 @@ export class RemarkModal implements OnInit {
   public data: { event: IEvent } = inject(MAT_DIALOG_DATA);
   private eventService = inject(EventService);
   private remarkService = inject(RemarkService);
-  private notificationService = inject(NotificationService);
+  private snackBarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
   private authService = inject(AuthService);
 
@@ -61,7 +61,7 @@ export class RemarkModal implements OnInit {
 
   onDelete(): void {
     if (this.isRemarked) {
-        this.notificationService.showError("Cannot delete a remarked event.");
+        this.snackBarService.showError("Cannot delete a remarked event.");
         return;
     }
     const dialogRef = this.dialog.open(ConfirmationDialog, {
@@ -76,11 +76,11 @@ export class RemarkModal implements OnInit {
     dialogRef.afterClosed().pipe(filter(result => result)).subscribe(() => {
       this.eventService.deleteEvent(this.data.event._id).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Event deleted successfully!');
+          this.snackBarService.showSuccess('Event deleted successfully!');
           this.onClose(true);
         },
         error: (err) => {
-          this.notificationService.showError(err.error?.message || 'Failed to delete event.');
+          this.snackBarService.showError(err.error?.message || 'Failed to delete event.');
         }
       });
     });
@@ -88,7 +88,7 @@ export class RemarkModal implements OnInit {
 
   onEdit(): void {
     if (this.isRemarked) {
-        this.notificationService.showError("Cannot edit a remarked event.");
+        this.snackBarService.showError("Cannot edit a remarked event.");
         return;
     }
     const dialogRef = this.dialog.open(AddEventModal, {
@@ -133,12 +133,12 @@ export class RemarkModal implements OnInit {
     if (this.rating) return;
     this.eventService.rateEvent(this.data.event._id, rating).subscribe({
         next: (updatedEvent) => {
-            this.notificationService.showSuccess('Event rated successfully!');
+            this.snackBarService.showSuccess('Event rated successfully!');
             this.rating = updatedEvent.rating;
             this.onClose(true);
         },
         error: (err) => {
-            this.notificationService.showError(err.error?.message || 'Failed to rate event.');
+            this.snackBarService.showError(err.error?.message || 'Failed to rate event.');
         }
     });
   }

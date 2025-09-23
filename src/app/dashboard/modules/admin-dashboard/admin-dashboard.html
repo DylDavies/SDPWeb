@@ -34,6 +34,30 @@
           </mat-tab>
         }
 
+        @if (canManageSidebar) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">view_sidebar</mat-icon>
+              <span>Sidebar Layout</span>
+            </ng-template>
+            <div class="tab-content">
+              <app-sidebar-customization></app-sidebar-customization>
+            </div>
+          </mat-tab>
+        }
+
+        @if (canManageBadges){
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">military_tech</mat-icon>
+              <span>Badge Management</span>
+            </ng-template>
+            <div class="tab-content">
+               <app-badge-management></app-badge-management>
+            </div>
+          </mat-tab>
+        }
+
         @if (canManageRemarks) {
           <mat-tab>
             <ng-template mat-tab-label>
