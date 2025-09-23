@@ -27,7 +27,6 @@ import { Subscription } from 'rxjs';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
-import { take } from 'lodash';
 
 @Component({
   selector: 'app-extra-work-dashboard',
