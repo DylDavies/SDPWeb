@@ -10,13 +10,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { NotificationService } from '../../../../../services/notification-service';
 import { UserService } from '../../../../../services/user-service';
 import { ExtraWorkService } from '../../../../../services/extra-work';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
 import { EPermission } from '../../../../../models/enums/permission.enum';
 import { IExtraWork } from '../../../../../models/interfaces/IExtraWork.interface';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-add-extra-work-modal',
@@ -39,7 +39,7 @@ export class AddExtraWorkModal implements OnInit {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
   private extraWorkService = inject(ExtraWorkService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   public dialogRef = inject(MatDialogRef<AddExtraWorkModal>);
 
   public addWorkForm: FormGroup;
@@ -97,12 +97,12 @@ export class AddExtraWorkModal implements OnInit {
 
     this.extraWorkService.createExtraWork(payload).subscribe({
       next: (newWorkItem) => {
-        this.notificationService.showSuccess('Extra work entry created successfully!');
+        this.snackbarService.showSuccess('Extra work entry created successfully!');
         this.dialogRef.close(newWorkItem);
       },
       error: (err) => {
         this.isSaving = false;
-        this.notificationService.showError(err.error?.message || 'Failed to create entry.');
+        this.snackbarService.showError(err.error?.message || 'Failed to create entry.');
       }
     });
   }

@@ -15,7 +15,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenu, MatMenuModule } from '@angular/material/menu';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { NotificationService } from '../../../services/notification-service';
 import { AuthService } from '../../../services/auth-service';
 import { EPermission } from '../../../models/enums/permission.enum';
 import { ExtraWorkService } from '../../../services/extra-work';
@@ -27,6 +26,7 @@ import { Subscription } from 'rxjs';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
+import { SnackBarService } from '../../../services/snackbar-service';
 
 @Component({
   selector: 'app-extra-work-dashboard',
@@ -56,7 +56,7 @@ import { ESocketMessage } from '../../../models/enums/socket-message.enum';
 })
 export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   private extraWorkService = inject(ExtraWorkService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
   private authService = inject(AuthService);
   private socketService = inject(SocketService);
@@ -191,7 +191,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
             }
         },
         error: (err: HttpErrorResponse) => {
-            this.notificationService.showError(err.error?.message || 'Failed to load extra work.');
+            this.snackbarService.showError(err.error?.message || 'Failed to load extra work.');
             this.isLoading = false;
             this.isCommissionedLoading = false;
         }
@@ -259,11 +259,11 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
 
     this.extraWorkService.completeExtraWork(item._id, selectedDate).subscribe({
       next: () => {
-        this.notificationService.showSuccess('Work item marked as complete!');
+        this.snackbarService.showSuccess('Work item marked as complete!');
         this.loadExtraWork();
       },
       error: (err: HttpErrorResponse) => {
-        this.notificationService.showError(err.error?.message || 'Failed to update item.');
+        this.snackbarService.showError(err.error?.message || 'Failed to update item.');
       }
     });
   }
@@ -271,11 +271,11 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   approveWork(item: IExtraWork): void {
     this.extraWorkService.setExtraWorkStatus(item._id, EExtraWorkStatus.Approved).subscribe({
       next: () => {
-        this.notificationService.showSuccess('Work item approved!');
+        this.snackbarService.showSuccess('Work item approved!');
         this.loadExtraWork();
       },
       error: (err: HttpErrorResponse) => {
-        this.notificationService.showError(err.error?.message || 'Failed to approve item.');
+        this.snackbarService.showError(err.error?.message || 'Failed to approve item.');
       }
     });
   }
@@ -283,11 +283,11 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   denyWork(item: IExtraWork): void {
     this.extraWorkService.setExtraWorkStatus(item._id, EExtraWorkStatus.Denied).subscribe({
       next: () => {
-        this.notificationService.showSuccess('Work item denied!');
+        this.snackbarService.showSuccess('Work item denied!');
         this.loadExtraWork();
       },
       error: (err: HttpErrorResponse) => {
-        this.notificationService.showError(err.error?.message || 'Failed to deny item.');
+        this.snackbarService.showError(err.error?.message || 'Failed to deny item.');
       }
     });
   }
