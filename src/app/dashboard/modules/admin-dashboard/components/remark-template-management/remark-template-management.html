@@ -1,0 +1,38 @@
+<div class="remark-management-container">
+  <h2>Manage Remark Template</h2>
+  <p>Drag and drop the fields to reorder them. Add or remove fields as needed. Saving will create a new, active version of the template.</p>
+
+  <div cdkDropList class="field-list" (cdkDropListDropped)="drop($event)">
+    <div class="field-box" *ngFor="let field of fields" cdkDrag>
+      <div class="drag-handle" cdkDragHandle>
+        <mat-icon>drag_indicator</mat-icon>
+      </div>
+      <span class="field-name">{{ field.name }}</span>
+      <span class="field-type">{{ field.type | titlecase }}</span>
+      <button mat-icon-button color="warn" (click)="removeField(field)">
+        <mat-icon>delete_outline</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="add-field-form">
+    <mat-form-field appearance="outline" class="field-name-input">
+      <mat-label>New Field Name</mat-label>
+      <input matInput [(ngModel)]="newFieldName" (keyup.enter)="addField()">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-type-select">
+      <mat-label>Field Type</mat-label>
+      <mat-select [(ngModel)]="newFieldType">
+        <mat-option *ngFor="let type of fieldTypes" [value]="type">{{ type | titlecase }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button color="primary" (click)="addField()" [disabled]="!newFieldName.trim()">Add Field</button>
+  </div>
+
+  <div class="actions">
+    <button mat-flat-button color="primary" (click)="saveChanges()" [disabled]="isSaveDisabled()">Save New Version</button>
+  </div>
+</div>
+

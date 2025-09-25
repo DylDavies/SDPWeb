@@ -1,0 +1,64 @@
+<header class="dialog-header">
+  <mat-icon color="primary">event</mat-icon>
+  <h1 mat-dialog-title>Event Details</h1>
+</header>
+<mat-divider></mat-divider>
+<mat-dialog-content class="dialog-content">
+  <div class="detail-item">
+    <mat-icon class="detail-icon">person</mat-icon>
+    <div>
+      <div class="detail-label">Student</div>
+      <div class="detail-value">{{ data.event.student.displayName }}</div>
+    </div>
+  </div>
+  <div class="detail-item">
+    <mat-icon class="detail-icon">school</mat-icon>
+    <div>
+      <div class="detail-label">Tutor</div>
+      <div class="detail-value">{{ data.event.tutor.displayName }}</div>
+    </div>
+  </div>
+  <div class="detail-item">
+    <mat-icon class="detail-icon">subject</mat-icon>
+    <div>
+      <div class="detail-label">Subject</div>
+      <div class="detail-value">{{ data.event.subject }}</div>
+    </div>
+  </div>
+  <div class="detail-item">
+    <mat-icon class="detail-icon">schedule</mat-icon>
+    <div>
+      <div class="detail-label">Time</div>
+      <div class="detail-value">{{ getEventTime(data.event) }}</div>
+    </div>
+  </div>
+  <div class="detail-item">
+    <mat-icon class="detail-icon">date_range</mat-icon>
+    <div>
+      <div class="detail-label">Date</div>
+      <div class="detail-value">{{ data.event.startTime | date:'fullDate' }}</div>
+    </div>
+  </div>
+
+  <div *ngIf="isPastEvent && isStudent" class="rating-section">
+    <mat-divider></mat-divider>
+    <h3>Rate this lesson</h3>
+    <div class="stars" (mouseleave)="clearHoveredStar()">
+        <mat-icon *ngFor="let star of [1,2,3,4,5]" 
+                  (mouseenter)="setHoveredStar(star)" 
+                  (click)="rateEvent(star)"
+                  [class.filled]="(hoveredStar || rating || 0) >= star"
+                  [class.disabled]="rating">
+            {{ (hoveredStar || rating || 0) >= star ? 'star' : 'star_border' }}
+        </mat-icon>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <ng-container *ngIf="!isStudent">
+        <button mat-stroked-button color="warn" (click)="onDelete()" [disabled]="isRemarked">Delete</button>
+        <button mat-stroked-button (click)="onEdit()" [disabled]="isRemarked">Edit</button>
+        <button mat-stroked-button (click)="addOrEditRemark()">{{ isRemarked ? 'Edit Remark' : 'Add Remark' }}</button>
+    </ng-container>
+  <button mat-flat-button color="primary" (click)="onClose()">Close</button>
+</mat-dialog-actions>

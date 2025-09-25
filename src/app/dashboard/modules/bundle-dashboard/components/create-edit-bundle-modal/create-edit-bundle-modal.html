@@ -1,11 +1,21 @@
-<h1 mat-dialog-title>Edit Bundle for {{ getStudentName() }}</h1>
+<h1 mat-dialog-title>{{ isEditMode ? 'Edit Bundle' : 'Create New Bundle' }}</h1>
 <mat-dialog-content>
-  <form [formGroup]="editForm">
+  <p>{{ isEditMode ? 'Edit the tutoring bundle for ' + studentNameCtrl.value : 'Create a new tutoring bundle for a student.' }}</p>
+  <form [formGroup]="bundleForm">
+    <mat-form-field appearance="outline" *ngIf="!isEditMode">
+      <mat-label>Student Name</mat-label>
+      <input type="text" matInput [formControl]="studentNameCtrl" [matAutocomplete]="autoStudent" placeholder="Search for a student...">
+      <mat-autocomplete #autoStudent="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onStudentSelected($event)">
+        @for (student of filteredStudents$ | async; track student._id) {
+          <mat-option [value]="student">{{ student.displayName }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
 
     <mat-divider></mat-divider>
 
-    <h3 class="subjects-title">Manage Subjects</h3>
     <div formArrayName="subjects">
+      <h3 class="subjects-title">Subjects</h3>
       @for (subjectGroup of subjects.controls; track subjectGroup; let i = $index) {
       <div [formGroupName]="i" class="subject-group">
         <div class="subject-details-group">
@@ -31,12 +41,12 @@
             </mat-form-field>
             
             <mat-form-field appearance="outline" class="small-field">
-              <mat-label>Grade</mat-label>
-              <mat-select formControlName="grade">
-                @for (grade of grades$[i] | async; track grade) {
-                  <mat-option [value]="grade">{{ grade }}</mat-option>
-                }
-              </mat-select>
+                <mat-label>Grade</mat-label>
+                <mat-select formControlName="grade">
+                    @for (grade of (grades$[i] | async); track grade) {
+                        <mat-option [value]="grade">{{ grade }}</mat-option>
+                    }
+                </mat-select>
             </mat-form-field>
           </div>
 
@@ -45,19 +55,26 @@
               <mat-label>Tutor Name</mat-label>
                <input type="text" matInput [formControl]="getFormControl(i, 'tutorName')" [matAutocomplete]="autoTutor" placeholder="Search for a tutor...">
                <mat-autocomplete #autoTutor="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onTutorSelected($event, i)">
-                @for (tutor of filteredTutors$[i] | async; track tutor._id) {
-                  <mat-option [value]="tutor">{{ tutor.displayName }}</mat-option>
-                }
-              </mat-autocomplete>
+                 @for (tutor of filteredTutors$[i] | async; track tutor._id) {
+                   <mat-option [value]="tutor">{{ tutor.displayName }}</mat-option>
+                 }
+               </mat-autocomplete>
             </mat-form-field>
-
-            <mat-form-field appearance="outline" class="small-field">
-              <mat-label>Hours</mat-label>
-              <input matInput type="number" formControlName="hours">
-            </mat-form-field>
+             <div class="labeled-spinner flex-item">
+                <span class="input-label">Duration</span>
+                <app-time-spinner
+                    mode="duration" 
+                    [step]="15" 
+                    [min]="15" 
+                    formControlName="duration">
+                </app-time-spinner>
+            </div>
           </div>
         </div>
       </div>
+        @if (i !== subjects.controls.length - 1) {
+          <mat-divider class="divider"></mat-divider>
+        }
       }
     </div>
     <div class="button-row">
@@ -65,23 +82,22 @@
         <mat-icon>add</mat-icon>
         Add Another Subject
       </button>
-       @if (subjects.controls.length > 1) {
+      @if (subjects.controls.length > 1) {
         <button mat-stroked-button color="warn" (click)="removeSubject(subjects.controls.length - 1)">
             <mat-icon>remove</mat-icon>
             Remove Subject
         </button>
       }
     </div>
-
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="editForm.invalid || isSaving">
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="bundleForm.invalid || isSaving">
     @if (isSaving) {
     <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
     } @else {
-    <span>Save Changes</span>
+    <span>{{ isEditMode ? 'Save Changes' : 'Create Bundle' }}</span>
     }
   </button>
 </mat-dialog-actions>
