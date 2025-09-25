@@ -82,7 +82,7 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
     this.subscriptions.add(
      
       this.missionService.getMissionsByBundleId(this.bundleId).subscribe(missions => {
-        this.dataSource.data = missions;
+         this.dataSource.data = missions.filter(mission => mission.status !== EMissionStatus.InActive);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
         this.isLoading = false;

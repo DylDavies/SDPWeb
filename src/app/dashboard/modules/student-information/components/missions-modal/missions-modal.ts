@@ -81,6 +81,11 @@ export class MissionsModal implements OnInit {
   ngOnInit(): void {
     // Get the current user to use as the commissioner
       this.isEditMode = !!this.data.mission;
+      if (this.isEditMode) {
+      this.missionStatuses = Object.values(EMissionStatus).filter(
+          status => status !== EMissionStatus.Active && status !== EMissionStatus.InActive
+      );
+    }
       this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
@@ -101,8 +106,8 @@ export class MissionsModal implements OnInit {
             remuneration: this.data.mission.remuneration,
             status: this.data.mission.status
         });
-    } else {
         this.createMissionForm.get('document')?.clearValidators();
+    } else {
         this.createMissionForm.get('document')?.setValidators(Validators.required);
     }
     

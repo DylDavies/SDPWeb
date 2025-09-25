@@ -45,3 +45,12 @@ mat-card-actions {
   justify-content: flex-end;
   padding: 24px 16px;
 }
+
+.lists-container {
+  display: flex;
+  gap: 96px;
+}
+
+.list-wrapper {
+  flex: 1; 
+}

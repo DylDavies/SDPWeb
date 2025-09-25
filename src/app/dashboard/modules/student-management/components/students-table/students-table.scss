@@ -1,0 +1,74 @@
+@use '@angular/material' as mat;
+
+
+.table-wrapper {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  padding-top: 10px;
+  overflow: hidden;
+}
+
+.table-toolbar {
+  display: flex;
+  gap: 16px;
+  padding: 0 24px 16px;
+  align-items: center;
+}
+
+.filter-field {
+  flex: 1 1 300px;
+}
+
+.table-responsive-wrapper {
+  overflow-x: auto;
+}
+
+.student-table {
+  width: 100%;
+}
+
+.student-table-row {
+  cursor: pointer;
+  /* Remove the transform and initial box-shadow */
+  transition: box-shadow 0.3s ease-in-out, background-color 0.2s ease-in-out;
+
+  &:hover {
+    /* A soft, diffused glow effect that outlines the row */
+    box-shadow: 0 0 8px 2px rgba(100, 181, 246, 0.5); /* Light blue glow */
+    background-color: rgba(100, 181, 246, 0.05); /* Optional: slight background color change */
+  }
+}
+// In dark mode, you might want a lighter hover color
+body.dark-theme .student-table-row:hover td.mat-mdc-cell {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.student {
+  font-weight: 500;
+}
+
+// Loading and Empty State styles
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.empty-state mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+}
+
+.empty-state h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+    margin: 0;
+}

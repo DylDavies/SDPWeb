@@ -19,6 +19,7 @@ import { AuthService } from '../../../../services/auth-service';
 
 @Component({
   selector: 'app-student-information-page',
+  standalone: true,
   imports: [CommonModule, DatePipe, TitleCasePipe, MatCardModule, MatProgressSpinnerModule,
     MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsTable],
   templateUrl: './student-information-page.html',
@@ -31,6 +32,7 @@ export class StudentInformationPage implements OnInit {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   public bundle: IBundle | null = null;
+  public tutors: IPopulatedUser[] = [];
   public isLoading = true;
   public bundleNotFound = false;
   public bundleId: string | null = null;
@@ -53,6 +55,7 @@ export class StudentInformationPage implements OnInit {
       next: (bundle) => {
         if (bundle) {
           this.bundle = bundle;
+          this.getTutorsFromBundle();
         } else {
           this.bundleNotFound = true;
         }
@@ -63,6 +66,17 @@ export class StudentInformationPage implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  getTutorsFromBundle(): void {
+    if (!this.bundle) return;
+    const tutorMap = new Map<string, IPopulatedUser>();
+    this.bundle.subjects.forEach(subject => {
+        if (typeof subject.tutor === 'object' && subject.tutor._id) {
+            tutorMap.set(subject.tutor._id, subject.tutor);
+        }
+    });
+    this.tutors = Array.from(tutorMap.values());
   }
 
   openCreateDialog(): void {
