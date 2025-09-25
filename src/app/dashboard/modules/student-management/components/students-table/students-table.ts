@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { BundleService } from '../../../../../services/bundle-service';
 import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
-import { IBundle } from '../../../../../models/interfaces/IBundle.interface';
+import { IBundle, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../../services/auth-service';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
@@ -51,14 +51,14 @@ export class StudentsTable implements OnInit, AfterViewInit {
   public EBundleStatus = EBundleStatus;
   private currentUser: IUser | null = null;
 
-  displayedColumns: string[] = ['student'];
+  displayedColumns: string[] = ['student', 'createdBy', 'totalHours'];
   dataSource = new MatTableDataSource<IBundle>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor() {
-    // Custom sorting accessor
+    
     this.dataSource.sortingDataAccessor = (data: IBundle, sortHeaderId: string) => {
       switch (sortHeaderId) {
         case 'student':
@@ -66,18 +66,27 @@ export class StudentsTable implements OnInit, AfterViewInit {
             return data.student.displayName?.toLowerCase() || '';
           }
           return '';
+        case 'createdBy':
+            return this.getCreatorName(data).toLowerCase();
+        case 'totalHours':
+            return this.getTotalHours(data);
         default:
           return (data as unknown as Record<string, unknown>)[sortHeaderId] as string;
       }
     };
 
-    // Custom filter predicate
+   
     this.dataSource.filterPredicate = (data: IBundle, filter: string): boolean => {
       const studentName =
         typeof data.student === 'object' && data.student?.displayName
           ? data.student.displayName.toLowerCase()
           : '';
-      return studentName.includes(filter);
+      const creatorName = this.getCreatorName(data).toLowerCase();
+      const totalHours = this.getTotalHours(data).toString();
+
+      return studentName.includes(filter) || 
+             creatorName.includes(filter) ||
+             totalHours.includes(filter);
     };
   }
 
@@ -89,7 +98,6 @@ export class StudentsTable implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Set paginator and sort after view init
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
@@ -116,7 +124,6 @@ export class StudentsTable implements OnInit, AfterViewInit {
 
         this.dataSource.data = filteredBundles;
         
-        // Re-set paginator and sort after data load to ensure they work
         setTimeout(() => {
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
@@ -142,5 +149,23 @@ export class StudentsTable implements OnInit, AfterViewInit {
 
   viewStudentInfo(student: IBundle): void {
     this.router.navigate(['/dashboard/student-info', student._id]);
+  }
+
+  
+  getTotalHours(bundle: IBundle): number {
+    if (!bundle || !bundle.subjects) {
+        return 0;
+    }
+    const totalMinutes = bundle.subjects.reduce((sum, subject) => sum + subject.durationMinutes, 0);
+    return totalMinutes / 60;
+  }
+
+  
+  getCreatorName(bundle: IBundle): string {
+      console.log(bundle.createdBy);
+      if (typeof bundle.createdBy === 'object' && bundle.createdBy) {
+          return (bundle.createdBy as IPopulatedUser).displayName || 'N/A';
+      }
+      return 'N/A';
   }
 }

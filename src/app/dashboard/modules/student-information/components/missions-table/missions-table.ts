@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, inject, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { EPermission } from '../../../../../models/enums/permission.enum';
-import { IMissions} from '../../../../../models/interfaces/IMissions.interface';
+import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
 import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { AuthService } from '../../../../../services/auth-service';
 import { MissionService } from '../../../../../services/missions-service';
@@ -15,7 +15,6 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { filter } from 'rxjs/operators';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
-//import { ViewMissionModal } from '../view-mission-modal/view-mission-modal';
 import { MissionsModal } from '../missions-modal/missions-modal';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -34,7 +33,7 @@ import { SnackBarService } from '../../../../../services/snackbar-service';
   templateUrl: './missions-table.html',
   styleUrls: ['./missions-table.scss']
 })
-export class MissionsTable implements OnInit, OnDestroy, OnChanges {
+export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   @Input() bundleId: string | null = null;
   private authService = inject(AuthService);
   private snackBarService = inject(SnackBarService);
@@ -49,12 +48,33 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
 
   private subscriptions = new Subscription();
 
-  constructor() {
-    this.dataSource.filterPredicate = this.createFilter();
-  }
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+
+  constructor() {
+    // Set up custom sorting accessor
+    this.dataSource.sortingDataAccessor = (data: IMissions, sortHeaderId: string) => {
+      switch (sortHeaderId) {
+        case 'tutor':
+          const tutor = data.tutor as IPopulatedUser;
+          return tutor?.displayName?.toLowerCase() || '';
+        case 'createdAt':
+          return new Date(data.createdAt).getTime();
+        case 'dateCompleted':
+          return new Date(data.dateCompleted).getTime();
+        case 'remuneration':
+          return data.remuneration;
+        case 'hoursCompleted':
+          return data.hoursCompleted;
+        default:
+          const value = data[sortHeaderId as keyof IMissions];
+          return typeof value === 'string' ? value : String(value || '');
+      }
+    };
+
+    // Set up filter predicate
+    this.dataSource.filterPredicate = this.createFilter();
+  }
 
   ngOnInit(): void {
     this.canEditMissions = this.authService.hasPermission(EPermission.MISSIONS_EDIT);
@@ -65,10 +85,16 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  ngAfterViewInit(): void {
+    // Set paginator and sort after view initialization
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-      if (changes['bundleId'] && changes['bundleId'].currentValue) {
-          this.loadMissions();
-      }
+    if (changes['bundleId'] && changes['bundleId'].currentValue) {
+      this.loadMissions();
+    }
   }
 
   ngOnDestroy(): void {
@@ -80,17 +106,21 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
     
     this.isLoading = true;
     this.subscriptions.add(
-     
       this.missionService.getMissionsByBundleId(this.bundleId).subscribe(missions => {
-         this.dataSource.data = missions.filter(mission => mission.status !== EMissionStatus.InActive);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+        this.dataSource.data = missions.filter(mission => mission.status !== EMissionStatus.InActive);
+        
+        // Re-set paginator and sort after data loads
+        setTimeout(() => {
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+        });
+        
         this.isLoading = false;
       })
     );
   }
 
-  applyFilter(event: Event) {
+  applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
 
@@ -98,21 +128,14 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
       this.dataSource.paginator.firstPage();
     }
   }
-  createFilter(): (data: IMissions, filter: string) => boolean {
-      const filterFunction = (data: IMissions, filter: string): boolean => {
-        const searchTerms = JSON.stringify(data.tutor).toLowerCase();
-        return searchTerms.indexOf(filter) !== -1;
-      };
-      return filterFunction;
-    }
 
-  /*viewDocument(mission: IMissions): void {
-    this.dialog.open(ViewMissionModal, {
-      width: '80vw',
-      height: '90vh',
-      data: mission
-    });
-  }*/
+  createFilter(): (data: IMissions, filter: string) => boolean {
+    return (data: IMissions, filter: string): boolean => {
+      const tutor = data.tutor as IPopulatedUser;
+      const tutorName = tutor?.displayName?.toLowerCase() || '';
+      return tutorName.includes(filter);
+    };
+  }
 
   editMission(mission: IMissions): void {
     const dialogRef = this.dialog.open(MissionsModal, {
@@ -149,7 +172,7 @@ export class MissionsTable implements OnInit, OnDestroy, OnChanges {
   }
   
   getTutorName(mission: IMissions): string {
-      const tutor = mission.tutor as IPopulatedUser;
-      return tutor?.displayName || 'N/A';
+    const tutor = mission.tutor as IPopulatedUser;
+    return tutor?.displayName || 'N/A';
   }
 }

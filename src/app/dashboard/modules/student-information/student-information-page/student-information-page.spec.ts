@@ -24,7 +24,7 @@ const mockBundle: IBundle = {
     { _id: 's2', subject: 'Science', grade: '10', tutor: mockTutor2, durationMinutes: 5 },
     { _id: 's3', subject: 'Advanced Math', grade: '11', tutor: mockTutor1, durationMinutes: 10 } // Duplicate tutor
   ],
-  creator: 'creator1',
+  createdBy: 'creator1',
   status: 'approved' as any,
   isActive: true,
   createdAt: new Date(),
