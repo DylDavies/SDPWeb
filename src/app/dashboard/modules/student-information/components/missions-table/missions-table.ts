@@ -54,9 +54,11 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
   constructor() {
     // Set up custom sorting accessor
     this.dataSource.sortingDataAccessor = (data: IMissions, sortHeaderId: string) => {
+       const tutor = data.tutor as IPopulatedUser;
+       const value = data[sortHeaderId as keyof IMissions];
       switch (sortHeaderId) {
         case 'tutor':
-          const tutor = data.tutor as IPopulatedUser;
+         
           return tutor?.displayName?.toLowerCase() || '';
         case 'createdAt':
           return new Date(data.createdAt).getTime();
@@ -67,7 +69,7 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
         case 'hoursCompleted':
           return data.hoursCompleted;
         default:
-          const value = data[sortHeaderId as keyof IMissions];
+          
           return typeof value === 'string' ? value : String(value || '');
       }
     };
