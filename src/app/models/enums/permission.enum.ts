@@ -37,6 +37,12 @@ export enum EPermission {
     MISSIONS_DELETE = 'missions:delete',
     MISSIONS_APPROVE = 'missions:approve',
 
+    EXTRA_WORK_CREATE = 'extra_work:create',
+    EXTRA_WORK_VIEW = 'extra_work:view',
+    EXTRA_WORK_VIEW_ALL = 'extra_work:view_all',
+    EXTRA_WORK_EDIT = 'extra_work:edit',
+    EXTRA_WORK_APPROVE = 'extra_work:approve',
+
     // Sidebar Management
     SIDEBAR_MANAGE = 'sidebar:manage',
 
@@ -47,6 +53,9 @@ export enum EPermission {
     BADGES_VIEW_REQUIREMENTS = 'badges:view_requirements', 
     BADGES_MANAGE_REQUIREMENTS = 'badges:manage_requirements',
 
-    NOTIFICATIONS_VIEW = 'notifications:view'
+    NOTIFICATIONS_VIEW = 'notifications:view',
 
+
+    // Remark Management Permissions
+    REMARKS_MANAGE = 'remarks:manage'
 }
