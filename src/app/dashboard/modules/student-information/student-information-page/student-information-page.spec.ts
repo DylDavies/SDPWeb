@@ -158,6 +158,11 @@ describe('StudentInformationPage', () => {
   });
 
   describe('getDisplayName', () => {
+     beforeEach(() => {
+      bundleServiceSpy.getBundleById.and.returnValue(of(mockBundle));
+      createComponentWithParams({ id: 'bundle123' });
+      fixture.detectChanges();
+    });
      it('should return the display name for a populated user', () => {
       const user: IPopulatedUser = { _id: 'user1', displayName: 'Test User' };
       expect(component.getDisplayName(user)).toBe('Test User');
