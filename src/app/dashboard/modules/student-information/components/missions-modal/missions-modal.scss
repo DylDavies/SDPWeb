@@ -3,6 +3,7 @@ form {
     flex-direction: column;
     gap: 16px;
     padding-top: 16px;
+    overflow: hidden;
 }
 
 mat-form-field {

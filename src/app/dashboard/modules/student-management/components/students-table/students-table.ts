@@ -11,13 +11,14 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { BundleService } from '../../../../../services/bundle-service';
 import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
-import { IBundle} from '../../../../../models/interfaces/IBundle.interface';
+import { IBundle } from '../../../../../models/interfaces/IBundle.interface';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../../services/auth-service'; 
-import { IUser } from '../../../../../models/interfaces/IUser.interface'; 
-import { EUserType } from '../../../../../models/enums/user-type.enum'; 
+import { AuthService } from '../../../../../services/auth-service';
+import { IUser } from '../../../../../models/interfaces/IUser.interface';
+import { EUserType } from '../../../../../models/enums/user-type.enum';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
@@ -38,90 +39,108 @@ import { SnackBarService } from '../../../../../services/snackbar-service';
     MatTooltipModule
   ],
   templateUrl: './students-table.html',
-  styleUrl: './students-table.scss'
+  styleUrls: ['./students-table.scss']
 })
 export class StudentsTable implements OnInit, AfterViewInit {
-    private bundleService = inject(BundleService);
-    private snackbarService = inject(SnackBarService);
-    private router = inject(Router);
-    private authService = inject(AuthService); 
-    public isLoading = true;
-    public EBundleStatus = EBundleStatus; 
-    private currentUser: IUser | null = null;
+  private bundleService = inject(BundleService);
+  private snackbarService = inject(SnackBarService);
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
-    displayedColumns: string[] = ['student'];
-    dataSource: MatTableDataSource<IBundle>;
-    
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
-    @ViewChild(MatSort) sort!: MatSort;
+  public isLoading = true;
+  public EBundleStatus = EBundleStatus;
+  private currentUser: IUser | null = null;
 
-    constructor() {
-      this.dataSource = new MatTableDataSource<IBundle>([]);
-      this.dataSource.filterPredicate = this.createFilter();
-    }
+  displayedColumns: string[] = ['student'];
+  dataSource = new MatTableDataSource<IBundle>([]);
 
-    ngOnInit(): void {
-        this.authService.currentUser$.subscribe(user => {
-          this.currentUser = user;
-          this.loadBundles();
-        });
-    }
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
-    ngAfterViewInit(): void {
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    }
-
-    loadBundles(): void {
-      if (!this.currentUser) {
-          this.isLoading = false;
-          return;
-      }
-
-      this.isLoading = true;
-      this.bundleService.getBundles().subscribe({
-        next: (bundles) => {
-          let filteredBundles = bundles.filter(b => b.isActive);
-
-          if (this.currentUser?.type === EUserType.Staff) {
-            filteredBundles = filteredBundles.filter(bundle => 
-              bundle.subjects.some(subject => {
-                const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
-                return tutorId === this.currentUser?._id;
-              })
-            );
+  constructor() {
+    // Custom sorting accessor
+    this.dataSource.sortingDataAccessor = (data: IBundle, sortHeaderId: string) => {
+      switch (sortHeaderId) {
+        case 'student':
+          if (typeof data.student === 'object' && data.student) {
+            return data.student.displayName?.toLowerCase() || '';
           }
-
-          this.dataSource.data = filteredBundles;
-          this.isLoading = false;
-        },
-        error: (err) => {
-          this.snackbarService.showError(err.error?.message || 'Failed to load bundles.');
-          this.isLoading = false;
-        }
-      });
-    }
-
-    applyFilter(event: Event) {
-      const filterValue = (event.target as HTMLInputElement).value;
-      this.dataSource.filter = filterValue.trim().toLowerCase();
-
-      if (this.dataSource.paginator) {
-        this.dataSource.paginator.firstPage();
+          return '';
+        default:
+          return (data as unknown as Record<string, unknown>)[sortHeaderId] as string;
       }
-    }
-    
-    createFilter(): (data: IBundle, filter: string) => boolean {
-      const filterFunction = (data: IBundle, filter: string): boolean => {
-        const studentName = (typeof data.student === 'object' && data.student.displayName) 
-          ? data.student.displayName.toLowerCase() 
+    };
+
+    // Custom filter predicate
+    this.dataSource.filterPredicate = (data: IBundle, filter: string): boolean => {
+      const studentName =
+        typeof data.student === 'object' && data.student?.displayName
+          ? data.student.displayName.toLowerCase()
           : '';
-        return studentName.includes(filter);
-      };
-      return filterFunction;
+      return studentName.includes(filter);
+    };
+  }
+
+  ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      this.loadBundles();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Set paginator and sort after view init
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  loadBundles(): void {
+    if (!this.currentUser) {
+      this.isLoading = false;
+      return;
     }
 
-    viewStudentInfo(student: IBundle): void {
-        this.router.navigate(['/dashboard/student-info', student._id]);
+    this.isLoading = true;
+    this.bundleService.getBundles().subscribe({
+      next: bundles => {
+        let filteredBundles = bundles.filter(b => b.isActive);
+
+        if (this.currentUser?.type === EUserType.Staff) {
+          filteredBundles = filteredBundles.filter(bundle =>
+            bundle.subjects.some(subject => {
+              const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
+              return tutorId === this.currentUser?._id;
+            })
+          );
+        }
+
+        this.dataSource.data = filteredBundles;
+        
+        // Re-set paginator and sort after data load to ensure they work
+        setTimeout(() => {
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+        });
+        
+        this.isLoading = false;
+      },
+      error: err => {
+        this.snackbarService.showError(err.error?.message || 'Failed to load bundles.');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
+  }
+
+  viewStudentInfo(student: IBundle): void {
+    this.router.navigate(['/dashboard/student-info', student._id]);
+  }
 }

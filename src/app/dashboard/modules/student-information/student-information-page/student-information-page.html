@@ -44,7 +44,7 @@
                         @for (subject of bundle.subjects; track subject._id) {
                         <mat-list-item>
                             <mat-icon matListItemIcon>school</mat-icon>
-                            <div matListItemTitle>{{ subject.subject }} ({{ subject.grade }})</div>
+                            <div matListItemTitle>{{ subject.subject }} ( grade: {{ subject.grade }})</div>
                         </mat-list-item>
                         }
                     </mat-list>
