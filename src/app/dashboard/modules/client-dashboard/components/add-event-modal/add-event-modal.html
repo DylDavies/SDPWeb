@@ -1,0 +1,67 @@
+<h1 mat-dialog-title>{{ isEditMode ? 'Edit Event' : 'Add Event' }} for {{ data.date | date:'longDate' }}</h1>
+<mat-dialog-content>
+  <form [formGroup]="eventForm" (ngSubmit)="onSave()">
+    <mat-form-field appearance="outline">
+      <mat-label>Student</mat-label>
+      <mat-select formControlName="bundle">
+        @for (bundle of bundles; track bundle._id) {
+          <mat-option [value]="bundle">
+            {{ getStudentDisplayName(bundle) }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Subject</mat-label>
+      <mat-select formControlName="subject">
+        @for (subject of subjectsInBundle; track subject._id || $index) {
+          <mat-option [value]="subject.subject">
+            {{ subject.subject }} ({{ subject.grade }})
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="spinners-container">
+      <div class="labeled-spinner">
+        <span class="input-label">Start Time</span>
+        <app-time-spinner
+          mode="time"
+          formControlName="startTime">
+        </app-time-spinner>
+      </div>
+
+      <div class="labeled-spinner">
+        <span class="input-label">Duration</span>
+        <div class="spinner-wrapper">
+          <app-time-spinner
+            mode="duration"
+            [step]="15"
+            [min]="15"
+            formControlName="duration">
+          </app-time-spinner>
+
+          @if (remainingMinutes !== null) {
+            <mat-hint class="remaining-hours-hint">
+              {{ remainingMinutes / 60 | number:'1.0-2' }} hours remaining in bundle
+            </mat-hint>
+          }
+          @if (eventForm.get('duration')?.hasError('maxDurationExceeded')) {
+            <mat-error>
+              Duration cannot exceed remaining hours.
+            </mat-error>
+          }
+
+          @if (remainingMinutes === null && !eventForm.get('duration')?.hasError('maxDurationExceeded')) {
+            <div class="message-placeholder"></div>
+          }
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="eventForm.invalid">{{ isEditMode ? 'Save Changes' : 'Save Event' }}</button>
+</mat-dialog-actions>

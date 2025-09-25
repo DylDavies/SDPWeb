@@ -42,8 +42,8 @@ export class TimeSpinner implements ControlValueAccessor {
       this.hour = hour;
       this.minute = minute;
     } else if (this.mode === 'duration' && typeof value === 'number') {
-      this.durationHour = Math.floor(value / 60);
-      this.durationMinute = value % 60;
+       this.durationHour = value ? Math.floor(value / 60) : 0;
+      this.durationMinute = value ? value % 60 : 15;
     }
   }
 
@@ -55,10 +55,10 @@ export class TimeSpinner implements ControlValueAccessor {
     this.onTouched = fn;
   }
 
-  // ... rest of the component class
+
   public durationHour = 0;
   public durationMinute = 15;
-  // --- Methods for Time Mode ---
+
   incrementHour(): void {
     this.hour = (this.hour + 1) % 24;
     this.updateValue();
@@ -81,7 +81,6 @@ export class TimeSpinner implements ControlValueAccessor {
     this.updateValue();
   }
 
-  // --- Methods for Duration Mode ---
   incrementDurationHour(): void {
     this.durationHour++;
     this.updateValue();

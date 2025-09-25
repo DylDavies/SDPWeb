@@ -16,8 +16,7 @@ import { SnackBarService } from '../../../services/snackbar-service';
 import { BundleService } from '../../../services/bundle-service';
 import { IBundle } from '../../../models/interfaces/IBundle.interface';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
-import { EditBundleModal } from './components/edit-bundle-modal/edit-bundle-modal';
-import { CreateBundleModal } from './components/create-bundle-modal/create-bundle-modal';
+import { CreateEditBundleModal } from './components/create-edit-bundle-modal/create-edit-bundle-modal';
 import { AuthService } from '../../../services/auth-service';
 import { EPermission } from '../../../models/enums/permission.enum';
 import { ConfirmationDialog } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
@@ -97,7 +96,7 @@ export class BundleDashboard implements OnInit, AfterViewInit {
   }
   
   openCreateDialog(): void {
-    const dialogRef = this.dialog.open(CreateBundleModal, {
+    const dialogRef = this.dialog.open(CreateEditBundleModal, { // Use the new modal
       panelClass: 'bundle-dialog-container'
     });
 
@@ -109,9 +108,9 @@ export class BundleDashboard implements OnInit, AfterViewInit {
   }
 
   openEditDialog(bundle: IBundle): void {
-    const dialogRef = this.dialog.open(EditBundleModal, {
+    const dialogRef = this.dialog.open(CreateEditBundleModal, { // Use the new modal
       panelClass: 'bundle-dialog-container',
-      data: JSON.parse(JSON.stringify(bundle))
+      data: { bundle: JSON.parse(JSON.stringify(bundle)) } // Pass bundle data
     });
 
     dialogRef.afterClosed().subscribe(result => {

@@ -1,0 +1,61 @@
+.remark-management-container {
+  max-width: 800px;
+  margin: auto;
+  padding: 1rem;
+}
+
+.field-list {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 16px;
+  min-height: 100px;
+}
+
+.field-box {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: var(--mat-sys-surface);
+  margin-bottom: 8px;
+  border-radius: 4px;
+  cursor: grab;
+}
+
+.drag-handle {
+  cursor: grab;
+  margin-right: 16px;
+}
+
+.field-name {
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+.field-type {
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+    margin-right: 16px;
+}
+
+.add-field-form {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.field-name-input {
+    flex: 2 1 200px;
+}
+
+.field-type-select {
+    flex: 1 1 150px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+

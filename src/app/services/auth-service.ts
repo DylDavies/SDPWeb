@@ -9,7 +9,7 @@ import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { SidebarService } from './sidebar-service';
 
-const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
+export const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
 
 @Injectable({
   providedIn: 'root'

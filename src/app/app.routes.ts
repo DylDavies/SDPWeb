@@ -21,6 +21,7 @@ import { BadgeLibrary } from './dashboard/modules/badge-library/badge-library';
 import { NotificationCenterComponent } from './notification-center/notification-center';
 import { StudentManagement } from './dashboard/modules/student-management/student-management';
 import { StudentInformationPage } from './dashboard/modules/student-information/student-information-page/student-information-page';
+import { ExtraWorkDashboard } from './dashboard/modules/extra-work-dashboard/extra-work-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -51,7 +52,8 @@ export const routes: Routes = [
         path: 'notifications',
         component: NotificationCenterComponent,
         canActivate: [permissionGuard([EPermission.NOTIFICATIONS_VIEW])]
-      }
+      },
+      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] },
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },
