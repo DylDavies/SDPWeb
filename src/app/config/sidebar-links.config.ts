@@ -21,5 +21,6 @@ export const AVAILABLE_SIDEBAR_LINKS: ISidebarLinkDefinition[] = [
       EPermission.BUNDLES_VIEW
     ] 
   },
-  { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW], stopRemove: true }
+  { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW], stopRemove: true },
+  { label: 'Extra Work', icon: 'work', route: '/dashboard/extrawork', requiredPermissions: [EPermission.EXTRA_WORK_VIEW] },
 ];

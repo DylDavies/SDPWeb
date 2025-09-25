@@ -48,6 +48,7 @@ describe('RoleManagement', () => {
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
