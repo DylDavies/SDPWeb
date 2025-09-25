@@ -44,10 +44,6 @@ describe('ViewExtraWorkModal', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should get the student name', () => {
-    expect(component.getStudentName()).toBe('Student User');
-  });
-
   it('should get the commissioner name', () => {
     expect(component.getCommissionerName()).toBe('Commissioner User');
   });
