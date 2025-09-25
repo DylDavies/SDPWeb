@@ -2,29 +2,27 @@
   display: block;
   padding: 24px;
 }
+
 .date-button {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  padding-top: 10px;    // Adds space above the filter bar
+  padding-bottom: 10px; // Adds space below the filter bar
 
   mat-form-field {
     max-width: 600px;
     width: 100%;
   }
-}
-
-.dashboard-header {
-  margin-top: 10px;
-  margin-bottom: 0;
 
   button {
-    margin-bottom: 1rem;
+    margin-left: 16px; // Adds space to the left of the "Add Extra Work" button
   }
 }
 
@@ -33,43 +31,18 @@ mat-tab-group {
 }
 
 .static-table-widths {
-  // This is the key property to stop widths from changing on sort ✅
   table-layout: fixed;
-  width: 100%; // Ensure the table takes up the full container width
+  width: 100%;
 }
 
-// Now, define the specific widths for your columns.
-// It's best to set the width on the header cells (th).
-// Using percentages is great for responsiveness.
-
 .static-table-widths th {
-  &.mat-column-createdAt {
-    width: 9%;
-  }
-  &.mat-column-student {
-    width: 12%;
-  }
-  &.mat-column-commissioner {
-    width: 15%;
-  }
-  &.mat-column-workType {
-    width: 10%;
-  }
-  &.mat-column-details {
-    // Let this column take the remaining space
-  }
-  &.mat-column-remuneration {
-    width: 12%;
-  }
-  &.mat-column-dateCompleted {
-    width: 9%;
-  }
-  &.mat-column-status {
-    width: 10%;
-  }
-  &.mat-column-actions {
-    width: 8%;
-  }
+  &.mat-column-createdAt { width: 12%; }
+  &.mat-column-student { width: 15%; }
+  &.mat-column-commissioner { width: 15%; }
+  &.mat-column-workType { width: 20%; }
+  &.mat-column-remuneration { width: 13%; }
+  &.mat-column-status { width: 12%; }
+  &.mat-column-actions { width: 8%; }
 }
 
 .static-table-widths td {
@@ -77,3 +50,24 @@ mat-tab-group {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.clickable-row {
+  cursor: pointer;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.status-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+  display: inline-block;
+}
+
+.status-chip.in-progress { background-color: #2196F3; }
+.status-chip.completed { background-color: #FFC107; }
+.status-chip.approved { background-color: #4CAF50; }
+.status-chip.denied { background-color: #f44336; }

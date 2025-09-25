@@ -33,11 +33,6 @@
           <td mat-cell *matCellDef="let item"> {{item.workType}} </td>
         </ng-container>
 
-        <ng-container matColumnDef="details">
-          <th mat-header-cell *matHeaderCellDef> Details </th>
-          <td mat-cell *matCellDef="let item" [matTooltip]="item.details">{{item.details | slice:0:30}}{{item.details.length > 30 ? '...' : ''}}</td>
-        </ng-container>
-
         <ng-container matColumnDef="remuneration">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Remuneration </th>
           <td mat-cell *matCellDef="let item"> R{{item.remuneration.toFixed(2)}} </td>
@@ -48,31 +43,6 @@
             <td mat-cell *matCellDef="let item"> {{ getCommissionerName(item) }} </td>
         </ng-container>
 
-        <ng-container matColumnDef="dateCompleted">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Completed </th>
-          <td mat-cell *matCellDef="let item">
-            @if (item.dateCompleted) {
-              {{item.dateCompleted | date:'mediumDate'}}
-            } @else {
-              <button
-                mat-stroked-button
-                class="date-button"
-                [matMenuTriggerFor]="dateMenu"
-                [disabled]="!canEdit || item.status === 'Completed' || item.status === 'Approved'">
-                <mat-icon>calendar_today</mat-icon>
-                Set Date
-              </button>
-              <mat-menu #dateMenu="matMenu">
-                <mat-calendar
-                  [minDate]="item.createdAt"
-                  [maxDate]="today"
-                  (selectedChange)="onDateSelected($event, item, dateMenu)">
-                </mat-calendar>
-              </mat-menu>
-            }
-          </td>
-        </ng-container>
-
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
           <td mat-cell *matCellDef="let item">
@@ -81,10 +51,10 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="myWorkDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: myWorkDisplayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: myWorkDisplayedColumns;" (click)="openViewWorkDialog(row)" class="clickable-row"></tr>
 
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="8">
+          <td class="mat-cell" colspan="6">
             @if (!input.value) {
               <span>You have not logged any extra work yet.</span>
             } @else {
@@ -126,11 +96,6 @@
             <td mat-cell *matCellDef="let item"> {{item.workType}} </td>
           </ng-container>
 
-          <ng-container matColumnDef="details">
-            <th mat-header-cell *matHeaderCellDef> Details </th>
-            <td mat-cell *matCellDef="let item" [matTooltip]="item.details">{{item.details | slice:0:30}}{{item.details.length > 30 ? '...' : ''}}</td>
-          </ng-container>
-
           <ng-container matColumnDef="remuneration">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Remuneration </th>
             <td mat-cell *matCellDef="let item"> R{{item.remuneration.toFixed(2)}} </td>
@@ -139,17 +104,6 @@
           <ng-container matColumnDef="commissioner">
               <th mat-header-cell *matHeaderCellDef> Commissioned By </th>
               <td mat-cell *matCellDef="let item"> {{ getCommissionerName(item) }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="dateCompleted">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Completed </th>
-            <td mat-cell *matCellDef="let item">
-              @if (item.dateCompleted) {
-                {{item.dateCompleted | date:'mediumDate'}}
-              } @else {
-                N/A
-              }
-            </td>
           </ng-container>
 
           <ng-container matColumnDef="status">
@@ -162,20 +116,20 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Actions </th>
             <td mat-cell *matCellDef="let item">
-              <button mat-icon-button color="primary" (click)="approveWork(item)" [disabled]="item.status === EExtraWorkStatus.Approved || item.status === EExtraWorkStatus.Denied">
+              <button mat-icon-button color="primary" (click)="approveWork(item); $event.stopPropagation()" [disabled]="item.status === EExtraWorkStatus.Approved || item.status === EExtraWorkStatus.Denied">
                   <mat-icon>check</mat-icon>
               </button>
-              <button mat-icon-button color="warn" (click)="denyWork(item)" [disabled]="item.status === EExtraWorkStatus.Denied || item.status === EExtraWorkStatus.Approved">
+              <button mat-icon-button color="warn" (click)="denyWork(item); $event.stopPropagation()" [disabled]="item.status === EExtraWorkStatus.Denied || item.status === EExtraWorkStatus.Approved">
                   <mat-icon>close</mat-icon>
               </button>
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="commissionedDisplayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: commissionedDisplayedColumns;"></tr>
+          <tr mat-row *matRowDef="let row; columns: commissionedDisplayedColumns;" (click)="openViewWorkDialog(row)" class="clickable-row"></tr>
 
           <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="9">
+            <td class="mat-cell" colspan="7">
               @if (!commissionedInput.value) {
                 <span>You have not commissioned any extra work yet.</span>
               } @else {

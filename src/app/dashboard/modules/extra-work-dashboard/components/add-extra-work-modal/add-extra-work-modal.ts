@@ -1,3 +1,5 @@
+// add-extra-work-modal.ts
+
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -62,7 +64,7 @@ export class AddExtraWorkModal implements OnInit {
       commissionerId: ['', Validators.required],
       workType: ['', Validators.required],
       details: ['', [Validators.required, Validators.maxLength(280)]],
-      remuneration: [null, [Validators.required, Validators.min(0)]]
+      remuneration: [null, [Validators.required, Validators.min(0), Validators.max(5000)]]
     });
 
     // Fetch and filter students (clients)

@@ -12,7 +12,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenu, MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { AuthService } from '../../../services/auth-service';
@@ -21,6 +21,7 @@ import { ExtraWorkService } from '../../../services/extra-work';
 import { IExtraWork, EExtraWorkStatus } from '../../../models/interfaces/IExtraWork.interface';
 import { IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
 import { AddExtraWorkModal } from './components/add-extra-work-modal/add-extra-work-modal';
+import { ViewExtraWorkModal } from './components/view-extra-work-modal/view-extra-work-modal';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Subscription } from 'rxjs';
 import { IUser } from '../../../models/interfaces/IUser.interface';
@@ -63,40 +64,27 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   public isLoading = true;
   public isCommissionedLoading = true;
-  public today = new Date();
   public EExtraWorkStatus = EExtraWorkStatus;
   public currentUser: IUser | null = null;
   private subscriptions = new Subscription();
 
-
-  myWorkDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'details', 'remuneration', 'commissioner', 'dateCompleted', 'status'];
-  commissionedDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'details', 'remuneration', 'commissioner', 'dateCompleted', 'status', 'actions'];
+  myWorkDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'remuneration', 'commissioner', 'status'];
+  commissionedDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'remuneration', 'commissioner', 'status', 'actions'];
 
   dataSource: MatTableDataSource<IExtraWork>;
   commissionedDataSource: MatTableDataSource<IExtraWork>;
 
   @ViewChild('myWorkPaginator') set myWorkPaginator(paginator: MatPaginator) {
-    if (paginator) {
-      this.dataSource.paginator = paginator;
-    }
+    if (paginator) { this.dataSource.paginator = paginator; }
   }
-
   @ViewChild('myWorkSort') set myWorkSort(sort: MatSort) {
-    if (sort) {
-      this.dataSource.sort = sort;
-    }
+    if (sort) { this.dataSource.sort = sort; }
   }
-
   @ViewChild('commissionedPaginator') set commissionedPaginator(paginator: MatPaginator) {
-    if (paginator) {
-      this.commissionedDataSource.paginator = paginator;
-    }
+    if (paginator) { this.commissionedDataSource.paginator = paginator; }
   }
-
   @ViewChild('commissionedSort') set commissionedSort(sort: MatSort) {
-    if (sort) {
-      this.commissionedDataSource.sort = sort;
-    }
+    if (sort) { this.commissionedDataSource.sort = sort; }
   }
 
   public canCreate = this.authService.hasPermission(EPermission.EXTRA_WORK_CREATE);
@@ -107,7 +95,6 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   constructor() {
     this.dataSource = new MatTableDataSource<IExtraWork>([]);
     this.commissionedDataSource = new MatTableDataSource<IExtraWork>([]);
-
     this.dataSource.filterPredicate = this.createFilterPredicate();
     this.commissionedDataSource.filterPredicate = this.createFilterPredicate();
   }
@@ -138,22 +125,14 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.dataSource.sortingDataAccessor = (item, property) => {
         switch (property) {
             case 'createdAt': return new Date(item.createdAt).getTime();
-            case 'student':
-                return (item.studentId as IPopulatedUser)?.displayName || '';
-            case 'dateCompleted':
-                return item.dateCompleted ? new Date(item.dateCompleted).getTime() : 0;
-            case 'workType':
-                return item.workType;
-            case 'remuneration':
-                return item.remuneration;
-            case 'commissioner':
-                return (item.commissionerId as IPopulatedUser)?.displayName || '';
-            case 'status':
-                return item.status;
+            case 'student': return (item.studentId as IPopulatedUser)?.displayName || '';
+            case 'workType': return item.workType;
+            case 'remuneration': return item.remuneration;
+            case 'commissioner': return (item.commissionerId as IPopulatedUser)?.displayName || '';
+            case 'status': return item.status;
             default: return 0;
         }
     };
-
     if (this.canApprove) {
       this.commissionedDataSource.sortingDataAccessor = this.dataSource.sortingDataAccessor;
     }
@@ -171,21 +150,16 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
 
             if (this.canViewAll) {
               this.dataSource.data = workItems;
-
               this.isLoading = false;
-
               if (this.canApprove) {
                 this.commissionedDataSource.data = workItems;
-
                 this.isCommissionedLoading = false;
               }
             } else {
               this.dataSource.data = workItems.filter(v => v.commissionerId !== userId);
               this.isLoading = false;
-
               if (this.canApprove) {
                   this.commissionedDataSource.data = workItems.filter(v => v.userId !== userId);
-
                   this.isCommissionedLoading = false;
               }
             }
@@ -196,7 +170,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
             this.isCommissionedLoading = false;
         }
     });
-}
+  }
 
   createFilterPredicate(): (data: IExtraWork, filter: string) => boolean {
     return (data: IExtraWork, filter: string): boolean => {
@@ -253,10 +227,21 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  onDateSelected(selectedDate: Date | null, item: IExtraWork, menu: MatMenu): void {
-    menu.closed.emit(); // Close the menu
-    if (!selectedDate) return;
+  openViewWorkDialog(item: IExtraWork): void {
+    const dialogRef = this.dialog.open(ViewExtraWorkModal, {
+      width: 'clamp(500px, 80vw, 650px)',
+      autoFocus: false,
+      data: { item: item, canEdit: this.canEdit }
+    });
 
+    dialogRef.afterClosed().subscribe(result => {
+      if (result instanceof Date) {
+        this.onDateSelected(result, item);
+      }
+    });
+  }
+
+  onDateSelected(selectedDate: Date, item: IExtraWork): void {
     this.extraWorkService.completeExtraWork(item._id, selectedDate).subscribe({
       next: () => {
         this.snackbarService.showSuccess('Work item marked as complete!');

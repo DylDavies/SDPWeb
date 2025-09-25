@@ -59,6 +59,9 @@
              @if (addWorkForm.get('remuneration')?.hasError('min')) {
                 <mat-error>Value cannot be negative.</mat-error>
             }
+            @if (addWorkForm.get('remuneration')?.hasError('max')) {
+                <mat-error>Value cannot exceed R5000.</mat-error>
+            }
         </mat-form-field>
     </form>
 </mat-dialog-content>
