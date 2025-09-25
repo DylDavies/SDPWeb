@@ -1,107 +1,50 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { UserTable } from './user-table';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { of, throwError } from 'rxjs';
+import { CdkDragStart } from '@angular/cdk/drag-drop';
+import { CreateEditRole } from '../../../dashboard/modules/admin-dashboard/components/create-edit-role/create-edit-role';
+import { RoleManagement } from '../../../dashboard/modules/admin-dashboard/components/role-management/role-management';
 import { AuthService } from '../../../services/auth-service';
-import { UserService } from '../../../services/user-service';
-import { RoleService, RoleNode } from '../../../services/role-service';
+import { RoleNode, RoleService } from '../../../services/role-service';
 import { SnackBarService } from '../../../services/snackbar-service';
-import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
-import { IUser } from '../../../models/interfaces/IUser.interface';
-import { EPermission } from '../../../models/enums/permission.enum';
-import { EUserType } from '../../../models/enums/user-type.enum';
-import { Theme } from '../../../services/theme-service';
-import { ILeave } from '../../../models/interfaces/ILeave.interface';
+import { ConfirmationDialog } from '../confirmation-dialog/confirmation-dialog';
 
 // --- MOCK DATA ---
-const mockAdminRole: RoleNode = { _id: 'admin_role', name: 'Admin', color: '#F44336' } as RoleNode;
-const mockTutorRole: RoleNode = { _id: 'tutor_role', name: 'Tutor', color: '#2196F3' } as RoleNode;
+const mockChildRole: RoleNode = { _id: 'child1', name: 'Child Role', parent: 'parent1', permissions: [], color: '#ccc', children: [] };
+const mockParentRole: RoleNode = { _id: 'parent1', name: 'Parent Role', parent: 'root', permissions: [], color: '#bbb', children: [mockChildRole] };
+const mockRootRole: RoleNode = { _id: 'root', name: 'Root', parent: null, permissions: [], color: '#aaa', children: [mockParentRole] };
 
-const mockFullUser: IUser = {
-  _id: '1',
-  displayName: 'Admin User',
-  email: 'admin@test.com',
-  type: EUserType.Admin,
-  roles: [mockAdminRole],
-  pending: false,
-  disabled: false,
-  googleId: 'g1',
-  firstLogin: false,
-  createdAt: new Date(),
-  permissions: [],
-  theme: 'light' as Theme,
-  leave: [] as ILeave[]
-};
-
-const mockUsers: IUser[] = [
-  mockFullUser,
-  { ...mockFullUser, _id: '2', displayName: 'Tutor One', email: 'tutor1@test.com', type: EUserType.Staff, roles: [mockTutorRole] },
-  { ...mockFullUser, _id: '3', displayName: 'Pending User', email: 'pending@test.com', type: EUserType.Staff, roles: [], pending: true },
-  { ...mockFullUser, _id: '4', displayName: 'Disabled Tutor', email: 'disabled@test.com', type: EUserType.Staff, roles: [mockTutorRole], disabled: true },
-];
-
-const mockRoleTree: RoleNode = {
-  _id: 'root', name: 'Root', children: [mockAdminRole, mockTutorRole]
-} as RoleNode;
-
-
-describe('UserTable', () => {
-  let component: UserTable;
-  let fixture: ComponentFixture<UserTable>;
-  let authServiceMock: any;
-  let userServiceMock: any;
+describe('RoleManagement', () => {
+  let component: RoleManagement;
+  let fixture: ComponentFixture<RoleManagement>;
   let roleServiceSpy: jasmine.SpyObj<RoleService>;
-  let snackbarServiceSpy: jasmine.SpyObj<SnackBarService>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
-  let routerSpy: jasmine.SpyObj<Router>;
-
-  let allUsersSubject: BehaviorSubject<IUser[]>;
-  let currentUserSubject: BehaviorSubject<IUser | null>;
+  let snackbarServiceSpy: jasmine.SpyObj<SnackBarService>;
 
   beforeEach(async () => {
-    allUsersSubject = new BehaviorSubject<IUser[]>(mockUsers);
-    currentUserSubject = new BehaviorSubject<IUser | null>(mockUsers[0]);
-
-    authServiceMock = {
-      currentUser$: currentUserSubject.asObservable(),
-      hasPermission: (permission: EPermission) =>
-        permission === EPermission.ADMIN_DASHBOARD_VIEW || permission === EPermission.USERS_MANAGE_ROLES
-    };
-
-    userServiceMock = {
-      allUsers$: allUsersSubject.asObservable(),
-      fetchAllUsers: jasmine.createSpy('fetchAllUsers').and.returnValue(of(mockUsers)),
-      approveUser: jasmine.createSpy('approveUser').and.returnValue(of(mockUsers[2])),
-      disableUser: jasmine.createSpy('disableUser').and.returnValue(of(mockUsers[1])),
-      enableUser: jasmine.createSpy('enableUser').and.returnValue(of(mockUsers[3])),
-      updateUserType: jasmine.createSpy('updateUserType').and.returnValue(of(mockUsers[1]))
-    };
-
-    roleServiceSpy = jasmine.createSpyObj('RoleService', ['getRoleTree']);
-    snackbarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess']);
+    roleServiceSpy = jasmine.createSpyObj('RoleService', ['getRoleTree', 'deleteRole', 'updateRoleParent']);
+    authServiceSpy = jasmine.createSpyObj('AuthService', ['hasPermission']);
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    snackbarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
 
     await TestBed.configureTestingModule({
-      imports: [UserTable, NoopAnimationsModule],
+      imports: [RoleManagement, NoopAnimationsModule],
       providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        { provide: AuthService, useValue: authServiceMock },
-        { provide: UserService, useValue: userServiceMock },
         { provide: RoleService, useValue: roleServiceSpy },
-        { provide: SnackBarService, useValue: snackbarServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
         { provide: MatDialog, useValue: dialogSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
+        { provide: SnackBarService, useValue: snackbarServiceSpy },
+      ],
     }).compileComponents();
 
-    roleServiceSpy.getRoleTree.and.returnValue(of(mockRoleTree));
-    fixture = TestBed.createComponent(UserTable);
-    component = fixture.componentInstance; 
+    roleServiceSpy.getRoleTree.and.returnValue(of(mockRootRole));
+    authServiceSpy.hasPermission.and.returnValue(true);
+
+    fixture = TestBed.createComponent(RoleManagement);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -109,140 +52,117 @@ describe('UserTable', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Initialization and Permissions', () => {
-    it('should add actions column if user has admin view permission', () => {
-      spyOn(authServiceMock, 'hasPermission').and.returnValue(true);
-      fixture.detectChanges();
-      expect(component.displayedColumns).toContain('actions');
-    });
-
-    it('should not add actions column if user lacks permissions', () => {
-      spyOn(authServiceMock, 'hasPermission').and.returnValue(false);
-      fixture.detectChanges();
-      expect(component.displayedColumns).not.toContain('actions');
-    });
-
-    it('should load users and roles on init', fakeAsync(() => {
-      fixture.detectChanges(); // ngOnInit
-      tick();
-      expect(userServiceMock.fetchAllUsers).toHaveBeenCalled();
+  describe('Initialization', () => {
+    it('should fetch and display the role tree on init', fakeAsync(() => {
+      tick(); 
       expect(roleServiceSpy.getRoleTree).toHaveBeenCalled();
-      expect(component.dataSource.data.length).toBe(4);
-      expect(component.allRoles.length).toBe(3);
+      expect(component.dataSource.data[0]).toEqual(mockRootRole);
+      expect(component.treeControl.dataNodes.length).toBe(1);
     }));
 
+    it('should handle a null role tree from the service', fakeAsync(() => {
+        roleServiceSpy.getRoleTree.and.returnValue(of(null as any));
+        component.ngOnInit();
+        fixture.detectChanges();
+        tick();
+        expect(component.dataSource.data.length).toBe(0);
+      }));
   });
 
-  describe('Filtering', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
+  describe('Dialog Interactions', () => {
+    it('should open the create dialog and refresh on success', () => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<any>);
+      component.openCreateRoleDialog('root');
+      expect(dialogSpy.open).toHaveBeenCalledWith(CreateEditRole, jasmine.any(Object));
+      const refreshSpy = spyOn((component as any).refreshTree$, 'next');
+      dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<any>);
+      component.openCreateRoleDialog('root');
+      expect(refreshSpy).toHaveBeenCalled();
     });
 
-    it('should filter by display name (text)', fakeAsync(() => {
-      component.textFilterControl.setValue('Tutor One');
-      tick(0);
-      expect(component.dataSource.filteredData.length).toBe(1);
-    }));
+     it('should open the edit dialog and refresh on success', () => {
+      const refreshSpy = spyOn((component as any).refreshTree$, 'next');
+      dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<any>);
+      component.openEditRoleDialog(mockParentRole);
+      expect(dialogSpy.open).toHaveBeenCalledWith(CreateEditRole, jasmine.objectContaining({
+        data: { parentId: mockParentRole.parent, role: mockParentRole }
+      }));
+      expect(refreshSpy).toHaveBeenCalled();
+    });
 
-    it('should filter by a role name (text)', fakeAsync(() => {
-      component.textFilterControl.setValue('admin');
-      tick(0);
-      expect(component.dataSource.filteredData.length).toBe(1);
-    }));
+    it('should open the delete dialog and call delete service on confirm', () => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<any>);
+      roleServiceSpy.deleteRole.and.returnValue(of({ message: 'Role deleted' }));
+      component.deleteRole(mockChildRole);
+      expect(dialogSpy.open).toHaveBeenCalledWith(ConfirmationDialog, jasmine.any(Object));
+      expect(roleServiceSpy.deleteRole).toHaveBeenCalledWith(mockChildRole._id);
+      expect(snackbarServiceSpy.showSuccess).toHaveBeenCalled();
+    });
 
-    it('should filter by role selection', fakeAsync(() => {
-      component.roleFilterControl.setValue([mockTutorRole._id]);
-      tick(0);
-      expect(component.dataSource.filteredData.length).toBe(2);
-    }));
+    it('should not call delete service if confirmation is cancelled', () => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of(false) } as MatDialogRef<any>);
+      component.deleteRole(mockChildRole);
+      expect(roleServiceSpy.deleteRole).not.toHaveBeenCalled();
+    });
 
-    it('should return all if roles filter is empty', fakeAsync(() => {
-      component.roleFilterControl.setValue([]);
-      tick(0);
-      expect(component.dataSource.filteredData.length).toBe(4);
-    }));
-
-    it('should filter by both text and role', fakeAsync(() => {
-      component.textFilterControl.setValue('disabled');
-      component.roleFilterControl.setValue([mockTutorRole._id]);
-      tick(0);
-      expect(component.dataSource.filteredData.length).toBe(1);
-    }));
-
-    it('should return no results if text does not match anything', fakeAsync(() => {
-      component.textFilterControl.setValue('notfound');
-      tick(0);
-      expect(component.dataSource.filteredData.length).toBe(0);
-    }));
-
-    it('should match pending keyword', fakeAsync(() => {
-      component.textFilterControl.setValue('pending');
-      tick(0);
-      expect(component.dataSource.filteredData.some(u => u.pending)).toBeTrue();
-    }));
-
-    it('should match disabled keyword', fakeAsync(() => {
-      component.textFilterControl.setValue('disabled');
-      tick(0);
-      expect(component.dataSource.filteredData.some(u => u.disabled)).toBeTrue();
-    }));
+    it('should show an error if delete service fails', () => {
+        const errorResponse = { error: { error: 'Deletion failed' } };
+        dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<any>);
+        roleServiceSpy.deleteRole.and.returnValue(throwError(() => errorResponse));
+        component.deleteRole(mockChildRole);
+        expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('Deletion failed');
+    });
   });
 
+  describe('Drag and Drop', () => {
+    beforeEach(fakeAsync(() => {
+        component.ngOnInit();
+        tick();
+    }));
 
-  describe('User Actions', () => {
-    let event: MouseEvent;
-
-    beforeEach(() => {
-      fixture.detectChanges();
-      event = new MouseEvent('click');
-      spyOn(event, 'stopPropagation');
+    it('should not update if dragged node is dropped on itself', () => {
+        component.draggedNode = mockParentRole;
+        component.dragHoveredNode = mockParentRole;
+        component.onDrop();
+        expect(roleServiceSpy.updateRoleParent).not.toHaveBeenCalled();
     });
 
-    xit('should open ManageUserRolesDialog', () => {
-      component.manageRoles(mockUsers[1], event);
-      expect(event.stopPropagation).toHaveBeenCalled();
-      expect(dialogSpy.open).toHaveBeenCalled();
+    it('should show an error if a parent is dropped into a child', () => {
+        component.draggedNode = mockRootRole; 
+        component.dragHoveredNode = mockChildRole; 
+        component.onDrop();
+        expect(roleServiceSpy.updateRoleParent).not.toHaveBeenCalled();
+        expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('Cannot move a role into one of its own children.');
     });
 
-    it('should not open ManageUserRolesDialog if no current user', () => {
-      currentUserSubject.next(null);
-      fixture.detectChanges();
-      component.manageRoles(mockUsers[1], event);
-      expect(dialogSpy.open).not.toHaveBeenCalled();
+    it('should call updateRoleParent on a valid drop and show success', () => {
+        const anotherParent: RoleNode = { _id: 'parent2', name: 'Another Parent', parent: 'root', permissions: [], color: '#ddd', children: [] };
+        const localMockRoot = JSON.parse(JSON.stringify(mockRootRole));
+        localMockRoot.children.push(anotherParent);
+        roleServiceSpy.getRoleTree.and.returnValue(of(localMockRoot));
+        component.ngOnInit(); 
+        const updatedChildRole = { ...mockChildRole, parent: anotherParent._id };
+        roleServiceSpy.updateRoleParent.and.returnValue(of(updatedChildRole));
+        
+        component.draggedNode = mockChildRole;
+        component.dragHoveredNode = anotherParent;
+        
+        component.onDrop();
+        
+        expect(roleServiceSpy.updateRoleParent).toHaveBeenCalledWith(mockChildRole._id, anotherParent._id);
+        expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('Role hierarchy updated successfully.');
     });
 
-    it('should call approveUser service and show snackbar', () => {
-      component.approveUser(mockUsers[2], event);
-      expect(event.stopPropagation).toHaveBeenCalled();
-      expect(userServiceMock.approveUser).toHaveBeenCalledWith(mockUsers[2]._id);
-      expect(snackbarServiceSpy.showSuccess).toHaveBeenCalled();
-    });
-
-    it('should call disableUser service and show snackbar', () => {
-      component.disableUser(mockUsers[1], event);
-      expect(event.stopPropagation).toHaveBeenCalled();
-      expect(userServiceMock.disableUser).toHaveBeenCalledWith(mockUsers[1]._id);
-      expect(snackbarServiceSpy.showSuccess).toHaveBeenCalled();
-    });
-
-    it('should call enableUser service and show snackbar', () => {
-      component.enableUser(mockUsers[3], event);
-      expect(event.stopPropagation).toHaveBeenCalled();
-      expect(userServiceMock.enableUser).toHaveBeenCalledWith(mockUsers[3]._id);
-      expect(snackbarServiceSpy.showSuccess).toHaveBeenCalled();
-    });
-
-    it('should call updateUserType service and show snackbar', () => {
-      const targetType = EUserType.Admin;
-      component.updateUserType(mockUsers[1], targetType, event);
-      expect(event.stopPropagation).toHaveBeenCalled();
-      expect(userServiceMock.updateUserType).toHaveBeenCalledWith(mockUsers[1]._id, targetType);
-      expect(snackbarServiceSpy.showSuccess).toHaveBeenCalled();
-    });
-
-    it('should navigate to the user profile on viewProfile', () => {
-      component.viewProfile(mockUsers[1]);
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/dashboard/profile', mockUsers[1]._id]);
+    it('should handle updateRoleParent API error', () => {
+        const errorResponse = { error: { message: 'Update failed' } };
+        roleServiceSpy.updateRoleParent.and.returnValue(throwError(() => errorResponse));
+        component.draggedNode = mockChildRole;
+        const anotherParent: RoleNode = { _id: 'parent2', name: 'Another Parent', parent: 'root', permissions: [], color: '#ddd', children: [] };
+        component.dragHoveredNode = anotherParent;
+        
+        component.onDrop();
+        
+        expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('Update failed');
     });
   });
 });
