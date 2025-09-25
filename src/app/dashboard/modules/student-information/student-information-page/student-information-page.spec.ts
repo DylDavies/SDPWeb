@@ -20,9 +20,9 @@ const mockBundle: IBundle = {
   _id: 'bundle123',
   student: { _id: 'student1', displayName: 'John Smith' },
   subjects: [
-    { _id: 's1', subject: 'Math', grade: '10', tutor: mockTutor1, hours: 5 },
-    { _id: 's2', subject: 'Science', grade: '10', tutor: mockTutor2, hours: 5 },
-    { _id: 's3', subject: 'Advanced Math', grade: '11', tutor: mockTutor1, hours: 10 } // Duplicate tutor
+    { _id: 's1', subject: 'Math', grade: '10', tutor: mockTutor1, durationMinutes : 5 },
+    { _id: 's2', subject: 'Science', grade: '10', tutor: mockTutor2, durationMinutes: 5 },
+    { _id: 's3', subject: 'Advanced Math', grade: '11', tutor: mockTutor1, durationMinutes: 10 } // Duplicate tutor
   ],
   creator: 'creator1',
   status: 'approved' as any,

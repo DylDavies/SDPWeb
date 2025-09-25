@@ -53,9 +53,9 @@ describe('StudentsTable', () => {
 
   const mockBundles: IBundle[] = [
     // Bundle for staff1
-    { _id: 'b1', student: { _id: 's1', displayName: 'Student A' }, subjects: [{ _id: 'sub1', subject: 'Math', grade: '10', tutor: 'staff1', hours: 10 }], creator: 'c1', status: EBundleStatus.Approved, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+    { _id: 'b1', student: { _id: 's1', displayName: 'Student A' }, subjects: [{ _id: 'sub1', subject: 'Math', grade: '10', tutor: 'staff1', durationMinutes: 10 }], creator: 'c1', status: EBundleStatus.Approved, isActive: true, createdAt: new Date(), updatedAt: new Date() },
     // Bundle for another staff member
-    { _id: 'b2', student: { _id: 's2', displayName: 'Student B' }, subjects: [{ _id: 'sub2', subject: 'Science', grade: '11', tutor: 'staff2', hours: 10 }], creator: 'c1', status: EBundleStatus.Pending, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+    { _id: 'b2', student: { _id: 's2', displayName: 'Student B' }, subjects: [{ _id: 'sub2', subject: 'Science', grade: '11', tutor: 'staff2', durationMinutes: 10 }], creator: 'c1', status: EBundleStatus.Pending, isActive: true, createdAt: new Date(), updatedAt: new Date() },
   ];
 
 
