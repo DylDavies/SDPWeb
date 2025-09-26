@@ -30,6 +30,15 @@ export enum EPermission {
     BUNDLES_DELETE = 'bundles:delete',
     BUNDLES_APPROVE = 'bundles:approve',
 
+    EXTRA_WORK_CREATE = 'extra_work:create',
+    EXTRA_WORK_VIEW = 'extra_work:view',
+    EXTRA_WORK_VIEW_ALL = 'extra_work:view_all',
+    EXTRA_WORK_EDIT = 'extra_work:edit',
+    EXTRA_WORK_APPROVE = 'extra_work:approve',
+
+    // Sidebar Management
+    SIDEBAR_MANAGE = 'sidebar:manage',
+
     // Badge Management Permissions
     BADGES_CREATE = 'badges:create',
     BADGES_MANAGE = 'badges:manage',
@@ -37,6 +46,9 @@ export enum EPermission {
     BADGES_VIEW_REQUIREMENTS = 'badges:view_requirements', 
     BADGES_MANAGE_REQUIREMENTS = 'badges:manage_requirements',
 
-    NOTIFICATIONS_VIEW = 'notifications:view'
+    NOTIFICATIONS_VIEW = 'notifications:view',
 
+
+    // Remark Management Permissions
+    REMARKS_MANAGE = 'remarks:manage'
 }

@@ -1,5 +1,7 @@
 .custom-sidebar {
-  width: 12vw;//250px; 
+  width: 12vw;
+  min-width: 200px;
+  max-width: 280px;
   background-color: var(--mat-sys-surface-container-low); 
   color: var(--mat-sys-on-surface); 
   position: fixed;
@@ -9,6 +11,15 @@
 
   box-shadow: 2px 0px 8px 0px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease-in-out;
+}
+
+::ng-deep .mat-drawer-inner-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
+  display: none;
 }
 
 body.dark-theme .custom-sidebar {
@@ -26,13 +37,6 @@ mat-toolbar {
   &:hover {
     background-color: var(--mat-sys-state-hover); // Add a hover effect 
   }
-}
-
-.item-area{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .profile-area{
@@ -71,4 +75,73 @@ mat-toolbar {
   box-sizing: border-box; /* Ensures padding is included in the width */
   display: flex;
   justify-content: center;
+  background-color: var(--mat-sys-surface-container-low);
+}
+
+// Styles to make the expansion panel look and feel like a nav item
+.expansion-panel {
+  background-color: transparent !important;
+  box-shadow: none !important;
+
+  .mat-expansion-panel-header {
+    padding: 0 16px;
+    font-family: inherit; // Use the same font as other items
+    font-weight: 400; // Match list item font weight
+  }
+
+  .mat-expansion-panel-body {
+    padding: 0;
+  }
+}
+
+/* --- Responsive & Theme Overrides --- */
+@media (max-width: 768px) {
+  .custom-sidebar {
+    width: 250px;
+  }
+  .profile-pic {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+[mat-list-item]:hover,
+.mat-expansion-panel-header:hover {
+  background-color: var(--mat-expansion-header-hover-state-layer-color, color-mix(in srgb, var(--mat-sys-on-surface) calc(var(--mat-sys-hover-state-layer-opacity) * 100%), transparent)) !important;
+  cursor: pointer;
+}
+
+.mat-expansion-panel-header.mat-expanded {
+  height: var(--mat-list-list-item-one-line-container-height, 48px);
+}
+
+.mat-expansion-panel-header {
+  border-radius: var(--mat-list-active-indicator-shape, var(--mat-sys-corner-full))
+}
+
+::ng-deep .mat-expansion-panel-body {
+  padding: 0 !important;
+  margin-left: 4%;
+  width: 92%;
+}
+
+.expansion-icon {
+  position: relative;
+  align-self: center;
+  margin-inline-end: var(--mat-list-list-item-leading-icon-end-space, 16px);
+}
+
+/* --- Style for the active router link --- */
+a[mat-list-item].active-link {
+  background-color: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-color-primary);
+
+  // This ensures the icon color matches the text color when active
+  .mat-icon {
+    color: var(--mat-sys-color-primary);
+  }
+
+  &::before {
+    all: unset;
+  }
 }

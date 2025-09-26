@@ -1,0 +1,117 @@
+<div class="customization-container" cdkDropListGroup>
+  <div class="panels-container">
+    <mat-card class="list-panel">
+      <mat-card-header>
+        <mat-card-title>Available Links</mat-card-title>
+        <mat-card-subtitle>Drag or click the add button to move a link</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content 
+          cdkDropList 
+          id="available" 
+          [cdkDropListData]="availableLinks" 
+          [cdkDropListConnectedTo]="['sidebar']" 
+          (cdkDropListDropped)="drop($event)"
+          (mouseenter)="dragHover(null, null)">
+
+        <div class="item-list">
+            @for (link of availableLinks; track link.route) {
+                <div class="draggable-item" cdkDrag [cdkDragData]="link">
+                    <mat-icon class="item-icon">{{ link.icon }}</mat-icon>
+                    <span>{{ link.label }}</span>
+                    <span class="spacer"></span>
+                    <button mat-icon-button class="action-button" (click)="addItem(link)" matTooltip="Add Item">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    </button>
+                    <div cdkDragHandle class="drag-handle" matTooltip="Drag to add">
+                    <mat-icon>drag_indicator</mat-icon>
+                    </div>
+                </div>
+            } @empty {
+                <div class="empty-list-message">
+                    <mat-icon>done_all</mat-icon>
+                    <span>All links are in use.</span>
+                </div>
+            }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="tree-panel">
+    <mat-card-header>
+        <mat-card-title>Sidebar Layout</mat-card-title>
+        <mat-card-subtitle>Drag to reorder and nest items</mat-card-subtitle>
+        <span class="spacer"></span>
+        <button mat-stroked-button (click)="addCategory()" matTooltip="Add a new category for nesting links">
+            <mat-icon>create_new_folder</mat-icon>
+            Add Category
+        </button>
+    </mat-card-header>
+    <mat-card-content 
+        cdkDropList 
+        id="sidebar" 
+        [cdkDropListData]="currentSidebarItems" 
+        (cdkDropListDropped)="drop($event)"
+        (cdkDragEnded)="dragReleased()">
+      
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+            <mat-nested-tree-node *matTreeNodeDef="let node">
+                <li>
+                <div class="drop-indicator"
+                    (mouseenter)="dragHover(node, 'before')"
+                    [class.drop-target-before]="dragHoveredNode?._id === node._id && dropAction === 'before'">
+                </div>
+                <div class="tree-node"
+                    cdkDrag [cdkDragData]="node"
+                    (cdkDragStarted)="dragStarted(node)"
+                    (mouseenter)="dragHover(node, 'on')"
+                    [class.drop-target-on]="dragHoveredNode?._id === node._id && dropAction === 'on'">
+                    
+                    <button mat-icon-button [style.visibility]="hasChild(node) ? 'visible' : 'hidden'" matTreeNodeToggle>
+                    <mat-icon>
+                        {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                    </mat-icon>
+                    </button>
+                    <mat-icon class="item-icon">{{ node.icon }}</mat-icon>
+                    <span>{{ node.label }}</span>
+                    <span class="spacer"></span>
+
+                    @if (!node.route) {
+                        <button mat-icon-button class="action-button" (click)="editCategory(node)" matTooltip="Edit Category">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    }
+
+                    <button mat-icon-button class="action-button" (click)="removeItem(node)" matTooltip="Remove Item">
+                        <mat-icon>delete_outline</mat-icon>
+                    </button>
+                    <div cdkDragHandle class="drag-handle" matTooltip="Drag to reorder/nest">
+                        <mat-icon>drag_indicator</mat-icon>
+                    </div>
+                </div>
+
+                <ul [class.tree-invisible]="!isExpanded(node)">
+                    <ng-container matTreeNodeOutlet></ng-container>
+
+                    <div class="drop-indicator sublist-end-indicator"
+                        (mouseenter)="dragHoverSublistEnd(node)"
+                        [class.drop-target-before]="dropIntoNode?._id === node._id && dropAction === 'before'">
+                    </div>
+                </ul>
+
+                    @if (isLastItem(node)) {
+                        <div class="drop-indicator"
+                            (mouseenter)="dragHover(null, 'before')"
+                            [class.drop-target-before]="dragHoveredNode === null && dropAction === 'before' && !dropIntoNode">
+                        </div>
+                    }
+                </li>
+            </mat-nested-tree-node>
+        </mat-tree>
+    </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="actions-bar">
+    <button mat-flat-button color="primary" (click)="saveChanges()">Save Changes</button>
+  </div>
+</div>
