@@ -12,6 +12,7 @@ import { AddUserBadgeDialogComponent } from '../../../../../shared/components/ad
 import { Subscription } from 'rxjs';
 import { RouterModule } from '@angular/router';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { UserService } from '../../../../../services/user-service';
 
 @Component({
   selector: 'app-badge-list',
@@ -25,6 +26,7 @@ export class BadgeListComponent implements OnInit, OnDestroy {
   @Output() userUpdated = new EventEmitter<void>();
 
   private authService = inject(AuthService);
+  private userService = inject(UserService);
   private dialog = inject(MatDialog);
   private snackbarService = inject(SnackBarService);
 
@@ -35,15 +37,10 @@ export class BadgeListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.canManageBadges = this.authService.hasPermission(EPermission.BADGES_MANAGE);
-    
-    // Update badge list when a change occurs
-    this.userSubscription = this.authService.currentUser$.subscribe((currentUser) => {
-        if (currentUser && currentUser._id === this.user?._id) {
-            this.user = currentUser; // Update the whole user object
-            this.badges = this.user.badges || [];
-        }
-    });
-    
+    this.badges = this.user?.badges || [];
+  }
+  
+  ngOnChanges(): void {
     this.badges = this.user?.badges || [];
   }
 
@@ -61,7 +58,7 @@ export class BadgeListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result && result.updatedUser){
         this.snackbarService.showSuccess('Badge added to user.');
-        this.authService.updateCurrentUserState(result.updatedUser);  // update the auth state with the fresh user object
+        this.userUpdated.emit(); // Notify the parent to refresh
       } 
       else if(result && result.error){
         this.snackbarService.showError('An error occurred, but the badge may have been added.');

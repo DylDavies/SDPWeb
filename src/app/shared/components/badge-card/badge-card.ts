@@ -9,7 +9,6 @@ import { BadgeDetailDialogComponent } from '../badge-detail-dialog/badge-detail-
 import { UserService } from '../../../services/user-service';
 import { CreateEditBadgeDialogComponent } from '../../../dashboard/modules/admin-dashboard/components/create-edit-badge-dialog/create-edit-badge-dialog';
 import { AuthService } from '../../../services/auth-service';
-import { IUser } from '../../../models/interfaces/IUser.interface';
 import { EPermission } from '../../../models/enums/permission.enum';
 import { BadgeService } from '../../../services/badge-service';
 import { ConfirmationDialog } from '../confirmation-dialog/confirmation-dialog';
@@ -104,9 +103,8 @@ export class BadgeCardComponent implements OnInit {
   removeBadgeFromUser(): void {
     if (this.userId) {
       this.userService.removeBadgeFromUser(this.userId, this.badge._id.toString()).subscribe({
-        next: (updatedUser: IUser) => {
+        next: () => {
           this.snackbarService.showSuccess('Badge removed from user.');
-          this.authService.updateCurrentUserState(updatedUser);
         },
         error: () => {
           this.snackbarService.showError('Failed to remove badge.');
