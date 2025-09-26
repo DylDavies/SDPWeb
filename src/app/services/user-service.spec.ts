@@ -23,7 +23,10 @@ const mockUsers: IUser[] = [
     pending: false,
     disabled: false,
     leave: [],
-    theme: 'system'
+    theme: 'system',
+    paymentType: 'Contract' as const,
+    monthlyMinimum: 0,
+    rateAdjustments: []
   },
 ];
 

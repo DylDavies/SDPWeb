@@ -21,6 +21,9 @@ import { BadgeLibrary } from './dashboard/modules/badge-library/badge-library';
 import { NotificationCenterComponent } from './notification-center/notification-center';
 import { StudentManagement } from './dashboard/modules/student-management/student-management';
 import { StudentInformationPage } from './dashboard/modules/student-information/student-information-page/student-information-page';
+import { PayslipViewer } from './dashboard/modules/payslip-dashboard/components/payslip-viewer/payslip-viewer';
+import { PayslipDashboard } from './dashboard/modules/payslip-dashboard/payslip-dashboard';
+import { RateManagementComponent } from './dashboard/modules/rate-management/rate-management';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -51,7 +54,22 @@ export const routes: Routes = [
         path: 'notifications',
         component: NotificationCenterComponent,
         canActivate: [permissionGuard([EPermission.NOTIFICATIONS_VIEW])]
-      }
+      },
+      {
+        path: 'payslips',
+        component: PayslipDashboard,
+        canActivate: [permissionGuard([EPermission.CAN_VIEW_OWN_PAYSLIP])]
+      },
+      {
+        path: 'payslip/:id',
+        component: PayslipViewer,
+        canActivate: [permissionGuard([EPermission.CAN_VIEW_OWN_PAYSLIP, EPermission.CAN_MANAGE_PAYSLIPS], false)]
+      },
+      {
+        path: 'rates',
+        component: RateManagementComponent,
+        canActivate: [permissionGuard([EPermission.CAN_ADJUST_RATES])]
+      },
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },

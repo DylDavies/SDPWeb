@@ -196,4 +196,45 @@ export class UserService {
       tap(() => this.fetchAllUsers().subscribe())
     );
   }
+
+  // ===== RATE ADJUSTMENT MANAGEMENT =====
+
+  /**
+   * Adds a rate adjustment to a user's history.
+   * After a successful API call, it triggers a refresh of the local user list.
+   * @param userId - The ID of the user to adjust rates for.
+   * @param rateAdjustment - The rate adjustment data.
+   * @returns An Observable that emits the updated user document.
+   */
+  addRateAdjustment(userId: string, rateAdjustment: {
+    reason: string;
+    newRate: number;
+    effectiveDate: string
+  }): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/rate-adjustments`, rateAdjustment).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  /**
+   * Gets the rate adjustment history for a specific user.
+   * @param userId - The ID of the user to fetch rate adjustments for.
+   * @returns An Observable that emits the user's rate adjustment history.
+   */
+  getRateAdjustments(userId: string): Observable<import('../models/interfaces/IUser.interface').IRateAdjustment[]> {
+    return this.httpService.get<import('../models/interfaces/IUser.interface').IRateAdjustment[]>(`users/${userId}/rate-adjustments`);
+  }
+
+  /**
+   * Removes a rate adjustment from a user's history (for corrections).
+   * After a successful API call, it triggers a refresh of the local user list.
+   * @param userId - The ID of the user.
+   * @param adjustmentIndex - The index of the adjustment to remove.
+   * @returns An Observable that emits the updated user document.
+   */
+  removeRateAdjustment(userId: string, adjustmentIndex: number): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/rate-adjustments/${adjustmentIndex}`).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
 } 
