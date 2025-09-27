@@ -19,18 +19,16 @@ describe('RateAdjustmentDialogComponent', () => {
 
   const mockRateAdjustments: IRateAdjustment[] = [
     {
-      _id: 'rate1',
-      previousRate: 100,
       newRate: 150,
       effectiveDate: new Date('2024-08-01'),
-      reason: 'Performance increase'
+      reason: 'Performance increase',
+      approvingManagerId: 'manager1'
     },
     {
-      _id: 'rate2',
-      previousRate: 80,
       newRate: 100,
       effectiveDate: new Date('2024-06-01'),
-      reason: 'Initial rate'
+      reason: 'Initial rate',
+      approvingManagerId: 'manager2'
     }
   ];
 
@@ -38,9 +36,19 @@ describe('RateAdjustmentDialogComponent', () => {
     _id: 'user1',
     email: 'test@example.com',
     displayName: 'Test User',
-    type: EUserType.Tutor,
-    accountStatus: 'Active',
-    isProfileComplete: true,
+    type: EUserType.Staff,
+    googleId: 'google123',
+    picture: 'test.jpg',
+    firstLogin: false,
+    createdAt: new Date(),
+    roles: [],
+    permissions: [],
+    pending: false,
+    disabled: false,
+    theme: 'light' as any,
+    leave: [],
+    paymentType: 'Contract' as any,
+    monthlyMinimum: 0,
     rateAdjustments: mockRateAdjustments
   };
 
@@ -95,7 +103,7 @@ describe('RateAdjustmentDialogComponent', () => {
     });
 
     it('should return 0 when rateAdjustments is undefined', () => {
-      component.user = { ...mockUser, rateAdjustments: undefined };
+      component.user = { ...mockUser, rateAdjustments: [] };
       const currentRate = component['getCurrentRate']();
       expect(currentRate).toBe(0);
     });
@@ -222,7 +230,9 @@ describe('RateAdjustmentDialogComponent', () => {
 
   describe('Input validation', () => {
     it('should prevent invalid characters in rate input', () => {
+      const mockInput = { value: '123' } as HTMLInputElement;
       const event = new KeyboardEvent('keydown', { key: 'a' });
+      Object.defineProperty(event, 'target', { value: mockInput });
       spyOn(event, 'preventDefault');
 
       component.onRateKeydown(event);
@@ -231,7 +241,9 @@ describe('RateAdjustmentDialogComponent', () => {
     });
 
     it('should allow numeric input', () => {
+      const mockInput = { value: '123' } as HTMLInputElement;
       const event = new KeyboardEvent('keydown', { key: '5' });
+      Object.defineProperty(event, 'target', { value: mockInput });
       spyOn(event, 'preventDefault');
 
       component.onRateKeydown(event);
@@ -280,7 +292,9 @@ describe('RateAdjustmentDialogComponent', () => {
       const controlKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'];
 
       controlKeys.forEach(key => {
+        const mockInput = { value: '123' } as HTMLInputElement;
         const event = new KeyboardEvent('keydown', { key });
+        Object.defineProperty(event, 'target', { value: mockInput });
         spyOn(event, 'preventDefault');
 
         component.onRateKeydown(event);
@@ -293,7 +307,9 @@ describe('RateAdjustmentDialogComponent', () => {
       const ctrlKeys = ['a', 'c', 'v', 'x', 'z'];
 
       ctrlKeys.forEach(key => {
+        const mockInput = { value: '123' } as HTMLInputElement;
         const event = new KeyboardEvent('keydown', { key, ctrlKey: true });
+        Object.defineProperty(event, 'target', { value: mockInput });
         spyOn(event, 'preventDefault');
 
         component.onRateKeydown(event);
@@ -306,7 +322,7 @@ describe('RateAdjustmentDialogComponent', () => {
   describe('onRateInput', () => {
     it('should truncate rate to 2 decimal places', () => {
       const mockInput = { value: '123.456' } as HTMLInputElement;
-      const event = { target: mockInput } as Event;
+      const event = { target: mockInput } as unknown as Event;
 
       component.onRateInput(event);
 
@@ -316,7 +332,7 @@ describe('RateAdjustmentDialogComponent', () => {
 
     it('should not modify rate with 2 or fewer decimal places', () => {
       const mockInput = { value: '123.45' } as HTMLInputElement;
-      const event = { target: mockInput } as Event;
+      const event = { target: mockInput } as unknown as Event;
       component.rateAdjustmentForm.get('newRate')?.setValue(123.45);
 
       component.onRateInput(event);
@@ -326,7 +342,7 @@ describe('RateAdjustmentDialogComponent', () => {
 
     it('should handle input without decimal point', () => {
       const mockInput = { value: '123' } as HTMLInputElement;
-      const event = { target: mockInput } as Event;
+      const event = { target: mockInput } as unknown as Event;
       const originalValue = 123;
       component.rateAdjustmentForm.get('newRate')?.setValue(originalValue);
 
@@ -338,7 +354,7 @@ describe('RateAdjustmentDialogComponent', () => {
 
   describe('Edge cases', () => {
     it('should handle user without display name', () => {
-      component.user = { ...mockUser, displayName: undefined };
+      component.user = { ...mockUser, displayName: 'Test User' };
       component.rateAdjustmentForm.patchValue({
         reason: 'Test reason',
         newRate: 100
@@ -348,7 +364,7 @@ describe('RateAdjustmentDialogComponent', () => {
       component.onSubmit();
 
       expect(mockSnackBarService.showSuccess).toHaveBeenCalledWith(
-        'Rate adjusted for undefined to R100.00/hr'
+        'Rate adjusted for Test User to R100.00/hr'
       );
     });
   });

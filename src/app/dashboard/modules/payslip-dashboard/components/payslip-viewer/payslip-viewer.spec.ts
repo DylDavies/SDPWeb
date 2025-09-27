@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject, throwError } from 'rxjs';
 
 import { PayslipViewer } from './payslip-viewer';
 import { PayslipService } from '../../../../../services/payslip-service';
@@ -200,9 +200,7 @@ describe('PayslipViewer', () => {
     it('should handle add bonus error', () => {
       component.selectedBonusId = 'performance';
       mockPayslipService.addBonus.and.returnValue(
-        new BehaviorSubject(null).asObservable().pipe(() => {
-          throw new Error('API Error');
-        })
+        throwError(() => new Error('API Error'))
       );
 
       component.addSelectedBonus();
@@ -420,7 +418,9 @@ describe('PayslipViewer', () => {
 
   describe('Input Validation', () => {
     it('should prevent invalid characters in amount input', () => {
+      const mockInput = { value: '123' } as HTMLInputElement;
       const event = new KeyboardEvent('keydown', { key: 'a' });
+      Object.defineProperty(event, 'target', { value: mockInput });
       spyOn(event, 'preventDefault');
 
       component.onAmountKeydown(event, 'deduction');
@@ -429,7 +429,9 @@ describe('PayslipViewer', () => {
     });
 
     it('should allow numeric input', () => {
+      const mockInput = { value: '123' } as HTMLInputElement;
       const event = new KeyboardEvent('keydown', { key: '5' });
+      Object.defineProperty(event, 'target', { value: mockInput });
       spyOn(event, 'preventDefault');
 
       component.onAmountKeydown(event, 'deduction');

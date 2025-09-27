@@ -42,18 +42,17 @@ describe('PayslipService', () => {
       { description: 'Equipment Fee', amount: 150 }
     ],
     notes: [],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    history: []
   };
 
   const mockPayslips: IPayslip[] = [mockPayslip];
 
   const mockPreapprovedItem: IPreapprovedItem = {
     _id: 'item1',
-    description: 'Performance Bonus',
-    amount: 500,
-    category: 'Performance',
-    isActive: true
+    itemName: 'Performance Bonus',
+    itemType: 'Bonus' as any,
+    defaultAmount: 500,
+    isAdminOnly: false
   };
 
   beforeEach(() => {

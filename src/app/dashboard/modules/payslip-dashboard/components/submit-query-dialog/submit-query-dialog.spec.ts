@@ -57,17 +57,14 @@ describe('SubmitQueryDialogComponent', () => {
       { description: 'Platform Fee', amount: 100 }
     ],
     notes: [],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    history: []
   };
 
   const mockExistingQuery: INote = {
     _id: 'query1',
     itemId: 'earning-0',
     note: 'Existing query note',
-    resolved: false,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    resolved: false
   };
 
   const mockDialogData = {
@@ -120,7 +117,7 @@ describe('SubmitQueryDialogComponent', () => {
   });
 
   it('should populate queryable items from payslip data', () => {
-    expect(component.queryableItems.length).toBe(6); // 2 earnings + 2 bonuses + 2 deductions + 1 general = 7, but we have 1 misc earning counted as well
+    expect(component.queryableItems.length).toBe(7); // 2 earnings + 2 bonuses + 1 misc earning + 2 deductions + 1 general = 7
 
     expect(component.queryableItems).toContain(
       jasmine.objectContaining({ id: 'earning-0', viewValue: 'Earning: Teaching Hours' })
