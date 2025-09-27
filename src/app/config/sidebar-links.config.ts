@@ -13,6 +13,7 @@ export const AVAILABLE_SIDEBAR_LINKS: ISidebarLinkDefinition[] = [
   { label: 'Home', icon: 'dashboard', route: '/dashboard', requiredPermissions: [], stopRemove: true },
   { label: 'Profile', icon: 'person', route: '/dashboard/profile', requiredPermissions: [] },
   { label: 'User Management', icon: 'people', route: '/dashboard/users', requiredPermissions: [EPermission.USERS_VIEW] },
+  { label: 'Students', icon: 'school', route: '/dashboard/students'},
   { 
     label: 'Bundles', 
     icon: 'inventory', 
