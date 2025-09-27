@@ -53,7 +53,7 @@ export const routes: Routes = [
         component: NotificationCenterComponent,
         canActivate: [permissionGuard([EPermission.NOTIFICATIONS_VIEW])]
       },
-      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] },
+      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },
