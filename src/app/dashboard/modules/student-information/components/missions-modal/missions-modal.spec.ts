@@ -26,7 +26,10 @@ const mockStudent: IUser = {
   pending: false,
   disabled: false,
   theme: 'system',
-  leave: []
+  leave: [],
+  paymentType: 'Contract' as const,
+  monthlyMinimum: 0,
+  rateAdjustments: []
 };
 const mockTutor: IPopulatedUser = {
     _id: 'tutor1', displayName: 'Jane',
@@ -43,7 +46,10 @@ const mockCurrentUser: IUser = {
   pending: false,
   disabled: false,
   theme: 'system',
-  leave: []
+  leave: [],
+  paymentType: 'Contract' as const,
+  monthlyMinimum: 0,
+  rateAdjustments: []
 };
 
 const mockMission: IMissions = {
