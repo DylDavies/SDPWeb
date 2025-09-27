@@ -2,17 +2,24 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BadgeCardComponent } from './badge-card';
+import { AuthService } from '../../../services/auth-service';
+import { MatDialog } from '@angular/material/dialog';
 
 describe('BadgeCard', () => {
   let component: BadgeCardComponent;
   let fixture: ComponentFixture<BadgeCardComponent>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
+    mockAuthService = jasmine.createSpyObj('AuthService', ['hasPermission']);
+
     await TestBed.configureTestingModule({
       imports: [BadgeCardComponent],
       providers: [
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: MatDialog, useValue: { open: () => {} } }
       ]
     })
     .compileComponents();
@@ -25,5 +32,14 @@ describe('BadgeCard', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should show admin actions if the user has the correct permissions', () => {
+    mockAuthService.hasPermission.and.returnValue(true);
+    component.context = 'admin';
+    component.ngOnInit();
+    fixture.detectChanges();
+    const adminActions = fixture.nativeElement.querySelector('.admin-actions');
+    expect(adminActions).toBeTruthy();
   });
 });

@@ -24,6 +24,7 @@ import { StudentInformationPage } from './dashboard/modules/student-information/
 import { PayslipViewer } from './dashboard/modules/payslip-dashboard/components/payslip-viewer/payslip-viewer';
 import { PayslipDashboard } from './dashboard/modules/payslip-dashboard/payslip-dashboard';
 import { RateManagementComponent } from './dashboard/modules/rate-management/rate-management';
+import { ExtraWorkDashboard } from './dashboard/modules/extra-work-dashboard/extra-work-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -70,6 +71,7 @@ export const routes: Routes = [
         component: RateManagementComponent,
         canActivate: [permissionGuard([EPermission.CAN_ADJUST_RATES])]
       },
+      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] },
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },

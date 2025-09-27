@@ -18,8 +18,8 @@ describe('BundleDashboard', () => {
   let dialog: MatDialog;
 
   const mockBundles: IBundle[] = [
-    { _id: '1', student: { _id: 's1', displayName: 'Student A' }, subjects: [], creator: 'c1', status: EBundleStatus.Pending, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-    { _id: '2', student: { _id: 's2', displayName: 'Student B' }, subjects: [], creator: 'c2', status: EBundleStatus.Approved, isActive: true, createdAt: new Date(), updatedAt: new Date() }
+    { _id: '1', student: { _id: 's1', displayName: 'Student A' }, subjects: [], createdBy: 'c1', status: EBundleStatus.Pending, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+    { _id: '2', student: { _id: 's2', displayName: 'Student B' }, subjects: [], createdBy: 'c2', status: EBundleStatus.Approved, isActive: true, createdAt: new Date(), updatedAt: new Date() }
   ];
 
   beforeEach(async () => {

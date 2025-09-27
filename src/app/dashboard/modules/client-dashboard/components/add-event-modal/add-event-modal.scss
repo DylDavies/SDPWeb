@@ -1,0 +1,49 @@
+mat-dialog-content {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 1rem;
+}
+
+.spinners-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.labeled-spinner {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+
+    .input-label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--mat-sys-on-surface-variant);
+        min-width: 120px;
+        padding-top: 1.25rem;
+    }
+}
+
+.spinner-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .remaining-hours-hint, mat-error {
+    margin-top: 8px;
+  }
+
+  // Style for the invisible placeholder
+  .message-placeholder {
+    // Height of a standard mat-hint or mat-error
+    min-height: 12px;
+    margin-top: 8px;
+  }
+}
