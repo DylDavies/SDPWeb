@@ -19,7 +19,7 @@ const mockBundle: IBundle = {
     subjects: [
         { _id: 'subject1', subject: 'Math', grade: '10', tutor: 'tutor1', durationMinutes: 120 },
     ],
-    creator: 'creator1',
+    createdBy: 'creator1',
     status: EBundleStatus.Approved,
     isActive: true,
     createdAt: new Date(),

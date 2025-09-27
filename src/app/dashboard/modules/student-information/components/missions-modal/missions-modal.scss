@@ -1,0 +1,63 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 16px;
+    overflow: hidden;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+.subjects-title {
+    margin: 8px 0;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.subject-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.subject-details-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-grow: 1;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.flex-item {
+    flex: 1;
+}
+
+.small-field {
+    flex: 0.5;
+}
+
+.button-row {
+    margin-top: -16px;
+    display: flex;
+    gap: 16px;
+}
+
+mat-dialog-actions {
+    padding: 16px 24px;
+}
+
+button[mat-flat-button] {
+    min-width: 120px;
+}
+
+.divider {
+    margin-bottom: 1rem;
+    margin-top: -1rem;
+}

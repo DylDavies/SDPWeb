@@ -1,16 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { StudentManagement } from './student-management';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { StudentManagement } from './student-management';
 
-describe('StudentManagement', () => {
+describe('StudentsTable', () => {
   let component: StudentManagement;
   let fixture: ComponentFixture<StudentManagement>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StudentManagement,NoopAnimationsModule],
+      imports: [StudentManagement],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting()
