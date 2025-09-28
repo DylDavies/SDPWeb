@@ -1,15 +1,8 @@
-/**
- * @file This file defines the MissionService, which is responsible for all
- * interactions with the backend API related to student missions.
- */
-
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http-service';
 import { EMissionStatus } from '../models/enums/mission-status.enum';
 import { IMissions } from '../models/interfaces/IMissions.interface';
-import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
 
 /**
  * A service for managing missions.
@@ -26,8 +19,6 @@ export class MissionService {
    * which will handle the actual HTTP requests.
    */
   private httpService = inject(HttpService);
-  private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
 
   /**
    * Retrieves all missions from the backend.
@@ -64,15 +55,9 @@ export class MissionService {
    * @param missionData The data for the new mission.
    * @returns An Observable that emits the newly created mission.
    */
-  createMission(missionData: FormData): Observable<IMissions> {
-    return this.http.post<IMissions>(`${this.apiUrl}/missions`, missionData);
+  createMission(missionData: Partial<IMissions>): Observable<IMissions> {
+    return this.httpService.post<IMissions>('missions', missionData);
   }
-
-  /*downloadMissionDocument(filename: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/missions/document/${filename}`, {
-      responseType: 'blob' // This is important for handling file downloads
-    });
-  }*/
 
   /**
    * Updates an existing mission with new data.

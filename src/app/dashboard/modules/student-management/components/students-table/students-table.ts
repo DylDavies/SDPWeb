@@ -162,7 +162,6 @@ export class StudentsTable implements OnInit, AfterViewInit {
 
   
   getCreatorName(bundle: IBundle): string {
-      console.log(bundle.createdBy);
       if (typeof bundle.createdBy === 'object' && bundle.createdBy) {
           return (bundle.createdBy as IPopulatedUser).displayName || 'N/A';
       }

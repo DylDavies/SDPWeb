@@ -6,18 +6,28 @@ import { MissionService } from './missions-service';
 import { IMissions } from '../models/interfaces/IMissions.interface';
 import { EMissionStatus } from '../models/enums/mission-status.enum';
 import { environment } from '../../environments/environment';
+import { IDocument } from '../models/interfaces/IDocument.interface';
 
 describe('MissionService', () => {
   let service: MissionService;
   let httpMock: HttpTestingController;
   const apiUrl = environment.apiUrl;
 
-  // Mock data for use in tests
+  // Mock document data to be used within the mission mock
+  const mockDocument: IDocument = {
+    _id: 'doc1',
+    fileKey: 'key123',
+    originalFilename: 'mission-doc.pdf',
+    contentType: 'application/pdf',
+    uploadedBy: 'user1',
+    createdAt: new Date(),
+  };
+
+  // Mock mission data for use in tests
   const mockMission: IMissions = {
     _id: 'mission1',
     bundleId: 'bundle1',
-    documentPath: 'path/to/doc.pdf',
-    documentName: 'doc.pdf',
+    document: mockDocument,
     student: 'student1',
     tutor: 'tutor1',
     remuneration: 100,
@@ -42,6 +52,7 @@ describe('MissionService', () => {
   });
 
   afterEach(() => {
+    // After every test, assert that there are no more pending requests.
     httpMock.verify();
   });
 
@@ -106,14 +117,12 @@ describe('MissionService', () => {
   });
 
   describe('createMission', () => {
-    it('should send a POST request to the /missions endpoint', () => {
-      const missionData = new FormData();
-      missionData.append('document', new File([], 'doc.pdf'));
-      missionData.append('studentId', 'student1');
-      missionData.append('tutorId', 'tutor1');
-      missionData.append('remuneration', '100');
-      missionData.append('commissionedById', 'commissioner1');
-      missionData.append('dateCompleted', new Date().toISOString());
+    it('should send a POST request with mission data', () => {
+      const missionData: Partial<IMissions> = {
+        student: 'student1',
+        tutor: 'tutor1',
+        remuneration: 100,
+      };
 
       service.createMission(missionData).subscribe(mission => {
         expect(mission).toBeDefined();
@@ -126,24 +135,8 @@ describe('MissionService', () => {
     });
   });
 
-  /*describe('downloadMissionDocument', () => {
-    it('should send a GET request to the /missions/document/:filename endpoint', () => {
-      const filename = 'path/to/doc.pdf';
-      const mockBlob = new Blob(['test content'], { type: 'application/pdf' });
-
-      service.downloadMissionDocument(filename).subscribe(blob => {
-        expect(blob).toEqual(mockBlob);
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/missions/document/${filename}`);
-      expect(req.request.method).toBe('GET');
-      expect(req.request.responseType).toBe('blob');
-      req.flush(mockBlob);
-    });
-  });*/
-
   describe('updateMission', () => {
-    it('should send a PATCH request to the /missions/:id endpoint', () => {
+    it('should send a PATCH request with update data', () => {
       const missionId = 'mission1';
       const updateData = { remuneration: 500 };
 
@@ -159,7 +152,7 @@ describe('MissionService', () => {
   });
 
   describe('setMissionStatus', () => {
-    it('should send a PATCH request to the /missions/:id/status endpoint', () => {
+    it('should send a PATCH request to update the status', () => {
       const missionId = 'mission1';
       const newStatus = EMissionStatus.Completed;
 
@@ -175,13 +168,13 @@ describe('MissionService', () => {
   });
 
   describe('deleteMission', () => {
-    it('should send a DELETE request to the /missions/:id endpoint', () => {
+    it('should send a DELETE request to the specified mission ID', () => {
       const missionId = 'mission1';
       service.deleteMission(missionId).subscribe();
 
       const req = httpMock.expectOne(`${apiUrl}/missions/${missionId}`);
       expect(req.request.method).toBe('DELETE');
-      req.flush(null);
+      req.flush(null); // DELETE requests often have no body in response
     });
   });
 });

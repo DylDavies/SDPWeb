@@ -21,7 +21,7 @@
       <div *ngIf="day" class="event-container">
         <button *ngFor="let event of getEventsForDay(day)" class="event-chip" (click)="onEventClick(event, $event)" type="button">
           <div class="event-content">
-            <span class="event-time">{{ getEventTime(event) }}</span>
+            <span class="event-time">{{ getEventTime(event) }} - </span>
             <span class="event-name">{{ event.subject }}</span>
           </div>
           <ng-container [ngSwitch]="getEventStatusIcon(event)">

@@ -1,13 +1,13 @@
-import { Component, inject, OnInit, OnDestroy} from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { /*DomSanitizer,*/ SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
-//import { MissionService } from '../../../../../services/missions-service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-//import { SnackBarService } from '../../../../../services/snackbar-service';
+import { FileService } from '../../../../../services/file-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-view-mission-modal',
@@ -21,25 +21,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class ViewMissionModal implements OnInit, OnDestroy {
   public dialogRef = inject(MatDialogRef<ViewMissionModal>);
   public data: IMissions = inject(MAT_DIALOG_DATA);
-  //private sanitizer = inject(DomSanitizer);
-  //private missionService = inject(MissionService);
-  //private snackBarService = inject(SnackBarService);
+  private sanitizer = inject(DomSanitizer);
+  private fileService = inject(FileService);
+  private snackBarService = inject(SnackBarService);
 
   public pdfUrl: SafeResourceUrl | null = null;
   public pdfFilename = '';
   public isLoading = true;
-  private objectUrl: string | null = null; // Store the raw object URL for cleanup
+  private objectUrl: string | null = null;
 
   ngOnInit(): void {
-    if (this.data) {
-      this.pdfFilename = this.data.documentName;
-       //const filename = this.data.documentPath || '';
-
-      /*this.missionService.downloadMissionDocument(filename).subscribe({
-        next: (blob) => {
-        
-          this.objectUrl = URL.createObjectURL(blob);
-          this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.objectUrl);
+    if (this.data && this.data.document) {
+      this.pdfFilename = this.data.document.originalFilename;
+      this.fileService.getPresignedDownloadUrl(this.data.document._id).subscribe({
+        next: (response) => {
+          this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(response.url);
           this.isLoading = false;
         },
         error: (err) => {
@@ -47,36 +43,17 @@ export class ViewMissionModal implements OnInit, OnDestroy {
           this.snackBarService.showError('Could not load the mission document.');
           this.isLoading = false;
         }
-      });*/
+      });
     } else {
       this.isLoading = false;
     }
   }
 
   ngOnDestroy(): void {
-    // Revoke the object URL to prevent memory leaks when the component is destroyed
     if (this.objectUrl) {
       URL.revokeObjectURL(this.objectUrl);
     }
   }
-
-  /*downloadDocument(): void {
-    const filename = this.data.documentPath.split(/[\\/]/).pop() || this.data.documentName;
-    this.missionService.downloadMissionDocument(filename).subscribe({
-      next: blob => {
-        const a = document.createElement('a');
-        const objectUrl = URL.createObjectURL(blob);
-        a.href = objectUrl;
-        a.download = this.data.documentName;
-        a.click();
-        URL.revokeObjectURL(objectUrl);
-      }, 
-      error: error => {
-        this.snackBarService.showError('Error downloading file.');
-        console.error(error);
-      }
-    });
-  }*/
 
   close(): void {
     this.dialogRef.close();
