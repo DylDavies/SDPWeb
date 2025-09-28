@@ -1,31 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { provideNativeDateAdapter } from '@angular/material/core';
 import { BadgeService } from '../../../../../services/badge-service';
 import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SnackBarService } from '../../../../../services/snackbar-service';
-
-export function futureDateValidator(): ValidatorFn {
-  return (control: AbstractControl): Record<string, unknown> | null => {
-    if (!control.value) {
-      return null; 
-    }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(control.value);
-
-    return selectedDate < today ? { pastDate: true } : null;
-  };
-}
 
 @Component({
   selector: 'app-create-edit-badge-dialog',
@@ -38,11 +23,9 @@ export function futureDateValidator(): ValidatorFn {
     MatInputModule,
     MatButtonModule,
     MatSlideToggleModule,
-    MatDatepickerModule,
     MatIconModule,
     MatTooltipModule
   ],
-  providers: [provideNativeDateAdapter()],
   templateUrl: './create-edit-badge-dialog.html',
   styleUrls: ['./create-edit-badge-dialog.scss'],
 })
@@ -73,7 +56,7 @@ export class CreateEditBadgeDialogComponent implements OnInit {
       description: ['', Validators.required],
       image: ['', Validators.required],
       permanent: [false],
-      expirationDate: [null, [futureDateValidator()]],
+      duration: [Validators.required], 
       bonus: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
 
@@ -81,23 +64,22 @@ export class CreateEditBadgeDialogComponent implements OnInit {
       this.badgeForm.addControl('requirements', this.fb.control(''));
     }
 
+    // Duration on appears when is permanent is false
     this.badgeForm.get('permanent')?.valueChanges.subscribe(isPermanent => {
-      const expirationDateControl = this.badgeForm.get('expirationDate');
-      if (!isPermanent) {
-        expirationDateControl?.setValidators([Validators.required, futureDateValidator()]);
+      const durationControl = this.badgeForm.get('duration');
+      if (isPermanent) {
+        durationControl?.clearValidators();
+        durationControl?.setValue(null); 
+      } 
+      else {
+        durationControl?.setValidators([Validators.required, Validators.min(1), Validators.max(365)]);
       }
-      else{
-
-        expirationDateControl?.setValidators([futureDateValidator()]);
-        expirationDateControl?.setValue(null); 
-      }
-
-      expirationDateControl?.updateValueAndValidity();
+      durationControl?.updateValueAndValidity();
     });
 
     if (this.isEditMode && this.data.badge) {
       this.badgeForm.patchValue(this.data.badge);
-      this.badgeForm.get('permanent')?.updateValueAndValidity();
+      this.badgeForm.get('permanent')?.updateValueAndValidity(); 
     }
   }
 

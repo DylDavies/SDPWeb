@@ -33,10 +33,10 @@
           <span class="detail-label">Type</span>
           <span class="detail-value">{{ data.badge.permanent ? 'Permanent' : 'Temporary' }}</span>
         </div>
-        @if (!data.badge.permanent && data.badge.expirationDate) {
+        @if (!data.badge.permanent && data.badge.duration) {
           <div class="detail-item">
             <span class="detail-label">Expires</span>
-            <span class="detail-value">{{ data.badge.expirationDate | date:'longDate' }}</span>
+            <span class="detail-value">{{ data.badge.duration }} days</span>
           </div>
         }
       </div>

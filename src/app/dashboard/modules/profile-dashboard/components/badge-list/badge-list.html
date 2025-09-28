@@ -14,19 +14,22 @@
       }
     </div>
   </div>
-  @if (badges && badges.length > 0) {
-    <div class="badge-grid">
-      @for (badge of badges; track badge._id) {
-        <app-badge-card 
-          [badge]="badge"
-          [context]="'profile'"
-          [userId]="user!._id">
-        </app-badge-card>
-      }
-    </div>
-  } @else {
-    <div class="empty-state">
-      <p>This user hasn't earned any badges yet.</p>
-    </div>
+
+  @if (badges$ | async; as badges) {
+    @if (badges && badges.length > 0) {
+      <div class="badge-grid">
+        @for (badge of badges; track badge._id) {
+          <app-badge-card 
+            [badge]="badge"
+            [context]="'profile'"
+            [userId]="user!._id"
+            (badgeRemoved)="userUpdated.emit()">  </app-badge-card>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <p>This user hasn't earned any badges yet.</p>
+      </div>
+    }
   }
 </div>

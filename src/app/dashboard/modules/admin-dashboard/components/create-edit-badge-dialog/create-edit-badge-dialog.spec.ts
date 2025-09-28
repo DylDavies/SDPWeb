@@ -3,7 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
-import { CreateEditBadgeDialogComponent, futureDateValidator } from './create-edit-badge-dialog';
+import { CreateEditBadgeDialogComponent } from './create-edit-badge-dialog';
 import { BadgeService } from '../../../../../services/badge-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import IBadge from '../../../../../models/interfaces/IBadge.interface';
@@ -20,7 +20,7 @@ const mockBadgeData: IBadge = {
   description: 'An existing description',
   image: 'star',
   permanent: false,
-  expirationDate: new Date('2099-12-31'),
+  duration: 30,
   bonus: 50
 };
 
@@ -64,7 +64,7 @@ describe('CreateEditBadgeDialogComponent', () => {
       badgeServiceSpy.addOrUpdateBadge.and.returnValue(of({} as IBadge));
       component.badgeForm.setValue({
         name: 'New Badge', TLA: 'NEW', summary: 'S', description: 'D', image: 'star',
-        permanent: true, expirationDate: null, bonus: 10, requirements: 'Do the thing'
+        permanent: true, duration: null, bonus: 10, requirements: 'Do the thing'
       });
 
       component.onSave();
@@ -117,34 +117,18 @@ describe('CreateEditBadgeDialogComponent', () => {
         expect(component.badgeForm.get('image')?.value).toBe('new_icon');
     });
 
-    it('should make expirationDate required when permanent is false', () => {
-      const expirationDateControl = component.badgeForm.get('expirationDate');
+    it('should make duration required when permanent is false', () => {
+      const durationControl = component.badgeForm.get('duration');
       component.badgeForm.get('permanent')?.setValue(false);
-      expect(expirationDateControl?.hasValidator(Validators.required)).toBeTrue();
+      expect(durationControl?.hasValidator(Validators.required)).toBeTrue();
     });
 
-    it('should make expirationDate optional when permanent is true', () => {
-      const expirationDateControl = component.badgeForm.get('expirationDate');
-      component.badgeForm.get('permanent')?.setValue(false); // Start as non-permanent
-      component.badgeForm.get('permanent')?.setValue(true); // Toggle to permanent
-      expect(expirationDateControl?.hasValidator(Validators.required)).toBeFalse();
-      expect(expirationDateControl?.value).toBeNull();
-    });
-
-    it('should fail futureDateValidator for a past date', () => {
-        const pastDate = new Date();
-        pastDate.setDate(pastDate.getDate() - 1);
-        const control = component.badgeForm.get('expirationDate');
-        control?.setValue(pastDate);
-        expect(control?.hasError('pastDate')).toBeTrue();
-    });
-
-    it('should pass futureDateValidator for a future date', () => {
-        const futureDate = new Date();
-        futureDate.setDate(futureDate.getDate() + 1);
-        const control = component.badgeForm.get('expirationDate');
-        control?.setValue(futureDate);
-        expect(control?.hasError('pastDate')).toBeFalse();
+    it('should make duration optional when permanent is true', () => {
+      const durationControl = component.badgeForm.get('duration');
+      component.badgeForm.get('permanent')?.setValue(false); 
+      component.badgeForm.get('permanent')?.setValue(true); 
+      expect(durationControl?.hasValidator(Validators.required)).toBeFalse();
+      expect(durationControl?.value).toBeNull();
     });
   });
 });
