@@ -574,10 +574,6 @@ Stores API keys for external clients, allowing secure, programmatic access to th
 | `createdAt` | `Date` | Timestamp of when the key was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
 
-#### Special Logic & Methods
-
-* **Pre-save Middleware:** A `pre('save')` hook automatically hashes the `key` field using `bcryptjs` before any document is saved to the database.
-* **`compareKey` Method:** An instance method is available on `ApiKey` documents to securely compare a plain-text key (from an incoming request) with the stored hash. It returns a `Promise<boolean>`.
 
 ---
 
