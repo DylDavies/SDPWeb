@@ -30,6 +30,7 @@ export class FileService {
    * @param url The pre-signed URL received from the backend.
    * @param file The file to upload.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   uploadFileToSignedUrl(url: string, file: File): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': file.type });
     return this.http.put(url, file, { headers });

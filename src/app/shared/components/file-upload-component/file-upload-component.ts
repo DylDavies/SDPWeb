@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +29,7 @@ export class FileUploadComponent {
   public isUploading = false;
   public uploadProgress = 0;
 
-  constructor(private snackbarService: SnackBarService) {}
+  private snackbarService = inject(SnackBarService);
 
   get acceptFileTypes(): string {
     return this.allowedFileTypes.join(',');
