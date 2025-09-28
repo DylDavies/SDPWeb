@@ -1,0 +1,86 @@
+<div class="missions-table-container">
+
+  <div class="table-toolbar">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Filter Missions by tutor</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Search...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  @if (!isLoading) {
+    @if (dataSource.data.length > 0) {
+      <div class="table-responsive-wrapper">
+        <table mat-table [dataSource]="dataSource" matSort>
+
+          <!-- Tutor Column -->
+          <ng-container matColumnDef="tutor">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tutor </th>
+            <td mat-cell *matCellDef="let mission"> {{ getTutorName(mission) }} </td>
+          </ng-container>
+
+          <!-- Date Created Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
+            <td mat-cell *matCellDef="let mission"> {{ mission.createdAt | date:'mediumDate' }} </td>
+          </ng-container>
+
+          <!-- Remuneration Column -->
+          <ng-container matColumnDef="remuneration">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Remuneration </th>
+            <td mat-cell *matCellDef="let mission"> R{{ mission.remuneration }} </td>
+          </ng-container>
+          
+          <!-- Hours Completed Column -->
+          <ng-container matColumnDef="hoursCompleted">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Hours Completed </th>
+            <td mat-cell *matCellDef="let mission"> {{ mission.hoursCompleted }} </td>
+          </ng-container>
+
+          <!-- Date Completed Column -->
+          <ng-container matColumnDef="dateCompleted">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Deadline </th>
+            <td mat-cell *matCellDef="let mission"> {{ mission.dateCompleted | date:'mediumDate' }} </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let mission">
+              @if (canEditMissions) {
+                <button mat-icon-button color="primary" (click)="editMission(mission)" matTooltip="Edit Mission">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              }
+              @if (canDeleteMissions) {
+                <button mat-icon-button color="warn" (click)="deactivateMission(mission)" matTooltip="Deactivate Mission">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+      
+      <mat-paginator 
+        [pageSizeOptions]="[5, 10, 25]" 
+        showFirstLastButtons
+        [pageSize]="5"
+        aria-label="Select page of missions">
+      </mat-paginator>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>assignment_late</mat-icon>
+        <h2>No Missions Found</h2>
+        <p>This student does not have any missions assigned yet.</p>
+      </div>
+    }
+  } @else {
+    <div class="loading-state">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    </div>
+  }
+</div>

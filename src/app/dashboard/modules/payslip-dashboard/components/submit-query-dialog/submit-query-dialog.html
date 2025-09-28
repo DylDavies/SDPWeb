@@ -1,0 +1,66 @@
+<h1 mat-dialog-title class="dialog-title">
+  <mat-icon class="title-icon" [ngClass]="{ 'edit-icon': isEditMode, 'query-icon': !isEditMode }">
+    {{ isEditMode ? 'edit' : 'help_outline' }}
+  </mat-icon>
+  {{ isEditMode ? 'Edit Query' : 'Submit Query' }}
+</h1>
+<div mat-dialog-content [formGroup]="queryForm">
+
+  <!-- Show selected item info if preselected -->
+  <div *ngIf="selectedItemName" class="selected-item-info">
+    <mat-icon class="info-icon" [ngClass]="{ 'edit-mode': isEditMode }">
+      {{ isEditMode ? 'edit' : 'info' }}
+    </mat-icon>
+    <span>{{ isEditMode ? 'Editing query for:' : 'Querying:' }} <strong>{{ selectedItemName }}</strong></span>
+  </div>
+
+  <p *ngIf="!selectedItemName && !isEditMode">Select the item you want to query and provide details about your concern.</p>
+  <p *ngIf="!selectedItemName && isEditMode">Edit your query details below.</p>
+
+  <mat-form-field appearance="outline" class="full-width" *ngIf="!selectedItemName">
+    <mat-label>Select Item to Query</mat-label>
+    <mat-select formControlName="itemId">
+      <mat-option *ngFor="let item of queryableItems" [value]="item.id">
+        {{ item.viewValue }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="queryForm.get('itemId')?.hasError('required')">
+      Please select an item to query.
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>{{ isEditMode ? 'Update Your Concern' : 'Describe Your Concern' }}</mat-label>
+    <textarea
+      matInput
+      formControlName="note"
+      rows="4"
+      [placeholder]="isEditMode ? 'Update your query details...' : 'e.g., The hours seem incorrect for this entry, or I don\'t recognize this bonus...'"
+      maxlength="500">
+    </textarea>
+    <mat-hint align="end">{{queryForm.get('note')?.value?.length || 0}}/500</mat-hint>
+    <mat-error *ngIf="queryForm.get('note')?.hasError('required')">
+      Please {{ isEditMode ? 'update' : 'describe' }} your concern.
+    </mat-error>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <!-- Show delete and resolve buttons only in edit mode -->
+  <div *ngIf="isEditMode" class="query-actions">
+    <button mat-stroked-button color="warn" class="delete-btn" (click)="onDelete()">
+      <mat-icon>delete</mat-icon>
+      Delete Query
+    </button>
+    <button mat-stroked-button color="accent" (click)="onResolve()">
+      <mat-icon>check_circle</mat-icon>
+      Mark Resolved
+    </button>
+  </div>
+
+  <div class="main-actions">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="queryForm.invalid" (click)="onSubmit()">
+      {{ isEditMode ? 'Update Query' : 'Submit Query' }}
+    </button>
+  </div>
+</div>

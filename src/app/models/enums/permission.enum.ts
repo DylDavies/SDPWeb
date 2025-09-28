@@ -30,6 +30,13 @@ export enum EPermission {
     BUNDLES_DELETE = 'bundles:delete',
     BUNDLES_APPROVE = 'bundles:approve',
 
+    //Missions Management Permissions
+    MISSIONS_CREATE = 'missions:create',
+    MISSIONS_VIEW = 'missions:view',
+    MISSIONS_EDIT = 'missions:edit',
+    MISSIONS_DELETE = 'missions:delete',
+    MISSIONS_APPROVE = 'missions:approve',
+
     EXTRA_WORK_CREATE = 'extra_work:create',
     EXTRA_WORK_VIEW = 'extra_work:view',
     EXTRA_WORK_VIEW_ALL = 'extra_work:view_all',
@@ -48,6 +55,10 @@ export enum EPermission {
 
     NOTIFICATIONS_VIEW = 'notifications:view',
 
+    CAN_MANAGE_PAYSLIPS = 'payslips:manage',
+    CAN_VIEW_OWN_PAYSLIP = 'payslips:view_own',
+    CAN_MANAGE_PREAPPROVED_ITEMS = 'payslips:preapproved_items_manage',
+    CAN_ADJUST_RATES = 'payslips:rate_adjustment',
 
     // Remark Management Permissions
     REMARKS_MANAGE = 'remarks:manage'

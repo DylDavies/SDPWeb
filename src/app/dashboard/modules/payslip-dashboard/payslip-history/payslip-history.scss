@@ -1,0 +1,127 @@
+:host {
+    display: block;
+}
+
+.table-container {
+    overflow: auto;
+}
+
+.generate-payslip-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: var(--mat-sys-surface-container-lowest);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 8px;
+
+    .generate-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        mat-icon {
+            flex-shrink: 0;
+        }
+
+        span {
+            flex: 1;
+            color: var(--mat-sys-on-surface);
+            font-size: 14px;
+        }
+
+        .generate-btn {
+            flex-shrink: 0;
+
+            mat-icon {
+                margin-right: 8px;
+            }
+        }
+    }
+}
+
+.current-rate-section {
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    background-color: var(--mat-sys-primary-container);
+    border-radius: 8px;
+    border: 1px solid var(--mat-sys-primary);
+
+    .rate-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        mat-icon {
+            flex-shrink: 0;
+        }
+
+        .rate-label {
+            color: var(--mat-sys-on-primary-container);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .rate-value {
+            color: var(--mat-sys-primary);
+            font-size: 18px;
+            font-weight: bold;
+        }
+    }
+}
+
+.loading-spinner, .no-records {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: var(--mat-disabled-text-color);
+}
+
+table {
+    width: 100%;
+}
+
+.mat-mdc-cell, .mat-mdc-header-cell {
+    padding: 8px;
+}
+
+// Adjust column widths if needed
+.mat-column-actions {
+    width: 80px;
+    text-align: right;
+}
+
+.mat-column-status {
+    width: 150px;
+
+    .status-chip {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 0.9em;
+        font-weight: 500;
+        color: #fff;
+        margin-right: 8px;
+
+        &.Draft { background-color: var(--mat-warn-color, #757575); }
+        &.Query { background-color: #f57c00; }
+        &.QueryHandled { background-color: var(--mat-primary-color, #1976d2); }
+        &.StaffApproved { background-color: var(--mat-accent-color, #388e3c); }
+        &.Locked { background-color: #d32f2f; }
+        &.Paid { background-color: #673ab7; }
+    }
+
+    .query-indicator {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: var(--mat-sys-error);
+        animation: pulse 2s infinite;
+        vertical-align: middle;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { opacity: 1; }
+    }
+}

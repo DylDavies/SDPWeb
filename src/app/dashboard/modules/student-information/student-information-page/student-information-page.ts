@@ -10,11 +10,18 @@ import { MatListModule } from '@angular/material/list';
 import { BundleService } from '../../../../services/bundle-service';
 import { IBundle, IPopulatedUser } from '../../../../models/interfaces/IBundle.interface';
 import { MatTabsModule } from "@angular/material/tabs";
+import { MissionsModal } from '../components/missions-modal/missions-modal';
+import { MissionsTable } from '../components/missions-table/missions-table';
+import { MatDialog } from '@angular/material/dialog';
+import { IUser } from '../../../../models/interfaces/IUser.interface';
+import { EPermission } from '../../../../models/enums/permission.enum';
+import { AuthService } from '../../../../services/auth-service';
 
 @Component({
   selector: 'app-student-information-page',
+  standalone: true,
   imports: [CommonModule, DatePipe, TitleCasePipe, MatCardModule, MatProgressSpinnerModule,
-    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule],
+    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsTable],
   templateUrl: './student-information-page.html',
   styleUrl: './student-information-page.scss'
 })
@@ -22,23 +29,33 @@ export class StudentInformationPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private bundleService = inject(BundleService);
-
+  private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
   public bundle: IBundle | null = null;
+  public tutors: IPopulatedUser[] = [];
   public isLoading = true;
   public bundleNotFound = false;
+  public bundleId: string | null = null;
+  public canCreateMissions = false;
 
   ngOnInit(): void {
+    
     const bundleId = this.route.snapshot.paramMap.get('id');
+    this.canCreateMissions = this.authService.hasPermission(EPermission.MISSIONS_CREATE);
+
     if (!bundleId) {
       this.bundleNotFound = true;
       this.isLoading = false;
       return;
+    }else{
+      this.bundleId = bundleId;
     }
 
     this.bundleService.getBundleById(bundleId).subscribe({
       next: (bundle) => {
         if (bundle) {
           this.bundle = bundle;
+          this.getTutorsFromBundle();
         } else {
           this.bundleNotFound = true;
         }
@@ -51,6 +68,37 @@ export class StudentInformationPage implements OnInit {
     });
   }
 
+  getTutorsFromBundle(): void {
+    if (!this.bundle) return;
+    const tutorMap = new Map<string, IPopulatedUser>();
+    this.bundle.subjects.forEach(subject => {
+        if (typeof subject.tutor === 'object' && subject.tutor._id) {
+            tutorMap.set(subject.tutor._id, subject.tutor);
+        }
+    });
+    this.tutors = Array.from(tutorMap.values());
+  }
+
+  openCreateDialog(): void {
+    if (this.bundle?.student && typeof this.bundle.student === 'object' && this.bundleId) {
+      const dialogRef = this.dialog.open(MissionsModal, {
+        width: '500px',
+        panelClass: 'missions-dialog-container',
+        data: {
+          student: this.bundle.student as IUser,
+          bundleId: this.bundleId 
+        }
+      });  
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+            const currentId = this.bundleId;
+            this.bundleId = null;
+            setTimeout(() => this.bundleId = currentId, 0);
+        }
+      });
+    }
+  }
+
   goBack(): void {
     this.router.navigate(['/dashboard/students']);
   }
@@ -58,7 +106,6 @@ export class StudentInformationPage implements OnInit {
     if (typeof user === 'object' && user.displayName) {
       return user.displayName;
     }
-    // You can decide what to show if it's just a string ID, e.g., the ID itself or a placeholder.
     return 'N/A';
   }
 

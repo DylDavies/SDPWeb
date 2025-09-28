@@ -12,7 +12,10 @@ const firstLoginUser: IUser = {
   _id: '1', displayName: 'New User', email: 'new@test.com',
   firstLogin: true,
   pending: false, disabled: false, type: EUserType.Staff, roles: [], permissions: [],
-  picture: '', createdAt: new Date(), googleId: '', theme: 'system', leave: []
+  picture: '', createdAt: new Date(), googleId: '', theme: 'system', leave: [],
+  paymentType: 'Contract' as const,
+  monthlyMinimum: 0,
+  rateAdjustments: []
 };
 
 const existingUser: IUser = { ...firstLoginUser, firstLogin: false };
