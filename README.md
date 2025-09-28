@@ -446,22 +446,22 @@ This plan outlines an iterative approach to development. Each sprint builds upon
 
 The following MongoDB collections will form the core of our database. Relationships will be managed via object IDs.
 
-- **Users:** Stores user credentials, roles, leave, personal info.
-- **Roles:** Defines permission sets (e.g., Admin, Tutor).
-- **Permissions:** Granular permissions linked to specific API features.
-- **Events:** Contains details of tutoring sessions, including ratings and remarks.
-- **Subjects:** A collection of available subjects and syllabi.
-- **Bundles:** Links students to tutors and tracks remaining lessons.
-- **Payslips:** Stores generated payslip data for tutors.
-- **(Additional entities:** Badges, Debriefs, Missions, etc., will be added in later sprints).
-
-The database consists of the following 5 primary collections as of right now:
+The database consists of the following 14 primary collections as of right now:
 
 1.  [**Users**](#1-users-collection): Stores all user account information.
 2.  [**Roles**](#2-roles-collection): Defines the role-based access control (RBAC) hierarchy.
 3.  [**Proficiencies**](#3-proficiencies-collection): Contains the master list of all teaching syllabi and subjects.
 4.  [**Bundles**](#4-bundles-collection): Manages student lesson bundles, linking students to tutors.
 5.  [**ApiKeys**](#5-apikeys-collection): Stores hashed API keys for external system access.
+6.  [**Badges**](#6-badges-collection): Stores information about badges that can be awarded to users.
+7.  [**BadgeRequirements**](#7-badgerequirements-collection): Stores the requirements for earning each badge.
+8.  [**Events**](#8-events-collection): Contains details of tutoring sessions, including ratings and remarks.
+9.  [**ExtraWork**](#9-extrawork-collection): Manages requests for extra work and their approval status.
+10. [**Missions**](#10-missions-collection): Manages missions assigned to users.
+11. [**Notifications**](#11-notifications-collection): Stores notifications for users.
+12. [**Remarks**](#12-remarks-collection): Stores remarks made on events.
+13. [**RemarkTemplates**](#13-remarktemplates-collection): Stores templates for remarks.
+14. [**SidebarItems**](#14-sidebaritems-collection): Defines the structure of the sidebar navigation.
 
 ---
 
@@ -572,6 +572,184 @@ Stores API keys for external clients, allowing secure, programmatic access to th
 | `createdAt` | `Date` | Timestamp of when the key was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
 
+#### Special Logic & Methods
+
+* **Pre-save Middleware:** A `pre('save')` hook automatically hashes the `key` field using `bcryptjs` before any document is saved to the database.
+* **`compareKey` Method:** An instance method is available on `ApiKey` documents to securely compare a plain-text key (from an incoming request) with the stored hash. It returns a `Promise<boolean>`.
+
+---
+
+## 6. `badges` Collection
+
+Stores information about badges that can be awarded to users.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the badge document. | Automatically generated. |
+| `name` | `String` | The unique name of the badge. | **Required**, **Unique** |
+| `image` | `String` | The URL to the badge's image. | **Required** |
+| `TLA` | `String` | A three-letter acronym for the badge. | **Required** |
+| `summary` | `String` | A short summary of the badge. | **Required** |
+| `description`| `String` | A detailed description of the badge. | **Required** |
+| `permanent` | `Boolean` | A flag to determine if the badge is permanent. | **Required**, `Default: false` |
+| `expirationDate` | `Date` | The date the badge expires. | Optional |
+| `bonus` | `Number` | A bonus value associated with the badge. | **Required**, `Default: 0` |
+| `createdAt` | `Date` | Timestamp of when the badge was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+---
+
+## 7. `badgerequirements` Collection
+
+Stores the requirements for earning each badge.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the badge requirement document. | Automatically generated. |
+| `badgeId` | `ObjectId` | A reference to the badge document. | **Required**, **Unique**, `ref: 'Badges'` |
+| `requirements`| `String` | The requirements for the badge. | **Required**, `Default: 'No requirements specified for this badge yet.'` |
+| `createdAt` | `Date` | Timestamp of when the badge requirement was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+---
+
+## 8. `events` Collection
+
+Contains details of tutoring sessions, including ratings and remarks.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the event document. | Automatically generated. |
+| `bundle` | `ObjectId` | A reference to the bundle document. | **Required**, `ref: 'Bundle'` |
+| `student` | `ObjectId` | A reference to the student user document. | **Required**, `ref: 'User'` |
+| `tutor` | `ObjectId` | A reference to the tutor user document. | **Required**, `ref: 'User'` |
+| `subject` | `String` | The subject of the event. | **Required** |
+| `startTime` | `Date` | The start time of the event. | **Required** |
+| `duration` | `Number` | The duration of the event in minutes. | **Required** |
+| `remarked` | `Boolean` | A flag to determine if the event has been remarked. | `Default: false` |
+| `remark` | `ObjectId` | A reference to the remark document. | `ref: 'Remark'` |
+| `rating` | `Number` | The student's rating out of 5. | Optional |
+| `createdAt` | `Date` | Timestamp of when the event was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+---
+
+## 9. `extrawork` Collection
+
+Manages requests for extra work and their approval status.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the extra work document. | Automatically generated. |
+| `userId` | `ObjectId` | A reference to the user document. | **Required**, `ref: 'User'` |
+| `studentId` | `ObjectId` | A reference to the student user document. | **Required**, `ref: 'User'` |
+| `commissionerId` | `ObjectId` | A reference to the commissioner user document. | **Required**, `ref: 'User'` |
+| `workType` | `String` | The type of work. | **Required** |
+| `details` | `String` | The details of the work. | **Required**, `maxlength: 500` |
+| `remuneration`| `Number` | The remuneration for the work. | **Required**, `min: 0`, `max: 10000` |
+| `dateCompleted`| `Date` | The date the work was completed. | `Default: null` |
+| `status` | `String` | The current status of the extra work. | Enum: `EExtraWorkStatus: [In Progress, Completed, Approved, Denied]`, `Default: 'In Progress'` |
+| `createdAt` | `Date` | Timestamp of when the extra work was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+---
+
+## 10. `missions` Collection
+
+Manages missions assigned to users.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the mission document. | Automatically generated. |
+| `bundleId` | `ObjectId` | A reference to the bundle document. | **Required**, `ref: 'Bundle'` |
+| `documentPath` | `String` | The path to the mission document. | **Required** |
+| `documentName` | `String` | The name of the mission document. | **Required** |
+| `student` | `ObjectId` | A reference to the student user document. | **Required**, `ref: 'User'` |
+| `tutor` | `ObjectId` | A reference to the tutor user document. | **Required**, `ref: 'User'` |
+| `remuneration`| `Number` | The remuneration for the mission. | **Required**, `min: 0` |
+| `commissionedBy`| `ObjectId` | A reference to the commissioning user document. | **Required**, `ref: 'User'` |
+| `hoursCompleted`| `Number` | The number of hours completed for the mission. | `Default: 0` |
+| `dateCompleted`| `Date` | The date the mission was completed. | **Required** |
+| `status` | `String` | The current status of the mission. | Enum: `EMissionStatus: [active, inactive, completed, achieved, failed]`, `Default: 'active'` |
+| `createdAt` | `Date` | Timestamp of when the mission was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+---
+
+## 11. `notifications` Collection
+
+Stores notifications for users.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the notification document. | Automatically generated. |
+| `recipientId`| `ObjectId` | A reference to the recipient user document. | **Required**, `ref: 'User'` |
+| `title` | `String` | The title of the notification. | **Required** |
+| `message` | `String` | The message of the notification. | **Required** |
+| `read` | `Boolean` | A flag to determine if the notification has been read. | `Default: false` |
+| `deletedAt` | `Date` | The date the notification was deleted. | `Default: null` |
+| `createdAt` | `Date` | Timestamp of when the notification was created. | `timestamps: true` |
+
+---
+
+## 12. `remarks` Collection
+
+Stores remarks made on events.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the remark document. | Automatically generated. |
+| `event` | `ObjectId` | A reference to the event document. | **Required**, `ref: 'Event'` |
+| `template` | `ObjectId` | A reference to the remark template document. | **Required**, `ref: 'RemarkTemplate'` |
+| `remarkedAt`| `Date` | The date the remark was made. | `Default: Date.now` |
+| `entries` | `Array` | An array of embedded remark entry documents. | See **Remark Entry Sub-schema** below. |
+| `createdAt` | `Date` | Timestamp of when the remark was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+#### Remark Entry Sub-schema (Embedded in `remarks`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `field` | `String` | The field of the remark entry. | **Required** |
+| `value` | `Mixed` | The value of the remark entry. | **Required** |
+
+---
+
+## 13. `remarktemplates` Collection
+
+Stores templates for remarks.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the remark template document. | Automatically generated. |
+| `name` | `String` | The name of the remark template. | **Required** |
+| `fields` | `Array` | An array of embedded remark field documents. | See **Remark Field Sub-schema** below. |
+| `isActive` | `Boolean` | A flag to determine if the remark template is active. | `Default: true` |
+| `createdAt` | `Date` | Timestamp of when the remark template was created. | `timestamps: true` |
+| `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+#### Remark Field Sub-schema (Embedded in `remarktemplates`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `name` | `String` | The name of the remark field. | **Required** |
+| `type` | `String` | The type of the remark field. | **Required**, Enum: `['string', 'boolean', 'number', 'time']` |
+
+---
+
+## 14. `sidebaritems` Collection
+
+Defines the structure of the sidebar navigation.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the sidebar item document. | Automatically generated. |
+| `label` | `String` | The label of the sidebar item. | **Required** |
+| `icon` | `String` | The icon of the sidebar item. | **Required** |
+| `route` | `String` | The route of the sidebar item. | Optional |
+| `requiredPermissions`| `Array<String>` | An array of permission strings required to view the sidebar item. | `Default: []` |
+| `order` | `Number` | The order of the sidebar item. | **Required**, `Default: 0` |
+| `children` | `Array` | An array of embedded sidebar item documents. | Optional |
 #### Special Logic & Methods
 
 * **Pre-save Middleware:** A `pre('save')` hook automatically hashes the `key` field using `bcryptjs` before any document is saved to the database.
