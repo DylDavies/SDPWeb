@@ -23,5 +23,7 @@ export const AVAILABLE_SIDEBAR_LINKS: ISidebarLinkDefinition[] = [
     ] 
   },
   { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW], stopRemove: true },
+  { label: 'Payslips', icon: 'receipt_long', route: '/dashboard/payslips', requiredPermissions: [EPermission.CAN_VIEW_OWN_PAYSLIP] },
+  { label: 'Rate Management', icon: 'price_change', route: '/dashboard/rates', requiredPermissions: [EPermission.CAN_ADJUST_RATES] },
   { label: 'Extra Work', icon: 'work', route: '/dashboard/extrawork', requiredPermissions: [EPermission.EXTRA_WORK_VIEW] },
 ];

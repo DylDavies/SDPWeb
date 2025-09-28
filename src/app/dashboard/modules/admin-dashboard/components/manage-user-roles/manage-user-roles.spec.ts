@@ -25,7 +25,10 @@ const mockTargetUser: IUser = {
     pending: false,
     disabled: false,
     theme: 'light',
-    leave: []
+    leave: [],
+    paymentType: 'Contract' as const,
+    monthlyMinimum: 0,
+    rateAdjustments: []
 };
 const mockCurrentUser: IUser = {
     _id: 'admin456',
@@ -40,7 +43,10 @@ const mockCurrentUser: IUser = {
     pending: false,
     disabled: false,
     theme: 'light',
-    leave: []
+    leave: [],
+    paymentType: 'Contract' as const,
+    monthlyMinimum: 0,
+    rateAdjustments: []
 };
 
 const mockRoleTree: RoleNode = {

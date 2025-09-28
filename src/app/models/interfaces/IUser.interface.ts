@@ -6,6 +6,13 @@ import IBadge from "./IBadge.interface";
 import { ILeave } from "./ILeave.interface";
 import { IProficiency } from "./IProficiency.interface";
 
+export interface IRateAdjustment {
+    reason: string;
+    newRate: number;
+    effectiveDate: Date;
+    approvingManagerId: string;
+}
+
 export interface IUser {
     _id: string;
     googleId: string;
@@ -24,4 +31,7 @@ export interface IUser {
     proficiencies?: IProficiency[],
     availability?: number,
     badges?: IBadge[],
+    paymentType: 'Contract' | 'Salaried';
+    monthlyMinimum: number;
+    rateAdjustments: IRateAdjustment[];
 }

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth-service';
+import { SnackBarService } from '../services/snackbar-service';
 import { permissionGuard } from './permission-guard';
 import { EPermission } from '../models/enums/permission.enum';
 
@@ -12,6 +13,10 @@ const mockAuthService = {
 
 const mockRouter = {
   createUrlTree: (commands: any[]) => new UrlTree()
+};
+
+const mockSnackBarService = {
+  showError: (message: string) => {}
 };
 
 describe('permissionGuard', () => {
@@ -26,7 +31,8 @@ describe('permissionGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: mockAuthService },
-        { provide: Router, useValue: mockRouter }
+        { provide: Router, useValue: mockRouter },
+        { provide: SnackBarService, useValue: mockSnackBarService }
       ]
     });
   });
@@ -47,6 +53,7 @@ describe('permissionGuard', () => {
       // Arrange: User has no permissions
       spyOn(mockAuthService, 'hasPermission').and.returnValue(false);
       spyOn(mockRouter, 'createUrlTree').and.callThrough();
+      spyOn(mockSnackBarService, 'showError');
 
       // Act
       const result = executeGuard([EPermission.USERS_VIEW, EPermission.ROLES_CREATE]);
@@ -54,6 +61,7 @@ describe('permissionGuard', () => {
       // Assert
       expect(result).toBeInstanceOf(UrlTree);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/dashboard']);
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith("You do not have the required permissions to access that page.");
     });
   });
 
@@ -73,6 +81,7 @@ describe('permissionGuard', () => {
       // Arrange: User has only one of the two required permissions
       spyOn(mockAuthService, 'hasPermission').and.callFake((p: EPermission) => p === EPermission.USERS_VIEW);
       spyOn(mockRouter, 'createUrlTree').and.callThrough();
+      spyOn(mockSnackBarService, 'showError');
 
       // Act
       const result = executeGuard([EPermission.USERS_VIEW, EPermission.ROLES_CREATE], true);
@@ -80,12 +89,14 @@ describe('permissionGuard', () => {
       // Assert
       expect(result).toBeInstanceOf(UrlTree);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/dashboard']);
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith("You do not have the required permissions to access that page.");
     });
 
     it('should deny activation if the user has none of the required permissions', () => {
       // Arrange: User has no permissions
       spyOn(mockAuthService, 'hasPermission').and.returnValue(false);
       spyOn(mockRouter, 'createUrlTree').and.callThrough();
+      spyOn(mockSnackBarService, 'showError');
 
       // Act
       const result = executeGuard([EPermission.USERS_VIEW, EPermission.ROLES_CREATE], true);
@@ -93,6 +104,7 @@ describe('permissionGuard', () => {
       // Assert
       expect(result).toBeInstanceOf(UrlTree);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/dashboard']);
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith("You do not have the required permissions to access that page.");
     });
   });
 });

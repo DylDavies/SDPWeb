@@ -1,0 +1,130 @@
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+:host {
+  .full-width {
+    width: 100% !important;
+  }
+}
+
+// Dialog title styling
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mat-sys-on-surface);
+  margin: 0;
+  padding: 0;
+
+  .title-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.edit-icon {
+      color: var(--mat-sys-primary);
+    }
+
+    &.query-icon {
+      color: var(--mat-sys-secondary);
+    }
+  }
+}
+
+.selected-item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+
+  .info-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--mat-sys-primary);
+
+    &.edit-mode {
+      color: var(--mat-sys-secondary);
+    }
+  }
+
+  span {
+    font-size: 14px;
+    color: var(--mat-sys-on-surface-variant);
+
+    strong {
+      color: var(--mat-sys-on-surface);
+      font-weight: 500;
+    }
+  }
+}
+
+// Dialog content styling
+mat-dialog-content {
+  min-width: 500px;
+  max-width: 600px;
+  padding: 20px 24px;
+
+  p {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+  }
+}
+
+.mat-mdc-dialog-actions {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .query-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    button {
+      min-width: 120px;
+      font-size: 14px;
+      margin-bottom: 8px;
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      &[color="warn"] mat-icon {
+        color: var(--mat-sys-error);
+      }
+
+      &[color="accent"] mat-icon {
+        color: var(--mat-sys-tertiary);
+      }
+    }
+  }
+
+  .main-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+
+    button {
+      min-width: 100px;
+    }
+  }
+}

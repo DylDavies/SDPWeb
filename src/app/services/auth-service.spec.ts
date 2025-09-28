@@ -25,7 +25,10 @@ const mockUser: IUser = {
   disabled: false,
   theme: 'system',
   leave: [],
-  proficiencies: []
+  proficiencies: [],
+  paymentType: 'Contract' as const,
+  monthlyMinimum: 0,
+  rateAdjustments: []
 };
 
 const MOCK_TOKEN = 'mock-jwt-token';

@@ -32,7 +32,10 @@ describe('StudentsTable', () => {
     pending: false,
     disabled: false,
     theme: 'system',
-    leave: []
+    leave: [],
+    paymentType: 'Contract' as const,
+    monthlyMinimum: 0,
+    rateAdjustments: []
   };
 
   const mockStaffUser: IUser = {
@@ -48,7 +51,10 @@ describe('StudentsTable', () => {
     pending: false,
     disabled: false,
     theme: 'system',
-    leave: []
+    leave: [],
+    paymentType: 'Contract' as const,
+    monthlyMinimum: 0,
+    rateAdjustments: []
   };
 
   const mockBundles: IBundle[] = [
