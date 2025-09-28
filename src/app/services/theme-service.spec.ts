@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RendererFactory2 } from '@angular/core';
-import { Subject, of } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { ThemeService, Theme } from './theme-service';
 import { AuthService } from './auth-service';
 import { UserService } from './user-service';
@@ -112,4 +112,25 @@ describe('ThemeService', () => {
       expect(service.theme()).toBe('dark');
     }));
   });
+
+  describe('Error Handling', () => {
+    beforeEach(() => {
+      spyOn(localStorage, 'getItem').and.returnValue(null);
+      spyOn(localStorage, 'setItem').and.stub();
+      configureTestingModule();
+      service = TestBed.inject(ThemeService);
+    });
+
+    it('should handle error when updating user preferences fails', () => {
+      spyOn(console, 'error');
+      spyOn(mockUserService, 'updateUserPreferences').and.returnValue(
+        throwError(() => new Error('API Error'))
+      );
+
+      service.setTheme('dark');
+
+      expect(console.error).toHaveBeenCalledWith('Failed to save theme preference:', jasmine.any(Error));
+    });
+  });
+
 });

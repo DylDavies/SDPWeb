@@ -439,4 +439,156 @@ describe('PayslipViewer', () => {
       expect(event.preventDefault).not.toHaveBeenCalled();
     });
   });
+
+  describe('Query Management', () => {
+    it('should return false when checking for queries without payslip data', () => {
+      component['payslipDataSubject'].next(null);
+
+      const hasQuery = component.hasQuery('Test Description', 'bonus');
+
+      expect(hasQuery).toBe(false);
+    });
+
+    it('should return false when checking for queries with no notes', () => {
+      const payslipWithoutNotes = { ...mockPayslip, notes: [] };
+      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes });
+
+      const hasQuery = component.hasQuery('Test Description', 'bonus');
+
+      expect(hasQuery).toBe(false);
+    });
+
+    it('should find existing query by description', () => {
+      const payslipWithNotes = {
+        ...mockPayslip,
+        notes: [{ itemId: 'Test Description', note: 'Query content', resolved: false }]
+      };
+      component['payslipDataSubject'].next({ payslip: payslipWithNotes });
+
+      const hasQuery = component.hasQuery('Test Description', 'bonus');
+
+      expect(hasQuery).toBe(true);
+    });
+
+    it('should get query details when query exists', () => {
+      const note = { itemId: 'Test Description', note: 'Query content', resolved: false };
+      const payslipWithNotes = { ...mockPayslip, notes: [note] };
+      component['payslipDataSubject'].next({ payslip: payslipWithNotes });
+
+      const queryDetails = component.getQueryDetails('Test Description', 'bonus');
+
+      expect(queryDetails).toEqual(note);
+    });
+
+    it('should return undefined when query does not exist', () => {
+      const payslipWithNotes = { ...mockPayslip, notes: [] };
+      component['payslipDataSubject'].next({ payslip: payslipWithNotes });
+
+      const queryDetails = component.getQueryDetails('Non-existent', 'bonus');
+
+      expect(queryDetails).toBeUndefined();
+    });
+  });
+
+  describe('User Information Methods', () => {
+    it('should return current user name', () => {
+      const userName = component.getCurrentUserName();
+
+      expect(userName).toBe('Test User');
+    });
+
+    it('should return current user email', () => {
+      const userEmail = component.getCurrentUserEmail();
+
+      expect(userEmail).toBe('test@example.com');
+    });
+
+    it('should return false for non-admin user', () => {
+      const isAdmin = component.isCurrentUserAdmin();
+
+      expect(isAdmin).toBe(false);
+    });
+
+    it('should return true for admin user', () => {
+      const adminUser = { ...mockUser, type: EUserType.Admin };
+
+      // Spy on the private getCurrentUser method
+      spyOn(component as any, 'getCurrentUser').and.returnValue(adminUser);
+
+      const isAdmin = component.isCurrentUserAdmin();
+
+      expect(isAdmin).toBe(true);
+    });
+  });
+
+  describe('Dialog Methods', () => {
+    it('should not open query dialog when no payslip data', () => {
+      component['payslipDataSubject'].next(null);
+
+      component.openQueryDialog(null, 'general');
+
+      expect(mockDialog.open).not.toHaveBeenCalled();
+    });
+
+    it('should open query dialog with correct data', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      const mockDialogRef = { afterClosed: () => of(true) };
+      mockDialog.open.and.returnValue(mockDialogRef as any);
+
+      component.openQueryDialog(null, 'general');
+
+      expect(mockDialog.open).toHaveBeenCalledWith(jasmine.any(Function), {
+        width: '600px',
+        data: {
+          payslip: mockPayslip,
+          selectedItem: null,
+          itemType: 'general',
+          itemIndex: undefined,
+          existingQuery: undefined
+        }
+      });
+    });
+  });
+
+  describe('Calculation Methods', () => {
+    it('should calculate earning total correctly', () => {
+      const total = component.calculateEarningTotal(10, 50);
+
+      expect(total).toBe(500);
+    });
+
+    it('should calculate gross earnings from earnings array', () => {
+      const earnings = [
+        { description: 'Test', baseRate: 50, hours: 10, rate: 50, total: 500, date: '2024-01-01' },
+        { description: 'Test2', baseRate: 30, hours: 5, rate: 30, total: 150, date: '2024-01-02' }
+      ];
+
+      const gross = component.calculateGrossEarnings(earnings);
+
+      expect(gross).toBe(650);
+    });
+
+    it('should calculate total bonuses', () => {
+      const bonuses = [
+        { description: 'Bonus 1', amount: 100 },
+        { description: 'Bonus 2', amount: 200 }
+      ];
+
+      const total = component.getTotalBonuses(bonuses);
+
+      expect(total).toBe(300);
+    });
+
+    it('should calculate total misc earnings', () => {
+      const miscEarnings = [
+        { amount: 50 },
+        { amount: 75 }
+      ];
+
+      const total = component.getTotalMiscEarnings(miscEarnings);
+
+      expect(total).toBe(125);
+    });
+  });
+
 });
