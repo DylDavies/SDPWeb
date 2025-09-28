@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import IBadge from '../models/interfaces/IBadge.interface';
 import { IBadgeRequirement } from '../models/interfaces/IBadgeRequirement.interface';
@@ -42,6 +42,17 @@ export class BadgeService {
     return this.httpService.get<IBadge[]>('badges').pipe(
       tap(badges => this.badges$.next(badges))
     );
+  }
+
+    /**
+   * Fetches a specific list of badges from the backend by their IDs.
+   * @param ids - An array of badge ID strings.
+   * @returns An Observable array of the requested badges.
+   */
+  getBadgesByIds(ids: string[]): Observable<IBadge[]> {
+    if(!ids || ids.length === 0) return of([]);
+
+    return this.httpService.post<IBadge[]>('badges/by-ids', { ids });
   }
 
     /**
