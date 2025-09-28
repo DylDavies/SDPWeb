@@ -53,12 +53,14 @@
                   <div class="list-wrapper">
                     <h2>Tutors</h2>
                     <mat-list>
-                        @for (tutor of tutors; track tutor._id) {
+                      @for (tutor of tutors; track tutor._id || $index) {
                         <mat-list-item>
-                            <mat-icon matListItemIcon>supervisor_account</mat-icon>
-                            <div matListItemTitle>{{ tutor.displayName }}</div>
+                          <mat-icon matListItemIcon>supervisor_account</mat-icon>
+                          <div matListItemTitle>{{ tutor.displayName || 'Unknown Tutor' }}</div>
                         </mat-list-item>
-                        }
+                      } @empty {
+                        <mat-list-item>No tutors assigned</mat-list-item>
+                      }
                     </mat-list>
                   </div>
                 </div>
