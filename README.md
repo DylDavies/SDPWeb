@@ -462,6 +462,8 @@ The database consists of the following 14 primary collections as of right now:
 12. [**Remarks**](#12-remarks-collection): Stores remarks made on events.
 13. [**RemarkTemplates**](#13-remarktemplates-collection): Stores templates for remarks.
 14. [**SidebarItems**](#14-sidebaritems-collection): Defines the structure of the sidebar navigation.
+15. [**Payslips**](#15-payslips-collection): Stores generated payslip data for tutors.
+16. [**PreapprovedItems**](#16-preapproveditems-collection): Stores pre-approved items for payslips.
 
 ---
 
@@ -754,6 +756,103 @@ Defines the structure of the sidebar navigation.
 
 * **Pre-save Middleware:** A `pre('save')` hook automatically hashes the `key` field using `bcryptjs` before any document is saved to the database.
 * **`compareKey` Method:** An instance method is available on `ApiKey` documents to securely compare a plain-text key (from an incoming request) with the stored hash. It returns a `Promise<boolean>`.
+
+## 15. `payslips` Collection
+
+Stores generated payslip data, including detailed breakdowns of earnings, bonuses, deductions, and historical changes.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the payslip document. | Automatically generated. |
+| `userId` | `String` | Reference to the user this payslip belongs to. | **Required** |
+| `payPeriod` | `String` | The pay period in 'YYYY-MM' format. | **Required** |
+| `status` | `String` | The current status of the payslip. | Enum: `EPayslipStatus`, `Default: 'Draft'` |
+| `earnings` | `Array` | An array of embedded documents for earnings from lessons. | See **Earning Sub-schema**. |
+| `miscEarnings`| `Array` | An array of embedded documents for miscellaneous earnings. | See **Misc Earning Sub-schema**. |
+| `bonuses`| `Array` | An array of embedded documents for bonuses. | See **Bonus Sub-schema**. |
+| `deductions`| `Array` | An array of embedded documents for deductions. | See **Deduction Sub-schema**. |
+| `grossEarnings`| `Number` | The total earnings before any deductions. | **Required** |
+| `totalDeductions`| `Number` | The sum of all deductions. | **Required** |
+| `netPay` | `Number` | The final take-home pay after all deductions. | **Required** |
+| `uif` | `Number` | Unemployment Insurance Fund contribution. | **Required** |
+| `paye` | `Number` | Pay As You Earn tax contribution. | **Required** |
+| `notes` | `Array` | An array of embedded query notes related to the payslip. | See **Note Sub-schema**. |
+| `history` | `Array` | An array of embedded history logs tracking status changes. | See **History Sub-schema**. |
+
+---
+
+#### Earning Sub-schema (Embedded in `payslips`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `description` | `String` | Description of the teaching session. | N/A |
+| `baseRate` | `Number` | The base rate for the session. | N/A |
+| `hours` | `Number` | The number of hours taught. | N/A |
+| `rate` | `Number` | The hourly rate applied. | N/A |
+| `total` | `Number` | The total amount for this earning entry. | N/A |
+| `date` | `String` | The date of the session. | N/A |
+
+---
+
+#### Misc Earning Sub-schema (Embedded in `payslips`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `description` | `String` | Description of the miscellaneous earning. | N/A |
+| `amount` | `Number` | The amount of the earning. | N/A |
+
+---
+
+#### Bonus Sub-schema (Embedded in `payslips`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `description` | `String` | Description of the bonus. | N/A |
+| `amount` | `Number` | The amount of the bonus. | N/A |
+
+---
+
+#### Deduction Sub-schema (Embedded in `payslips`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `description` | `String` | Description of the deduction. | N/A |
+| `amount` | `Number` | The amount of the deduction. | N/A |
+
+---
+
+#### Note Sub-schema (Embedded in `payslips`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `String` | Unique identifier for the note. | Optional |
+| `itemId` | `String` | The ID of the item being queried. | **Required** |
+| `note` | `String` | The content of the query note. | **Required** |
+| `resolved` | `Boolean` | Whether the query has been resolved. | **Required** |
+
+---
+
+#### History Sub-schema (Embedded in `payslips`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `status` | `String` | The status that was set. | **Required** |
+| `timestamp` | `Date` | The timestamp of the status change. | **Required** |
+| `updatedBy` | `String` | The ID of the user who made the change. | **Required** |
+
+---
+
+## 16. `preapproveditems` Collection
+
+Stores a list of pre-approved bonus or deduction items that can be quickly added to a payslip.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the pre-approved item. | Automatically generated. |
+| `itemName` | `String` | The name of the item (e.g., "Performance Bonus"). | **Required** |
+| `itemType` | `String` | The type of item. | Enum: `EItemType ['Earning', 'Deduction']` |
+| `defaultAmount`| `Number` | The default monetary value of the item. | **Required** |
+| `isAdminOnly`| `Boolean` | If true, only an admin can add this item to a payslip. | **Required** |
 
 ---
 
