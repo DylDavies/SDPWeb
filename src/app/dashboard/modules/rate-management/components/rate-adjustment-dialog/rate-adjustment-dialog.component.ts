@@ -53,7 +53,7 @@ export class RateAdjustmentDialogComponent {
 
     return this.fb.group({
       reason: ['', [Validators.required, Validators.minLength(5)]],
-      newRate: [currentRate, [Validators.required, Validators.min(0.01)]]
+      newRate: [currentRate, [Validators.required, Validators.min(0.01), Validators.max(1000.01)]]
     });
   }
 

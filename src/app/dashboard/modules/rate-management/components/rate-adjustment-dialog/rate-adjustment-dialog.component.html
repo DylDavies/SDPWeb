@@ -46,6 +46,7 @@
                step="0.01"
                min="0.01"
                placeholder="0.00"
+               max="1000.00"
                (keydown)="onRateKeydown($event)"
                (input)="onRateInput($event)">
         <span matSuffix class="rate-suffix">/hr</span>
@@ -54,7 +55,10 @@
           New rate is required
         </mat-error>
         <mat-error *ngIf="rateAdjustmentForm.get('newRate')?.hasError('min')">
-          Rate must be greater than 0
+          Rate must be greater than R0
+        </mat-error>
+        <mat-error *ngIf="rateAdjustmentForm.get('newRate')?.hasError('max')">
+          Rate must be less than R1000.00
         </mat-error>
       </mat-form-field>
 
