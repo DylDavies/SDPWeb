@@ -2,7 +2,7 @@
 
 This document provides a complete guide for setting up and running the **TutorCore platform** in a local development environment. It covers both the **backend API** (Express.js + Node.js) and the **frontend web application** (Angular), including database setup, environment configuration, and testing.
 
-(version 2.0.0)
+(version 3.0.0)
 
 ### Link to documentation: 
 
@@ -219,6 +219,163 @@ ng test
 ```
 
 This will run in an interactive "watch mode" locally. The CI workflow is configured to run in a headless, single-run mode for automation.
+
+
+## 6. Testing Strategy
+
+A robust testing strategy is crucial for maintaining code quality, preventing regressions, and ensuring all parts of the application behave as expected. This section covers the testing approach for both our Angular frontend and our Express.js backend.
+
+### 6.1 Frontend Testing (Angular)
+
+Our frontend testing is built on the foundation of Angular's built-in testing tools, primarily **Jasmine** (as the testing framework) and **Karma** (as the test runner). We focus on **unit tests** to ensure that individual parts of our application work correctly in isolation.
+
+#### What We Test and Why
+
+The testing approach differs slightly depending on the type of file:
+
+-   **Component Testing (`.spec.ts`):**
+    -   **What:** We test the interaction between the component's class (TypeScript logic) and its template (HTML). This includes user interactions, data binding, and conditional rendering.
+    -   **Why:** To verify that the UI behaves correctly from a user's perspective. When a user clicks a button, fills a form, or receives data, the component should respond as expected.
+    -   **How:** We use Angular's `TestBed` to create an instance of the component in a controlled environment. We simulate user actions (like clicks) and then check if the component's state has changed correctly or if the right methods were called.
+
+        ```typescript
+        // Conceptual Example for a component test
+        it('should call the submit method when the save button is clicked', () => {
+          spyOn(component, 'submit'); // Create a spy on the component's submit method
+          const saveButton = fixture.nativeElement.querySelector('button.save');
+          saveButton.click(); // Simulate a user click
+          expect(component.submit).toHaveBeenCalled(); // Verify the method was called
+        });
+        ```
+
+-   **Service Testing (`.spec.ts`):**
+    -   **What:** We test the public methods of a service to verify its business logic. This is where we test data transformations and interactions with other services (like `HttpService`).
+    -   **Why:** To ensure the core business logic of our application is reliable, independent of any single component. This is crucial for data consistency across the app.
+    -   **How:** We use `TestBed` to inject an instance of the service. We provide mock implementations for its dependencies (like `HttpService`) so we can test the service's logic without making real network calls. This makes our tests faster and more predictable.
+
+        ```typescript
+        // Conceptual Example for a service test
+        it('should fetch users via a GET request', () => {
+          const mockUsers = [{ id: 1, name: 'Test User' }];
+          // Tell our HttpService spy to return a mock value when 'get' is called
+          httpServiceSpy.get.and.returnValue(of(mockUsers));
+
+          service.getUsers().subscribe(users => {
+            expect(users.length).toBe(1);
+            expect(users[0].name).toBe('Test User');
+          });
+
+          // Verify that the HttpService's 'get' method was called with the correct endpoint
+          expect(httpServiceSpy.get).toHaveBeenCalledWith('users');
+        });
+        ```
+
+-   **Pipe Testing (`.spec.ts`):**
+    -   **What:** We test the `transform` method of our custom pipes.
+    -   **Why:** To guarantee that data is consistently and correctly formatted for display in the UI. Since pipes are often used in many places, a single test can ensure correctness across the entire application.
+    -   **How:** Pipes are simple classes, so we can often test them by creating a `new` instance directly without needing the full `TestBed`. We pass various inputs to the `transform` method and assert that the output is what we expect.
+
+        ```typescript
+        // Conceptual Example for a pipe test
+        it('should correctly format a user type string', () => {
+          const pipe = new UserTypePipe();
+          expect(pipe.transform('admin')).toBe('Administrator');
+          expect(pipe.transform('staff')).toBe('Staff');
+        });
+        ```
+
+-   **Guard Testing (`.spec.ts`):**
+    -   **What:** We test the logic within our route guards (`CanActivateFn`).
+    -   **Why:** This is critical for application security. We need to verify that users are correctly allowed or blocked from accessing routes based on their authentication status and permissions.
+    -   **How:** We use `TestBed` to provide mock services (like `AuthService` and `Router`). We then execute the guard function and control the return values of our mock services to simulate different scenarios (e.g., user is logged in, user is an admin, user is not logged in). We then check if the guard returns `true`, `false`, or a `UrlTree` for redirection.
+
+        ```typescript
+        // Conceptual Example for a guard test
+        it('should deny access if the user does not have the required permission', () => {
+          // Tell the AuthService mock that the user does NOT have permission
+          authServiceSpy.hasPermission.and.returnValue(false);
+          
+          const canActivate = executeGuard([EPermission.ADMIN_DASHBOARD_VIEW]);
+          
+          expect(canActivate).toBeInstanceOf(UrlTree); // Expect a redirect
+        });
+        ```
+
+#### How to Add a New Frontend Test
+
+Our convention is to create a test file named `[filename].spec.ts` alongside the file it is testing (e.g., `auth.service.ts` and `auth.service.spec.ts`).
+
+-   For **components, directives, and pipes**, the Angular CLI automatically generates this `.spec.ts` file for you when you run `ng generate component ...`.
+-   For **services and guards**, you can create the `.spec.ts` file manually in the same directory.
+
+---
+
+### 6.2 Backend Testing (Jest & Supertest)
+
+To ensure the reliability, security, and correctness of our API, we employ a thorough testing strategy using **Jest** as our primary testing framework and **Supertest** for testing HTTP endpoints.
+
+#### Test File Structure
+
+As a convention, all test files are located within the `__tests__` directory at the root of the backend project. The structure inside `__tests__` mirrors the main `src` directory, making it easy to locate the tests for a specific file.
+
+-   Tests for a route file like `src/routes/user/users.routes.ts` will be located at `__tests__/routes/user/users.routes.test.ts`.
+-   Tests for a service like `src/services/BundleService.ts` will be located at `__tests__/services/BundleService.test.ts`.
+
+#### What We Test and Why
+
+-   **Route/Endpoint Testing (`__tests__/routes`):**
+    -   **What:** This is the highest level of testing we perform. We test the API endpoints themselves by making mock HTTP requests (e.g., `GET /api/users`, `POST /api/roles`).
+    -   **Why:** To verify the API's public contract. These tests confirm that endpoints are correctly configured, protected by the right middleware, handle valid and invalid inputs, and return the correct HTTP status codes and JSON data shapes.
+    -   **How:** We use `supertest` to send requests to our Express app. Dependencies, especially database and service layers, are mocked using Jest to ensure tests are fast and predictable.
+
+-   **Service Testing (`__tests__/services`):**
+    -   **What:** We test the business logic contained within our service files (e.g., `UserService`, `RoleService`).
+    -   **Why:** Services contain the core application logic. By unit testing them in isolation, we can ensure complex operations (like calculating payslip data or building a role hierarchy) are correct without the overhead of HTTP requests.
+    -   **How:** We import the service directly into our test file. All of its dependencies (like Mongoose models) are mocked using `jest.mock()`. We then call the service's methods with various inputs and assert that the outputs are correct and that the mocked dependencies were called as expected.
+
+-   **Middleware Testing (`__tests__/middleware`):**
+    -   **What:** We test individual middleware functions, such as those that handle authentication or permission checks.
+    -   **Why:** Middleware is critical for security and ensuring requests are properly validated before they reach a route handler. Testing this layer in isolation helps prevent security vulnerabilities.
+    -   **How:** We call the middleware function directly with mocked Express `req`, `res`, and `next` objects. We can then assert that `next()` is called for a valid request, or that an appropriate HTTP status (like `401 Unauthorized` or `403 Forbidden`) is sent for an invalid one.
+
+#### How to Add a New Backend Test
+
+1.  **Create the Test File:** Following the convention mentioned above, create a `[filename].test.ts` file in the corresponding `__tests__` subdirectory.
+2.  **Structure the Test:** Use Jest's BDD (Behavior-Driven Development) syntax with `describe`, `it`, and `expect`.
+    -   `describe('GroupName', () => { ... })`: Groups related tests together.
+    -   `it('should do something', () => { ... })`: Defines an individual test case.
+    -   `expect(value).matcher()`: Makes an assertion (e.g., `expect(response.status).toBe(200);`).
+3.  **Mock Dependencies:** Use `jest.mock('../path/to/dependency')` at the top of your test file to mock any modules the file under test imports. This is crucial for isolating your tests.
+4.  **Write the Test Logic:** Inside your `it` block, set up any required data, call the function or send the request you want to test, and then make assertions about the result.
+
+---
+
+### 6.3 Automated Testing and CI/CD
+
+All tests for both the frontend and backend are designed to be fully automated. This is essential for our Continuous Integration (CI) pipeline (e.g., GitHub Actions), which runs on every push to the `dev` and `main` branches to act as a quality gate.
+
+-   **Frontend Automation:**
+    The CI workflow runs the tests in a headless, single-run mode.
+    ```bash
+    ng test --code-coverage --watch=false --browsers=ChromeHeadless
+    ```
+
+-   **Backend Automation:**
+    The CI workflow runs the Jest test suite.
+    ```bash
+    npm test -- --coverage
+    ```
+
+### 6.4 Viewing Code Coverage Reports
+
+To check how much of your code is covered by tests, you can generate coverage reports for both projects.
+
+-   **Frontend Coverage:**
+    Run `ng test --code-coverage`. This creates a `coverage/` directory. Open `coverage/sdpweb/index.html` in your browser to see the interactive report.
+
+-   **Backend Coverage:**
+    Run `npm test -- --coverage`. This creates a `coverage/` directory. Open `coverage/lcov-report/index.html` in your browser to see the interactive report.
+
 
 # TutorCore Technology Stack
 
