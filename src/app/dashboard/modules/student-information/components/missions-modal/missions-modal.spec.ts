@@ -22,13 +22,19 @@ import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
 const mockStudent: IUser = {
   _id: 'student1', displayName: 'John Doe', email: 'john@test.com', roles: [],
   googleId: '', firstLogin: false, createdAt: new Date(), type: EUserType.Client,
-  permissions: [], pending: false, disabled: false, theme: 'system', leave: []
+  permissions: [], pending: false, disabled: false, theme: 'system', leave: [],
+  paymentType: 'Contract',
+  monthlyMinimum: 0,
+  rateAdjustments: []
 };
 const mockTutor: IPopulatedUser = { _id: 'tutor1', displayName: 'Jane Smith' };
 const mockCurrentUser: IUser = {
   _id: 'user1', displayName: 'Admin User', email: 'admin@test.com', roles: [],
   googleId: '', firstLogin: false, createdAt: new Date(), type: EUserType.Admin,
-  permissions: [], pending: false, disabled: false, theme: 'system', leave: []
+  permissions: [], pending: false, disabled: false, theme: 'system', leave: [],
+  paymentType: 'Contract',
+  monthlyMinimum: 0,
+  rateAdjustments: []
 };
 const mockDocument: IDocument = {
     _id: 'doc1',

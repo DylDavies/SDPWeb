@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of, BehaviorSubject, throwError } from 'rxjs';
+import { of, BehaviorSubject, throwError, delay } from 'rxjs';
 
 import { PayslipViewer } from './payslip-viewer';
 import { PayslipService } from '../../../../../services/payslip-service';
@@ -591,4 +591,154 @@ describe('PayslipViewer', () => {
     });
   });
 
+  describe('Template and UI Interaction', () => {
+    it('should display the correct pay period and status', () => {
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.header-info p:nth-child(1)')?.textContent).toContain('September 2024');
+      expect(compiled.querySelector('.status-chip')?.textContent).toContain('Draft');
+    });
+
+
+    it('should call openQueryDialog when an earning row is clicked', () => {
+      spyOn(component, 'openQueryDialog');
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const row = compiled.querySelector('.payslip-table tbody tr.clickable-row') as HTMLElement;
+      row.click();
+      expect(component.openQueryDialog).toHaveBeenCalledWith(mockPayslip.earnings[0], 'earning', 0);
+    });
+
+    it('should show bonus controls when payslip is in draft status', () => {
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.bonus-controls')).not.toBeNull();
+    });
+
+
+  });
+
+  describe('Error Handling and Edge Cases', () => {
+    it('should handle getPayslipById failure', () => {
+      mockPayslipService.getPayslipById.and.returnValue(throwError(() => new Error('Not Found')));
+      spyOn(console, 'error'); // Prevent error from logging to console during test
+      fixture.detectChanges();
+      expect(component.payslipData$).toBeDefined();
+      component.payslipData$.subscribe(data => {
+        expect(data).toBeNull();
+      });
+    });
+  });
+
+  describe('Asynchronous Operations', () => {
+    it('should handle async data loading correctly with fakeAsync', fakeAsync(() => {
+      mockPayslipService.getPayslipById.and.returnValue(of(mockPayslip).pipe(delay(100)));
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.loading-spinner')).not.toBeNull();
+      tick(100);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.loading-spinner')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.payslip-container')).not.toBeNull();
+    }));
+  });
+
+  
+
+  describe('Dialog and Query Management', () => {
+
+
+    it('should refresh data when the addQuery dialog is closed with a result', () => {
+      const mockDialogRef = { afterClosed: () => of(true) };
+      mockDialog.open.and.returnValue(mockDialogRef as any);
+      spyOn(component, 'loadPayslipData');
+
+      component.addQuery(mockPayslip);
+
+      expect(component.loadPayslipData).toHaveBeenCalled();
+    });
+
+    it('should NOT refresh data when the addQuery dialog is closed without a result', () => {
+        const mockDialogRef = { afterClosed: () => of(false) }; // Dialog returns false
+        mockDialog.open.and.returnValue(mockDialogRef as any);
+        spyOn(component, 'loadPayslipData');
+
+        component.addQuery(mockPayslip);
+
+        expect(component.loadPayslipData).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Bonus Management', () => {
+    it('should not add a bonus if the selected bonus ID is invalid', () => {
+      fixture.detectChanges();
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component.selectedBonusId = 'invalid-id'; // Use an ID that doesn't exist
+
+      component.addSelectedBonus();
+
+      expect(mockPayslipService.addBonus).not.toHaveBeenCalled();
+    });
+
+
+    it('should handle an error when removing a bonus', () => {
+        mockPayslipService.removeBonus.and.returnValue(throwError(() => new Error('API Error')));
+        fixture.detectChanges();
+        component['payslipDataSubject'].next({ payslip: mockPayslip });
+
+        component.removeBonus(0);
+
+        expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to remove bonus. Please try again.');
+    });
+  });
+
+  describe('Deduction and Misc Earning Error Handling', () => {
+    beforeEach(() => {
+        fixture.detectChanges();
+        component['payslipDataSubject'].next({ payslip: mockPayslip });
+    });
+
+    it('should handle an error when adding a new deduction', () => {
+        mockPayslipService.addDeduction.and.returnValue(throwError(() => new Error('API Error')));
+        component.addNewDeduction();
+        expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to add deduction. Please try again.');
+    });
+
+    it('should handle an error when updating a deduction', () => {
+        mockPayslipService.updateDeduction.and.returnValue(throwError(() => new Error('API Error')));
+        component.editingDeduction = 0;
+        component.editingDeductionData = { description: 'Fail', amount: 100 };
+        component.saveDeductionEdit(0);
+        expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to update deduction. Please try again.');
+    });
+
+    it('should handle an error when removing a misc earning', () => {
+        mockPayslipService.removeMiscEarning.and.returnValue(throwError(() => new Error('API Error')));
+        component.removeMiscEarning(0);
+        expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to remove misc earning. Please try again.');
+    });
+
+     it('should handle an error when updating a misc earning', () => {
+        mockPayslipService.updateMiscEarning.and.returnValue(throwError(() => new Error('API Error')));
+        component.editingMiscEarning = 0;
+        component.editingMiscEarningData = { description: 'Fail', amount: 100 };
+        component.saveMiscEarningEdit(0);
+        expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to update misc earning. Please try again.');
+    });
+  });
+
+ describe('Input Validation', () => {
+
+    it('should prevent multiple decimal points', () => {
+      const mockInput = { value: '123.' } as HTMLInputElement;
+      const event = new KeyboardEvent('keydown', { key: '.' });
+      Object.defineProperty(event, 'target', { value: mockInput });
+      spyOn(event, 'preventDefault');
+
+      component.onAmountKeydown(event, 'deduction');
+
+      expect(event.preventDefault).toHaveBeenCalled();
+    });
+  });
+  
+  
 });

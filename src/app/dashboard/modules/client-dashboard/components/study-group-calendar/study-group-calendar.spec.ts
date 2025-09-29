@@ -1,87 +1,163 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { of, throwError } from 'rxjs';
+import { StudyGroupCalendarComponent } from './study-group-calendar';
 import { StudyGroupService } from '../../../../../services/study-group-service';
-import { IStudyGroupEvent } from '../../../../../models/interfaces/IStudyGroupEvent.interface';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { IStudyGroup } from '../../../../../models/interfaces/IStudyGroup.interface';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-@Component({
-  selector: 'app-study-group-calendar',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule],
-  templateUrl: './study-group-calendar.html',
-  styleUrls: ['./study-group-calendar.scss']
-})
-export class StudyGroupCalendarComponent implements OnInit {
-  private studyGroupService = inject(StudyGroupService);
-  private snackbarService = inject(SnackBarService);
+// Mock data for testing
+const mockStudyGroups: IStudyGroup[] = [
+  {
+    id: '1',
+    name: 'Calculus Study Group',
+    description: 'test',
+    creatorId: 'test',
+    max_members: 1,
+    is_private: false,
+    invite_code: 'test',
+    status: 'test',
+    faculty: 'test',
+    course: 'test',
+    year_of_study: 'test',
+    created_at: 'test',
+    updated_at: 'test',
+    scheduled_start: new Date().toISOString(),
+    scheduled_end: new Date().toISOString(),
+    meeting_times: [],
+    is_scheduled: false
+  },
+  {
+    id: '2',
+    name: 'Physics Study Group',
+    description: 'test',
+    creatorId: 'test',
+    max_members: 1,
+    is_private: false,
+    invite_code: 'test',
+    status: 'test',
+    faculty: 'test',
+    course: 'test',
+    year_of_study: 'test',
+    created_at: 'test',
+    updated_at: 'test',
+    scheduled_start: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+    scheduled_end: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+    meeting_times: [],
+    is_scheduled: false
+  },
+];
 
-  public currentDate: Date = new Date();
-  public daysInMonth: (Date | null)[] = [];
-  public events: IStudyGroupEvent[] = [];
-  public monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-  public weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+describe('StudyGroupCalendarComponent', () => {
+  let component: StudyGroupCalendarComponent;
+  let fixture: ComponentFixture<StudyGroupCalendarComponent>;
+  let studyGroupServiceSpy: jasmine.SpyObj<StudyGroupService>;
+  let snackbarServiceSpy: jasmine.SpyObj<SnackBarService>;
 
-  ngOnInit(): void {
-    this.generateCalendarDays();
-    this.loadEvents();
-  }
+  beforeEach(async () => {
+    studyGroupServiceSpy = jasmine.createSpyObj('StudyGroupService', ['getUpcomingStudyGroups']);
+    snackbarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showError']);
 
-  loadEvents(): void {
-      this.studyGroupService.getUpcomingStudyGroups().subscribe({
-        next: (studyGroups) => {
-          this.events = studyGroups.map(sg => ({
-              id: sg.id,
-              date: new Date(sg.scheduled_start),
-              name: sg.name,
-              startTime: new Date(sg.scheduled_start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-              endTime: new Date(sg.scheduled_end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
-          }));
-        },
-        error: () => {
-          this.snackbarService.showError('Could not load upcoming study groups. Please try again later.');
-        }
+    await TestBed.configureTestingModule({
+      imports: [StudyGroupCalendarComponent, NoopAnimationsModule],
+      providers: [
+        { provide: StudyGroupService, useValue: studyGroupServiceSpy },
+        { provide: SnackBarService, useValue: snackbarServiceSpy },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(StudyGroupCalendarComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('should create', () => {
+    studyGroupServiceSpy.getUpcomingStudyGroups.and.returnValue(of([]));
+    fixture.detectChanges();
+    expect(component).toBeTruthy();
+  });
+
+  describe('ngOnInit', () => {
+    it('should call generateCalendarDays and loadEvents on initialization', () => {
+      spyOn(component, 'generateCalendarDays');
+      spyOn(component, 'loadEvents');
+      studyGroupServiceSpy.getUpcomingStudyGroups.and.returnValue(of([]));
+      component.ngOnInit();
+      expect(component.generateCalendarDays).toHaveBeenCalled();
+      expect(component.loadEvents).toHaveBeenCalled();
+    });
+  });
+
+  describe('loadEvents', () => {
+    it('should load and process study groups successfully', fakeAsync(() => {
+      studyGroupServiceSpy.getUpcomingStudyGroups.and.returnValue(of(mockStudyGroups));
+      component.loadEvents();
+      tick();
+      expect(component.events.length).toBe(2);
+      expect(component.events[0].name).toBe('Calculus Study Group');
+    }));
+
+    it('should show an error message if loading study groups fails', fakeAsync(() => {
+      studyGroupServiceSpy.getUpcomingStudyGroups.and.returnValue(throwError(() => new Error('Failed to load')));
+      component.loadEvents();
+      tick();
+      expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('Could not load upcoming study groups. Please try again later.');
+    }));
+  });
+
+  describe('Calendar Navigation and Generation', () => {
+    beforeEach(() => {
+        studyGroupServiceSpy.getUpcomingStudyGroups.and.returnValue(of([]));
+        fixture.detectChanges();
+    });
+
+    it('should generate calendar days for the current month', () => {
+      component.currentDate = new Date(2025, 8, 15); // September 15, 2025
+      component.generateCalendarDays();
+      expect(component.daysInMonth.length).toBeGreaterThan(28);
+    });
+
+    it('should navigate to the previous month', () => {
+      const initialMonth = component.currentDate.getMonth();
+      component.previousMonth();
+      expect(component.currentDate.getMonth()).not.toBe(initialMonth);
+    });
+
+    it('should navigate to the next month', () => {
+        const initialMonth = component.currentDate.getMonth();
+        component.nextMonth();
+        expect(component.currentDate.getMonth()).not.toBe(initialMonth);
       });
-  }
+  });
 
-  generateCalendarDays(): void {
-    this.daysInMonth = [];
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth();
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
-    const startingDay = firstDayOfMonth.getDay();
+  describe('Event Handling', () => {
+    beforeEach(() => {
+        studyGroupServiceSpy.getUpcomingStudyGroups.and.returnValue(of(mockStudyGroups));
+        component.loadEvents();
+        fixture.detectChanges();
+    });
 
-    for (let i = 0; i < startingDay; i++) {
-      this.daysInMonth.push(null);
-    }
+    it('should return the correct event time', () => {
+      const eventTime = component.getEventTime(component.events[0]);
+      expect(eventTime).toMatch(/\d{2}:\d{2}/);
+    });
 
-    for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
-      this.daysInMonth.push(new Date(year, month, i));
-    }
-  }
+    it('should return events for a specific day', () => {
+      const today = new Date();
+      const eventsToday = component.getEventsForDay(today);
+      expect(eventsToday.length).toBe(1);
+      expect(eventsToday[0].name).toBe('Calculus Study Group');
+    });
 
-  previousMonth(): void {
-    this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-    this.generateCalendarDays();
-  }
-
-  nextMonth(): void {
-    this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-    this.generateCalendarDays();
-  }
-
-  getEventTime(event: IStudyGroupEvent): string {
-    return event.startTime;
-  }
-
-  getEventsForDay(day: Date | null): IStudyGroupEvent[] {
-    if (!day) return [];
-    return this.events
-      .filter(event => event.date.toDateString() === day.toDateString())
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-  }
-}
+    it('should return an empty array for a day with no events', () => {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 5);
+        const eventsOnFutureDate = component.getEventsForDay(futureDate);
+        expect(eventsOnFutureDate.length).toBe(0);
+      });
+  
+      it('should return an empty array for a null day', () => {
+        const events = component.getEventsForDay(null);
+        expect(events.length).toBe(0);
+      });
+  });
+});
