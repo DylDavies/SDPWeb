@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, Observable, of, tap, map } from 'rxjs'; 
 import { HttpService } from './http-service';
 import IBadge from '../models/interfaces/IBadge.interface';
 import { IBadgeRequirement } from '../models/interfaces/IBadgeRequirement.interface';
@@ -45,14 +45,18 @@ export class BadgeService {
   }
 
     /**
-   * Fetches a specific list of badges from the backend by their IDs.
+   * This makes any component using this method reactive to real-time updates.
    * @param ids - An array of badge ID strings.
-   * @returns An Observable array of the requested badges.
+   * @returns A reactive Observable array of the requested badges.
    */
   getBadgesByIds(ids: string[]): Observable<IBadge[]> {
-    if(!ids || ids.length === 0) return of([]);
+    if (!ids || ids.length === 0) {
+      return of([]);
+    }
 
-    return this.httpService.post<IBadge[]>('badges/by-ids', { ids });
+    return this.allBadges$.pipe(
+      map(allBadges => allBadges.filter(badge => ids.includes(badge._id)))
+    );
   }
 
     /**

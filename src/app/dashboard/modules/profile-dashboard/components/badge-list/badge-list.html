@@ -2,10 +2,10 @@
   <div class="header">
     <h3>Earned Badges</h3>
     <div class="header-actions">
-        <button mat-stroked-button routerLink="/dashboard/badges">
-            <mat-icon>inventory_2</mat-icon>
-            View Badge Library
-        </button>
+      <button mat-stroked-button routerLink="/dashboard/badges">
+        <mat-icon>inventory_2</mat-icon>
+        View Badge Library
+      </button>
       @if (canManageBadges) {
         <button mat-stroked-button color="primary" (click)="openAddBadgeDialog()">
           <mat-icon>add</mat-icon>
@@ -15,15 +15,17 @@
     </div>
   </div>
 
-  @if (badges$ | async; as badges) {
-    @if (badges && badges.length > 0) {
+  @if (combinedBadges$ | async; as combinedBadges) {
+    @if (combinedBadges.length > 0) {
       <div class="badge-grid">
-        @for (badge of badges; track badge._id) {
-          <app-badge-card 
-            [badge]="badge"
+        @for (item of combinedBadges; track item.badge._id) {
+          <app-badge-card
+            [badge]="item.badge"
+            [userBadge]="item.userBadge"
             [context]="'profile'"
             [userId]="user!._id"
-            (badgeRemoved)="userUpdated.emit()">  </app-badge-card>
+            (badgeRemoved)="userUpdated.emit()">
+          </app-badge-card>
         }
       </div>
     } @else {
@@ -31,5 +33,6 @@
         <p>This user hasn't earned any badges yet.</p>
       </div>
     }
-  }
+  } @else {
+    }
 </div>
