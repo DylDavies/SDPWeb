@@ -56,6 +56,8 @@ export class MissionsModal implements OnInit {
   public dialogRef = inject(MatDialogRef<MissionsModal>);
   public data: { student: IUser | IPopulatedUser, mission?: IMissions, bundleId: string } = inject(MAT_DIALOG_DATA);
 
+  public EMissionStatus = EMissionStatus;
+
   public createMissionForm: FormGroup;
   public isSaving = false;
   public isEditMode = false;
@@ -73,7 +75,7 @@ export class MissionsModal implements OnInit {
       tutorId: ['', Validators.required],
        dateCompleted: ['', [Validators.required, futureDateValidator()]],
       remuneration: ['', [Validators.required, Validators.min(0)]],
-      status: [EMissionStatus.Active, Validators.required],
+      status: [{value: this.data.mission?.status || EMissionStatus.Active, disabled: this.data.mission?.status == EMissionStatus.Achieved}, Validators.required],
       document: [null, Validators.required]
     });
   }
@@ -148,21 +150,16 @@ export class MissionsModal implements OnInit {
     if (this.createMissionForm.invalid || this.isSaving) {
       return;
     }
-    console.log("Clicked");
-    console.log(this.data.bundleId);
 
     if (this.isEditMode) {
-      console.log("update");
       this.updateMission();
     } else {
-      console.log("create");
       this.createMission();
     }
   }
 
   private createMission(): void {
     if (this.createMissionForm.invalid || this.isSaving || !this.currentUser || !this.selectedFile) {
-      console.log("broken");
       return;
     }
     this.isSaving = true;
@@ -190,7 +187,7 @@ export class MissionsModal implements OnInit {
           tutor: this.createMissionForm.value.tutorId,
           dateCompleted: this.createMissionForm.value.dateCompleted,
           remuneration: this.createMissionForm.value.remuneration,
-           status: this.createMissionForm.value.status,
+           status: this.data.mission?.status == EMissionStatus.Achieved ? this.data.mission?.status == EMissionStatus.Achieved : this.createMissionForm.value.status,
       };
 
       this.missionService.updateMission(this.data.mission!._id, payload).subscribe({

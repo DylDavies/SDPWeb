@@ -98,7 +98,6 @@ updateAllMissionHours(): void {
       }
     });
     
-    console.log('Calculated tutor hours:', Array.from(tutorHours.entries()));
     this.updateMissionsForTutors(tutorHours);
   });
 }
