@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.calendar-container {
+  max-width: 100%;
+  margin: auto;
+  padding: 12px;
+  background-color: var(--mat-sys-surface-container-low);
+  border-radius: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 8px;
+
+  .current-month {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.day-name-cell {
+  font-weight: 500;
+  text-align: center;
+  padding-bottom: 4px;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.day-cell {
+  position: relative;
+  height: 120px;
+  background-color: var(--mat-sys-surface);
+  border-radius: 6px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  transition: all 0.2s ease-in-out;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+.day-number {
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+}
+
+.empty-cell {
+  background-color: transparent;
+  border: none;
+}
+
+.event-container {
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.event-chip {
+  padding: 2px 4px;
+  width: 100%;
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  border-radius: 4px;
+  margin-bottom: 2px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
