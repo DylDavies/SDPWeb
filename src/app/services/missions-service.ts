@@ -127,7 +127,6 @@ export class MissionService {
         console.error('Error updating mission hours:', error);
         if (error.status === 403) {
           console.error('Permission denied. User may not have MISSIONS_EDIT permission.');
-          // You might want to show a user-friendly message
         }
         throw error;
       })

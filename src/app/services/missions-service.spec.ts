@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { MissionService } from './missions-service';
 import { IMissions } from '../models/interfaces/IMissions.interface';
@@ -126,21 +127,7 @@ describe('MissionService', () => {
     });
   });
 
-  /*describe('downloadMissionDocument', () => {
-    it('should send a GET request to the /missions/document/:filename endpoint', () => {
-      const filename = 'path/to/doc.pdf';
-      const mockBlob = new Blob(['test content'], { type: 'application/pdf' });
-
-      service.downloadMissionDocument(filename).subscribe(blob => {
-        expect(blob).toEqual(mockBlob);
-      });
-
-      const req = httpMock.expectOne(`${apiUrl}/missions/document/${filename}`);
-      expect(req.request.method).toBe('GET');
-      expect(req.request.responseType).toBe('blob');
-      req.flush(mockBlob);
-    });
-  });*/
+  
 
   describe('updateMission', () => {
     it('should send a PATCH request to the /missions/:id endpoint', () => {
@@ -183,5 +170,74 @@ describe('MissionService', () => {
       expect(req.request.method).toBe('DELETE');
       req.flush(null);
     });
+  });
+
+  // New tests for findMissionByBundleAndTutor
+  describe('findMissionByBundleAndTutor', () => {
+    it('should send a GET request to find a mission by bundle and tutor IDs', () => {
+      const bundleId = 'bundle1';
+      const tutorId = 'tutor1';
+
+      service.findMissionByBundleAndTutor(bundleId, tutorId).subscribe(mission => {
+        expect(mission).toEqual(mockMission);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/find/bundle/${bundleId}/tutor/${tutorId}`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockMission);
+    });
+
+    it('should return null when no mission is found', () => {
+        const bundleId = 'bundle-nonexistent';
+        const tutorId = 'tutor-nonexistent';
+  
+        service.findMissionByBundleAndTutor(bundleId, tutorId).subscribe(mission => {
+          expect(mission).toBeNull();
+        });
+  
+        const req = httpMock.expectOne(`${apiUrl}/missions/find/bundle/${bundleId}/tutor/${tutorId}`);
+        expect(req.request.method).toBe('GET');
+        req.flush(null);
+      });
+  });
+
+  // New tests for updateMissionHours
+  describe('updateMissionHours', () => {
+    it('should send a PATCH request to update mission hours', () => {
+      const missionId = 'mission1';
+      const hoursToAdd = 10;
+      const updatedMission = { ...mockMission, hoursCompleted: mockMission.hoursCompleted! + hoursToAdd };
+
+      service.updateMissionHours(missionId, hoursToAdd).subscribe(mission => {
+        expect(mission.hoursCompleted).toBe(15);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/${missionId}/hours`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ hours: hoursToAdd });
+      req.flush(updatedMission);
+    });
+
+    it('should handle errors, such as 403 Forbidden', () => {
+        const missionId = 'mission1';
+        const hoursToAdd = 5;
+        const errorMessage = 'Permission denied.';
+    
+        // Spy on console.error to check if it's called
+        spyOn(console, 'error');
+    
+        service.updateMissionHours(missionId, hoursToAdd).subscribe({
+          next: () => fail('should have failed with a 403 error'),
+          error: (error: HttpErrorResponse) => {
+            expect(error.status).toBe(403);
+            expect(console.error).toHaveBeenCalledWith('Error updating mission hours:', jasmine.any(HttpErrorResponse));
+            expect(console.error).toHaveBeenCalledWith('Permission denied. User may not have MISSIONS_EDIT permission.');
+          }
+        });
+    
+        const req = httpMock.expectOne(`${apiUrl}/missions/${missionId}/hours`);
+        expect(req.request.method).toBe('PATCH');
+        req.flush({ message: errorMessage }, { status: 403, statusText: 'Forbidden' });
+      });
   });
 });

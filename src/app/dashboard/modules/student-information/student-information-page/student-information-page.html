@@ -41,7 +41,7 @@
                   <div class="list-wrapper">
                     <h2>Subjects</h2>
                     <mat-list>
-                        @for (subject of bundle.subjects; track subject._id) {
+                        @for (subject of bundle.subjects; track subject._id || $index) {
                         <mat-list-item>
                             <mat-icon matListItemIcon>school</mat-icon>
                             <div matListItemTitle>{{ subject.subject }} (Grade: {{ subject.grade }})</div>

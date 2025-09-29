@@ -75,7 +75,7 @@ export class StudentInformationPage implements OnInit {
       }
     });
   }
-  private updateAllMissionHours(): void {
+updateAllMissionHours(): void {
   if (!this.bundleId || this.isUpdatingMissions) return;
 
   this.isUpdatingMissions = true;  
@@ -103,8 +103,8 @@ export class StudentInformationPage implements OnInit {
   });
 }
 
-private updateMissionsForTutors(tutorHours: Map<string, number>): void {
-  const updatePromises: Observable<any>[] = [];
+updateMissionsForTutors(tutorHours: Map<string, number>): void {
+  const updatePromises:Observable<IMissions | null>[] = [];
   
   tutorHours.forEach((totalHours, tutorId) => {
     if (totalHours >= 0) { 
@@ -112,7 +112,6 @@ private updateMissionsForTutors(tutorHours: Map<string, number>): void {
         .pipe(
           switchMap(mission => {
             if (mission) {
-              console.log(`Setting mission ${mission._id} hours to ${totalHours}`);
               return this.missionService.updateMissionHours(mission._id, totalHours);
             } else {
               console.warn(`No mission found for bundle ${this.bundleId} and tutor ${tutorId}`);
@@ -131,8 +130,7 @@ private updateMissionsForTutors(tutorHours: Map<string, number>): void {
   
   if (updatePromises.length > 0) {
     forkJoin(updatePromises).subscribe({
-      next: (results) => {
-        console.log('Mission hours updated successfully');
+      next: () => {
         this.isUpdatingMissions = false;  
       },
       error: (error) => {
@@ -152,14 +150,12 @@ getTutorsFromBundle(): void {
   
   this.bundle.subjects.forEach(subject => {
     if (typeof subject.tutor === 'object' && subject.tutor._id) {
-      // Only add tutors with valid IDs
       tutorMap.set(subject.tutor._id, subject.tutor);
     }
   });
   
   this.tutors = Array.from(tutorMap.values());
   
-  // Update template to handle potential missing IDs
   if (this.tutors.length > 0) {
     this.updateAllMissionHours();
   }
