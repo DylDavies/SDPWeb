@@ -33,8 +33,8 @@ const mockStudent: IUser = {
 };
 const mockTutor: IPopulatedUser = {
     _id: 'tutor1', displayName: 'Jane',
-   
-    
+
+
 };
 const mockCurrentUser: IUser = {
   _id: 'user1', displayName: 'Admin User', email: 'admin@test.com', roles: [],
@@ -87,7 +87,7 @@ describe('futureDateValidator', () => {
     });
 
     it('should return null for today', () => {
-        
+
         const today = new Date();
         today.setHours(12,0,0,0);
          const control = { value: today } as AbstractControl;
@@ -112,7 +112,7 @@ describe('MissionsModal', () => {
 
   const setup = async (data: any) => {
     missionServiceSpy = jasmine.createSpyObj('MissionService', ['createMission', 'updateMission']);
-    bundleServiceSpy = jasmine.createSpyObj('BundleService', ['getBundles']);
+    bundleServiceSpy = jasmine.createSpyObj('BundleService', ['getBundles', 'getBundleById']);
     snackBarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
     authServiceSpy = jasmine.createSpyObj('AuthService', ['currentUser$'], {
       currentUser$: new BehaviorSubject<IUser | null>(mockCurrentUser).asObservable()
@@ -135,6 +135,7 @@ describe('MissionsModal', () => {
     fixture = TestBed.createComponent(MissionsModal);
     component = fixture.componentInstance;
     bundleServiceSpy.getBundles.and.returnValue(of(mockBundles));
+    bundleServiceSpy.getBundleById.and.returnValue(of(mockBundles[0])); // Mock the new method
     fixture.detectChanges();
     tick(); // process ngOnInit async operations
   };
@@ -155,7 +156,7 @@ describe('MissionsModal', () => {
         let tutors: any;
         component.tutors$.subscribe(t => tutors = t);
         tick();
-        expect(bundleServiceSpy.getBundles).toHaveBeenCalled();
+        expect(bundleServiceSpy.getBundleById).toHaveBeenCalled();
         expect(tutors.length).toBe(1);
         expect(tutors[0]._id).toBe(mockTutor._id);
     }));
@@ -223,18 +224,18 @@ describe('MissionsModal', () => {
         expect(component.createMissionForm.get('remuneration')?.value).toBe(mockMission.remuneration);
         expect(component.fileName).toBe(mockMission.documentName);
     });
-    
+
     it('should successfully update a mission', fakeAsync(() => {
         component.createMissionForm.patchValue({
             remuneration: 200,
             status: EMissionStatus.Completed
         });
-        
+
         // The form is invalid because 'document' is required but not provided in edit mode.
         // Clear the validator to simulate the correct behavior for an update without a file change.
         component.createMissionForm.get('document')?.clearValidators();
         component.createMissionForm.get('document')?.updateValueAndValidity();
-        
+
         const updatedMission = { ...mockMission, remuneration: 200, status: EMissionStatus.Completed };
         missionServiceSpy.updateMission.and.returnValue(of(updatedMission));
 
@@ -276,7 +277,7 @@ describe('MissionsModal', () => {
         const file = new File(['content'], 'document.pdf', { type: 'application/pdf' });
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
-        
+
         const inputElement = document.createElement('input');
         inputElement.type = 'file';
         inputElement.files = dataTransfer.files;
@@ -295,4 +296,3 @@ describe('MissionsModal', () => {
     });
   });
 });
-

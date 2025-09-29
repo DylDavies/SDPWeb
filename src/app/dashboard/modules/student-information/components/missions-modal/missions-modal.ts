@@ -93,7 +93,7 @@ export class MissionsModal implements OnInit {
 
     if (this.data.student) {
       this.createMissionForm.get('studentName')?.setValue(this.data.student.displayName);
-      this.fetchTutorsForStudent(this.data.student._id);
+      this.fetchTutorsForStudent(this.data.bundleId);
     }
     if (this.isEditMode && this.data.mission) {
         this.fileName = this.data.mission.documentName;
@@ -113,23 +113,23 @@ export class MissionsModal implements OnInit {
     
   }
 
-  private fetchTutorsForStudent(studentId: string): void {
-    this.tutors$ = this.bundleService.getBundles().pipe(
-      map(bundles => {
+  private fetchTutorsForStudent(bundleId: string): void {
+    this.tutors$ = this.bundleService.getBundleById(bundleId).pipe(
+      map(bundle => {
+        if (!bundle) {
+            return [];
+        }
         const tutors = new Map<string, IPopulatedUser>();
-        bundles
-          .filter(bundle => (bundle.student as IPopulatedUser)?._id === studentId)
-          .forEach(bundle => {
-            bundle.subjects.forEach(subject => {
-              if (typeof subject.tutor === 'object') {
-                tutors.set(subject.tutor._id, subject.tutor);
-              }
-            });
-          });
+        bundle.subjects.forEach(subject => {
+          if (typeof subject.tutor === 'object' && subject.tutor._id) {
+            tutors.set(subject.tutor._id, subject.tutor);
+          }
+        });
         return Array.from(tutors.values());
       })
     );
   }
+  
 
   onFileSelected(event: Event): void {
     const element = event.currentTarget as HTMLInputElement;
