@@ -1,0 +1,477 @@
+<div class="payslip-container" *ngIf="payslipData$ | async as data; else loading">
+  <div class="payslip-document">
+    <!-- Header Section -->
+    <div class="payslip-header">
+      <div class="header-left">
+        <div class="header-info">
+          <p><strong>Pay Period:</strong> {{ data.payslip.payPeriod | payPeriod }}</p>
+          <p><strong>Status:</strong> <span class="status-chip" [ngClass]="data.payslip.status">{{ data.payslip.status | payslipStatus }}</span></p>
+          <p><strong>Generated:</strong> {{ getCurrentDate() | date:'dd MMMM, yyyy' }}</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="logo-container">
+          <img src="assets/logo.png" alt="TutorCore" class="company-logo" />
+          <div class="company-name">
+            <span class="company-text">TUTORCORE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company and Employee Information -->
+    <div class="info-section">
+      <div class="company-info">
+        <h3>TutorCore (Pty) Ltd</h3>
+        <p><strong>Registration Number:</strong> 2024/123456/07</p>
+        <p>www.tutorcore.com</p>
+        <p>123 Education Drive</p>
+        <p>Sandton, Johannesburg</p>
+        <p>2196, South Africa</p>
+        <p>P.O. BOX 12345</p>
+      </div>
+      <div class="employee-info">
+        <h3>{{ getCurrentUserName() }}</h3>
+        <p>{{ getCurrentUserEmail() }}</p>
+      </div>
+    </div>
+
+    <div class="payslip-content">
+      <!-- Left Column: Tables -->
+      <div class="left-column">
+        <!-- Earnings Section -->
+        <div class="section-container">
+          <h3>Earnings</h3>
+          <table class="payslip-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Base Rate</th>
+                <th>Hours</th>
+                <th>Hourly Rate</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let earning of data.payslip.earnings || getDummyEarnings(); let i = index; trackBy: trackByIndex"
+                  class="clickable-row"
+                  (click)="openQueryDialog(earning, 'earning', i)"
+                  [class.has-query]="hasQuery(earning.description, 'earning', i)">
+                <td>{{ earning.date | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="cell-content">
+                    {{ earning.description }}
+                    <mat-icon *ngIf="hasQuery(earning.description, 'earning', i)"
+                             class="query-icon"
+                             matTooltip="This item has been queried"
+                             color="warn">help_outline</mat-icon>
+                  </div>
+                </td>
+                <td>{{ earning.baseRate | currency:'ZAR':'symbol':'1.2-2' }}</td>
+                <td>{{ earning.hours }}</td>
+                <td>{{ earning.rate | currency:'ZAR':'symbol':'1.2-2' }}</td>
+                <td>{{ earning.total | currency:'ZAR':'symbol':'1.2-2' }}</td>
+              </tr>
+              <tr class="total-row" *ngIf="data.payslip.earnings?.length">
+                <td colspan="5"><strong>Gross Earnings</strong></td>
+                <td><strong>{{ data.payslip.grossEarnings | currency:'ZAR':'symbol':'1.2-2' }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bonuses Section -->
+        <div class="section-container">
+          <div class="section-header">
+            <h3>Bonuses</h3>
+            <div class="bonus-controls" *ngIf="canEditPayslip(data.payslip)">
+              <mat-select placeholder="Add Bonus" [(value)]="selectedBonusId">
+                <mat-option value="">Select bonus to add...</mat-option>
+                <mat-option *ngFor="let bonus of getAvailableBonuses()" [value]="bonus.id">
+                  {{ bonus.description }} ({{ bonus.amount | currency:'ZAR':'symbol':'1.2-2' }})
+                </mat-option>
+              </mat-select>
+              <button mat-icon-button
+                      color="primary"
+                      matTooltip="Add selected bonus"
+                      class="add-bonus-btn"
+                      (click)="addSelectedBonus()"
+                      [disabled]="!selectedBonusId">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+          <table class="payslip-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let bonus of data.payslip.bonuses || []; let i = index; trackBy: trackByIndex"
+                  class="clickable-row bonus-row"
+                  (click)="openQueryDialog(bonus, 'bonus', i)"
+                  [class.has-query]="hasQuery(bonus.description, 'bonus', i)">
+                <td class="bonus-description">
+                  <div class="cell-content">
+                    {{ bonus.description }}
+                    <mat-icon *ngIf="hasQuery(bonus.description, 'bonus', i)"
+                             class="query-icon"
+                             matTooltip="This item has been queried"
+                             color="warn">help_outline</mat-icon>
+                  </div>
+                  <button mat-icon-button
+                          color="warn"
+                          (click)="removeBonus(i); $event.stopPropagation()"
+                          matTooltip="Remove bonus"
+                          class="delete-bonus-btn"
+                          *ngIf="canEditPayslip(data.payslip)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+                <td>{{ bonus.amount | currency:'ZAR':'symbol':'1.2-2' }}</td>
+              </tr>
+              <tr class="total-row" *ngIf="data.payslip.bonuses?.length">
+                <td><strong>Total Bonuses</strong></td>
+                <td><strong>{{ getTotalBonuses(data.payslip.bonuses) | currency:'ZAR':'symbol':'1.2-2' }}</strong></td>
+              </tr>
+              <!-- Show message when no bonuses exist -->
+              <tr *ngIf="!data.payslip.bonuses?.length" class="no-data-row">
+                <td colspan="2" style="text-align: center; font-style: italic; color: #666;">
+                  No bonuses added yet
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Misc Earnings Section -->
+        <div class="section-container">
+          <div class="section-header">
+            <h3>Misc Earnings</h3>
+            <div class="misc-earnings-controls" *ngIf="canEditPayslip(data.payslip)">
+              <button mat-icon-button
+                      color="primary"
+                      matTooltip="Add new misc earning"
+                      class="add-misc-earning-btn"
+                      (click)="addNewMiscEarning()">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+          <table class="payslip-table description-amount-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th *ngIf="canEditPayslip(data.payslip)">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let earning of data.payslip.miscEarnings || []; let i = index; trackBy: trackByIndex"
+                  class="clickable-row misc-earning-row"
+                  (click)="openQueryDialog(earning, 'earning', i)"
+                  [class.has-query]="hasQuery(earning.description, 'earning', i)">
+                <td>
+                  <div class="cell-content">
+                    <input *ngIf="editingMiscEarning === i && canEditPayslip(data.payslip); else displayMiscDescription"
+                           [(ngModel)]="editingMiscEarningData.description"
+                           (click)="$event.stopPropagation()"
+                           (keyup.enter)="saveMiscEarningEdit(i)"
+                           (keyup.escape)="cancelMiscEarningEdit()"
+                           class="inline-edit-input"
+                           placeholder="Earning description">
+                    <ng-template #displayMiscDescription>
+                      {{ earning.description }}
+                      <mat-icon *ngIf="hasQuery(earning.description, 'earning', i)"
+                               class="query-icon"
+                               matTooltip="This item has been queried"
+                               color="warn">help_outline</mat-icon>
+                    </ng-template>
+                  </div>
+                </td>
+                <td>
+                  <input *ngIf="editingMiscEarning === i && canEditPayslip(data.payslip); else displayAmount"
+                         [(ngModel)]="editingMiscEarningData.amount"
+                         type="number"
+                         step="0.01"
+                         (click)="$event.stopPropagation()"
+                         (keydown)="onAmountKeydown($event, 'miscEarning')"
+                         (input)="onAmountInput($event, 'miscEarning')"
+                         (keyup.enter)="saveMiscEarningEdit(i)"
+                         (keyup.escape)="cancelMiscEarningEdit()"
+                         class="inline-edit-input"
+                         placeholder="0.00">
+                  <ng-template #displayAmount>
+                    {{ earning.amount | currency:'ZAR':'symbol':'1.2-2' }}
+                  </ng-template>
+                </td>
+                <td *ngIf="canEditPayslip(data.payslip)">
+                  <div *ngIf="editingMiscEarning === i; else normalMiscActions" class="edit-actions">
+                    <button mat-icon-button
+                            color="primary"
+                            (click)="saveMiscEarningEdit(i); $event.stopPropagation()"
+                            matTooltip="Save changes"
+                            class="save-misc-earning-btn">
+                      <mat-icon>check</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            color="warn"
+                            (click)="cancelMiscEarningEdit(); $event.stopPropagation()"
+                            matTooltip="Cancel editing"
+                            class="cancel-misc-earning-btn">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                  <ng-template #normalMiscActions>
+                    <button mat-icon-button
+                            color="accent"
+                            (click)="editMiscEarning(i, earning); $event.stopPropagation()"
+                            matTooltip="Edit misc earning"
+                            class="edit-misc-earning-btn">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            color="warn"
+                            (click)="removeMiscEarning(i); $event.stopPropagation()"
+                            matTooltip="Remove misc earning"
+                            class="delete-misc-earning-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </ng-template>
+                </td>
+              </tr>
+              <tr class="total-row" *ngIf="data.payslip.miscEarnings?.length">
+                <td><strong>Total Misc Earnings</strong></td>
+                <td><strong>{{ getTotalMiscEarnings(data.payslip.miscEarnings) | currency:'ZAR':'symbol':'1.2-2' }}</strong></td>
+                <td *ngIf="canEditPayslip(data.payslip)"></td>
+              </tr>
+              <!-- Show message when no misc earnings exist -->
+              <tr *ngIf="!data.payslip.miscEarnings?.length" class="no-data-row">
+                <td [attr.colspan]="canEditPayslip(data.payslip) ? 3 : 2" style="text-align: center; font-style: italic; color: #666;">
+                  No misc earnings added yet
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Deductions Section -->
+        <div class="section-container">
+          <div class="section-header">
+            <h3>Deductions</h3>
+            <div class="deduction-controls" *ngIf="canEditPayslip(data.payslip)">
+              <button mat-icon-button
+                      color="primary"
+                      matTooltip="Add new deduction"
+                      class="add-deduction-btn"
+                      (click)="addNewDeduction()">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+          <table class="payslip-table description-amount-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th *ngIf="canEditPayslip(data.payslip)">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let deduction of data.payslip.deductions || getDummyDeductions(); let i = index; trackBy: trackByIndex"
+                  class="clickable-row deduction-row"
+                  (click)="openQueryDialog(deduction, 'deduction', i)"
+                  [class.has-query]="hasQuery(deduction.description, 'deduction', i)">
+                <td>
+                  <div class="cell-content">
+                    <input *ngIf="editingDeduction === i && canEditPayslip(data.payslip); else displayDescription"
+                           [(ngModel)]="editingDeductionData.description"
+                           (click)="$event.stopPropagation()"
+                           (keyup.enter)="saveDeductionEdit(i)"
+                           (keyup.escape)="cancelDeductionEdit()"
+                           class="inline-edit-input"
+                           placeholder="Deduction description">
+                    <ng-template #displayDescription>
+                      {{ deduction.description }}
+                      <mat-icon *ngIf="hasQuery(deduction.description, 'deduction', i)"
+                               class="query-icon"
+                               matTooltip="This item has been queried"
+                               color="warn">help_outline</mat-icon>
+                    </ng-template>
+                  </div>
+                </td>
+                <td>
+                  <input *ngIf="editingDeduction === i && canEditPayslip(data.payslip); else displayAmount"
+                         [(ngModel)]="editingDeductionData.amount"
+                         type="number"
+                         step="0.01"
+                         (click)="$event.stopPropagation()"
+                         (keydown)="onAmountKeydown($event, 'deduction')"
+                         (input)="onAmountInput($event, 'deduction')"
+                         (keyup.enter)="saveDeductionEdit(i)"
+                         (keyup.escape)="cancelDeductionEdit()"
+                         class="inline-edit-input"
+                         placeholder="0.00">
+                  <ng-template #displayAmount>
+                    {{ deduction.amount | currency:'ZAR':'symbol':'1.2-2' }}
+                  </ng-template>
+                </td>
+                <td *ngIf="canEditPayslip(data.payslip)">
+                  <div *ngIf="editingDeduction === i; else normalActions" class="edit-actions">
+                    <button mat-icon-button
+                            color="primary"
+                            (click)="saveDeductionEdit(i); $event.stopPropagation()"
+                            matTooltip="Save changes"
+                            class="save-deduction-btn">
+                      <mat-icon>check</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            color="warn"
+                            (click)="cancelDeductionEdit(); $event.stopPropagation()"
+                            matTooltip="Cancel editing"
+                            class="cancel-deduction-btn">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                  <ng-template #normalActions>
+                    <button mat-icon-button
+                            color="accent"
+                            (click)="editDeduction(i, deduction); $event.stopPropagation()"
+                            matTooltip="Edit deduction"
+                            class="edit-deduction-btn">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            color="warn"
+                            (click)="removeDeduction(i); $event.stopPropagation()"
+                            matTooltip="Remove deduction"
+                            class="delete-deduction-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </ng-template>
+                </td>
+              </tr>
+              <tr class="total-row" *ngIf="data.payslip.deductions?.length">
+                <td><strong>Total Deductions</strong></td>
+                <td><strong>{{ data.payslip.totalDeductions | currency:'ZAR':'symbol':'1.2-2' }}</strong></td>
+                <td *ngIf="canEditPayslip(data.payslip)"></td>
+              </tr>
+              <!-- Show message when no deductions exist -->
+              <tr *ngIf="!data.payslip.deductions?.length" class="no-data-row">
+                <td [attr.colspan]="canEditPayslip(data.payslip) ? 3 : 2" style="text-align: center; font-style: italic; color: #666;">
+                  No deductions added yet
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Summary -->
+      <div class="right-column">
+        <div class="summary-container">
+          <div class="summary-section">
+            <h4>Income</h4>
+            <div class="summary-item income-item">
+              <span>Gross Earnings</span>
+              <strong>+ {{ data.payslip.grossEarnings | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-item income-item" *ngIf="data.payslip.bonuses?.length">
+              <span>Total Bonuses</span>
+              <strong>+ {{ getTotalBonuses(data.payslip.bonuses) | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-item income-item" *ngIf="data.payslip.miscEarnings?.length">
+              <span>Total Misc Earnings</span>
+              <strong>+ {{ getTotalMiscEarnings(data.payslip.miscEarnings) | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="subtotal-item" *ngIf="data.payslip.bonuses?.length || data.payslip.miscEarnings?.length || data.payslip.grossEarnings > 0">
+              <span>Total Income</span>
+              <strong>{{ getTotalIncome(data.payslip) | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="summary-section">
+            <h4>Deductions</h4>
+            <div class="summary-item deduction-item">
+              <span>Total Deductions</span>
+              <strong>- {{ data.payslip.totalDeductions | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-item deduction-item">
+              <span>PAYE (Tax)</span>
+              <strong>- {{ data.payslip.paye | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-item deduction-item">
+              <span>UIF</span>
+              <strong>- {{ data.payslip.uif | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="summary-item total">
+            <span><strong>Net Pay</strong></span>
+            <strong>{{ getCurrentNetPay(data.payslip) | currency:'ZAR':'symbol':'1.2-2' }}</strong>
+          </div>
+
+          <div class="calculation-hint">
+            <small>
+              Net Pay = Income - Deductions
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-raised-button class="action-btn history-btn" routerLink="/dashboard/payslips">
+        <mat-icon>history</mat-icon>
+        History
+      </button>
+
+      <button mat-raised-button class="action-btn pdf-btn"
+              color="primary"
+              (click)="downloadPDF(data.payslip)">
+        <mat-icon>download</mat-icon>
+        Download PDF
+      </button>
+
+      <button mat-raised-button class="action-btn query-btn"
+              color="warn"
+              (click)="openQueryDialog(null, 'general')">
+        <mat-icon>help_outline</mat-icon>
+        Query Payslip
+      </button>
+
+      <button mat-raised-button class="action-btn approve-btn"
+              color="accent"
+              *ngIf="data.payslip.status === EPayslipStatus.DRAFT || data.payslip.status === EPayslipStatus.QUERY_HANDLED"
+              (click)="submitForApproval(data.payslip)">
+        <mat-icon>send</mat-icon>
+        Submit for Approval
+      </button>
+
+      <!-- Admin Only: Add Test Data Button -->
+      <button mat-raised-button class="action-btn admin-btn"
+              color="accent"
+              *ngIf="isCurrentUserAdmin()"
+              (click)="addDummyData()"
+              matTooltip="ADMIN ONLY: Add test data to this payslip for development/testing purposes">
+        <mat-icon>science</mat-icon>
+        Add Test Data (Admin)
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

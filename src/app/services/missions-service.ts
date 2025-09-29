@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { HttpService } from './http-service';
 import { EMissionStatus } from '../models/enums/mission-status.enum';
 import { IMissions } from '../models/interfaces/IMissions.interface';
@@ -87,4 +87,34 @@ export class MissionService {
   deleteMission(missionId: string): Observable<void> {
     return this.httpService.delete<void>(`missions/${missionId}`);
   }
+
+   /**
+   * Finds a single mission by its bundle and tutor IDs.
+   * @param bundleId The ID of the bundle.
+   * @param tutorId The ID of the tutor.
+   * @returns An Observable that emits the found mission or null.
+   */
+  findMissionByBundleAndTutor(bundleId: string, tutorId: string): Observable<IMissions | null> {
+    // Assuming the backend exposes a route like /missions/find/bundle/:bundleId/tutor/:tutorId
+    return this.httpService.get<IMissions | null>(`missions/find/bundle/${bundleId}/tutor/${tutorId}`);
+  }
+
+  /**
+   * Updates the completed hours for a specific mission.
+   * @param missionId The ID of the mission to update.
+   * @param hoursToAdd The number of hours to add to the mission's completed hours.
+   * @returns An Observable that emits the updated mission.
+   */
+  updateMissionHours(missionId: string, hoursToAdd: number): Observable<IMissions> {
+  return this.httpService.patch<IMissions>(`missions/${missionId}/hours`, { hours: hoursToAdd })
+    .pipe(
+      catchError(error => {
+        console.error('Error updating mission hours:', error);
+        if (error.status === 403) {
+          console.error('Permission denied. User may not have MISSIONS_EDIT permission.');
+        }
+        throw error;
+      })
+    );
+}
 }

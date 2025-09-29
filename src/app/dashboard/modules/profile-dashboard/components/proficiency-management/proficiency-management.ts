@@ -24,7 +24,7 @@ import { UserService } from '../../../../../services/user-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { IBackendProficiency } from '../../../../../models/interfaces/IBackendProficiency.interface';
-import * as _ from 'lodash'; 
+ 
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -118,11 +118,11 @@ export class ProficiencyManagement implements OnInit {
             });
         }
     });
-    this.initialSyllabusSelections = _.cloneDeep(this.syllabusSelections);
+    this.initialSyllabusSelections = JSON.parse(JSON.stringify(this.syllabusSelections));
   }
 
   isSaveDisabled(): boolean {
-    return _.isEqual(this.syllabusSelections, this.initialSyllabusSelections);
+    return JSON.stringify(this.syllabusSelections) === JSON.stringify(this.initialSyllabusSelections);
   }
 
   private _filter(value: string): string[] {

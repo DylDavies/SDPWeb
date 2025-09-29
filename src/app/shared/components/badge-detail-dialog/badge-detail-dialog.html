@@ -33,10 +33,15 @@
           <span class="detail-label">Type</span>
           <span class="detail-value">{{ data.badge.permanent ? 'Permanent' : 'Temporary' }}</span>
         </div>
-        @if (!data.badge.permanent && data.badge.expirationDate) {
+        @if (!data.badge.permanent) {
           <div class="detail-item">
-            <span class="detail-label">Expires</span>
-            <span class="detail-value">{{ data.badge.expirationDate | date:'longDate' }}</span>
+            <span class="detail-label">Expires in</span>
+            <span class="detail-value remaining-days">
+              {{ expirationDisplay }}
+              @if (expirationDate) {
+                <span class="expiration-date"> ({{ expirationDate }})</span>
+              }
+            </span>
           </div>
         }
       </div>
@@ -44,6 +49,6 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-flat-button color="primary" (click)="dialogRef.close()">Close</button>
+    <button mat-flat-button color="primary" (click)="onClose()">Close</button>
   </mat-dialog-actions>
 </div>

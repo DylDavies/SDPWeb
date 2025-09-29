@@ -2,11 +2,15 @@
     padding: 24px;
 }
 
-.dialog-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
+.dialog-header h2[mat-dialog-title] {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+
+  white-space: normal;       
+  word-break: break-word;     
+  overflow-wrap: anywhere;   
+  line-height: 1.2;
 }
 
 .dialog-header mat-icon {
@@ -41,4 +45,31 @@ h2[mat-dialog-title] {
 
 mat-dialog-actions {
     padding-top: 16px;
+}
+
+::ng-deep .add-badge-dialog-panel {
+  max-width: 352px !important; 
+
+  .mat-mdc-option .mdc-list-item__primary-text {
+    white-space: normal;      
+    line-height: 1.4;         
+    padding-top: 8px;         
+    padding-bottom: 8px;
+  }
+}
+
+.add-badge-dialog-panel {
+  max-width: 352px !important;
+
+.badge-option span {
+  white-space: normal;
+  word-break: break-word; 
+}
+
+
+  .mat-mdc-option {
+    min-height: 56px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
 }

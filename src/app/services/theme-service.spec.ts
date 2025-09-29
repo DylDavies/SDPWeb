@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RendererFactory2 } from '@angular/core';
-import { Subject, of } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { ThemeService, Theme } from './theme-service';
 import { AuthService } from './auth-service';
 import { UserService } from './user-service';
@@ -11,7 +11,10 @@ import { EUserType } from '../models/enums/user-type.enum';
 const mockUser: IUser = {
   _id: '1', displayName: 'Test User', email: 'active@test.com',
   pending: false, disabled: false, type: EUserType.Staff, roles: [], permissions: [],
-  picture: '', createdAt: new Date(), firstLogin: false, googleId: '', theme: 'dark', leave: []
+  picture: '', createdAt: new Date(), firstLogin: false, googleId: '', theme: 'dark', leave: [],
+  paymentType: 'Contract' as const,
+  monthlyMinimum: 0,
+  rateAdjustments: []
 };
 
 // --- Mock Services and Dependencies ---
@@ -109,4 +112,25 @@ describe('ThemeService', () => {
       expect(service.theme()).toBe('dark');
     }));
   });
+
+  describe('Error Handling', () => {
+    beforeEach(() => {
+      spyOn(localStorage, 'getItem').and.returnValue(null);
+      spyOn(localStorage, 'setItem').and.stub();
+      configureTestingModule();
+      service = TestBed.inject(ThemeService);
+    });
+
+    it('should handle error when updating user preferences fails', () => {
+      spyOn(console, 'error');
+      spyOn(mockUserService, 'updateUserPreferences').and.returnValue(
+        throwError(() => new Error('API Error'))
+      );
+
+      service.setTheme('dark');
+
+      expect(console.error).toHaveBeenCalledWith('Failed to save theme preference:', jasmine.any(Error));
+    });
+  });
+
 });

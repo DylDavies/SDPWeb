@@ -1,0 +1,97 @@
+<div class="rate-adjustment-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>trending_up</mat-icon>
+    Adjust Rate for {{ user.displayName }}
+  </h2>
+
+  <mat-dialog-content>
+    <!-- User Information Section -->
+    <div class="user-info">
+      <div class="info-item">
+        <span class="label">Current Rate:</span>
+        <span class="current-rate">{{ currentRateDisplay }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">User:</span>
+        <span class="user-details">{{ user.displayName }} ({{ user.email }})</span>
+      </div>
+    </div>
+
+    <!-- Rate Adjustment Form -->
+    <form [formGroup]="rateAdjustmentForm" class="adjustment-form">
+
+      <!-- Reason Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Reason for Adjustment</mat-label>
+        <textarea matInput
+                  formControlName="reason"
+                  rows="3"
+                  placeholder="Please provide a detailed reason for this rate adjustment..."
+                  maxlength="500"></textarea>
+        <mat-hint align="end">{{ rateAdjustmentForm.get('reason')?.value?.length || 0 }}/500</mat-hint>
+        <mat-error *ngIf="rateAdjustmentForm.get('reason')?.hasError('required')">
+          Reason is required
+        </mat-error>
+        <mat-error *ngIf="rateAdjustmentForm.get('reason')?.hasError('minlength')">
+          Reason must be at least 5 characters long
+        </mat-error>
+      </mat-form-field>
+
+      <!-- New Rate Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>New Hourly Rate</mat-label>
+        <input matInput
+               type="number"
+               formControlName="newRate"
+               step="0.01"
+               min="0.01"
+               placeholder="0.00"
+               max="1000.00"
+               (keydown)="onRateKeydown($event)"
+               (input)="onRateInput($event)">
+        <span matSuffix class="rate-suffix">/hr</span>
+        <mat-hint>Enter the new hourly rate in Rands</mat-hint>
+        <mat-error *ngIf="rateAdjustmentForm.get('newRate')?.hasError('required')">
+          New rate is required
+        </mat-error>
+        <mat-error *ngIf="rateAdjustmentForm.get('newRate')?.hasError('min')">
+          Rate must be greater than R0
+        </mat-error>
+        <mat-error *ngIf="rateAdjustmentForm.get('newRate')?.hasError('max')">
+          Rate must be less than R1000.00
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Immediate Effect Notice -->
+      <div class="immediate-effect-notice">
+        <mat-icon>info</mat-icon>
+        <span>Rate adjustments take effect immediately upon approval.</span>
+      </div>
+
+      <!-- Rate Change Summary -->
+      <div *ngIf="isRateChanged" class="rate-summary">
+        <div class="summary-title">Rate Change Summary:</div>
+        <div class="rate-change">
+          <span class="old-rate">{{ currentRateDisplay }}</span>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+          <span class="new-rate">R{{ rateAdjustmentForm.get('newRate')?.value | number:'1.2-2' }}/hr</span>
+        </div>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">
+      Cancel
+    </button>
+    <button mat-raised-button
+            color="primary"
+            (click)="onSubmit()"
+            [disabled]="!rateAdjustmentForm.valid || isSubmitting || !isRateChanged">
+      <mat-spinner *ngIf="isSubmitting" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+      <span *ngIf="!isSubmitting">Save Rate Adjustment</span>
+    </button>
+  </mat-dialog-actions>
+</div>

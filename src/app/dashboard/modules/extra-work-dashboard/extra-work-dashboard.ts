@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
-import { CommonModule, DatePipe, SlicePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -35,7 +35,6 @@ import { SnackBarService } from '../../../services/snackbar-service';
   imports: [
     CommonModule,
     DatePipe,
-    SlicePipe,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,

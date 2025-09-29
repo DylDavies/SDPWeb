@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { UserService } from '../../../services/user-service';
 import { BadgeService } from '../../../services/badge-service';
 import IBadge from '../../../models/interfaces/IBadge.interface';
-import { IUser } from '../../../models/interfaces/IUser.interface';
+import { IUser, IUserBadge } from '../../../models/interfaces/IUser.interface';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -35,18 +35,29 @@ export class AddUserBadgeDialogComponent implements OnInit {
   public availableBadges: IBadge[] = [];
   public badgeControl = new FormControl<IBadge | null>(null, Validators.required);
 
-  ngOnInit(): void {
-    this.badgeService.getBadges().subscribe((allBadges) => {
-      const userBadgeIds = new Set(this.data.user.badges?.map(b => b._id.toString()));
-      this.availableBadges = allBadges.filter(b => !userBadgeIds.has(b._id.toString()));
-    });
-  }
+ngOnInit(): void {
+  this.badgeService.getBadges().subscribe((allBadges) => {
+    const userBadgeIds = new Set(
+      this.data.user.badges?.map((userBadge: IUserBadge) => {
+        if (typeof userBadge.badge === 'string') {
+          return userBadge.badge;
+        }
+        return (userBadge.badge as IBadge)._id;
+      })
+    );
+
+    // Filter the list of all badges to only include those the user does not have
+    this.availableBadges = allBadges.filter(
+      (b) => !userBadgeIds.has(b._id.toString())
+    );
+  });
+}
 
   onAdd(): void {
     if (this.badgeControl.valid && this.badgeControl.value) {
       const selectedBadge = this.badgeControl.value;
       if (selectedBadge) {
-        this.userService.addBadgeToUser(this.data.user._id, selectedBadge).subscribe({
+        this.userService.addBadgeToUser(this.data.user._id, selectedBadge._id).subscribe({
           next: (updatedUser) => {
             this.dialogRef.close({ updatedUser: updatedUser });
           },

@@ -16,6 +16,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { IUser } from '../../../../models/interfaces/IUser.interface';
 import { EPermission } from '../../../../models/enums/permission.enum';
 import { AuthService } from '../../../../services/auth-service';
+import { EventService } from '../../../../services/event-service';
+import { MissionService } from '../../../../services/missions-service';
+import { IEvent } from '../../../../models/interfaces/IEvent.interface';
+import { Observable, switchMap, of, catchError, forkJoin } from 'rxjs';
+import { IMissions } from '../../../../models/interfaces/IMissions.interface';
 
 @Component({
   selector: 'app-student-information-page',
@@ -32,11 +37,14 @@ export class StudentInformationPage implements OnInit {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   public bundle: IBundle | null = null;
+   private eventService = inject(EventService);
+  private missionService = inject(MissionService);
   public tutors: IPopulatedUser[] = [];
   public isLoading = true;
   public bundleNotFound = false;
   public bundleId: string | null = null;
   public canCreateMissions = false;
+  public isUpdatingMissions = false;
 
   ngOnInit(): void {
     
@@ -67,18 +75,90 @@ export class StudentInformationPage implements OnInit {
       }
     });
   }
+updateAllMissionHours(): void {
+  if (!this.bundleId || this.isUpdatingMissions) return;
 
-  getTutorsFromBundle(): void {
-    if (!this.bundle) return;
-    const tutorMap = new Map<string, IPopulatedUser>();
-    this.bundle.subjects.forEach(subject => {
-        if (typeof subject.tutor === 'object' && subject.tutor._id) {
-            tutorMap.set(subject.tutor._id, subject.tutor);
+  this.isUpdatingMissions = true;  
+
+  this.eventService.getEvents().subscribe((events: IEvent[]) => {
+    
+    const tutorHours = new Map<string, number>();
+    
+    events.forEach(event => {
+      // Check if event belongs to current bundle and is remarked
+      if (event.bundle === this.bundleId && event.remarked) {
+        const tutorId = typeof event.tutor === 'object' ? (event.tutor as IPopulatedUser)._id : event.tutor as string;
+        
+        if (tutorId) {
+          const eventHours = event.duration / 60;
+          // ACCUMULATE hours instead of replacing them
+          const currentHours = tutorHours.get(tutorId) || 0;
+          tutorHours.set(tutorId, currentHours + eventHours);
         }
+      }
     });
-    this.tutors = Array.from(tutorMap.values());
-  }
+    
+    this.updateMissionsForTutors(tutorHours);
+  });
+}
 
+updateMissionsForTutors(tutorHours: Map<string, number>): void {
+  const updatePromises:Observable<IMissions | null>[] = [];
+  
+  tutorHours.forEach((totalHours, tutorId) => {
+    if (totalHours >= 0) { 
+      const missionUpdate$ = this.missionService.findMissionByBundleAndTutor(this.bundleId!, tutorId)
+        .pipe(
+          switchMap(mission => {
+            if (mission) {
+              return this.missionService.updateMissionHours(mission._id, totalHours);
+            } else {
+              console.warn(`No mission found for bundle ${this.bundleId} and tutor ${tutorId}`);
+              return of(null);
+            }
+          }),
+          catchError(error => {
+            console.error(`Error updating mission for tutor ${tutorId}:`, error);
+            return of(null);
+          })
+        );
+      
+      updatePromises.push(missionUpdate$);
+    }
+  });
+  
+  if (updatePromises.length > 0) {
+    forkJoin(updatePromises).subscribe({
+      next: () => {
+        this.isUpdatingMissions = false;  
+      },
+      error: (error) => {
+        console.error('Error updating mission hours:', error);
+        this.isUpdatingMissions = false;  
+      }
+    });
+  } else {
+    console.log('No missions to update');
+    this.isUpdatingMissions = false;  
+  }
+}
+
+getTutorsFromBundle(): void {
+  if (!this.bundle) return;
+  const tutorMap = new Map<string, IPopulatedUser>();
+  
+  this.bundle.subjects.forEach(subject => {
+    if (typeof subject.tutor === 'object' && subject.tutor._id) {
+      tutorMap.set(subject.tutor._id, subject.tutor);
+    }
+  });
+  
+  this.tutors = Array.from(tutorMap.values());
+  
+  if (this.tutors.length > 0) {
+    this.updateAllMissionHours();
+  }
+}
   openCreateDialog(): void {
     if (this.bundle?.student && typeof this.bundle.student === 'object' && this.bundleId) {
       const dialogRef = this.dialog.open(MissionsModal, {

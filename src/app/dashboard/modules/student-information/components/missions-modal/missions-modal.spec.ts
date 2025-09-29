@@ -100,7 +100,7 @@ describe('MissionsModal', () => {
   // Helper function to set up the testing module
   const setupTestBed = async (data: any) => {
     missionServiceSpy = jasmine.createSpyObj('MissionService', ['createMission', 'updateMission']);
-    bundleServiceSpy = jasmine.createSpyObj('BundleService', ['getBundles']);
+    bundleServiceSpy = jasmine.createSpyObj('BundleService', ['getBundles', 'getBundleById']);
     snackBarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
     authServiceSpy = { currentUser$: new BehaviorSubject<IUser | null>(mockCurrentUser) };
     fileServiceSpy = jasmine.createSpyObj('FileService', ['getPresignedUploadUrl', 'uploadFileToSignedUrl', 'finalizeUpload']);
@@ -123,6 +123,7 @@ describe('MissionsModal', () => {
     fixture = TestBed.createComponent(MissionsModal);
     component = fixture.componentInstance;
     bundleServiceSpy.getBundles.and.returnValue(of(mockBundles));
+    bundleServiceSpy.getBundleById.and.returnValue(of(mockBundles[0])); // Mock the new method
     fixture.detectChanges();
     tick(); // process ngOnInit async operations
   };
@@ -144,7 +145,7 @@ describe('MissionsModal', () => {
         let tutors: IPopulatedUser[] = [];
         component.tutors$.subscribe(t => tutors = t);
         tick();
-        expect(bundleServiceSpy.getBundles).toHaveBeenCalled();
+        expect(bundleServiceSpy.getBundleById).toHaveBeenCalled();
         expect(tutors.length).toBe(1);
         expect(tutors[0]._id).toBe(mockTutor._id);
     }));
@@ -207,7 +208,7 @@ describe('MissionsModal', () => {
         expect(component.createMissionForm.get('remuneration')?.value).toBe(mockMission.remuneration);
         expect(component.createMissionForm.get('document')?.hasValidator(Validators.required)).toBeFalse();
     });
-    
+
     it('should successfully update a mission', fakeAsync(() => {
         component.createMissionForm.patchValue({
             remuneration: 200,
@@ -240,4 +241,3 @@ describe('MissionsModal', () => {
     }));
   });
 });
-
