@@ -7,6 +7,7 @@ import { BadgeService } from '../../../services/badge-service';
 import { AuthService } from '../../../services/auth-service';
 import { combineLatest, map, Observable, startWith } from 'rxjs';
 import IBadge from '../../../models/interfaces/IBadge.interface';
+import { IUserBadge } from '../../../models/interfaces/IUser.interface';
 
 @Component({
   selector: 'app-badge-library',
@@ -32,7 +33,7 @@ export class BadgeLibrary{
     ]).pipe(
       map(([allBadges, user, filterValue]) => {
         if (filterValue === 'my') {
-          const myBadgeIds = new Set(user?.badges?.map(b => b._id));
+          const myBadgeIds = new Set(user?.badges?.map((userBadge: IUserBadge) => userBadge.badge._id));
           return allBadges.filter(b => myBadgeIds.has(b._id));
         }
         return allBadges;

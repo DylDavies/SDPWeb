@@ -1,3 +1,4 @@
+// src/app/shared/components/badge-card/badge-card.ts
 import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +10,6 @@ import { BadgeDetailDialogComponent } from '../badge-detail-dialog/badge-detail-
 import { UserService } from '../../../services/user-service';
 import { CreateEditBadgeDialogComponent } from '../../../dashboard/modules/admin-dashboard/components/create-edit-badge-dialog/create-edit-badge-dialog';
 import { AuthService } from '../../../services/auth-service';
-import { IUser } from '../../../models/interfaces/IUser.interface';
 import { EPermission } from '../../../models/enums/permission.enum';
 import { BadgeService } from '../../../services/badge-service';
 import { ConfirmationDialog } from '../confirmation-dialog/confirmation-dialog';
@@ -17,6 +17,7 @@ import { filter } from 'rxjs/operators';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BadgeRequirementDialogComponent } from '../badge-requirement-dialog/badge-requirement-dialog';
 import { SnackBarService } from '../../../services/snackbar-service';
+import { IUserBadge } from '../../../models/interfaces/IUser.interface';
 
 @Component({
   selector: 'app-badge-card',
@@ -27,6 +28,7 @@ import { SnackBarService } from '../../../services/snackbar-service';
 })
 export class BadgeCardComponent implements OnInit {
   @Input() badge!: IBadge;
+  @Input() userBadge!: IUserBadge;
   @Input() userId?: string;
   @Input() context: 'admin' | 'profile' | 'library' = 'profile';
   @Output() badgeUpdated = new EventEmitter<void>();
@@ -52,13 +54,14 @@ export class BadgeCardComponent implements OnInit {
   viewDetails(): void {
     this.dialog.open(BadgeDetailDialogComponent, {
       width: '400px',
-      data: { badge: this.badge },
+      data: { badge: this.badge, userBadge: this.userBadge },
     });
   }
+
   openRequirementsDialog(): void {
     this.dialog.open(BadgeRequirementDialogComponent, {
       width: 'clamp(500px, 50vw, 600px)',
-      data: { 
+      data: {
         badge: this.badge,
         isEditable: this.context === 'admin' && this.canManageRequirements
       }
@@ -104,9 +107,8 @@ export class BadgeCardComponent implements OnInit {
   removeBadgeFromUser(): void {
     if (this.userId) {
       this.userService.removeBadgeFromUser(this.userId, this.badge._id.toString()).subscribe({
-        next: (updatedUser: IUser) => {
+        next: () => {
           this.snackbarService.showSuccess('Badge removed from user.');
-          this.authService.updateCurrentUserState(updatedUser);
         },
         error: () => {
           this.snackbarService.showError('Failed to remove badge.');
