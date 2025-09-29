@@ -68,7 +68,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions = new Subscription();
 
   myWorkDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'remuneration', 'commissioner', 'status'];
-  commissionedDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'remuneration', 'commissioner', 'status', 'actions'];
+  commissionedDisplayedColumns: string[] = ['createdAt', 'student', 'workType', 'remuneration', 'createdBy', 'status', 'actions'];
 
   dataSource: MatTableDataSource<IExtraWork>;
   commissionedDataSource: MatTableDataSource<IExtraWork>;
@@ -127,7 +127,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
             case 'student': return (item.studentId as IPopulatedUser)?.displayName || '';
             case 'workType': return item.workType;
             case 'remuneration': return item.remuneration;
-            case 'commissioner': return (item.commissionerId as IPopulatedUser)?.displayName || '';
+            case 'createdBy': return (item.userId as IPopulatedUser)?.displayName || '';
             case 'status': return item.status;
             default: return 0;
         }
@@ -175,7 +175,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     return (data: IExtraWork, filter: string): boolean => {
       const dataStr = (
         this.getStudentName(data) +
-        this.getCommissionerName(data) +
+        this.getCreatedByName(data) +
         data.workType +
         data.status +
         data.remuneration
@@ -208,9 +208,14 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     return student?.displayName || 'N/A';
   }
 
-  getCommissionerName(item: IExtraWork): string {
-    const commissioner = item.commissionerId as IPopulatedUser;
-    return commissioner?.displayName || 'N/A';
+  getCommisionedByName(item: IExtraWork): string {
+    const commisioned = item.commissionerId as IPopulatedUser;
+    return commisioned?.displayName || 'N/A';
+  }
+
+  getCreatedByName(item: IExtraWork): string {
+    const createdBy = item.userId as IPopulatedUser;
+    return createdBy?.displayName || 'N/A';
   }
 
   openAddWorkDialog(): void {

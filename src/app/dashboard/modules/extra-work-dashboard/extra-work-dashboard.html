@@ -40,7 +40,7 @@
 
         <ng-container matColumnDef="commissioner">
             <th mat-header-cell *matHeaderCellDef> Commissioned By </th>
-            <td mat-cell *matCellDef="let item"> {{ getCommissionerName(item) }} </td>
+            <td mat-cell *matCellDef="let item"> {{ getCommisionedByName(item) }} </td>
         </ng-container>
 
         <ng-container matColumnDef="status">
@@ -101,9 +101,9 @@
             <td mat-cell *matCellDef="let item"> R{{item.remuneration.toFixed(2)}} </td>
           </ng-container>
 
-          <ng-container matColumnDef="commissioner">
-              <th mat-header-cell *matHeaderCellDef> Commissioned By </th>
-              <td mat-cell *matCellDef="let item"> {{ getCommissionerName(item) }} </td>
+          <ng-container matColumnDef="createdBy">
+              <th mat-header-cell *matHeaderCellDef> Created By </th>
+              <td mat-cell *matCellDef="let item"> {{ getCreatedByName(item) }} </td>
           </ng-container>
 
           <ng-container matColumnDef="status">
