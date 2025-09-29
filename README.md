@@ -487,6 +487,10 @@ Stores information about all registered users, including their personal details,
 | `proficiencies`| `Array` | An array of embedded proficiency documents specific to the user. | See `proficiencies` collection. |
 | `theme` | `String` | The user's preferred UI theme. | Enum: `['light', 'dark', 'system']`, `Default: 'system'` |
 | `availability` | `Number` | A field to store a tutor's availability in hours. | `Default: 0` |
+| `badges` | `Array` | An array of embedded badge documents. | See **User Badge Sub-schema** below. |
+| `paymentType` | `String` | The user's payment type. | Enum: `['Contract', 'Salaried']`, `Default: 'Contract'` |
+| `monthlyMinimum`| `Number` | The minimum monthly payment for the user. | `Default: 0` |
+| `rateAdjustments`| `Array` | An array of embedded rate adjustment documents. | See **Rate Adjustment Sub-schema** below. |
 | `createdAt` | `Date` | Timestamp of when the user was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
 
@@ -498,6 +502,22 @@ Stores information about all registered users, including their personal details,
 | `startDate` | `Date` | The starting date of the leave period. | **Required** |
 | `endDate` | `Date` | The ending date of the leave period. | **Required** |
 | `approved` | `String` | The current status of the leave request. | Enum: `ELeave: [pending, approved, denied]`, `Default: 'pending'` |
+
+#### User Badge Sub-schema (Embedded in `users`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `badge` | `ObjectId` | A reference to the badge document. | **Required**, `ref: 'Badges'` |
+| `dateAdded` | `Date` | The date the badge was added. | `Default: Date.now` |
+
+#### Rate Adjustment Sub-schema (Embedded in `users`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `reason` | `String` | The reason for the rate adjustment. | **Required** |
+| `newRate` | `Number` | The new rate for the user. | **Required** |
+| `effectiveDate`| `Date` | The date the new rate is effective from. | **Required** |
+| `approvingManagerId` | `ObjectId` | A reference to the approving manager's user document. | **Required**, `ref: 'User'` |
 
 ---
 
@@ -557,8 +577,9 @@ Manages lesson bundles, linking a student to one or more tutors for specific sub
 | Field | Data Type | Description | Constraints & Defaults |
 | :--- | :--- | :--- | :--- |
 | `subject` | `String` | The name of the subject for this part of the bundle. | **Required** |
+| `grade` | `String` | The grade of the subject. | **Required** |
 | `tutor` | `ObjectId` | A reference to the tutor user assigned to this subject. | **Required**, `ref: 'User'` |
-| `hours` | `Number` | The number of lesson hours allocated for this subject in the bundle. | **Required**, `min: 0` |
+| `durationMinutes` | `Number` | The number of lesson minutes allocated for this subject in the bundle. | **Required**, `min: 0` |
 
 ---
 
@@ -573,7 +594,6 @@ Stores API keys for external clients, allowing secure, programmatic access to th
 | `key` | `String` | The **hashed** API key. | **Required** |
 | `createdAt` | `Date` | Timestamp of when the key was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
-
 
 ---
 
@@ -590,7 +610,7 @@ Stores information about badges that can be awarded to users.
 | `summary` | `String` | A short summary of the badge. | **Required** |
 | `description`| `String` | A detailed description of the badge. | **Required** |
 | `permanent` | `Boolean` | A flag to determine if the badge is permanent. | **Required**, `Default: false` |
-| `expirationDate` | `Date` | The date the badge expires. | Optional |
+| `duration` | `Number` | The duration of the badge in days. | Optional |
 | `bonus` | `Number` | A bonus value associated with the badge. | **Required**, `Default: 0` |
 | `createdAt` | `Date` | Timestamp of when the badge was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
@@ -750,8 +770,6 @@ Defines the structure of the sidebar navigation.
 | `children` | `Array` | An array of embedded sidebar item documents. | Optional |
 #### Special Logic & Methods
 
-* **Pre-save Middleware:** A `pre('save')` hook automatically hashes the `key` field using `bcryptjs` before any document is saved to the database.
-* **`compareKey` Method:** An instance method is available on `ApiKey` documents to securely compare a plain-text key (from an incoming request) with the stored hash. It returns a `Promise<boolean>`.
 
 ## 15. `payslips` Collection
 
