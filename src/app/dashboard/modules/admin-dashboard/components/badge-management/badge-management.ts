@@ -7,6 +7,7 @@ import IBadge from '../../../../../models/interfaces/IBadge.interface';
 import { BadgeService } from '../../../../../services/badge-service';
 import { CreateEditBadgeDialogComponent } from '../create-edit-badge-dialog/create-edit-badge-dialog';
 import { BadgeCardComponent } from '../../../../../shared/components/badge-card/badge-card';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 
 @Component({
   selector: 'app-badge-management',
@@ -18,6 +19,7 @@ import { BadgeCardComponent } from '../../../../../shared/components/badge-card/
 export class BadgeManagement implements OnInit {
   private badgeService = inject(BadgeService);
   private dialog = inject(MatDialog);
+  private snackbarService = inject(SnackBarService);
 
   public badges: IBadge[] = [];
 
@@ -27,8 +29,13 @@ export class BadgeManagement implements OnInit {
   }
 
   loadBadges(): void {
-    this.badgeService.getBadges().subscribe((badges) => {
-      this.badges = badges;
+    this.badgeService.getBadges().subscribe({
+      next: (badges) => {
+        this.badges = badges;
+      },
+      error: () => {
+        this.snackbarService.showError('Failed to load badges.');
+      }
     });
   }
 

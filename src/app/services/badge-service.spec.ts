@@ -59,7 +59,7 @@ describe('BadgeService', () => {
   });
 
   describe('getBadges', () => {
-    it('should fetch all badges via GET and update the badges$ subject', (done: DoneFn) => {
+    it('should fetch all badges via GET and update the badges$ subject', (done) => {
       service.getBadges().subscribe(badges => {
         expect(badges).toEqual(mockBadges);
 
@@ -74,7 +74,7 @@ describe('BadgeService', () => {
   });
 
   describe('addOrUpdateBadge', () => {
-    it('should send a POST request and then refresh the badge list', (done: DoneFn) => {
+    it('should send a POST request and then refresh the badge list', (done) => {
       const newBadge: IBadge = { _id: '3', name: 'New Badge', TLA: 'NEW', image: 'rocket', summary: 'New Summary', description: 'New Desc', permanent: true, bonus: 0 };
       httpServiceSpy.post.and.returnValue(of(newBadge));
       httpServiceSpy.get.and.returnValue(of([...mockBadges, newBadge]));
@@ -86,7 +86,7 @@ describe('BadgeService', () => {
       });
     });
 
-    it('should handle errors when adding or updating a badge', (done: DoneFn) => {
+    it('should handle errors when adding or updating a badge', (done) => {
       const newBadge: IBadge = { _id: '3', name: 'New Badge', TLA: 'NEW', image: 'rocket', summary: 'New Summary', description: 'New Desc', permanent: true, bonus: 0 };
       httpServiceSpy.post.and.returnValue(throwError(() => new Error('API Error')));
 
@@ -101,7 +101,7 @@ describe('BadgeService', () => {
 
 
   describe('deleteBadge', () => {
-    it('should send a DELETE request and then refresh the badge list', (done: DoneFn) => {
+    it('should send a DELETE request and then refresh the badge list', (done) => {
       const badgeIdToDelete = '1';
       httpServiceSpy.delete.and.returnValue(of(undefined));
       httpServiceSpy.get.and.returnValue(of(mockBadges.filter(b => b._id !== badgeIdToDelete)));
@@ -140,6 +140,132 @@ describe('BadgeService', () => {
       socketListener$.next({ event: ESocketMessage.BadgesUpdated });
 
       expect(service.getBadges).toHaveBeenCalled();
+    });
+  });
+
+  describe('getBadgesByIds', () => {
+    beforeEach((done) => {
+      httpServiceSpy.get.and.returnValue(of(mockBadges));
+      customObservableServiceSpy.createManagedTopicObservable.and.returnValue(of(mockBadges));
+      // Populate allBadges$ by calling getBadges
+      service.getBadges().subscribe(() => done());
+    });
+
+    it('should return an empty array if ids array is empty', (done) => {
+      service.getBadgesByIds([]).subscribe(badges => {
+        expect(badges).toEqual([]);
+        done();
+      });
+    });
+
+    it('should return an empty array if ids is null', (done) => {
+      service.getBadgesByIds(null as any).subscribe(badges => {
+        expect(badges).toEqual([]);
+        done();
+      });
+    });
+
+    it('should return an empty array if ids is undefined', (done) => {
+      service.getBadgesByIds(undefined as any).subscribe(badges => {
+        expect(badges).toEqual([]);
+        done();
+      });
+    });
+
+    it('should filter badges by provided IDs', (done) => {
+      const idsToFilter = ['1'];
+
+      service.getBadgesByIds(idsToFilter).subscribe(badges => {
+        expect(badges.length).toBe(1);
+        expect(badges[0]._id).toBe('1');
+        done();
+      });
+    });
+
+    it('should return multiple badges when multiple IDs match', (done) => {
+      const idsToFilter = ['1', '2'];
+
+      service.getBadgesByIds(idsToFilter).subscribe(badges => {
+        expect(badges.length).toBe(2);
+        expect(badges.map(b => b._id)).toEqual(['1', '2']);
+        done();
+      });
+    });
+
+    it('should return empty array when no IDs match', (done) => {
+      const idsToFilter = ['999'];
+
+      service.getBadgesByIds(idsToFilter).subscribe(badges => {
+        expect(badges.length).toBe(0);
+        done();
+      });
+    });
+  });
+
+  describe('deleteBadge - Error handling', () => {
+    it('should handle errors when deleting a badge', (done) => {
+      const badgeIdToDelete = '1';
+      httpServiceSpy.delete.and.returnValue(throwError(() => new Error('Delete failed')));
+
+      service.deleteBadge(badgeIdToDelete).subscribe({
+        error: (err) => {
+          expect(err).toBeDefined();
+          expect(httpServiceSpy.delete).toHaveBeenCalledWith(`badges/${badgeIdToDelete}`);
+          done();
+        }
+      });
+    });
+  });
+
+  describe('getBadgeRequirements - Error handling', () => {
+    it('should handle errors when fetching badge requirements', (done) => {
+      const badgeId = '1';
+      httpServiceSpy.get.and.returnValue(throwError(() => new Error('Fetch failed')));
+
+      service.getBadgeRequirements(badgeId).subscribe({
+        error: (err) => {
+          expect(err).toBeDefined();
+          done();
+        }
+      });
+    });
+  });
+
+  describe('updateBadgeRequirements - Error handling', () => {
+    it('should handle errors when updating badge requirements', (done) => {
+      const badgeId = '1';
+      const newRequirements = 'Updated requirements text.';
+      httpServiceSpy.patch.and.returnValue(throwError(() => new Error('Update failed')));
+
+      service.updateBadgeRequirements(badgeId, newRequirements).subscribe({
+        error: (err) => {
+          expect(err).toBeDefined();
+          done();
+        }
+      });
+    });
+  });
+
+  describe('addOrUpdateBadge - with requirements field', () => {
+    it('should handle badge data with requirements field', (done) => {
+      const newBadge = {
+        _id: '3',
+        name: 'New Badge',
+        TLA: 'NEW',
+        image: 'rocket',
+        summary: 'New Summary',
+        description: 'New Desc',
+        permanent: true,
+        bonus: 0,
+        requirements: 'Special requirements text'
+      };
+      httpServiceSpy.post.and.returnValue(of(newBadge));
+      httpServiceSpy.get.and.returnValue(of([...mockBadges, newBadge]));
+
+      service.addOrUpdateBadge(newBadge).subscribe(() => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('badges', newBadge);
+        done();
+      });
     });
   });
 });

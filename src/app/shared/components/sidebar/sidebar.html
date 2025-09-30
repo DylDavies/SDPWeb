@@ -31,7 +31,7 @@
 
 <ng-template #itemList let-items="items">
   @for (item of items; track item.route) {
-    @if (canView(item.requiredPermissions)) {
+    @if (shouldShow(item)) {
       @if (item.children && item.children.length > 0) {
         <mat-expansion-panel class="expansion-panel">
           <mat-expansion-panel-header>

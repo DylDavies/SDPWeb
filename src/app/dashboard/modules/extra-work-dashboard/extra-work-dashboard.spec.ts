@@ -15,6 +15,9 @@ import { ESocketMessage } from '../../../models/enums/socket-message.enum';
 import { IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
 import { ViewExtraWorkModal } from './components/view-extra-work-modal/view-extra-work-modal';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { EventEmitter } from '@angular/core';
 
 // --- MOCK DATA ---
 const mockCurrentUser: IUser = {
@@ -94,7 +97,15 @@ describe('ExtraWorkDashboard', () => {
         mockSocketService = jasmine.createSpyObj('SocketService', ['subscribe', 'listen', 'unsubscribe']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
-        mockSocketService.listen.and.returnValue(of({}));
+        // Setup default dialog ref with afterClosed returning observable
+        const defaultDialogRef = jasmine.createSpyObj('dialogRef', ['afterClosed']);
+        defaultDialogRef.afterClosed.and.returnValue(of(null));
+        mockDialog.open.and.returnValue(defaultDialogRef);
+
+        // Ensure socket service methods always return proper values
+        mockSocketService.subscribe.and.returnValue(undefined); // subscribe returns void
+        mockSocketService.unsubscribe.and.returnValue(undefined); // unsubscribe returns void
+        mockSocketService.listen.and.returnValue(of({})); // listen returns Observable
 
         await TestBed.configureTestingModule({
             imports: [ExtraWorkDashboard, NoopAnimationsModule, HttpClientTestingModule],
@@ -202,14 +213,208 @@ describe('ExtraWorkDashboard', () => {
             expect(name).toBe('Student A');
         });
 
-        it('getCommissionerName should return "N/A" for a string ID', () => {
-            const name = component.getCommissionerName(mockExtraWorkItems[2]);
+        it('getCommisionedByName should return "N/A" for a string ID', () => {
+            const name = component.getCommisionedByName(mockExtraWorkItems[2]);
             expect(name).toBe('N/A');
         });
 
-        it('getCommissionerName should return displayName for a populated user', () => {
-            const name = component.getCommissionerName(mockExtraWorkItems[0]);
+        it('getCommisionedByName should return displayName for a populated user', () => {
+            const name = component.getCommisionedByName(mockExtraWorkItems[0]);
             expect(name).toBe('Commissioner User');
+        });
+
+        it('getCreatedByName should return "N/A" for a string ID', () => {
+            const name = component.getCreatedByName(mockExtraWorkItems[2]);
+            expect(name).toBe('N/A');
+        });
+
+        it('getCreatedByName should return displayName for a populated user', () => {
+            const name = component.getCreatedByName(mockExtraWorkItems[0]);
+            expect(name).toBe('Test User');
+        });
+    });
+
+    describe('Data Loading Branches', () => {
+        beforeEach(() => fixture.detectChanges());
+
+        it('should load all work items when canViewAll is true', () => {
+            mockAuthService.hasPermission.and.returnValue(true);
+            component.canViewAll = true;
+            component.canApprove = true;
+            mockExtraWorkService.allExtraWork$.next(mockExtraWorkItems);
+
+            expect(component.dataSource.data.length).toBe(3);
+            expect(component.commissionedDataSource.data.length).toBe(3);
+        });
+
+        it('should handle error with default message when no error.message provided', () => {
+            const errorResponse = new HttpErrorResponse({ error: {} });
+            const errorSubject = new BehaviorSubject<IExtraWork[]>([]);
+            mockExtraWorkService.allExtraWork$ = errorSubject;
+
+            component.loadExtraWork();
+
+            errorSubject.error(errorResponse);
+
+            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Failed to load extra work.');
+            expect(component.isLoading).toBeFalse();
+            expect(component.isCommissionedLoading).toBeFalse();
+        });
+
+        it('should not load commissioned data if canApprove is false', () => {
+            component.canApprove = false;
+            component.canViewAll = true;
+            mockExtraWorkService.allExtraWork$.next(mockExtraWorkItems);
+
+            expect(component.dataSource.data.length).toBe(3);
+            expect(component.commissionedDataSource.data.length).toBe(0);
+        });
+    });
+
+    describe('Sorting Data Accessor', () => {
+        beforeEach(() => {
+            fixture.detectChanges();
+            component.ngAfterViewInit();
+        });
+
+        it('should sort by createdAt as timestamp', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[0], 'createdAt');
+            expect(typeof result).toBe('number');
+        });
+
+        it('should sort by student displayName', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[0], 'student');
+            expect(result).toBe('Student A');
+        });
+
+        it('should sort by workType', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[0], 'workType');
+            expect(result).toBe('Marking');
+        });
+
+        it('should sort by remuneration', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[0], 'remuneration');
+            expect(result).toBe(100);
+        });
+
+        it('should sort by createdBy displayName', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[0], 'createdBy');
+            expect(result).toBe('Test User');
+        });
+
+        it('should sort by status', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[0], 'status');
+            expect(result).toBe(EExtraWorkStatus.InProgress);
+        });
+
+        it('should return 0 for unknown property', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[0], 'unknownProperty');
+            expect(result).toBe(0);
+        });
+
+        it('should handle student as string ID in sorting', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[2], 'student');
+            expect(result).toBe('');
+        });
+
+        it('should handle createdBy as string ID in sorting', () => {
+            const result = component.dataSource.sortingDataAccessor(mockExtraWorkItems[2], 'createdBy');
+            expect(result).toBe('');
+        });
+
+        it('should set commissionedDataSource sortingDataAccessor when canApprove is true', () => {
+            component.canApprove = true;
+            component.ngAfterViewInit();
+            expect(component.commissionedDataSource.sortingDataAccessor).toBe(component.dataSource.sortingDataAccessor);
+        });
+
+        it('should not set commissionedDataSource sortingDataAccessor when canApprove is false', () => {
+            component.canApprove = false;
+            const originalAccessor = component.commissionedDataSource.sortingDataAccessor;
+            component.ngAfterViewInit();
+            expect(component.commissionedDataSource.sortingDataAccessor).toBe(originalAccessor);
+        });
+    });
+
+    describe('Filter Functions', () => {
+        beforeEach(() => fixture.detectChanges());
+
+        it('should apply filter without calling firstPage when paginator is null', () => {
+            component.dataSource.paginator = null;
+            const event = { target: { value: 'Test' } } as any;
+
+            component.applyFilter(event);
+
+            expect(component.dataSource.filter).toBe('test');
+        });
+
+        it('should apply commissioned filter without calling firstPage when paginator is null', () => {
+            component.commissionedDataSource.paginator = null;
+            const event = { target: { value: 'Test' } } as any;
+
+            component.applyCommissionedFilter(event);
+
+            expect(component.commissionedDataSource.filter).toBe('test');
+        });
+    });
+
+    describe('Socket Event Handling', () => {
+        it('should subscribe to socket events on init', () => {
+            fixture.detectChanges();
+            expect(mockSocketService.subscribe).toHaveBeenCalledWith(ESocketMessage.ExtraWorkUpdated);
+        });
+
+        it('should reload data when socket event is received', () => {
+            const socketSubject = new Subject();
+            mockSocketService.listen.and.returnValue(socketSubject);
+            spyOn(component, 'loadExtraWork');
+
+            // Cleanup existing subscriptions before calling ngOnInit again
+            component.ngOnDestroy();
+            component.ngOnInit();
+            socketSubject.next({});
+
+            expect(component.loadExtraWork).toHaveBeenCalled();
+
+            // Cleanup after test
+            socketSubject.complete();
+        });
+
+        it('should unsubscribe from socket on destroy', () => {
+            fixture.detectChanges();
+            component.ngOnDestroy();
+            expect(mockSocketService.unsubscribe).toHaveBeenCalledWith(ESocketMessage.ExtraWorkUpdated);
+        });
+    });
+
+    describe('Error Handling with Default Messages', () => {
+        beforeEach(() => fixture.detectChanges());
+
+        it('should use default error message when approving work fails without error.message', () => {
+            const errorResponse = new HttpErrorResponse({ error: {} });
+            mockExtraWorkService.setExtraWorkStatus.and.returnValue(throwError(() => errorResponse));
+
+            component.approveWork(mockExtraWorkItems[0]);
+
+            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Failed to approve item.');
+        });
+
+        it('should use default error message when denying work fails without error.message', () => {
+            const errorResponse = new HttpErrorResponse({ error: {} });
+            mockExtraWorkService.setExtraWorkStatus.and.returnValue(throwError(() => errorResponse));
+
+            component.denyWork(mockExtraWorkItems[0]);
+
+            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Failed to deny item.');
+        });
+
+        it('should use default error message when completing work fails without error.message', () => {
+            const errorResponse = new HttpErrorResponse({ error: {} });
+            mockExtraWorkService.completeExtraWork.and.returnValue(throwError(() => errorResponse));
+
+            component.onDateSelected(new Date(), mockExtraWorkItems[0]);
+
+            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Failed to update item.');
         });
     });
 });
