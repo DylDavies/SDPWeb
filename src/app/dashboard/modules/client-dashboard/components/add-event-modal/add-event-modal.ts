@@ -14,6 +14,9 @@ import { combineLatest } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import { EventService } from '../../../../../services/event-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { AuthService } from '../../../../../services/auth-service';
+import { IUser } from '../../../../../models/interfaces/IUser.interface';
+import { EUserType } from '../../../../../models/enums/user-type.enum';
 
 @Component({
   selector: 'app-add-event-modal',
@@ -34,8 +37,9 @@ import { SnackBarService } from '../../../../../services/snackbar-service';
 export class AddEventModal implements OnInit {
   private fb = inject(FormBuilder);
   private bundleService = inject(BundleService);
-  public eventService = inject(EventService); // Made public for template access
+  public eventService = inject(EventService); 
   private snackBarService = inject(SnackBarService);
+  private authService = inject(AuthService);
   public dialogRef = inject(MatDialogRef<AddEventModal>);
   public data: { date: Date, event?: IEvent } = inject(MAT_DIALOG_DATA);
 
@@ -45,6 +49,7 @@ export class AddEventModal implements OnInit {
   public remainingMinutes: number | null = null;
   private allEvents: IEvent[] = [];
   public isEditMode = false;
+  private currentUser: IUser | null = null;
 
   constructor() {
     this.isEditMode = !!this.data.event;
@@ -63,9 +68,22 @@ export class AddEventModal implements OnInit {
   }
 
   ngOnInit(): void {
-    // Fetch all necessary data upfront
+    this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+    });
     this.bundleService.getBundles().subscribe(bundles => {
-      this.bundles = bundles.filter(b => b.isActive && b.status === 'approved');
+      let userBundles = bundles.filter(b => b.isActive && b.status === 'approved');
+
+      if (this.currentUser && this.currentUser.type !== EUserType.Admin) {
+        userBundles = userBundles.filter(bundle =>
+          bundle.subjects.some(subject => {
+            const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
+            return tutorId === this.currentUser?._id;
+          })
+        );
+      }
+      this.bundles = userBundles;
+
       if (this.isEditMode && this.data.event) {
         const eventBundle = this.bundles.find(b => b._id === this.data.event!.bundle);
         if (eventBundle) {
@@ -115,14 +133,14 @@ export class AddEventModal implements OnInit {
     const subjectDetails = bundle.subjects.find(s => s.subject === subjectName);
     if (!subjectDetails) return;
 
-    const totalMinutesAllocated = subjectDetails.durationMinutes;
-    const minutesAlreadyScheduled = this.allEvents
-      .filter(event => event.bundle === bundle._id && event.subject === subjectName)
-      .reduce((sum, event) => sum + event.duration, 0);
+    let remainingMinutesFromDB = subjectDetails.durationMinutes;
 
-    this.remainingMinutes = totalMinutesAllocated - minutesAlreadyScheduled;
+    if (this.isEditMode && this.data.event && this.data.event.subject === subjectName) {
+        remainingMinutesFromDB += this.data.event.duration;
+    }
 
-    // Set a new validator on the duration control
+    this.remainingMinutes = remainingMinutesFromDB;
+
     const maxDurationValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
       return control.value > this.remainingMinutes! ? { maxDurationExceeded: true } : null;
     };

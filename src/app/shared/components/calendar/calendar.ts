@@ -68,8 +68,7 @@ export class CalendarComponent implements OnInit {
     if (this.currentUser?.type === EUserType.Client) {
       return event.rating ? 'completed' : 'pending';
     } else {
-      if (event.remarked) return 'completed';
-      return event.rating ? null : 'pending';
+      return event.remarked ? 'completed' : 'pending';
     }
   }
 

@@ -1,14 +1,12 @@
-
 import { EMissionStatus } from "../enums/mission-status.enum";
 import { IPopulatedUser } from "./IBundle.interface";
+import { IDocument } from "./IDocument.interface";
 
-
-export interface IMissions{
+export interface IMissions {
     _id: string;
     bundleId: string;
-    documentPath: string;
-    documentName: string;
-    student: string | IPopulatedUser; // The ID of the student this bundle is for, or the populated student object
+    document: IDocument; // Changed from documentPath and documentName
+    student: string | IPopulatedUser;
     tutor: string | IPopulatedUser;
     createdAt: Date;
     remuneration: number;
@@ -16,5 +14,5 @@ export interface IMissions{
     hoursCompleted: number;
     dateCompleted: Date;
     status: EMissionStatus;
-    updatedAt: Date; // Automatically managed by timestamps
+    updatedAt: Date;
 }

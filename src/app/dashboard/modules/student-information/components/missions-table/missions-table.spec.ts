@@ -12,6 +12,7 @@ import { EPermission } from '../../../../../models/enums/permission.enum';
 import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
 import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
 import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
+import { IDocument } from '../../../../../models/interfaces/IDocument.interface';
 
 describe('MissionsTable', () => {
   let component: MissionsTable;
@@ -21,12 +22,22 @@ describe('MissionsTable', () => {
   let snackBarSpy: jasmine.SpyObj<SnackBarService>;
   let dialogOpenSpy: jasmine.Spy;
 
+
+  const mockDocument: IDocument = {
+    _id: 'doc1',
+    fileKey: 'key123',
+    originalFilename: 'mission_document.pdf',
+    contentType: 'application/pdf',
+    uploadedBy: 'user1',
+    createdAt: new Date()
+};
+
   const mockMissions: IMissions[] = [
     {
       _id: '1',
       tutor: { _id: 't1', displayName: 'Tutor 1' } as IPopulatedUser,
       student: { _id: 's1', displayName: 'Student 1' } as any,
-      documentName: 'Mission 1',
+      document: mockDocument,
       createdAt: new Date(),
       updatedAt: new Date(),
       remuneration: 100,
@@ -34,7 +45,6 @@ describe('MissionsTable', () => {
       dateCompleted: new Date(),
       status: EMissionStatus.Active,
       bundleId: '',
-      documentPath: '',
       commissionedBy: ''
     }
   ];
