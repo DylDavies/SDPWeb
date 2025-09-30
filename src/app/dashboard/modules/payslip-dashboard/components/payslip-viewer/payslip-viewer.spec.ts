@@ -738,7 +738,560 @@ describe('PayslipViewer', () => {
 
       expect(event.preventDefault).toHaveBeenCalled();
     });
+
+    it('should allow navigation keys', () => {
+      const mockInput = { value: '123' } as HTMLInputElement;
+      const navigationKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+
+      navigationKeys.forEach(key => {
+        const event = new KeyboardEvent('keydown', { key });
+        Object.defineProperty(event, 'target', { value: mockInput });
+        spyOn(event, 'preventDefault');
+
+        component.onAmountKeydown(event, 'deduction');
+
+        expect(event.preventDefault).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z', () => {
+      const mockInput = { value: '123' } as HTMLInputElement;
+      const ctrlKeys = ['a', 'c', 'v', 'x', 'z'];
+
+      ctrlKeys.forEach(key => {
+        const event = new KeyboardEvent('keydown', { key, ctrlKey: true });
+        Object.defineProperty(event, 'target', { value: mockInput });
+        spyOn(event, 'preventDefault');
+
+        component.onAmountKeydown(event, 'deduction');
+
+        expect(event.preventDefault).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should prevent more than 2 decimal places', () => {
+      const mockInput = {
+        value: '123.45',
+        selectionStart: 7,
+        selectionEnd: 7
+      } as HTMLInputElement;
+      const event = new KeyboardEvent('keydown', { key: '6' });
+      Object.defineProperty(event, 'target', { value: mockInput });
+      spyOn(event, 'preventDefault');
+
+      component.onAmountKeydown(event, 'deduction');
+
+      expect(event.preventDefault).toHaveBeenCalled();
+    });
+
+    it('should allow typing when text is selected', () => {
+      const mockInput = {
+        value: '123.45',
+        selectionStart: 4,
+        selectionEnd: 6
+      } as HTMLInputElement;
+      const event = new KeyboardEvent('keydown', { key: '6' });
+      Object.defineProperty(event, 'target', { value: mockInput });
+      spyOn(event, 'preventDefault');
+
+      component.onAmountKeydown(event, 'deduction');
+
+      expect(event.preventDefault).not.toHaveBeenCalled();
+    });
+
+    it('should truncate input to 2 decimal places in onAmountInput for miscEarning', () => {
+      const mockInput = { value: '123.456' } as HTMLInputElement;
+      const event = { target: mockInput } as unknown as Event;
+      component.editingMiscEarningData = { description: 'Test', amount: 0 };
+
+      component.onAmountInput(event, 'miscEarning');
+
+      expect(component.editingMiscEarningData.amount).toBe(123.45);
+      expect(mockInput.value).toBe('123.45');
+    });
+
+    it('should truncate input to 2 decimal places in onAmountInput for deduction', () => {
+      const mockInput = { value: '50.999' } as HTMLInputElement;
+      const event = { target: mockInput } as unknown as Event;
+      component.editingDeductionData = { description: 'Test', amount: 0 };
+
+      component.onAmountInput(event, 'deduction');
+
+      expect(component.editingDeductionData.amount).toBe(50.99);
+      expect(mockInput.value).toBe('50.99');
+    });
+
+    it('should handle onAmountInput with no decimal point', () => {
+      const mockInput = { value: '123' } as HTMLInputElement;
+      const event = { target: mockInput } as unknown as Event;
+
+      component.onAmountInput(event, 'deduction');
+
+      // Should not throw error
+      expect(mockInput.value).toBe('123');
+    });
   });
-  
-  
+
+  describe('Additional Branch Coverage Tests', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should not add selected bonus when no current data', () => {
+      component['payslipDataSubject'].next(null);
+      component.selectedBonusId = 'performance';
+
+      component.addSelectedBonus();
+
+      expect(mockPayslipService.addBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not add selected bonus when preapproved bonus not found', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component.selectedBonusId = 'non-existent-id';
+
+      component.addSelectedBonus();
+
+      expect(mockPayslipService.addBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not remove bonus when no current data', () => {
+      component['payslipDataSubject'].next(null);
+
+      component.removeBonus(0);
+
+      expect(mockPayslipService.removeBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not remove bonus when bonuses array is missing', () => {
+      const payslipNoBonuses = { ...mockPayslip, bonuses: undefined };
+      component['payslipDataSubject'].next({ payslip: payslipNoBonuses as any });
+
+      component.removeBonus(0);
+
+      expect(mockPayslipService.removeBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not add deduction when no current data', () => {
+      component['payslipDataSubject'].next(null);
+
+      component.addNewDeduction();
+
+      expect(mockPayslipService.addDeduction).not.toHaveBeenCalled();
+    });
+
+    it('should not save deduction edit when no current data', () => {
+      component['payslipDataSubject'].next(null);
+      component.editingDeduction = 0;
+
+      component.saveDeductionEdit(0);
+
+      expect(mockPayslipService.updateDeduction).not.toHaveBeenCalled();
+    });
+
+    it('should not save deduction edit when editingDeduction is null', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component.editingDeduction = null;
+
+      component.saveDeductionEdit(0);
+
+      expect(mockPayslipService.updateDeduction).not.toHaveBeenCalled();
+    });
+
+    it('should not remove deduction when no current data', () => {
+      component['payslipDataSubject'].next(null);
+
+      component.removeDeduction(0);
+
+      expect(mockPayslipService.removeDeduction).not.toHaveBeenCalled();
+    });
+
+    it('should not add misc earning when no current data', () => {
+      component['payslipDataSubject'].next(null);
+
+      component.addNewMiscEarning();
+
+      expect(mockPayslipService.addMiscEarning).not.toHaveBeenCalled();
+    });
+
+    it('should not save misc earning edit when no current data', () => {
+      component['payslipDataSubject'].next(null);
+      component.editingMiscEarning = 0;
+
+      component.saveMiscEarningEdit(0);
+
+      expect(mockPayslipService.updateMiscEarning).not.toHaveBeenCalled();
+    });
+
+    it('should not save misc earning edit when editingMiscEarning is null', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component.editingMiscEarning = null;
+
+      component.saveMiscEarningEdit(0);
+
+      expect(mockPayslipService.updateMiscEarning).not.toHaveBeenCalled();
+    });
+
+    it('should not remove misc earning when no current data', () => {
+      component['payslipDataSubject'].next(null);
+
+      component.removeMiscEarning(0);
+
+      expect(mockPayslipService.removeMiscEarning).not.toHaveBeenCalled();
+    });
+
+    it('should handle getTotalBonuses with null bonuses array', () => {
+      const total = component.getTotalBonuses(null as any);
+
+      expect(total).toBe(0);
+    });
+
+    it('should handle getTotalBonuses with undefined bonuses array', () => {
+      const total = component.getTotalBonuses(undefined as any);
+
+      expect(total).toBe(0);
+    });
+
+    it('should handle getTotalMiscEarnings with null array', () => {
+      const total = component.getTotalMiscEarnings(null as any);
+
+      expect(total).toBe(0);
+    });
+
+    it('should handle getTotalMiscEarnings with undefined array', () => {
+      const total = component.getTotalMiscEarnings(undefined as any);
+
+      expect(total).toBe(0);
+    });
+
+    it('should handle calculateEarningTotal with zero hours', () => {
+      const total = component.calculateEarningTotal(0, 50);
+
+      expect(total).toBe(0);
+    });
+
+    it('should handle calculateEarningTotal with zero rate', () => {
+      const total = component.calculateEarningTotal(10, 0);
+
+      expect(total).toBe(0);
+    });
+
+    it('should handle calculateEarningTotal with null values', () => {
+      const total = component.calculateEarningTotal(null as any, null as any);
+
+      expect(total).toBe(0);
+    });
+
+    it('should calculate gross earnings with missing total and use hours*rate', () => {
+      const earnings = [
+        { description: 'Test', baseRate: 50, hours: 10, rate: 100, total: undefined as any, date: '2024-09-01' }
+      ];
+
+      const gross = component.calculateGrossEarnings(earnings);
+
+      expect(gross).toBe(1000);
+    });
+
+    it('should handle calculateGrossEarnings with null array', () => {
+      const gross = component.calculateGrossEarnings(null as any);
+
+      expect(gross).toBe(0);
+    });
+
+    it('should handle calculateGrossEarnings with undefined array', () => {
+      const gross = component.calculateGrossEarnings(undefined as any);
+
+      expect(gross).toBe(0);
+    });
+
+    it('should calculate net pay without optional paye and uif', () => {
+      const netPay = component.calculateNetPay(5000, mockPayslip.bonuses, 500);
+
+      expect(netPay).toBe(5000);
+    });
+
+    it('should calculate net pay with paye only', () => {
+      const netPay = component.calculateNetPay(5000, mockPayslip.bonuses, 500, 750);
+
+      expect(netPay).toBe(4250);
+    });
+
+    it('should calculate net pay with uif only', () => {
+      const netPay = component.calculateNetPay(5000, mockPayslip.bonuses, 500, undefined, 50);
+
+      expect(netPay).toBe(4950); // 5000 + 500 (bonus) - 500 (deductions) - 50 (uif)
+    });
+
+    it('should handle getCurrentUserName with null user', () => {
+      spyOn(component as any, 'getCurrentUser').and.returnValue(null);
+
+      const userName = component.getCurrentUserName();
+
+      expect(userName).toBe('Unknown User');
+    });
+
+    it('should handle getCurrentUserEmail with null user', () => {
+      spyOn(component as any, 'getCurrentUser').and.returnValue(null);
+
+      const userEmail = component.getCurrentUserEmail();
+
+      expect(userEmail).toBe('unknown@tutorcore.com');
+    });
+
+    it('should handle isCurrentUserAdmin with null user', () => {
+      spyOn(component as any, 'getCurrentUser').and.returnValue(null);
+
+      const isAdmin = component.isCurrentUserAdmin();
+
+      expect(isAdmin).toBe(false);
+    });
+
+    it('should return false for canEditPayslip when status is not DRAFT', () => {
+      const approvedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+
+      const canEdit = component.canEditPayslip(approvedPayslip);
+
+      expect(canEdit).toBe(false);
+    });
+
+    it('should return false for canEditPayslip when status is PAID', () => {
+      const paidPayslip = { ...mockPayslip, status: EPayslipStatus.PAID };
+
+      const canEdit = component.canEditPayslip(paidPayslip);
+
+      expect(canEdit).toBe(false);
+    });
+
+    it('should refresh data when openQueryDialog is closed with result', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      const mockDialogRef = { afterClosed: () => of(true) };
+      mockDialog.open.and.returnValue(mockDialogRef as any);
+      spyOn(component, 'loadPayslipData');
+
+      component.openQueryDialog(mockPayslip.earnings[0], 'earning', 0);
+
+      expect(component.loadPayslipData).toHaveBeenCalled();
+    });
+
+    it('should not refresh data when openQueryDialog is closed without result', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      const mockDialogRef = { afterClosed: () => of(false) };
+      mockDialog.open.and.returnValue(mockDialogRef as any);
+      spyOn(component, 'loadPayslipData');
+
+      component.openQueryDialog(mockPayslip.earnings[0], 'earning', 0);
+
+      expect(component.loadPayslipData).not.toHaveBeenCalled();
+    });
+
+    it('should call getQueryDetails with itemIndex in openQueryDialog', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      const mockDialogRef = { afterClosed: () => of(false) };
+      mockDialog.open.and.returnValue(mockDialogRef as any);
+      spyOn(component, 'getQueryDetails');
+
+      component.openQueryDialog(mockPayslip.earnings[0], 'earning', 0);
+
+      expect(component.getQueryDetails).toHaveBeenCalledWith(mockPayslip.earnings[0].description, 'earning', 0);
+    });
+
+    it('should handle hasQuery when payslip has no notes property', () => {
+      const payslipWithoutNotes = { ...mockPayslip };
+      delete (payslipWithoutNotes as any).notes;
+      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes as any });
+
+      const hasQuery = component.hasQuery('Test', 'earning', 0);
+
+      expect(hasQuery).toBe(false);
+    });
+
+    it('should handle getQueryDetails when payslip has no notes property', () => {
+      const payslipWithoutNotes = { ...mockPayslip };
+      delete (payslipWithoutNotes as any).notes;
+      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes as any });
+
+      const queryDetails = component.getQueryDetails('Test', 'earning', 0);
+
+      expect(queryDetails).toBeUndefined();
+    });
+
+    it('should return false for hasQuery when no payslip data', () => {
+      component['payslipDataSubject'].next(null);
+
+      const hasQuery = component.hasQuery('Test', 'earning', 0);
+
+      expect(hasQuery).toBe(false);
+    });
+
+    it('should return undefined for getQueryDetails when no payslip data', () => {
+      component['payslipDataSubject'].next(null);
+
+      const queryDetails = component.getQueryDetails('Test', 'earning', 0);
+
+      expect(queryDetails).toBeUndefined();
+    });
+
+    it('should return true for hasQuery with resolved=false note', () => {
+      const payslipWithNote = {
+        ...mockPayslip,
+        notes: [{ itemId: 'earning-0', resolved: false, note: 'Test' }]
+      };
+      component['payslipDataSubject'].next({ payslip: payslipWithNote });
+
+      const hasQuery = component.hasQuery('Test', 'earning', 0);
+
+      expect(hasQuery).toBe(true);
+    });
+
+    it('should return false for hasQuery with resolved=true note', () => {
+      const payslipWithNote = {
+        ...mockPayslip,
+        notes: [{ itemId: 'earning-0', resolved: true, note: 'Test' }]
+      };
+      component['payslipDataSubject'].next({ payslip: payslipWithNote });
+
+      const hasQuery = component.hasQuery('Test', 'earning', 0);
+
+      expect(hasQuery).toBe(false);
+    });
+
+    it('should not add dummy data when no current data', () => {
+      component['payslipDataSubject'].next(null);
+
+      component.addDummyData();
+
+      expect(mockSnackBarService.showSuccess).not.toHaveBeenCalled();
+    });
+
+    it('should handle error when removing deduction', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      mockPayslipService.removeDeduction.and.returnValue(throwError(() => new Error('API Error')));
+
+      component.removeDeduction(0);
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to remove deduction. Please try again.');
+    });
+
+    it('should handle error when adding misc earning', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      mockPayslipService.addMiscEarning.and.returnValue(throwError(() => new Error('API Error')));
+
+      component.addNewMiscEarning();
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to add misc earning. Please try again.');
+    });
+
+    it('should add dummy data successfully', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      spyOn(component, 'getDummyEarnings').and.returnValue([]);
+      spyOn(component, 'getDummyBonuses').and.returnValue([]);
+      spyOn(component, 'getDummyMiscEarnings').and.returnValue([]);
+      spyOn(component, 'getDummyDeductions').and.returnValue([]);
+
+      component.addDummyData();
+
+      expect(mockSnackBarService.showSuccess).toHaveBeenCalledWith('Dummy data added for UI testing!');
+    });
+  });
+
+  describe('Helper Methods', () => {
+    it('should return correct dummy earnings', () => {
+      const earnings = component.getDummyEarnings();
+
+      expect(earnings.length).toBe(4);
+      expect(earnings[0].description).toBe('Individual Tutoring - Mathematics');
+    });
+
+    it('should return correct dummy bonuses', () => {
+      const bonuses = component.getDummyBonuses();
+
+      expect(bonuses.length).toBe(3);
+      expect(bonuses[0].description).toBe('Performance Bonus - High Student Ratings');
+    });
+
+    it('should return correct dummy misc earnings', () => {
+      const miscEarnings = component.getDummyMiscEarnings();
+
+      expect(miscEarnings.length).toBe(2);
+      expect(miscEarnings[0].description).toBe('Overtime Bonus');
+    });
+
+    it('should return correct dummy deductions', () => {
+      const deductions = component.getDummyDeductions();
+
+      expect(deductions.length).toBe(4);
+      expect(deductions[0].description).toBe('Equipment Usage Fee');
+    });
+
+    it('should return available bonuses', () => {
+      const bonuses = component.getAvailableBonuses();
+
+      expect(bonuses.length).toBe(7);
+      expect(bonuses[0].id).toBe('performance');
+    });
+
+    it('should return current date', () => {
+      const date = component.getCurrentDate();
+
+      expect(date).toBeInstanceOf(Date);
+    });
+
+    it('should return track by index', () => {
+      const index = component.trackByIndex(5);
+
+      expect(index).toBe(5);
+    });
+
+    it('should calculate total income correctly', () => {
+      const totalIncome = component.getTotalIncome(mockPayslip);
+
+      expect(totalIncome).toBeGreaterThan(0);
+    });
+
+    it('should calculate current net pay correctly', () => {
+      const netPay = component.getCurrentNetPay(mockPayslip);
+
+      expect(netPay).toBeDefined();
+    });
+
+    it('should edit deduction and set editing state', () => {
+      const deduction = { description: 'Test', amount: 100 };
+
+      component.editDeduction(0, deduction);
+
+      expect(component.editingDeduction).toBe(0);
+      expect(component.editingDeductionData).toEqual(deduction);
+    });
+
+    it('should edit misc earning and set editing state', () => {
+      const earning = { description: 'Test', amount: 200 };
+
+      component.editMiscEarning(0, earning);
+
+      expect(component.editingMiscEarning).toBe(0);
+      expect(component.editingMiscEarningData).toEqual(earning);
+    });
+
+    it('should cancel deduction edit', () => {
+      component.editingDeduction = 5;
+      component.editingDeductionData = { description: 'Test', amount: 100 };
+
+      component.cancelDeductionEdit();
+
+      expect(component.editingDeduction).toBeNull();
+      expect(component.editingDeductionData).toEqual({ description: '', amount: 0 });
+    });
+
+    it('should cancel misc earning edit', () => {
+      component.editingMiscEarning = 5;
+      component.editingMiscEarningData = { description: 'Test', amount: 100 };
+
+      component.cancelMiscEarningEdit();
+
+      expect(component.editingMiscEarning).toBeNull();
+      expect(component.editingMiscEarningData).toEqual({ description: '', amount: 0 });
+    });
+  });
+
+
 });

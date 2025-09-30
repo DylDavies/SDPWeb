@@ -120,6 +120,11 @@ export class AuthService {
     this.httpService.post('auth/logout', {}).subscribe({
       next: () => {
         this.router.navigateByUrl('/');
+      },
+      error: (err) => {
+        console.error('Logout API call failed:', err);
+        // Token is already removed, so we can still navigate to root
+        this.router.navigateByUrl('/');
       }
     })
   }
