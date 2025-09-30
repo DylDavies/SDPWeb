@@ -618,6 +618,43 @@ export class PayslipViewer implements OnInit {
         yPosition += 15;
       }
 
+      // Misc Earnings Section
+      if (payslip.miscEarnings && payslip.miscEarnings.length > 0) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('MISC EARNINGS', 20, yPosition);
+        yPosition += 10;
+
+        doc.setFontSize(9);
+        doc.text('Description', 20, yPosition);
+        doc.text('Amount', 170, yPosition);
+        yPosition += 5;
+
+        doc.line(20, yPosition, 190, yPosition);
+        yPosition += 5;
+
+        doc.setFont('helvetica', 'normal');
+        payslip.miscEarnings.forEach(miscEarning => {
+          // Check if we need a new page before adding content
+          if (yPosition > 270) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          doc.text(miscEarning.description, 20, yPosition);
+          doc.text(`R${miscEarning.amount?.toFixed(2) || '0.00'}`, 170, yPosition);
+          yPosition += 5;
+        });
+
+        yPosition += 5;
+        doc.line(140, yPosition, 190, yPosition);
+        yPosition += 5;
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total Misc Earnings:', 120, yPosition);
+        doc.text(`R${(payslip.miscEarnings?.reduce((total, earning) => total + earning.amount, 0) || 0).toFixed(2) || '0.00'}`, 170, yPosition);
+        yPosition += 15;
+      }
+
       // Deductions Section
       if (payslip.deductions && payslip.deductions.length > 0) {
         doc.setFontSize(12);
