@@ -71,7 +71,7 @@ export const routes: Routes = [
         component: RateManagementComponent,
         canActivate: [permissionGuard([EPermission.CAN_ADJUST_RATES])]
       },
-      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] },
+      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },

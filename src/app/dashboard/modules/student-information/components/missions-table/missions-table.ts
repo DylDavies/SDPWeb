@@ -21,6 +21,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { ViewMissionModal } from '../view-mission-modal/view-mission-modal';
 
 @Component({
   selector: 'app-missions-table',
@@ -52,7 +53,6 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor() {
-    // Set up custom sorting accessor
     this.dataSource.sortingDataAccessor = (data: IMissions, sortHeaderId: string) => {
        const tutor = data.tutor as IPopulatedUser;
        const value = data[sortHeaderId as keyof IMissions];
@@ -74,7 +74,6 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
       }
     };
 
-    // Set up filter predicate
     this.dataSource.filterPredicate = this.createFilter();
   }
 
@@ -88,7 +87,6 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
   }
 
   ngAfterViewInit(): void {
-    // Set paginator and sort after view initialization
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
@@ -111,7 +109,6 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
       this.missionService.getMissionsByBundleId(this.bundleId).subscribe(missions => {
         this.dataSource.data = missions.filter(mission => mission.status !== EMissionStatus.InActive);
         
-        // Re-set paginator and sort after data loads
         setTimeout(() => {
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
@@ -139,6 +136,14 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
     };
   }
 
+  viewMission(mission: IMissions): void {
+    this.dialog.open(ViewMissionModal, {
+      width: 'clamp(500px, 70vw, 800px)',
+      height: '85vh',
+      data: mission
+    });
+  }
+
   editMission(mission: IMissions): void {
     const dialogRef = this.dialog.open(MissionsModal, {
       width: 'clamp(500px, 80vw, 700px)',
@@ -156,7 +161,7 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
     const dialogRef = this.dialog.open(ConfirmationDialog, {
       data: {
         title: 'Deactivate Mission',
-        message: `Are you sure you want to deactivate the mission "${mission.documentName}"? This will mark it as inactive but will not permanently delete it.`,
+        message: `Are you sure you want to deactivate the mission "${mission.document.originalFilename}"? This will mark it as inactive but will not permanently delete it.`,
         confirmText: 'Deactivate',
         color: 'warn'
       }

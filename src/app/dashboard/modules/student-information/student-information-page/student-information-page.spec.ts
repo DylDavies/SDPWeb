@@ -16,6 +16,7 @@ import { MissionService } from '../../../../services/missions-service';
 import { IEvent } from '../../../../models/interfaces/IEvent.interface';
 import { IMissions } from '../../../../models/interfaces/IMissions.interface';
 import { EMissionStatus } from '../../../../models/enums/mission-status.enum';
+import { IDocument } from '../../../../models/interfaces/IDocument.interface';
 
 // --- MOCK DATA ---
 const mockTutor1: IPopulatedUser = { _id: 'tutor1', displayName: 'Jane Doe' };
@@ -41,12 +42,20 @@ const mockEvents: IEvent[] = [
   { _id: 'e2', bundle: 'bundle123', tutor: mockTutor2, duration: 60, remarked: true } as IEvent
 ];
 
+const mockDocument: IDocument = {
+    _id: 'doc1',
+    fileKey: 'key123',
+    originalFilename: 'mission_doc.pdf',
+    contentType: 'application/pdf',
+    uploadedBy: 'user1',
+    createdAt: new Date()
+};
+
 // FIX: Updated mock mission to match the provided IMissions interface
 const mockMission: IMissions = {
     _id: 'mission1',
     bundleId: 'bundle123',
-    documentPath: '/path/to/doc',
-    documentName: 'mission_doc.pdf',
+    document: mockDocument,
     student: 'student1',
     tutor: 'tutor1',
     createdAt: new Date(),

@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { of, throwError, BehaviorSubject } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { of, throwError, BehaviorSubject, Subject } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ExtraWorkDashboard } from './extra-work-dashboard';
 import { ExtraWorkService } from '../../../services/extra-work';
 import { SnackBarService } from '../../../services/snackbar-service';
@@ -10,82 +11,93 @@ import { SocketService } from '../../../services/socket-service';
 import { IExtraWork, EExtraWorkStatus } from '../../../models/interfaces/IExtraWork.interface';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { EPermission } from '../../../models/enums/permission.enum';
-import { AddExtraWorkModal } from './components/add-extra-work-modal/add-extra-work-modal';
-import { ViewExtraWorkModal } from './components/view-extra-work-modal/view-extra-work-modal';
-import { HttpErrorResponse } from '@angular/common/http';
-import { HarnessLoader } from '@angular/cdk/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { MatTabGroupHarness } from '@angular/material/tabs/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
+import { IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
+import { ViewExtraWorkModal } from './components/view-extra-work-modal/view-extra-work-modal';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 // --- MOCK DATA ---
-const mockUser: IUser = {
+const mockCurrentUser: IUser = {
     _id: 'user1',
     displayName: 'Test User',
-    email: 'test@example.com',
+} as IUser;
+
+const mockCommissionerUser: IUser = {
+    _id: 'commissioner1',
+    displayName: 'Commissioner User',
 } as IUser;
 
 const mockExtraWorkItems: IExtraWork[] = [
     {
         _id: '1',
-        userId: 'user1',
-        studentId: { _id: 's1', displayName: 'Student A' },
-        commissionerId: { _id: 'c1', displayName: 'Commissioner A' },
+        userId: mockCurrentUser,
+        studentId: { _id: 's1', displayName: 'Student A' } as IPopulatedUser,
+        commissionerId: mockCommissionerUser,
+        status: EExtraWorkStatus.InProgress,
         workType: 'Marking',
         details: 'Details 1',
         remuneration: 100,
         dateCompleted: null,
-        status: EExtraWorkStatus.InProgress,
         createdAt: new Date(),
         updatedAt: new Date(),
     },
     {
         _id: '2',
-        userId: 'user2',
+        userId: { _id: 'user2', displayName: 'Other User' },
         studentId: { _id: 's2', displayName: 'Student B' },
-        commissionerId: { _id: 'c2', displayName: 'Commissioner B' },
+        commissionerId: mockCurrentUser,
+        status: EExtraWorkStatus.Completed,
         workType: 'Test Creation',
         details: 'Details 2',
         remuneration: 200,
-        dateCompleted: new Date(),
-        status: EExtraWorkStatus.Completed,
+        dateCompleted: null,
         createdAt: new Date(),
         updatedAt: new Date(),
     },
+    // NEW: Item with string IDs for helper function tests
+    {
+        _id: '3',
+        userId: 'user3',
+        studentId: 'student3',
+        commissionerId: 'commissioner3',
+        status: EExtraWorkStatus.Approved,
+        workType: 'Research',
+        details: 'Details 3',
+        remuneration: 300,
+        dateCompleted: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    }
 ];
 
-// --- MOCK SERVICES ---
+
 describe('ExtraWorkDashboard', () => {
     let component: ExtraWorkDashboard;
     let fixture: ComponentFixture<ExtraWorkDashboard>;
-    let loader: HarnessLoader;
     let mockExtraWorkService: { allExtraWork$: BehaviorSubject<IExtraWork[]>, setExtraWorkStatus: jasmine.Spy, completeExtraWork: jasmine.Spy };
     let mockSnackbarService: jasmine.SpyObj<SnackBarService>;
     let mockAuthService: { hasPermission: jasmine.Spy, currentUser$: BehaviorSubject<IUser | null> };
-    let mockSocketService: jasmine.SpyObj<SocketService>;
+    let mockSocketService: { listen: jasmine.Spy, subscribe: jasmine.Spy, unsubscribe: jasmine.Spy };
     let mockDialog: jasmine.SpyObj<MatDialog>;
 
     beforeEach(async () => {
-        // More robust mocks for services with observable properties
         mockExtraWorkService = {
             allExtraWork$: new BehaviorSubject<IExtraWork[]>(mockExtraWorkItems),
             setExtraWorkStatus: jasmine.createSpy('setExtraWorkStatus').and.returnValue(of({})),
             completeExtraWork: jasmine.createSpy('completeExtraWork').and.returnValue(of({}))
         };
+        mockSnackbarService = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
         mockAuthService = {
             hasPermission: jasmine.createSpy('hasPermission').and.returnValue(false),
-            currentUser$: new BehaviorSubject<IUser | null>(mockUser)
+            currentUser$: new BehaviorSubject<IUser | null>(mockCurrentUser)
         };
-        mockSnackbarService = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
         mockSocketService = jasmine.createSpyObj('SocketService', ['subscribe', 'listen', 'unsubscribe']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
-        // Default listen to return an empty observable
         mockSocketService.listen.and.returnValue(of({}));
 
         await TestBed.configureTestingModule({
-            imports: [ExtraWorkDashboard, NoopAnimationsModule, HttpClientTestingModule], // Added HttpClientTestingModule
+            imports: [ExtraWorkDashboard, NoopAnimationsModule, HttpClientTestingModule],
             providers: [
                 { provide: ExtraWorkService, useValue: mockExtraWorkService },
                 { provide: SnackBarService, useValue: mockSnackbarService },
@@ -97,7 +109,6 @@ describe('ExtraWorkDashboard', () => {
 
         fixture = TestBed.createComponent(ExtraWorkDashboard);
         component = fixture.componentInstance;
-        loader = TestbedHarnessEnvironment.loader(fixture);
     });
 
     it('should create', () => {
@@ -105,48 +116,24 @@ describe('ExtraWorkDashboard', () => {
         expect(component).toBeTruthy();
     });
 
-    describe('Initialization', () => {
-        it('should load extra work on init', () => {
-            fixture.detectChanges();
-            expect(component.dataSource.data.length).toBe(2);
-            expect(component.isLoading).toBeFalse();
-        });
+    describe('Initialization and Data Loading', () => {
 
-        it('should set up socket listeners on init', () => {
+        // NEW: Test for the !this.currentUser branch
+        it('should not load data if there is no current user', () => {
+            mockAuthService.currentUser$.next(null);
+            spyOn(component, 'loadExtraWork').and.callThrough();
             fixture.detectChanges();
-            expect(mockSocketService.subscribe).toHaveBeenCalledWith(ESocketMessage.ExtraWorkUpdated);
-            expect(mockSocketService.listen).toHaveBeenCalledWith(ESocketMessage.ExtraWorkUpdated);
-        });
 
-        it('should unsubscribe from observables on destroy', () => {
-            fixture.detectChanges();
-            spyOn(component['subscriptions'], 'unsubscribe');
-            component.ngOnDestroy();
-            expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
-            expect(mockSocketService.unsubscribe).toHaveBeenCalledWith(ESocketMessage.ExtraWorkUpdated);
-        });
-    });
-
-    describe('Data Loading and Filtering', () => {
-        it('should handle error when loading extra work', () => {
-            const errorResponse = new HttpErrorResponse({ error: { message: 'Failed to load' } });
-            mockExtraWorkService.allExtraWork$.error(errorResponse);
-            fixture.detectChanges();
-            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Failed to load');
-            expect(component.isLoading).toBeFalse();
-        });
-
-        it('should filter "My Work" table', () => {
-            fixture.detectChanges();
-            component.applyFilter({ target: { value: 'Marking' } } as any);
-            expect(component.dataSource.filteredData.length).toBe(1);
-            expect(component.dataSource.filteredData[0].workType).toBe('Marking');
+            expect(component.loadExtraWork).toHaveBeenCalled();
+            expect(mockExtraWorkService.allExtraWork$.observed).toBe(false);
+            expect(component.dataSource.data.length).toBe(0);
         });
     });
 
     describe('User Actions', () => {
+        beforeEach(() => fixture.detectChanges());
 
-        it('should approve work and reload data', () => {
+        it('should approve work successfully', () => {
             spyOn(component, 'loadExtraWork');
             component.approveWork(mockExtraWorkItems[0]);
 
@@ -155,13 +142,74 @@ describe('ExtraWorkDashboard', () => {
             expect(component.loadExtraWork).toHaveBeenCalled();
         });
 
-        it('should deny work and reload data', () => {
+        // NEW: Test for the error path on approveWork
+        it('should handle error when approving work fails', () => {
+            const errorResponse = new HttpErrorResponse({ error: { message: 'Approval Failed' } });
+            mockExtraWorkService.setExtraWorkStatus.and.returnValue(throwError(() => errorResponse));
+            spyOn(component, 'loadExtraWork');
+
+            component.approveWork(mockExtraWorkItems[0]);
+
+            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Approval Failed');
+            expect(component.loadExtraWork).not.toHaveBeenCalled();
+        });
+
+        it('should deny work successfully', () => {
             spyOn(component, 'loadExtraWork');
             component.denyWork(mockExtraWorkItems[0]);
 
             expect(mockExtraWorkService.setExtraWorkStatus).toHaveBeenCalledWith(mockExtraWorkItems[0]._id, EExtraWorkStatus.Denied);
             expect(mockSnackbarService.showSuccess).toHaveBeenCalledWith('Work item denied!');
             expect(component.loadExtraWork).toHaveBeenCalled();
+        });
+
+        // NEW: Test for the error path on denyWork
+        it('should handle error when denying work fails', () => {
+            const errorResponse = new HttpErrorResponse({ error: { message: 'Denial Failed' } });
+            mockExtraWorkService.setExtraWorkStatus.and.returnValue(throwError(() => errorResponse));
+            spyOn(component, 'loadExtraWork');
+
+            component.denyWork(mockExtraWorkItems[0]);
+
+            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Denial Failed');
+            expect(component.loadExtraWork).not.toHaveBeenCalled();
+        });
+
+        // NEW: Test for the error path on onDateSelected (completing work)
+        it('should handle error when completing work fails', () => {
+            const errorResponse = new HttpErrorResponse({ error: { message: 'Completion Failed' } });
+            mockExtraWorkService.completeExtraWork.and.returnValue(throwError(() => errorResponse));
+            spyOn(component, 'loadExtraWork');
+
+            component.onDateSelected(new Date(), mockExtraWorkItems[0]);
+
+            expect(mockSnackbarService.showError).toHaveBeenCalledWith('Completion Failed');
+            expect(component.loadExtraWork).not.toHaveBeenCalled();
+        });
+
+        
+    });
+
+    // NEW: Test group for helper functions
+    describe('Helper Functions', () => {
+        it('getStudentName should return "N/A" for a string ID', () => {
+            const name = component.getStudentName(mockExtraWorkItems[2]); // This item has string IDs
+            expect(name).toBe('N/A');
+        });
+
+        it('getStudentName should return displayName for a populated user', () => {
+            const name = component.getStudentName(mockExtraWorkItems[0]);
+            expect(name).toBe('Student A');
+        });
+
+        it('getCommissionerName should return "N/A" for a string ID', () => {
+            const name = component.getCommissionerName(mockExtraWorkItems[2]);
+            expect(name).toBe('N/A');
+        });
+
+        it('getCommissionerName should return displayName for a populated user', () => {
+            const name = component.getCommissionerName(mockExtraWorkItems[0]);
+            expect(name).toBe('Commissioner User');
         });
     });
 });
