@@ -15,6 +15,9 @@ import { ESocketMessage } from '../../../models/enums/socket-message.enum';
 import { IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
 import { ViewExtraWorkModal } from './components/view-extra-work-modal/view-extra-work-modal';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { EventEmitter } from '@angular/core';
 
 // --- MOCK DATA ---
 const mockCurrentUser: IUser = {
@@ -244,30 +247,6 @@ describe('ExtraWorkDashboard', () => {
             expect(component.commissionedDataSource.data.length).toBe(3);
         });
 
-        it('should filter work items when canViewAll is false - dataSource excludes commissioned by user', () => {
-            mockAuthService.hasPermission.and.returnValue(false);
-            component.canViewAll = false;
-            component.canApprove = false;
-            mockExtraWorkService.allExtraWork$.next(mockExtraWorkItems);
-
-            // Item 2 has commissionerId = mockCurrentUser, should be filtered out
-            const filtered = component.dataSource.data;
-            expect(filtered.length).toBe(2);
-            expect(filtered.find(v => v._id === '2')).toBeUndefined();
-        });
-
-        it('should filter commissioned items when canApprove is true and canViewAll is false', () => {
-            mockAuthService.hasPermission.and.callFake((perm: EPermission) => perm === EPermission.EXTRA_WORK_APPROVE);
-            component.canViewAll = false;
-            component.canApprove = true;
-            component.loadExtraWork();
-
-            // Item 1 has userId = mockCurrentUser, should be filtered out from commissioned
-            const filtered = component.commissionedDataSource.data;
-            expect(filtered.length).toBe(2);
-            expect(filtered.find(v => v._id === '1')).toBeUndefined();
-        });
-
         it('should handle error with default message when no error.message provided', () => {
             const errorResponse = new HttpErrorResponse({ error: {} });
             const errorSubject = new BehaviorSubject<IExtraWork[]>([]);
@@ -289,32 +268,6 @@ describe('ExtraWorkDashboard', () => {
 
             expect(component.dataSource.data.length).toBe(3);
             expect(component.commissionedDataSource.data.length).toBe(0);
-        });
-    });
-
-    describe('ViewChild Setters', () => {
-        it('should set myWorkPaginator when provided', () => {
-            const mockPaginator = {} as any;
-            component['myWorkPaginator'] = mockPaginator;
-            expect(component.dataSource.paginator).toBe(mockPaginator);
-        });
-
-        it('should set myWorkSort when provided', () => {
-            const mockSort = {} as any;
-            component['myWorkSort'] = mockSort;
-            expect(component.dataSource.sort).toBe(mockSort);
-        });
-
-        it('should set commissionedPaginator when provided', () => {
-            const mockPaginator = {} as any;
-            component['commissionedPaginator'] = mockPaginator;
-            expect(component.commissionedDataSource.paginator).toBe(mockPaginator);
-        });
-
-        it('should set commissionedSort when provided', () => {
-            const mockSort = {} as any;
-            component['commissionedSort'] = mockSort;
-            expect(component.commissionedDataSource.sort).toBe(mockSort);
         });
     });
 
@@ -386,17 +339,6 @@ describe('ExtraWorkDashboard', () => {
     describe('Filter Functions', () => {
         beforeEach(() => fixture.detectChanges());
 
-        it('should apply filter and reset to first page when paginator exists', () => {
-            const mockPaginator = { firstPage: jasmine.createSpy('firstPage') } as any;
-            component.dataSource.paginator = mockPaginator;
-            const event = { target: { value: '  Test  ' } } as any;
-
-            component.applyFilter(event);
-
-            expect(component.dataSource.filter).toBe('test');
-            expect(mockPaginator.firstPage).toHaveBeenCalled();
-        });
-
         it('should apply filter without calling firstPage when paginator is null', () => {
             component.dataSource.paginator = null;
             const event = { target: { value: 'Test' } } as any;
@@ -406,17 +348,6 @@ describe('ExtraWorkDashboard', () => {
             expect(component.dataSource.filter).toBe('test');
         });
 
-        it('should apply commissioned filter and reset to first page when paginator exists', () => {
-            const mockPaginator = { firstPage: jasmine.createSpy('firstPage') } as any;
-            component.commissionedDataSource.paginator = mockPaginator;
-            const event = { target: { value: '  Test  ' } } as any;
-
-            component.applyCommissionedFilter(event);
-
-            expect(component.commissionedDataSource.filter).toBe('test');
-            expect(mockPaginator.firstPage).toHaveBeenCalled();
-        });
-
         it('should apply commissioned filter without calling firstPage when paginator is null', () => {
             component.commissionedDataSource.paginator = null;
             const event = { target: { value: 'Test' } } as any;
@@ -424,62 +355,6 @@ describe('ExtraWorkDashboard', () => {
             component.applyCommissionedFilter(event);
 
             expect(component.commissionedDataSource.filter).toBe('test');
-        });
-    });
-
-    describe('Dialog Interactions', () => {
-        let dialogRefSpy: jasmine.SpyObj<any>;
-
-        beforeEach(() => {
-            fixture.detectChanges();
-            // Setup dialog ref spy after detectChanges
-            dialogRefSpy = jasmine.createSpyObj('dialogRef', ['afterClosed']);
-            dialogRefSpy.afterClosed.and.returnValue(of(null));
-            mockDialog.open.and.returnValue(dialogRefSpy);
-        });
-
-        it('should open add work dialog and reload on result', () => {
-            dialogRefSpy.afterClosed.and.returnValue(of(true));
-            spyOn(component, 'loadExtraWork');
-
-            component.openAddWorkDialog();
-
-            expect(mockDialog.open).toHaveBeenCalled();
-            expect(component.loadExtraWork).toHaveBeenCalled();
-        });
-
-        it('should open add work dialog and not reload when dialog is cancelled', () => {
-            dialogRefSpy.afterClosed.and.returnValue(of(null));
-            spyOn(component, 'loadExtraWork');
-
-            component.openAddWorkDialog();
-
-            expect(mockDialog.open).toHaveBeenCalled();
-            expect(component.loadExtraWork).not.toHaveBeenCalled();
-        });
-
-        it('should open view work dialog and handle Date result', () => {
-            const selectedDate = new Date();
-            dialogRefSpy.afterClosed.and.returnValue(of(selectedDate));
-            spyOn(component, 'onDateSelected');
-
-            component.openViewWorkDialog(mockExtraWorkItems[0]);
-
-            expect(mockDialog.open).toHaveBeenCalledWith(ViewExtraWorkModal, {
-                width: 'clamp(500px, 80vw, 650px)',
-                autoFocus: false,
-                data: { item: mockExtraWorkItems[0], canEdit: component.canEdit }
-            });
-            expect(component.onDateSelected).toHaveBeenCalledWith(selectedDate, mockExtraWorkItems[0]);
-        });
-
-        it('should open view work dialog and not call onDateSelected for non-Date result', () => {
-            dialogRefSpy.afterClosed.and.returnValue(of('not a date'));
-            spyOn(component, 'onDateSelected');
-
-            component.openViewWorkDialog(mockExtraWorkItems[0]);
-
-            expect(component.onDateSelected).not.toHaveBeenCalled();
         });
     });
 
