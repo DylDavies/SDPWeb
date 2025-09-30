@@ -46,10 +46,9 @@ export class RemarkTemplateManagement implements OnInit {
   }
 
   loadActiveTemplate(): void {
-    console.log("attempting to load active template");
     this.remarkService.getActiveTemplate().subscribe(template => {
         if (template) {
-          console.log("has active template");
+
             this.template = template;
             this.fields = _.cloneDeep(template.fields);
             this.initialFields = _.cloneDeep(template.fields);
@@ -81,9 +80,8 @@ export class RemarkTemplateManagement implements OnInit {
   }
 
   saveChanges(): void {
-    console.log("click");
+
     if (this.template) {
-      console.log("has a template");
       this.remarkService.updateTemplate(this.fields).subscribe({
         next: () => {
           this.snackBarService.showSuccess('New remark template version created successfully!');

@@ -22,6 +22,15 @@ table {
   width: 100%;
 }
 
+.mission-table-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: var(--mat-sys-state-hover-layer) !important;
+  }
+}
+
 .loading-state,
 .empty-state {
   display: flex;
@@ -38,4 +47,9 @@ table {
     height: 64px;
     margin-bottom: 16px;
   }
+}
+
+
+::ng-deep .mat-mdc-dialog-content {
+  overflow: hidden !important;
 }

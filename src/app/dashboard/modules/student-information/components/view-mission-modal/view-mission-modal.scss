@@ -1,14 +1,31 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; // Prevents the component host from overflowing
+}
+
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h1[mat-dialog-title] {
+    margin: 0;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 mat-dialog-content {
-  height: 100%;
-  padding: 0;
-  overflow: hidden;
+  flex-grow: 1;
+  padding: 0 !important; // Removes padding that can cause overflow
+  overflow: hidden !important; // Explicitly hides the scrollbar
   display: flex;
   flex-direction: column;
 }
@@ -38,6 +55,7 @@ iframe {
     height: 48px;
   }
 }
-.close-button{
-    padding-right: 20px;
+
+.close-button {
+  margin-left: 16px;
 }

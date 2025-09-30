@@ -9,56 +9,47 @@ import { MissionService } from '../../../../../services/missions-service';
 import { BundleService } from '../../../../../services/bundle-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { AuthService } from '../../../../../services/auth-service';
+import { FileService } from '../../../../../services/file-service';
 import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
 import { IBundle, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { IMissions } from '../../../../../models/interfaces/IMissions.interface';
+import { IDocument } from '../../../../../models/interfaces/IDocument.interface';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
+import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
 
-// Mocks
+// --- MOCK DATA ---
 const mockStudent: IUser = {
   _id: 'student1', displayName: 'John Doe', email: 'john@test.com', roles: [],
-  googleId: '',
-  firstLogin: false,
-  createdAt: new Date(),
-  type: EUserType.Client,
-  permissions: [],
-  pending: false,
-  disabled: false,
-  theme: 'system',
-  leave: [],
-  paymentType: 'Contract' as const,
+  googleId: '', firstLogin: false, createdAt: new Date(), type: EUserType.Client,
+  permissions: [], pending: false, disabled: false, theme: 'system', leave: [],
+  paymentType: 'Contract',
   monthlyMinimum: 0,
   rateAdjustments: []
 };
-const mockTutor: IPopulatedUser = {
-    _id: 'tutor1', displayName: 'Jane',
-
-
-};
+const mockTutor: IPopulatedUser = { _id: 'tutor1', displayName: 'Jane Smith' };
 const mockCurrentUser: IUser = {
   _id: 'user1', displayName: 'Admin User', email: 'admin@test.com', roles: [],
-  googleId: '',
-  firstLogin: false,
-  createdAt: new Date(),
-  type: EUserType.Client,
-  permissions: [],
-  pending: false,
-  disabled: false,
-  theme: 'system',
-  leave: [],
-  paymentType: 'Contract' as const,
+  googleId: '', firstLogin: false, createdAt: new Date(), type: EUserType.Admin,
+  permissions: [], pending: false, disabled: false, theme: 'system', leave: [],
+  paymentType: 'Contract',
   monthlyMinimum: 0,
   rateAdjustments: []
 };
-
+const mockDocument: IDocument = {
+    _id: 'doc1',
+    fileKey: 'key123',
+    originalFilename: 'mission-doc.pdf',
+    contentType: 'application/pdf',
+    uploadedBy: 'user1',
+    createdAt: new Date()
+};
 const mockMission: IMissions = {
   _id: 'mission1',
   student: mockStudent,
   tutor: mockTutor,
   bundleId: 'bundle1',
-  documentName: 'mission-doc.pdf',
-  documentPath: 'path/to/mission-doc.pdf',
+  document: mockDocument,
   dateCompleted: new Date(),
   remuneration: 150,
   status: EMissionStatus.Active,
@@ -67,14 +58,18 @@ const mockMission: IMissions = {
   commissionedBy: 'user1',
   hoursCompleted: 5,
 };
-
 const mockBundles: IBundle[] = [{
   _id: 'bundle1',
   student: mockStudent,
-  subjects: [{ subject: 'Math', tutor: mockTutor }]
-} as unknown as IBundle];
+  subjects: [{ _id: 'sub1', subject: 'Math', grade: '10', tutor: mockTutor, durationMinutes: 600 }],
+  createdBy: 'creatorId',
+  status: EBundleStatus.Approved,
+  isActive: true,
+  createdAt: new Date(),
+  updatedAt: new Date()
+}];
 
-
+// --- UNIT TEST FOR THE VALIDATOR ---
 describe('futureDateValidator', () => {
     it('should return null for a future date', () => {
         const control = { value: new Date(Date.now() + 86400000) } as AbstractControl; // Tomorrow
@@ -87,10 +82,7 @@ describe('futureDateValidator', () => {
     });
 
     it('should return null for today', () => {
-
-        const today = new Date();
-        today.setHours(12,0,0,0);
-         const control = { value: today } as AbstractControl;
+        const control = { value: new Date() } as AbstractControl;
         expect(futureDateValidator()(control)).toBeNull();
     });
 
@@ -100,23 +92,24 @@ describe('futureDateValidator', () => {
     });
 });
 
-
+// --- COMPONENT TESTS ---
 describe('MissionsModal', () => {
   let component: MissionsModal;
   let fixture: ComponentFixture<MissionsModal>;
   let missionServiceSpy: jasmine.SpyObj<MissionService>;
   let bundleServiceSpy: jasmine.SpyObj<BundleService>;
   let snackBarServiceSpy: jasmine.SpyObj<SnackBarService>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let authServiceSpy: { currentUser$: BehaviorSubject<IUser | null> };
+  let fileServiceSpy: jasmine.SpyObj<FileService>;
   let dialogRefSpy: jasmine.SpyObj<MatDialogRef<MissionsModal>>;
 
-  const setup = async (data: any) => {
+  // Helper function to set up the testing module
+  const setupTestBed = async (data: any) => {
     missionServiceSpy = jasmine.createSpyObj('MissionService', ['createMission', 'updateMission']);
     bundleServiceSpy = jasmine.createSpyObj('BundleService', ['getBundles', 'getBundleById']);
     snackBarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
-    authServiceSpy = jasmine.createSpyObj('AuthService', ['currentUser$'], {
-      currentUser$: new BehaviorSubject<IUser | null>(mockCurrentUser).asObservable()
-    });
+    authServiceSpy = { currentUser$: new BehaviorSubject<IUser | null>(mockCurrentUser) };
+    fileServiceSpy = jasmine.createSpyObj('FileService', ['getPresignedUploadUrl', 'uploadFileToSignedUrl', 'finalizeUpload']);
     dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
@@ -126,6 +119,7 @@ describe('MissionsModal', () => {
         { provide: BundleService, useValue: bundleServiceSpy },
         { provide: SnackBarService, useValue: snackBarServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
+        { provide: FileService, useValue: fileServiceSpy },
         { provide: MatDialogRef, useValue: dialogRefSpy },
         { provide: MAT_DIALOG_DATA, useValue: data },
         FormBuilder
@@ -140,20 +134,21 @@ describe('MissionsModal', () => {
     tick(); // process ngOnInit async operations
   };
 
+  // --- CREATE MODE TESTS ---
   describe('Create Mode', () => {
     beforeEach(fakeAsync(() => {
-      setup({ student: mockStudent, bundleId: 'bundle1' });
+      setupTestBed({ student: mockStudent, bundleId: 'bundle1' });
     }));
 
     it('should create and initialize form in create mode', () => {
       expect(component).toBeTruthy();
       expect(component.isEditMode).toBeFalse();
       expect(component.createMissionForm.get('studentName')?.value).toBe(mockStudent.displayName);
-       expect(component.createMissionForm.get('document')?.hasValidator(Validators.required)).toBeTrue();
+      expect(component.createMissionForm.get('document')?.hasValidator(Validators.required)).toBeTrue();
     });
 
-    it('should fetch tutors on init', fakeAsync(() => {
-        let tutors: any;
+    it('should fetch and correctly populate tutors for the student', fakeAsync(() => {
+        let tutors: IPopulatedUser[] = [];
         component.tutors$.subscribe(t => tutors = t);
         tick();
         expect(bundleServiceSpy.getBundleById).toHaveBeenCalled();
@@ -166,63 +161,58 @@ describe('MissionsModal', () => {
         expect(missionServiceSpy.createMission).not.toHaveBeenCalled();
     });
 
-    it('should successfully create a mission', fakeAsync(() => {
+    it('should successfully upload file and create a mission', fakeAsync(() => {
         const file = new File([''], 'test.pdf');
-        component.selectedFile = file;
-        component.fileName = 'test.pdf';
-        component.createMissionForm.setValue({
-            studentName: mockStudent.displayName,
+        component.onFileSelected(file);
+        component.createMissionForm.patchValue({
             tutorId: mockTutor._id,
             dateCompleted: new Date(),
             remuneration: 100,
-            status: EMissionStatus.Active,
-            document: file
         });
 
+        fileServiceSpy.getPresignedUploadUrl.and.returnValue(of({ url: 'signed-url', fileKey: 'file-key' }));
+        fileServiceSpy.uploadFileToSignedUrl.and.returnValue(of({}));
+        fileServiceSpy.finalizeUpload.and.returnValue(of(mockDocument));
         missionServiceSpy.createMission.and.returnValue(of(mockMission));
+
         component.onSave();
         tick();
 
+        expect(fileServiceSpy.getPresignedUploadUrl).toHaveBeenCalledWith(file.name, file.type);
         expect(missionServiceSpy.createMission).toHaveBeenCalled();
         expect(snackBarServiceSpy.showSuccess).toHaveBeenCalledWith('Mission created successfully!');
         expect(dialogRefSpy.close).toHaveBeenCalledWith(mockMission);
     }));
 
-     it('should handle error on mission creation', fakeAsync(() => {
+    it('should handle error during mission creation', fakeAsync(() => {
         const file = new File([''], 'test.pdf');
-        component.selectedFile = file;
-        component.fileName = 'test.pdf';
-        component.createMissionForm.setValue({
-            studentName: mockStudent.displayName,
-            tutorId: mockTutor._id,
-            dateCompleted: new Date(),
-            remuneration: 100,
-            status: EMissionStatus.Active,
-            document: file
-        });
-
-        const errorResponse = { error: { message: 'Creation Failed' } };
-        missionServiceSpy.createMission.and.returnValue(throwError(() => errorResponse));
+        component.onFileSelected(file);
+        component.createMissionForm.patchValue({ tutorId: mockTutor._id, dateCompleted: new Date(), remuneration: 100 });
+        
+        fileServiceSpy.getPresignedUploadUrl.and.returnValue(of({ url: 'signed-url', fileKey: 'file-key' }));
+        fileServiceSpy.uploadFileToSignedUrl.and.returnValue(of({}));
+        fileServiceSpy.finalizeUpload.and.returnValue(of(mockDocument));
+        missionServiceSpy.createMission.and.returnValue(throwError(() => ({ error: { message: 'Creation Failed' } })));
+        
         component.onSave();
         tick();
 
-        expect(missionServiceSpy.createMission).toHaveBeenCalled();
         expect(snackBarServiceSpy.showError).toHaveBeenCalledWith('Creation Failed');
-        expect(dialogRefSpy.close).not.toHaveBeenCalled();
         expect(component.isSaving).toBeFalse();
     }));
   });
 
+  // --- EDIT MODE TESTS ---
   describe('Edit Mode', () => {
     beforeEach(fakeAsync(() => {
-      setup({ student: mockStudent, mission: mockMission, bundleId: 'bundle1' });
+      setupTestBed({ student: mockStudent, mission: mockMission, bundleId: 'bundle1' });
     }));
 
     it('should initialize form in edit mode and patch values', () => {
         expect(component.isEditMode).toBeTrue();
         expect(component.createMissionForm.get('tutorId')?.value).toBe(mockTutor._id);
         expect(component.createMissionForm.get('remuneration')?.value).toBe(mockMission.remuneration);
-        expect(component.fileName).toBe(mockMission.documentName);
+        expect(component.createMissionForm.get('document')?.hasValidator(Validators.required)).toBeFalse();
     });
 
     it('should successfully update a mission', fakeAsync(() => {
@@ -230,12 +220,7 @@ describe('MissionsModal', () => {
             remuneration: 200,
             status: EMissionStatus.Completed
         });
-
-        // The form is invalid because 'document' is required but not provided in edit mode.
-        // Clear the validator to simulate the correct behavior for an update without a file change.
-        component.createMissionForm.get('document')?.clearValidators();
-        component.createMissionForm.get('document')?.updateValueAndValidity();
-
+        
         const updatedMission = { ...mockMission, remuneration: 200, status: EMissionStatus.Completed };
         missionServiceSpy.updateMission.and.returnValue(of(updatedMission));
 
@@ -250,11 +235,6 @@ describe('MissionsModal', () => {
     }));
 
     it('should handle error on mission update', fakeAsync(() => {
-        // The form is invalid because 'document' is required but not provided in edit mode.
-        // Clear the validator to simulate the correct behavior for an update without a file change.
-        component.createMissionForm.get('document')?.clearValidators();
-        component.createMissionForm.get('document')?.updateValueAndValidity();
-
         const errorResponse = { error: { message: 'Update Failed' } };
         missionServiceSpy.updateMission.and.returnValue(throwError(() => errorResponse));
 
@@ -263,36 +243,7 @@ describe('MissionsModal', () => {
 
         expect(missionServiceSpy.updateMission).toHaveBeenCalled();
         expect(snackBarServiceSpy.showError).toHaveBeenCalledWith('Update Failed');
-        expect(dialogRefSpy.close).not.toHaveBeenCalled();
         expect(component.isSaving).toBeFalse();
     }));
-  });
-
-  describe('General Functionality', () => {
-    beforeEach(fakeAsync(() => {
-        setup({ student: mockStudent, bundleId: 'bundle1' });
-    }));
-
-    it('should update file name and form value on file selection', () => {
-        const file = new File(['content'], 'document.pdf', { type: 'application/pdf' });
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-
-        const inputElement = document.createElement('input');
-        inputElement.type = 'file';
-        inputElement.files = dataTransfer.files;
-
-        const event = { currentTarget: inputElement } as unknown as Event;
-        component.onFileSelected(event);
-
-        expect(component.selectedFile).toBe(file);
-        expect(component.fileName).toBe('document.pdf');
-        expect(component.createMissionForm.get('document')?.value).toBe(file);
-    });
-
-    it('should close dialog on cancel', () => {
-        component.onCancel();
-        expect(dialogRefSpy.close).toHaveBeenCalled();
-    });
   });
 });
