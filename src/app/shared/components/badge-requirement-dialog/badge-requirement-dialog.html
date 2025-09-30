@@ -1,0 +1,45 @@
+<div class="dialog-container">
+  <header class="dialog-header">
+    <mat-icon class="header-icon">checklist</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>{{ data.isEditable ? 'Edit Requirements' : 'View Requirements' }}</h2>
+      <p class="badge-name-subtitle">{{ data.badge.name }}</p>
+    </div>
+  </header>
+
+  <mat-dialog-content class="dialog-content">
+    @if (isLoading) {
+      <div class="loading-state">
+        <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+      </div>
+    } @else {
+      @if(data.isEditable) {
+        <form [formGroup]="form">
+          <mat-form-field appearance="outline" class="edit-textarea">
+            <mat-label>Requirements</mat-label>
+            <textarea matInput formControlName="requirements" rows="15"
+                      placeholder="Describe the steps or criteria needed to earn this badge."></textarea>
+          </mat-form-field>
+        </form>
+      } @else {
+        @if (requirementsText && requirementsText !== 'No requirements specified for this badge yet.') {
+          <div class="requirements-text-container">
+            <pre class="requirements-text">{{ requirementsText }}</pre>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>info_outline</mat-icon>
+            <p>No requirements have been specified for this badge yet.</p>
+          </div>
+        }
+      }
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">{{ data.isEditable ? 'Cancel' : 'Close' }}</button>
+    @if(data.isEditable) {
+      <button mat-flat-button color="primary" [disabled]="form.invalid || isLoading" (click)="onSave()">Save Changes</button>
+    }
+  </mat-dialog-actions>
+</div>

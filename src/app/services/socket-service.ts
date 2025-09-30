@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { TOKEN_STORAGE_KEY } from './auth-service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,35 @@ export class SocketService implements OnDestroy {
     this.socket.on('connect_error', (error) => {
       console.error('%cSocket.IO Connection Error:', 'color: #f44336; font-weight: bold;', error);
     });
+  }
+
+  public connectionHook(cb: () => void) {
+    this.socket.on('connect', cb);
+  }
+
+  authenticate(token: string) {
+    this.socket.emit('authenticate', token);
+  }
+
+  /**
+   * Subscribes to a specific topic.
+   * @param topic The name of the topic to subscribe to.
+   */
+  subscribe(topic: ESocketMessage) {
+    this.socket.emit('subscribe', {topic, token: this.getToken()});
+  }
+
+  
+  private getToken(): string | null {
+    return localStorage.getItem(TOKEN_STORAGE_KEY);
+  }
+
+  /**
+   * Unsubscribes from a specific topic.
+   * @param topic The name of the topic to unsubscribe from.
+   */
+  unsubscribe(topic: ESocketMessage) {
+    this.socket.emit('unsubscribe', topic);
   }
 
   /**

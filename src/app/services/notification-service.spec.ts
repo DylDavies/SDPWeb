@@ -1,85 +1,181 @@
 import { TestBed } from '@angular/core/testing';
-import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { BehaviorSubject, of } from 'rxjs';
 import { NotificationService } from './notification-service';
-
-// Create a spy object for MatSnackBar. This is a mock that will stand in for the real service.
-const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+import { HttpService } from './http-service';
+import { SocketService } from './socket-service';
+import { AuthService } from './auth-service';
+import { INotification } from '../models/interfaces/INotification.interface';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
 
 describe('NotificationService', () => {
   let service: NotificationService;
+  let httpServiceSpy: jasmine.SpyObj<HttpService>;
+  let socketServiceSpy: jasmine.SpyObj<SocketService>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let currentUserSubject: BehaviorSubject<any>;
+
+  const mockNotifications: INotification[] = [
+    {
+      _id: 'notif-1',
+      recipientId: 'user-123',
+      title: 'Test Title 1',
+      message: 'Test notification 1',
+      read: false,
+      createdAt: new Date()
+    },
+    {
+      _id: 'notif-2',
+      recipientId: 'user-123',
+      title: 'Test Title 2',
+      message: 'Test notification 2',
+      read: true,
+      createdAt: new Date()
+    }
+  ];
 
   beforeEach(() => {
+    const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'patch', 'delete']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen']);
+    currentUserSubject = new BehaviorSubject(null);
+    const authSpy = jasmine.createSpyObj('AuthService', [], {
+      currentUser$: currentUserSubject.asObservable()
+    });
+
+    socketSpy.listen.and.returnValue(of({}));
+    httpSpy.get.and.returnValue(of(mockNotifications));
+
     TestBed.configureTestingModule({
       providers: [
         NotificationService,
-        // Provide the mock object instead of the real MatSnackBar
-        { provide: MatSnackBar, useValue: snackBarSpy }
+        { provide: HttpService, useValue: httpSpy },
+        { provide: SocketService, useValue: socketSpy },
+        { provide: AuthService, useValue: authSpy }
       ]
     });
-    service = TestBed.inject(NotificationService);
 
-    // Reset the spy's call history before each test to ensure a clean slate
-    snackBarSpy.open.calls.reset();
+    httpServiceSpy = TestBed.inject(HttpService) as jasmine.SpyObj<HttpService>;
+    socketServiceSpy = TestBed.inject(SocketService) as jasmine.SpyObj<SocketService>;
+    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    service = TestBed.inject(NotificationService);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('showSuccess', () => {
-    it('should call the snackbar with a success message and correct configuration', () => {
-      // Arrange
-      const message = 'Operation was successful!';
-      const expectedConfig: MatSnackBarConfig = {
-        panelClass: ['success-snackbar', 'duration-3000'],
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'bottom'
-      };
+  it('should listen to notifications-updated socket events', () => {
+    expect(socketServiceSpy.listen).toHaveBeenCalledWith(ESocketMessage.NotificationsUpdated);
+  });
 
-      // Act
-      service.showSuccess(message);
+  describe('fetchNotifications', () => {
+    it('should fetch notifications from API', (done) => {
+      httpServiceSpy.get.and.returnValue(of(mockNotifications));
 
-      // Assert
-      expect(snackBarSpy.open).toHaveBeenCalledOnceWith(message, undefined, expectedConfig);
+      service.fetchNotifications().subscribe((notifications) => {
+        expect(notifications).toEqual(mockNotifications);
+        expect(httpServiceSpy.get).toHaveBeenCalledWith('user/notifications');
+        done();
+      });
+    });
+
+    it('should update notifications$ BehaviorSubject', (done) => {
+      httpServiceSpy.get.and.returnValue(of(mockNotifications));
+
+      service.fetchNotifications().subscribe(() => {
+        service.allNotifications$.subscribe((notifications) => {
+          expect(notifications).toEqual(mockNotifications);
+          expect(notifications.length).toBe(2);
+          done();
+        });
+      });
+    });
+
+    it('should handle empty notifications', (done) => {
+      httpServiceSpy.get.and.returnValue(of([]));
+
+      service.fetchNotifications().subscribe((notifications) => {
+        expect(notifications).toEqual([]);
+        done();
+      });
     });
   });
 
-  describe('showError', () => {
-    it('should call the snackbar with an error message and correct configuration', () => {
-      // Arrange
-      const message = 'An error occurred!';
-      const expectedConfig: MatSnackBarConfig = {
-        panelClass: ['error-snackbar', 'duration-5000'],
-        duration: 5000,
-        horizontalPosition: 'end',
-        verticalPosition: 'bottom'
-      };
+  describe('markAsRead', () => {
+    it('should mark a notification as read', (done) => {
+      const notificationId = 'notif-1';
+      const readNotification = { ...mockNotifications[0], read: true };
 
-      // Act
-      service.showError(message);
+      httpServiceSpy.patch.and.returnValue(of(readNotification));
 
-      // Assert
-      expect(snackBarSpy.open).toHaveBeenCalledOnceWith(message, undefined, expectedConfig);
+      service.markAsRead(notificationId).subscribe((notification) => {
+        expect(notification.read).toBe(true);
+        expect(httpServiceSpy.patch).toHaveBeenCalledWith(
+          `user/notifications/${notificationId}/read`,
+          {}
+        );
+        done();
+      });
+    });
+
+    it('should handle marking multiple notifications as read', (done) => {
+      httpServiceSpy.patch.and.returnValue(of(mockNotifications[0]));
+
+      service.markAsRead('notif-1').subscribe(() => {
+        service.markAsRead('notif-2').subscribe(() => {
+          expect(httpServiceSpy.patch).toHaveBeenCalledTimes(2);
+          done();
+        });
+      });
     });
   });
 
-  describe('showInfo', () => {
-    it('should call the snackbar with an info message and correct configuration', () => {
-      // Arrange
-      const message = 'Here is some information.';
-      const expectedConfig: MatSnackBarConfig = {
-        panelClass: ['info-snackbar', 'duration-3000'],
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'bottom'
-      };
+  describe('deleteNotification', () => {
+    it('should delete a notification', (done) => {
+      const notificationId = 'notif-1';
 
-      // Act
-      service.showInfo(message);
+      httpServiceSpy.delete.and.returnValue(of({}));
 
-      // Assert
-      expect(snackBarSpy.open).toHaveBeenCalledOnceWith(message, undefined, expectedConfig);
+      service.deleteNotification(notificationId).subscribe(() => {
+        expect(httpServiceSpy.delete).toHaveBeenCalledWith(
+          `user/notifications/${notificationId}`
+        );
+        done();
+      });
+    });
+
+    it('should handle deleting multiple notifications', (done) => {
+      httpServiceSpy.delete.and.returnValue(of({}));
+
+      service.deleteNotification('notif-1').subscribe(() => {
+        service.deleteNotification('notif-2').subscribe(() => {
+          expect(httpServiceSpy.delete).toHaveBeenCalledTimes(2);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('user authentication integration', () => {
+    it('should fetch notifications when user logs in', (done) => {
+      httpServiceSpy.get.and.returnValue(of(mockNotifications));
+
+      currentUserSubject.next({ _id: 'user-123', name: 'Test User' });
+
+      setTimeout(() => {
+        expect(httpServiceSpy.get).toHaveBeenCalledWith('user/notifications');
+        done();
+      }, 10);
+    });
+
+    it('should clear notifications when user logs out', (done) => {
+      currentUserSubject.next(null);
+
+      setTimeout(() => {
+        service.allNotifications$.subscribe((notifications) => {
+          expect(notifications).toEqual([]);
+          done();
+        });
+      }, 10);
     });
   });
 });

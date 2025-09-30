@@ -1,0 +1,75 @@
+.dialog-container {
+    padding: 24px;
+}
+
+.dialog-header h2[mat-dialog-title] {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+
+  white-space: normal;       
+  word-break: break-word;     
+  overflow-wrap: anywhere;   
+  line-height: 1.2;
+}
+
+.dialog-header mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+}
+
+h2[mat-dialog-title] {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.dialog-content p {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.full-width {
+    width: 100%;
+}
+
+
+.badge-option {
+    display: flex;
+    align-items: center;
+    gap: 12px; 
+
+    mat-icon {
+        color: var(--mat-sys-primary);
+    }
+}
+
+mat-dialog-actions {
+    padding-top: 16px;
+}
+
+::ng-deep .add-badge-dialog-panel {
+  max-width: 352px !important; 
+
+  .mat-mdc-option .mdc-list-item__primary-text {
+    white-space: normal;      
+    line-height: 1.4;         
+    padding-top: 8px;         
+    padding-bottom: 8px;
+  }
+}
+
+.add-badge-dialog-panel {
+  max-width: 352px !important;
+
+.badge-option span {
+  white-space: normal;
+  word-break: break-word; 
+}
+
+
+  .mat-mdc-option {
+    min-height: 56px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}

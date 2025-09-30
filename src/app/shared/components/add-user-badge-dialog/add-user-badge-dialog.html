@@ -1,0 +1,37 @@
+<div class="dialog-container">
+  <header class="dialog-header">
+    <mat-icon color="primary">add_circle_outline</mat-icon>
+    <h2 mat-dialog-title>Add Badge to {{ data.user.displayName }}</h2>
+  </header>
+
+  <mat-dialog-content class="dialog-content">
+    <p>Select a badge to award to this user. They will not be notified.</p>
+<mat-form-field appearance="outline" class="full-width">
+  <mat-label>Available Badges</mat-label>
+  <mat-select [formControl]="badgeControl" panelClass="add-badge-dialog-panel">
+    <mat-select-trigger>
+      @if (badgeControl.value) {
+        <span>{{ badgeControl.value.name }}</span>
+      }
+    </mat-select-trigger>
+    
+    @for (badge of availableBadges; track badge._id) {
+      <mat-option [value]="badge">
+        <div class="badge-option">
+          <mat-icon>{{ badge.image }}</mat-icon>
+          <span>{{ badge.name }}</span>
+        </div>
+      </mat-option>
+    }
+  </mat-select>
+  @if (badgeControl.hasError('required')) {
+    <mat-error>Please select a badge.</mat-error>
+  }
+</mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="badgeControl.invalid" (click)="onAdd()">Add Badge</button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,93 @@
+<div class="page-container">
+  @if (isLoading) {
+    <mat-spinner></mat-spinner>
+  } @else {
+    @if (bundleNotFound) {
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Student Not Found</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Sorry, we couldn't find the bundle you were looking for.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-stroked-button color="primary" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            <span>Back to Student List</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    } @else if (bundle) {
+      <mat-card class="bundle-info-card">
+        <mat-tab-group animationDuration="0ms">
+            <mat-tab label="Student Information">
+                <mat-card-header>
+                <mat-card-title>{{ getDisplayName(bundle.student) }}</mat-card-title>
+                <mat-card-subtitle>Created on {{ bundle.createdAt | date:'longDate' }}</mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                <div class="detail-item">
+                    <mat-icon class="detail-icon">check_circle_outline</mat-icon>
+                    <div>
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">{{ bundle.status | titlecase }}</div>
+                    </div>
+                </div>
+
+                <mat-divider></mat-divider>
+                
+                <div class="lists-container">
+                  <div class="list-wrapper">
+                    <h2>Subjects</h2>
+                    <mat-list>
+                        @for (subject of bundle.subjects; track subject._id || $index) {
+                        <mat-list-item>
+                            <mat-icon matListItemIcon>school</mat-icon>
+                            <div matListItemTitle>{{ subject.subject }} (Grade: {{ subject.grade }})</div>
+                        </mat-list-item>
+                        }
+                    </mat-list>
+                  </div>
+
+                  <div class="list-wrapper">
+                    <h2>Tutors</h2>
+                    <mat-list>
+                      @for (tutor of tutors; track tutor._id || $index) {
+                        <mat-list-item>
+                          <mat-icon matListItemIcon>supervisor_account</mat-icon>
+                          <div matListItemTitle>{{ tutor.displayName || 'Unknown Tutor' }}</div>
+                        </mat-list-item>
+                      } @empty {
+                        <mat-list-item>No tutors assigned</mat-list-item>
+                      }
+                    </mat-list>
+                  </div>
+                </div>
+
+                </mat-card-content>
+                <mat-card-actions>
+                <button mat-stroked-button color="primary" (click)="goBack()">
+                    <mat-icon>arrow_back</mat-icon>
+                    <span>Back to Student List</span>
+                </button>
+                </mat-card-actions>
+            </mat-tab>
+            <mat-tab label="Missions">
+                <div class = missions-dashboard-header>
+                  @if(canCreateMissions){
+                     <button mat-flat-button color="primary" (click)="openCreateDialog()">
+                      <mat-icon>add</mat-icon>
+                      Add New Mission
+                    </button>
+
+                  }
+                   
+                </div>
+                  <app-missions-table [bundleId]="bundleId"></app-missions-table>
+            </mat-tab>
+        </mat-tab-group>
+       </mat-card>
+    }
+  }
+</div>

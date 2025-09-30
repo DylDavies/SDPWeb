@@ -4,7 +4,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet, RouterLinkActive  } from '@angular/router';
 import { ISidebarItem } from '../../../models/interfaces/ISidebarItem.interface';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth-service';
@@ -14,6 +14,9 @@ import { Subscription } from 'rxjs';
 import { EPermission } from '../../../models/enums/permission.enum';
 import { EUserType } from '../../../models/enums/user-type.enum';
 import { ThemeToggleButton } from '../theme-toggle-button/theme-toggle-button';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { SidebarService } from '../../../services/sidebar-service';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @Component({
   selector: 'app-sidebar',
@@ -28,49 +31,44 @@ import { ThemeToggleButton } from '../theme-toggle-button/theme-toggle-button';
     RouterLink,
     CommonModule,
     DisplayNamePipe,
-    ThemeToggleButton
+    ThemeToggleButton,
+    MatExpansionModule,
+    RouterLinkActive
   ],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss']
 })
 export class Sidebar implements OnInit, OnDestroy {
   @ViewChild('sidenav') sidenav!: MatSidenav;
-  /**
-   * List storing information on the items on the Sidebar
-   */
-  sideBarLinks: ISidebarItem[] = [
-    { label: 'Home', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Profile', icon: 'person', route: '/dashboard/profile' },
-    { label: 'User Management', icon: 'people', route: '/dashboard/users', requiredPermissions: [EPermission.USERS_VIEW] },
-    { 
-      label: 'Bundles', 
-      icon: 'inventory', 
-      route: '/dashboard/bundles', 
-      requiredPermissions: [
-        EPermission.BUNDLES_VIEW,
-        EPermission.BUNDLES_CREATE,
-        EPermission.BUNDLES_EDIT,
-        EPermission.BUNDLES_DELETE
-      ] 
-    },
-    { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW] }
-  ]
+
+  public isMobile = false;
+  private breakpointObserver = inject(BreakpointObserver);
 
   public authService = inject(AuthService);
+  public sideBarService = inject(SidebarService);
 
   public user: IUser | null = null;
   private userSubscription: Subscription | null = null;
 
+  public sideBarLinks: ISidebarItem[] = []; 
+  private sideBarSubscription: Subscription | null = null;
+
   ngOnInit(): void {
     this.userSubscription = this.authService.currentUser$.subscribe((user) => this.user = user);
+    
+    this.breakpointObserver.observe([
+      Breakpoints.XSmall,
+      Breakpoints.Small
+    ]).subscribe(result => {
+      this.isMobile = result.matches;
+    });
+
+    this.sideBarSubscription = this.sideBarService.sidebarItems$.subscribe((items) => this.sideBarLinks = items);
   }
 
   ngOnDestroy(): void {
-      if (this.userSubscription) this.userSubscription.unsubscribe();
-  }
-  
-  toggleSidenav() {
-    this.sidenav.toggle();
+    if (this.userSubscription) this.userSubscription.unsubscribe();
+    if (this.sideBarSubscription) this.sideBarSubscription.unsubscribe();
   }
   
   public canView(requiredPermissions: EPermission[] | undefined) {
@@ -79,5 +77,11 @@ export class Sidebar implements OnInit, OnDestroy {
     if (this.user && this.user.type == EUserType.Admin) return true;
 
     return requiredPermissions.every(p => this.authService.hasPermission(p)); 
+  }
+
+  public shouldShow(item: ISidebarItem) {
+    const isCat = (!item.route || item.route == '') && item.children && item.children.length > 0;
+
+    return isCat ? item.children!.some(c => this.canView(c.requiredPermissions)) : this.canView(item.requiredPermissions);
   }
 }

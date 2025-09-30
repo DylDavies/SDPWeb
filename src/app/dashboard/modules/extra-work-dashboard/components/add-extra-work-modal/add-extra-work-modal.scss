@@ -1,0 +1,56 @@
+.dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 24px 20px 24px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.dialog-header mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+}
+
+h1[mat-dialog-title] {
+    margin: 0;
+    line-height: 1.5;
+}
+
+mat-dialog-content {
+    padding: 20px 24px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+mat-dialog-actions {
+    padding: 0 24px 20px 24px;
+}
+
+button[mat-flat-button] {
+    min-width: 120px;
+}
+
+mat-form-field {
+    // Target the prefix span within the form field
+    span[matPrefix] {
+        // ALWAYS have padding on the left to create the space you want.
+        // This padding will be respected even when the element is invisible.
+        padding-left: 8px;
+
+        // By default, make the prefix invisible but KEEP ITS SPACE.
+        visibility: hidden;
+    }
+
+    // When the form field IS focused (i.e., clicked on)...
+    &.mat-focused, &.ng-valid {
+        // ...make the prefix visible again.
+        span[matPrefix] {
+            visibility: visible;
+        }
+    }
+}

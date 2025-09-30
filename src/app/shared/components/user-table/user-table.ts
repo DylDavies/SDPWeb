@@ -13,7 +13,7 @@ import { AuthService } from '../../../services/auth-service';
 import { UserService } from '../../../services/user-service';
 import { UserTypePipe } from '../../../pipes/usertype-pipe';
 import { ManageUserRolesDialog } from '../../../dashboard/modules/admin-dashboard/components/manage-user-roles/manage-user-roles';
-import { NotificationService } from '../../../services/notification-service';
+import { SnackBarService } from '../../../services/snackbar-service';
 import { EUserType } from '../../../models/enums/user-type.enum';
 import { MatMenuModule } from '@angular/material/menu';
 import { RoleChipRow } from '../../../dashboard/components/role-chip-row/role-chip-row';
@@ -41,7 +41,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 })
 export class UserTable implements OnInit, OnDestroy {
   private authService = inject(AuthService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
   private roleService = inject(RoleService);
   private userService = inject(UserService);
@@ -167,28 +167,28 @@ export class UserTable implements OnInit, OnDestroy {
   approveUser(user: IUser, event: MouseEvent): void {
     event.stopPropagation();
     this.userService.approveUser(user._id).subscribe(() => {
-      this.notificationService.showSuccess(`User ${user.displayName} approved.`);
+      this.snackbarService.showSuccess(`User ${user.displayName} approved.`);
     });
   }
 
   disableUser(user: IUser, event: MouseEvent): void {
     event.stopPropagation();
     this.userService.disableUser(user._id).subscribe(() => {
-      this.notificationService.showSuccess(`User ${user.displayName} disabled.`);
+      this.snackbarService.showSuccess(`User ${user.displayName} disabled.`);
     });
   }
 
   enableUser(user: IUser, event: MouseEvent): void {
     event.stopPropagation();
     this.userService.enableUser(user._id).subscribe(() => {
-      this.notificationService.showSuccess(`User ${user.displayName} enabled.`);
+      this.snackbarService.showSuccess(`User ${user.displayName} enabled.`);
     });
   }
 
   updateUserType(user: IUser, type: EUserType, event: MouseEvent): void {
     event.stopPropagation();
     this.userService.updateUserType(user._id, type).subscribe(() => {
-      this.notificationService.showSuccess(`${user.displayName}'s type updated to ${type}.`);
+      this.snackbarService.showSuccess(`${user.displayName}'s type updated to ${type}.`);
     });
   }
 

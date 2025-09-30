@@ -1,0 +1,86 @@
+.dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 24px 20px 24px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+h1[mat-dialog-title] {
+    margin: 0;
+}
+
+mat-dialog-content {
+    padding: 24px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+    margin-bottom: 4px;
+}
+
+.detail-value {
+    font-size: 1rem;
+}
+
+.details-box {
+    background-color: var(--mat-sys-surface-container-low);
+    padding: 12px;
+    border-radius: 8px;
+
+    p {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.status-chip {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    display: inline-block;
+}
+
+.status-chip.in-progress { background-color: #2196F3; }
+.status-chip.completed { background-color: #FFC107; }
+.status-chip.approved { background-color: #4CAF50; }
+.status-chip.denied { background-color: #f44336; }
+
+.calendar-divider {
+    margin-top: 24px;
+}
+
+.calendar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 16px;
+
+    h3 {
+        margin: 0 0 16px 0;
+        font-weight: 500;
+    }
+}
+
+mat-dialog-actions {
+    padding: 0 24px 20px 24px;
+}

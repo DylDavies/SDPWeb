@@ -95,4 +95,12 @@ export class BundleService {
   setBundleStatus(bundleId: string, status: EBundleStatus): Observable<IBundle> {
     return this.httpService.patch<IBundle>(`bundle/${bundleId}/status`, { status });
   }
+  /**
+   * Retrieves a single bundle by its unique ID.
+   * @param id The ID of the bundle to retrieve.
+   * @returns An Observable that emits the requested bundle.
+   */
+  getBundleById(id: string): Observable<IBundle> {
+    return this.httpService.get<IBundle>(`bundle/${id}`);
+  }
 }

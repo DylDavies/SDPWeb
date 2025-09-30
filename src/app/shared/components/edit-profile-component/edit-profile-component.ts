@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../../services/user-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
-import { NotificationService } from '../../../services/notification-service';
+import { SnackBarService } from '../../../services/snackbar-service';
 
 @Component({
   selector: 'app-edit-profile-modal',
@@ -28,7 +28,7 @@ export class EditProfileComponent {
   public data: IUser = inject(MAT_DIALOG_DATA);
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
 
   constructor() {
     this.editForm = this.fb.group({
@@ -50,11 +50,11 @@ export class EditProfileComponent {
     
     this.userService.updateProfile(updatedData).subscribe({
       next: (updatedUser) => {
-        this.notificationService.showSuccess('Profile updated successfully!');
+        this.snackbarService.showSuccess('Profile updated successfully!');
         this.dialogRef.close(updatedUser);
       },
       error: (err) => {
-        this.notificationService.showError('Failed to update profile.');
+        this.snackbarService.showError('Failed to update profile.');
         console.error(err);
         this.isSaving = false;
       }

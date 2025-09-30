@@ -2,8 +2,21 @@ import { RoleNode } from "../../services/role-service";
 import { Theme } from "../../services/theme-service";
 import { EPermission } from "../enums/permission.enum";
 import { EUserType } from "../enums/user-type.enum";
+import IBadge from "./IBadge.interface";
 import { ILeave } from "./ILeave.interface";
 import { IProficiency } from "./IProficiency.interface";
+
+export interface IRateAdjustment {
+    reason: string;
+    newRate: number;
+    effectiveDate: Date;
+    approvingManagerId: string;
+}
+
+export interface IUserBadge{
+    badge: IBadge;
+    dateAdded: string;
+}
 
 export interface IUser {
     _id: string;
@@ -22,4 +35,8 @@ export interface IUser {
     leave: ILeave[],
     proficiencies?: IProficiency[],
     availability?: number,
+    badges?: IUserBadge[],
+    paymentType: 'Contract' | 'Salaried';
+    monthlyMinimum: number;
+    rateAdjustments: IRateAdjustment[];
 }

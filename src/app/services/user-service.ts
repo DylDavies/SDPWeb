@@ -10,7 +10,8 @@ import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { Theme } from './theme-service';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
-
+import { CustomObservableService } from './custom-observable-service';
+import { EPermission } from '../models/enums/permission.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +19,10 @@ import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.in
 export class UserService {
   public httpService = inject(HttpService);
   public socketService = inject(SocketService);
+  public observableService = inject(CustomObservableService);
 
   private users$ = new BehaviorSubject<IUser[]>([]);
-  public allUsers$ = this.users$.asObservable();
+  public allUsers$: Observable<IUser[]>;
 
   constructor() {
     this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
@@ -32,6 +34,13 @@ export class UserService {
       console.log('Received roles-updated event. Refreshing user list to update roles.');
       this.fetchAllUsers().subscribe();
     });
+
+    // Initialize the managed observable
+    this.allUsers$ = this.observableService.createManagedTopicObservable(
+      ESocketMessage.UsersUpdated,
+      this.users$.asObservable(),
+      () => this.fetchAllUsers()
+    );
   }
 
   /**
@@ -39,10 +48,24 @@ export class UserService {
    * Any component subscribed to `allUsers$` will automatically receive the new data.
    */
   public fetchAllUsers(): Observable<IUser[]> {
-    return this.httpService.get<IUser[]>('users').pipe(
-      tap(users => this.users$.next(users))
-    );
-  }
+  return this.httpService.get<IUser[]>('users').pipe(
+    map(users => {
+      return users.map(user => {
+        const permissions = new Set<EPermission>();
+        if (user.roles) {
+          for (const role of user.roles) {
+            for (const permission of role.permissions) {
+              permissions.add(permission);
+            }
+          }
+        }
+        return { ...user, permissions: Array.from(permissions) };
+      });
+    }),
+    // This part stays the same
+    tap(processedUsers => this.users$.next(processedUsers))
+  );
+}
 
   getUser(): Observable<IUser> {
     return this.httpService.get<IUser>('user');
@@ -161,4 +184,65 @@ export class UserService {
   updateUserAvailability(userId: string, availability: number): Observable<IUser> {
     return this.httpService.patch<IUser>(`users/${userId}/availability`, { availability });
   }
-}
+
+    /**
+   * Assigns a badge to a specific user.
+   * @param userId - The ID of the user to whom the badge will be added.
+   * @param badgeId - The id of the badge to be added to the user
+   * @returns An Observable that emits the updated user document.
+   */
+  addBadgeToUser(userId: string, badgeId: string): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/badges`, { badgeId });
+  }
+
+    /**
+   * Removes a badge from a specific user.
+   * @param userId - The ID of the user from whom the badge will be removed.
+   * @param badgeId - The ID of the badge to remove.
+   * @returns An Observable that emits the updated user document.
+   */
+  removeBadgeFromUser(userId: string, badgeId: string): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/badges/${badgeId}`);
+  }
+
+  // ===== RATE ADJUSTMENT MANAGEMENT =====
+
+  /**
+   * Adds a rate adjustment to a user's history.
+   * After a successful API call, it triggers a refresh of the local user list.
+   * @param userId - The ID of the user to adjust rates for.
+   * @param rateAdjustment - The rate adjustment data.
+   * @returns An Observable that emits the updated user document.
+   */
+  addRateAdjustment(userId: string, rateAdjustment: {
+    reason: string;
+    newRate: number;
+    effectiveDate: string
+  }): Observable<IUser> {
+    return this.httpService.post<IUser>(`users/${userId}/rate-adjustments`, rateAdjustment).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+
+  /**
+   * Gets the rate adjustment history for a specific user.
+   * @param userId - The ID of the user to fetch rate adjustments for.
+   * @returns An Observable that emits the user's rate adjustment history.
+   */
+  getRateAdjustments(userId: string): Observable<import('../models/interfaces/IUser.interface').IRateAdjustment[]> {
+    return this.httpService.get<import('../models/interfaces/IUser.interface').IRateAdjustment[]>(`users/${userId}/rate-adjustments`);
+  }
+
+  /**
+   * Removes a rate adjustment from a user's history (for corrections).
+   * After a successful API call, it triggers a refresh of the local user list.
+   * @param userId - The ID of the user.
+   * @param adjustmentIndex - The index of the adjustment to remove.
+   * @returns An Observable that emits the updated user document.
+   */
+  removeRateAdjustment(userId: string, adjustmentIndex: number): Observable<IUser> {
+    return this.httpService.delete<IUser>(`users/${userId}/rate-adjustments/${adjustmentIndex}`).pipe(
+      tap(() => this.fetchAllUsers().subscribe())
+    );
+  }
+} 

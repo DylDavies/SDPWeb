@@ -1,6 +1,6 @@
 import {Component, inject, OnDestroy, OnInit,Input, ViewChild, AfterViewInit} from '@angular/core';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
-import { NotificationService } from '../../../../../services/notification-service';
+import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ILeave } from '../../../../../models/interfaces/ILeave.interface';
 import { Subscription} from 'rxjs';
 import { CommonModule} from '@angular/common';
@@ -32,7 +32,7 @@ export class LeaveManagement implements OnInit, OnDestroy, AfterViewInit {
   @Input() userId: string | null = null;
   private authService = inject(AuthService);
   private userService = inject(UserService);
-  private notificationService = inject(NotificationService);
+  private snackbarService = inject(SnackBarService);
 
   public displayedColumns: string[] = ['expand', 'dates', 'approved'];
   public dataSource = new MatTableDataSource<ILeave>([]);
@@ -92,13 +92,13 @@ approveLeave(leave: ILeave): void {
     .subscribe({
       next: (updatedUser: IUser) => {
         this.dataSource.data = updatedUser.leave;
-        this.notificationService.showSuccess(
+        this.snackbarService.showSuccess(
           `Leave for ${this.viewedUser?.displayName} approved.`
         );
       },
       error: (err) => {
         console.error('approve error', err);
-        this.notificationService.showError('Could not approve leave.');
+        this.snackbarService.showError('Could not approve leave.');
       },
     });
 }
@@ -111,13 +111,13 @@ denyLeave(leave: ILeave): void {
     .subscribe({
       next: (updatedUser) => {
         this.dataSource.data = updatedUser.leave;
-        this.notificationService.showSuccess(
+        this.snackbarService.showSuccess(
           `Leave for ${this.viewedUser?.displayName} denied.`
         );
       },
       error: (err) => {
         console.error('deny error', err);
-        this.notificationService.showError('Could not deny leave.');
+        this.snackbarService.showError('Could not deny leave.');
       },
     });
   }

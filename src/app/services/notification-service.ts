@@ -1,66 +1,72 @@
 import { inject, Injectable } from '@angular/core';
-import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { HttpService } from './http-service';
+import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
+import { INotification } from '../models/interfaces/INotification.interface';
+import { AuthService } from './auth-service';
 
-/**
- * A service for displaying snack bar notifications.
- * This service is injectable at the root level to be used across the application.
- */
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
+  private httpService = inject(HttpService);
+  private socketService = inject(SocketService);
+  private authService = inject(AuthService);
 
-  private snackBar = inject(MatSnackBar);
+  private notifications$ = new BehaviorSubject<INotification[]>([]);
+  public allNotifications$ = this.notifications$.asObservable();
 
-  /**
-   * Displays a success notification.
-   * @param message The message to display.
-   */
-  showSuccess(message: string): void {
-    const duration = 3000;
-    this.show(message, {
-      panelClass: ['success-snackbar', `duration-${duration}`],
-      duration: duration,
+  constructor() {
+    // Listen for new notifications in real-time
+    this.socketService.listen<INotification>(ESocketMessage.NotificationsUpdated).subscribe(() => {
+      this.fetchNotifications().subscribe();
     });
+
+    // When user logs in, fetch their notifications
+    this.authService.currentUser$.subscribe(user => {
+        if (user) {
+            this.fetchNotifications().subscribe();
+        } else {
+            this.notifications$.next([]); // Clear notifications on logout
+        }
+    })
   }
 
   /**
-   * Displays an error notification.
-   * @param message The message to display.
+   * Fetches all notifications for the current user from the API.
    */
-  showError(message: string): void {
-    const duration = 5000;
-    this.show(message, {
-      panelClass: ['error-snackbar', `duration-${duration}`],
-      duration: duration, // Errors might need more time to be read
-    });
+  public fetchNotifications(): Observable<INotification[]> {
+    return this.httpService.get<INotification[]>('user/notifications').pipe(
+        tap(notifications => this.notifications$.next(notifications))
+    );
   }
 
   /**
-   * Displays a general information notification.
-   * @param message The message to display.
+   * Marks a single notification as read.
+   * @param notificationId The ID of the notification to mark as read.
    */
-  showInfo(message: string): void {
-    const duration = 3000;
-    this.show(message, {
-      panelClass: ['info-snackbar', `duration-${duration}`],
-      duration: duration,
-    });
+  public markAsRead(notificationId: string): Observable<INotification> {
+    return this.httpService.patch<INotification>(`user/notifications/${notificationId}/read`, {});
   }
 
   /**
-   * The core method to open a snack bar with custom configuration.
-   * @param message The message to display in the snack bar.
-   * @param config The configuration object for the MatSnackBar.
+   * Deletes a specific notification.
+   * @param notificationId The ID of the notification to delete.
    */
-  private show(message: string, config: MatSnackBarConfig): void {
-    // Default configuration for all snackbars
-    const defaultConfig: MatSnackBarConfig = {
-      horizontalPosition: 'end',
-      verticalPosition: 'bottom',
-      ...config // Merge default and provided configs
-    };
-    // Pass 'undefined' for the action to remove the button
-    this.snackBar.open(message, undefined, defaultConfig);
+  public deleteNotification(notificationId: string): Observable<unknown> {
+    return this.httpService.delete(`user/notifications/${notificationId}`);
+  }
+
+  public markAllAsRead(): Observable<unknown> {
+    return this.httpService.patch("user/notifications/read-all", {});
+  }
+
+  public deleteAllRead(): Observable<unknown> {
+    return this.httpService.delete("user/notifications/read");
+  }
+
+  public restoreNotification(notificationId: string): Observable<INotification> {
+    return this.httpService.patch<INotification>(`user/notifications/${notificationId}/restore`, {});
   }
 }

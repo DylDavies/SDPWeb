@@ -119,6 +119,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   color: white;
 }
 
+.mat-mdc-snack-bar-container.info-snackbar button.mdc-snackbar__action {
+  color: white !important;
+}
+
 .image-backdrop {
   background-color: transparent;
 }
@@ -152,4 +156,14 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     width: 80vw;
     height: 80vh;
     max-width: 900px !important;
+}
+
+.remark-dialog-container {
+  /* This targets the overlay pane and forces it to not have a max-width */
+  max-width: none !important;
+
+  /* This targets the actual dialog surface inside the pane */
+  .mdc-dialog__surface {
+    max-width: none !important;
+  }
 }

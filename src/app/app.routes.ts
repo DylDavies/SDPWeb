@@ -17,6 +17,14 @@ import { AccountPending } from './status-pages/account-pending/account-pending';
 import { AccountDisabled } from './status-pages/account-disabled/account-disabled';
 import { UserManagement } from './dashboard/modules/user-management/user-management';
 import { BundleDashboard } from './dashboard/modules/bundle-dashboard/bundle-dashboard';
+import { BadgeLibrary } from './dashboard/modules/badge-library/badge-library';
+import { NotificationCenterComponent } from './notification-center/notification-center';
+import { StudentManagement } from './dashboard/modules/student-management/student-management';
+import { StudentInformationPage } from './dashboard/modules/student-information/student-information-page/student-information-page';
+import { PayslipViewer } from './dashboard/modules/payslip-dashboard/components/payslip-viewer/payslip-viewer';
+import { PayslipDashboard } from './dashboard/modules/payslip-dashboard/payslip-dashboard';
+import { RateManagementComponent } from './dashboard/modules/rate-management/rate-management';
+import { ExtraWorkDashboard } from './dashboard/modules/extra-work-dashboard/extra-work-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -27,9 +35,11 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard, children: [
       { path: '', component: ClientDashboard },
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
-      { path: 'profile', component: Profile },
-      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
+      { path: 'profile', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
+      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
+      {path: 'students', component: StudentManagement},
+      {path: 'student-info/:id',component: StudentInformationPage},
       { 
         path: 'bundles', 
         component: BundleDashboard,
@@ -39,7 +49,29 @@ export const routes: Routes = [
           EPermission.BUNDLES_EDIT,
           EPermission.BUNDLES_DELETE
         ], true)] 
-      }
+      },
+      { path: 'badges', component: BadgeLibrary, canActivate: [permissionGuard([EPermission.BADGES_VIEW])] },
+      {
+        path: 'notifications',
+        component: NotificationCenterComponent,
+        canActivate: [permissionGuard([EPermission.NOTIFICATIONS_VIEW])]
+      },
+      {
+        path: 'payslips',
+        component: PayslipDashboard,
+        canActivate: [permissionGuard([EPermission.CAN_VIEW_OWN_PAYSLIP])]
+      },
+      {
+        path: 'payslip/:id',
+        component: PayslipViewer,
+        canActivate: [permissionGuard([EPermission.CAN_VIEW_OWN_PAYSLIP, EPermission.CAN_MANAGE_PAYSLIPS], false)]
+      },
+      {
+        path: 'rates',
+        component: RateManagementComponent,
+        canActivate: [permissionGuard([EPermission.CAN_ADJUST_RATES])]
+      },
+      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },

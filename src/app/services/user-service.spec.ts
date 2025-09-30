@@ -1,6 +1,5 @@
-// src/app/services/user-service.spec.ts
 import { TestBed } from '@angular/core/testing';
-import { of, filter } from 'rxjs';
+import { of, filter, Observable, throwError } from 'rxjs';
 import { HttpService } from './http-service';
 import { SocketService } from './socket-service';
 import { UserService } from './user-service';
@@ -8,6 +7,7 @@ import { IUser } from '../models/interfaces/IUser.interface';
 import { EUserType } from '../models/enums/user-type.enum';
 import { ELeave } from '../models/enums/ELeave.enum';
 import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.interface';
+import { CustomObservableService } from './custom-observable-service';
 
 const mockUsers: IUser[] = [
   {
@@ -23,7 +23,10 @@ const mockUsers: IUser[] = [
     pending: false,
     disabled: false,
     leave: [],
-    theme: 'system'
+    theme: 'system',
+    paymentType: 'Contract' as const,
+    monthlyMinimum: 0,
+    rateAdjustments: []
   },
 ];
 
@@ -32,25 +35,33 @@ describe('UserService', () => {
   let service: UserService;
   let httpServiceSpy: jasmine.SpyObj<HttpService>;
   let socketServiceSpy: jasmine.SpyObj<SocketService>;
+  let customObservableServiceSpy: jasmine.SpyObj<CustomObservableService>;
 
   beforeEach(() => {
-    // Create spy objects for the services
+    // Create spy objects for the services, including the new methods and the new service
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch', 'delete']);
-    const socketSpy = jasmine.createSpyObj('SocketService', ['listen']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
+    const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
 
     TestBed.configureTestingModule({
       providers: [
         UserService,
         { provide: HttpService, useValue: httpSpy },
-        { provide: SocketService, useValue: socketSpy }
+        { provide: SocketService, useValue: socketSpy },
+        { provide: CustomObservableService, useValue: observableSpy }
       ]
     });
 
     socketServiceSpy = TestBed.inject(SocketService) as jasmine.SpyObj<SocketService>;
     httpServiceSpy = TestBed.inject(HttpService) as jasmine.SpyObj<HttpService>;
+    customObservableServiceSpy = TestBed.inject(CustomObservableService) as jasmine.SpyObj<CustomObservableService>;
 
     socketServiceSpy.listen.and.returnValue(of(null));
-    httpServiceSpy.get.and.returnValue(of([])); // Default to returning an empty array
+    httpServiceSpy.get.and.returnValue(of([]));
+
+    customObservableServiceSpy.createManagedTopicObservable.and.callFake((topic, source$) => {
+      return source$;
+    });
 
     service = TestBed.inject(UserService);
   });
@@ -61,11 +72,11 @@ describe('UserService', () => {
 
   describe('fetchAllUsers', () => {
     it('should fetch all users via GET and update the users$ subject', (done: DoneFn) => {
-      // Override the default 'get' spy for this specific test
       httpServiceSpy.get.and.returnValue(of(mockUsers));
 
       service.fetchAllUsers().subscribe(users => {
         expect(users).toEqual(mockUsers);
+
         service.allUsers$.subscribe(usersFromStream => {
           expect(usersFromStream).toEqual(mockUsers);
           done();
@@ -100,27 +111,27 @@ describe('UserService', () => {
 
   describe('assignRoleToUser', () => {
      it('should assign a role and refresh the user list', (done: DoneFn) => {
-      httpServiceSpy.post.and.returnValue(of(mockUsers[0]));
-      httpServiceSpy.get.and.returnValue(of(mockUsers));
+       httpServiceSpy.post.and.returnValue(of(mockUsers[0]));
+       httpServiceSpy.get.and.returnValue(of(mockUsers));
 
-      service.assignRoleToUser('1', 'role1').subscribe(() => {
-        expect(httpServiceSpy.post).toHaveBeenCalledOnceWith('users/1/roles', { roleId: 'role1' });
-        expect(httpServiceSpy.get).toHaveBeenCalledWith('users');
-        done();
-      });
+       service.assignRoleToUser('1', 'role1').subscribe(() => {
+         expect(httpServiceSpy.post).toHaveBeenCalledOnceWith('users/1/roles', { roleId: 'role1' });
+         expect(httpServiceSpy.get).toHaveBeenCalledWith('users');
+         done();
+       });
     });
   });
 
   describe('removeRoleFromUser', () => {
      it('should remove a role and refresh the user list', (done: DoneFn) => {
-      httpServiceSpy.delete.and.returnValue(of(mockUsers[0]));
-      httpServiceSpy.get.and.returnValue(of(mockUsers));
+       httpServiceSpy.delete.and.returnValue(of(mockUsers[0]));
+       httpServiceSpy.get.and.returnValue(of(mockUsers));
 
-      service.removeRoleFromUser('1', 'role1').subscribe(() => {
-        expect(httpServiceSpy.delete).toHaveBeenCalledOnceWith('users/1/roles/role1');
-        expect(httpServiceSpy.get).toHaveBeenCalledWith('users');
-        done();
-      });
+       service.removeRoleFromUser('1', 'role1').subscribe(() => {
+         expect(httpServiceSpy.delete).toHaveBeenCalledOnceWith('users/1/roles/role1');
+         expect(httpServiceSpy.get).toHaveBeenCalledWith('users');
+         done();
+       });
     });
   });
 
@@ -137,7 +148,7 @@ describe('UserService', () => {
       });
     });
   });
-  
+
   describe('updateLeaveStatus', () => {
     it('should update leave status and refresh the user list', (done: DoneFn) => {
       const status = ELeave.Approved;
@@ -221,8 +232,6 @@ describe('UserService', () => {
       service['users$'].next([]); // Ensure cache is empty
       httpServiceSpy.get.and.returnValue(of(mockUsers));
 
-      // The observable will emit `undefined` first, then the user.
-      // We use filter() to ignore the first emission and only test the final result.
       service.getUserById('1').pipe(
         filter(user => !!user)
       ).subscribe(user => {

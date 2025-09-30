@@ -1,0 +1,78 @@
+<div class="table-wrapper">
+  <div class="table-toolbar">
+    <mat-form-field appearance="outline" class="filter-field compact-form-field">
+      <mat-label>Filter Students</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="Search by name..."
+        #input
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  @if (!isLoading) {
+    @if (dataSource.data.length > 0) {
+      <div class="table-responsive-wrapper">
+        <table
+          mat-table
+          [dataSource]="dataSource"
+          matSort
+          class="student-table"
+        >
+          <ng-container matColumnDef="student">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Student</th>
+            <td mat-cell *matCellDef="let bundle">
+              <span class="student">
+                {{ (typeof bundle.student === 'object' && bundle.student)
+                  ? bundle.student.displayName
+                  : 'N/A' }}
+              </span>
+            </td>
+          </ng-container>
+
+          
+          <ng-container matColumnDef="createdBy">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Created By</th>
+            <td mat-cell *matCellDef="let bundle">
+              {{ getCreatorName(bundle) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalHours">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Hours Remaining</th>
+            <td mat-cell *matCellDef="let bundle">
+              {{ getTotalHours(bundle) | number:'1.0-2' }}
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            class="student-table-row"
+            *matRowDef="let row; columns: displayedColumns;"
+            (click)="viewStudentInfo(row)"
+          ></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [pageSizeOptions]="[10, 25, 100]"
+        [pageSize]="10"
+        showFirstLastButtons
+        aria-label="Select page of students"
+      ></mat-paginator>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <h2>No Students Found</h2>
+        <p>Your search and filter criteria did not match any students.</p>
+      </div>
+    }
+  } @else {
+    <div class="loading-state">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    </div>
+  }
+</div>
