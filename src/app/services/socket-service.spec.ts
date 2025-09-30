@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { SocketService } from './socket-service';
+import { ESocketMessage } from '../models/enums/socket-message.enum';
 
 describe('SocketService', () => {
   let service: SocketService;
