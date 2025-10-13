@@ -25,6 +25,7 @@ import { PayslipViewer } from './dashboard/modules/payslip-dashboard/components/
 import { PayslipDashboard } from './dashboard/modules/payslip-dashboard/payslip-dashboard';
 import { RateManagementComponent } from './dashboard/modules/rate-management/rate-management';
 import { ExtraWorkDashboard } from './dashboard/modules/extra-work-dashboard/extra-work-dashboard';
+import { AdminPayslipDashboard } from './dashboard/modules/admin-dashboard/components/admin-payslip-dashboard/admin-payslip-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -35,6 +36,16 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard, children: [
       { path: '', component: ClientDashboard },
       { path: 'admin', component: AdminDashboard, canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])] },
+      {
+        path: 'admin/payslips',
+        component: AdminPayslipDashboard,
+        canActivate: [permissionGuard([EPermission.CAN_MANAGE_PAYSLIPS])]
+      },
+      {
+        path: 'admin/payslips/:id',
+        component: PayslipViewer,
+        canActivate: [permissionGuard([EPermission.CAN_MANAGE_PAYSLIPS])]
+      },
       { path: 'profile', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
       { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
