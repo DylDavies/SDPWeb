@@ -10,7 +10,7 @@
     "serve:ssr:SDPWeb": "node dist/SDPWeb/server/server.mjs",
     "lint": "ng lint",
     "docs": "typedoc",
-    "analyze:size": "ng build --configuration=production && source-map-explorer dist/SDPWeb/**/*.js"
+    "analyze:size": "ng build --configuration=production && source-map-explorer dist/SDPWeb/browser/*.js"
   },
   "prettier": {
     "overrides": [
