@@ -227,6 +227,16 @@
       &.has-query {
         background-color: var(--mat-sys-error-container);
       }
+    }
+
+    &.locked-row {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: var(--mat-sys-surface-container-low);
+
+      &:hover {
+        background-color: var(--mat-sys-surface-container-low) !important;
+      }
 
       &.bonus-row {
         .bonus-description {
@@ -276,6 +286,33 @@
     0% { opacity: 1; }
     50% { opacity: 0.6; }
     100% { opacity: 1; }
+  }
+
+  // Column widths for earnings table (main table with Date, Description, Base Rate, Hours, Hourly Rate, Total, Actions)
+  &:not(.description-amount-table) {
+    // When Actions column is shown (7 columns)
+    &:has(th:nth-child(7)) {
+      th:nth-child(1), td:nth-child(1) { width: 10%; } // Date
+      th:nth-child(2), td:nth-child(2) { width: 25%; } // Description
+      th:nth-child(3), td:nth-child(3) { width: 13%; } // Base Rate
+      th:nth-child(4), td:nth-child(4) { width: 10%; } // Hours
+      th:nth-child(5), td:nth-child(5) { width: 13%; } // Hourly Rate
+      th:nth-child(6), td:nth-child(6) { width: 13%; } // Total
+      th:nth-child(7), td:nth-child(7) {
+        width: 16%;
+        text-align: center;
+      } // Actions
+    }
+
+    // When Actions column is hidden (6 columns)
+    &:not(:has(th:nth-child(7))) {
+      th:nth-child(1), td:nth-child(1) { width: 12%; } // Date
+      th:nth-child(2), td:nth-child(2) { width: 30%; } // Description
+      th:nth-child(3), td:nth-child(3) { width: 15%; } // Base Rate
+      th:nth-child(4), td:nth-child(4) { width: 10%; } // Hours
+      th:nth-child(5), td:nth-child(5) { width: 15%; } // Hourly Rate
+      th:nth-child(6), td:nth-child(6) { width: 18%; } // Total
+    }
   }
 
   // Column widths for description/amount tables (misc earnings and deductions)
@@ -438,6 +475,37 @@
   }
 }
 
+/* Material Form Fields in Tables */
+.table-form-field {
+  width: 100%;
+  margin: 0 !important;
+
+  ::ng-deep {
+    .mat-mdc-form-field-infix {
+      min-height: 40px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      padding-bottom: 0;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mat-mdc-form-field-bottom-align::before {
+      display: none;
+    }
+
+    input {
+      font-size: 12px;
+      font-family: inherit;
+    }
+  }
+}
+
 .calculated-total {
   font-weight: bold;
   color: var(--mat-sys-primary);
@@ -504,5 +572,135 @@
 
   .action-buttons {
     flex-wrap: wrap;
+  }
+}
+
+/* Admin Controls Section */
+.admin-controls {
+  margin-top: 40px;
+  padding: 20px;
+  background-color: var(--mat-sys-surface-container-high);
+  border-radius: 8px;
+  border: 2px solid var(--mat-sys-primary);
+
+  h3 {
+    margin: 0 0 15px 0;
+    color: var(--mat-sys-primary);
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+
+    button {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .history-log {
+    margin-top: 15px;
+
+    h4 {
+      margin: 0 0 10px 0;
+      color: var(--mat-sys-on-surface);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .history-timeline {
+      position: relative;
+      padding-left: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: var(--mat-sys-surface-container-low);
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--mat-sys-outline-variant);
+        border-radius: 3px;
+
+        &:hover {
+          background: var(--mat-sys-outline);
+        }
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: var(--mat-sys-outline-variant);
+      }
+
+      .history-entry {
+        position: relative;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: flex-start;
+
+        .history-marker {
+          position: absolute;
+          left: -18px;
+          top: 3px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: var(--mat-sys-primary);
+          border: 2px solid var(--mat-sys-surface-container-high);
+        }
+
+        .history-content {
+          flex: 1;
+          padding: 4px 8px;
+          background-color: transparent;
+          border-radius: 0;
+          border-left: none;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+
+          .history-status {
+            font-weight: 500;
+            color: var(--mat-sys-on-surface);
+            font-size: 12px;
+            white-space: nowrap;
+
+            .history-user {
+              font-weight: 400;
+              color: var(--mat-sys-on-surface-variant);
+              font-style: italic;
+              margin-left: 4px;
+            }
+          }
+
+          .history-timestamp {
+            font-size: 11px;
+            color: var(--mat-sys-on-surface-variant);
+            white-space: nowrap;
+          }
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,144 @@
+.admin-payslip-dashboard-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  mat-card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  mat-card-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .filters-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
+
+    .filter-field {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .clear-filters-btn,
+    .refresh-btn {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+    background-color: var(--mat-sys-surface-container-low);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    table {
+      width: 100%;
+    }
+
+    // Use Angular Material table classes
+    .mat-mdc-table {
+      background-color: var(--mat-sys-surface-container-low);
+
+      .mat-mdc-header-row {
+        background-color: var(--mat-sys-surface-container);
+      }
+
+      .mat-mdc-header-cell {
+        font-weight: 600;
+        color: var(--mat-sys-on-surface);
+        background-color: var(--mat-sys-surface-container);
+        border-bottom: 2px solid var(--mat-sys-outline-variant);
+      }
+
+      .mat-mdc-row {
+        &:hover {
+          background-color: var(--mat-sys-surface-container-highest);
+          transition: background-color 0.2s ease;
+        }
+      }
+
+      .mat-mdc-cell {
+        color: var(--mat-sys-on-surface-variant);
+      }
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: white;
+
+      // Match colors from payslip-history.scss
+      &.Draft { background-color: #757575; }
+      &.Query { background-color: #f57c00; }
+      &.QueryHandled { background-color: #1976d2; }
+      &.StaffApproved { background-color: #388e3c; }
+      &.Locked { background-color: #d32f2f; }
+      &.Paid { background-color: #673ab7; }
+    }
+
+    .action-btn {
+      mat-icon {
+        margin-right: 6px;
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+      }
+    }
+
+    .no-data,
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: #757575;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      p {
+        margin: 0;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-payslip-dashboard-container {
+    padding: 10px;
+
+    .filters-section {
+      flex-direction: column;
+      align-items: stretch;
+
+      .filter-field {
+        width: 100%;
+      }
+
+      .clear-filters-btn,
+      .refresh-btn {
+        width: 100%;
+        margin-bottom: 0;
+      }
+    }
+  }
+}

@@ -1,0 +1,111 @@
+<div class="admin-payslip-dashboard-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Payslip Management</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Search User</mat-label>
+          <input type="text" matInput [formControl]="userSearchControl" [matAutocomplete]="auto" placeholder="Name or Email">
+          <mat-icon matSuffix>search</mat-icon>
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayUserFn">
+            @for (user of filteredUsers$ | async; track user._id) {
+              <mat-option [value]="user">
+                {{ user.displayName }} ({{ user.email }})
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="statusFilter">
+            @for (option of statusOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Pay Period</mat-label>
+          <input type="month" matInput [formControl]="payPeriodFilter" placeholder="YYYY-MM">
+          <mat-icon matSuffix>calendar_today</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="accent" (click)="clearFilters()" class="clear-filters-btn" style="margin-bottom: 20px;">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+
+        <button mat-raised-button color="primary" (click)="refresh()" class="refresh-btn" style="margin-bottom: 20px;">
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Table Section -->
+      <div class="table-container">
+        @if (payslips$ | async; as payslips) {
+          @if (payslips.length > 0) {
+            <table mat-table [dataSource]="payslips" class="payslips-table">
+              <!-- User Column -->
+              <ng-container matColumnDef="user">
+                <th mat-header-cell *matHeaderCellDef>User</th>
+                <td mat-cell *matCellDef="let payslip">{{ payslip.userDisplay }}</td>
+              </ng-container>
+
+              <!-- Pay Period Column -->
+              <ng-container matColumnDef="payPeriod">
+                <th mat-header-cell *matHeaderCellDef>Pay Period</th>
+                <td mat-cell *matCellDef="let payslip">{{ payslip.payPeriod | payPeriod }}</td>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let payslip">
+                  <span class="status-badge" [ngClass]="getStatusClass(payslip.status)">
+                    {{ payslip.status | payslipStatus }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Net Pay Column -->
+              <ng-container matColumnDef="netPay">
+                <th mat-header-cell *matHeaderCellDef>Net Pay</th>
+                <td mat-cell *matCellDef="let payslip">R{{ payslip.netPay | number:'1.2-2' }}</td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let payslip">
+                  <button mat-raised-button color="primary" (click)="viewPayslip(payslip)" class="action-btn">
+                    <mat-icon>visibility</mat-icon>
+                    View Details
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          } @else {
+            <div class="no-data">
+              <mat-icon>inbox</mat-icon>
+              <p>No payslips found. Try adjusting your filters.</p>
+            </div>
+          }
+        } @else {
+          <div class="loading">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Loading payslips...</p>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
