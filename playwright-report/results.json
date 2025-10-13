@@ -1,0 +1,1169 @@
+{
+  "config": {
+    "configFile": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\playwright.config.ts",
+    "rootDir": "D:/Documents/Programming/Angular/SDP/SDPWeb/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 6
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-report/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "D:/Documents/Programming/Angular/SDP/SDPWeb/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "D:/Documents/Programming/Angular/SDP/SDPWeb/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "D:/Documents/Programming/Angular/SDP/SDPWeb/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "mobile",
+        "name": "mobile",
+        "testDir": "D:/Documents/Programming/Angular/SDP/SDPWeb/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.0",
+    "workers": 6,
+    "webServer": {
+      "command": "npm run start",
+      "url": "http://localhost:4200",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "performance.spec.ts",
+      "file": "performance.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Performance Metrics",
+          "file": "performance.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should measure landing page load performance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4502,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Landing page load time: 3281ms\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:07:59.966Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Performance-Me-9fdd1-nding-page-load-performance-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-c9fa9f3d850bbe3ca473",
+              "file": "performance.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "should measure bundle sizes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 4548,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n=== Bundle Sizes ===\n"
+                        },
+                        {
+                          "text": "polyfills-FWSH6SFJ.js: 0 KB\n"
+                        },
+                        {
+                          "text": "main-NHS2RZWC.js: 58 KB\n"
+                        },
+                        {
+                          "text": "zone__js.js?v=5d788242: 88 KB\n"
+                        },
+                        {
+                          "text": "chunk-IOBXYQSS.js: 7 KB\n"
+                        },
+                        {
+                          "text": "chunk-CGSLYVCE.js: 8 KB\n"
+                        },
+                        {
+                          "text": "chunk-T6PPH43S.js: 32 KB\n"
+                        },
+                        {
+                          "text": "chunk-WQ2QIZZU.js: 10 KB\n"
+                        },
+                        {
+                          "text": "chunk-DIRO5ALZ.js: 8 KB\n"
+                        },
+                        {
+                          "text": "chunk-Y5RQAIA6.js: 1 KB\n"
+                        },
+                        {
+                          "text": "@angular_platform-browser.js?v=5d788242: 13 KB\n"
+                        },
+                        {
+                          "text": "chunk-GG6GVMAA.js: 1 KB\n"
+                        },
+                        {
+                          "text": "chunk-SDXQR7QM.js: 36 KB\n"
+                        },
+                        {
+                          "text": "@angular_core.js?v=5d788242: 100 KB\n"
+                        },
+                        {
+                          "text": "@angular_router.js?v=5d788242: 214 KB\n"
+                        },
+                        {
+                          "text": "rxjs.js?v=5d788242: 22 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_dialog.js?v=5d788242: 82 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_form-field.js?v=5d788242: 5 KB\n"
+                        },
+                        {
+                          "text": "@angular_forms.js?v=5d788242: 15 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_button.js?v=5d788242: 19 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_input.js?v=5d788242: 22 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_progress-spinner.js?v=5d788242: 25 KB\n"
+                        },
+                        {
+                          "text": "@angular_common.js?v=5d788242: 20 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_icon.js?v=5d788242: 37 KB\n"
+                        },
+                        {
+                          "text": "@angular_common_http.js?v=5d788242: 11 KB\n"
+                        },
+                        {
+                          "text": "chunk-4MWRP73S.js?v=5d788242: 17 KB\n"
+                        },
+                        {
+                          "text": "@angular_platform-browser_animations_async.js?v=5d788242: 9 KB\n"
+                        },
+                        {
+                          "text": "chunk-Y6CBSXH6.js?v=5d788242: 24 KB\n"
+                        },
+                        {
+                          "text": "chunk-DGGZ4VGZ.js?v=5d788242: 41 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_snack-bar.js?v=5d788242: 44 KB\n"
+                        },
+                        {
+                          "text": "chunk-SCVAXWF3.js?v=5d788242: 180 KB\n"
+                        },
+                        {
+                          "text": "chunk-W2WIUP6R.js?v=5d788242: 1 KB\n"
+                        },
+                        {
+                          "text": "chunk-XRLCXNHV.js?v=5d788242: 92 KB\n"
+                        },
+                        {
+                          "text": "chunk-JRFR6BLO.js?v=5d788242: 1 KB\n"
+                        },
+                        {
+                          "text": "chunk-HWYXSU2G.js?v=5d788242: 27 KB\n"
+                        },
+                        {
+                          "text": "chunk-MARUHEWW.js?v=5d788242: 143 KB\n"
+                        },
+                        {
+                          "text": "chunk-UWYTGBQW.js?v=5d788242: 976 KB\n"
+                        },
+                        {
+                          "text": "rxjs_operators.js?v=5d788242: 15 KB\n"
+                        },
+                        {
+                          "text": "socket__io-client.js?v=5d788242: 90 KB\n"
+                        },
+                        {
+                          "text": "chunk-OG27FDGW.js?v=5d788242: 104 KB\n"
+                        },
+                        {
+                          "text": "chunk-WRNMBYJG.js?v=5d788242: 18 KB\n"
+                        },
+                        {
+                          "text": "chunk-VENV3F3G.js?v=5d788242: 0 KB\n"
+                        },
+                        {
+                          "text": "chunk-R36V3OD6.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-DXFB6AFC.js?v=5d788242: 1 KB\n"
+                        },
+                        {
+                          "text": "chunk-GWFLKVBH.js?v=5d788242: 1 KB\n"
+                        },
+                        {
+                          "text": "chunk-XXIXCHYC.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-43HO45VL.js?v=5d788242: 86 KB\n"
+                        },
+                        {
+                          "text": "chunk-SOMXCMHV.js?v=5d788242: 6 KB\n"
+                        },
+                        {
+                          "text": "chunk-7UGEZNGG.js?v=5d788242: 14 KB\n"
+                        },
+                        {
+                          "text": "chunk-3MTSODG6.js?v=5d788242: 5 KB\n"
+                        },
+                        {
+                          "text": "chunk-5EG33CFQ.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-RAZPNIZY.js?v=5d788242: 3 KB\n"
+                        },
+                        {
+                          "text": "chunk-JL33DVDI.js?v=5d788242: 60 KB\n"
+                        },
+                        {
+                          "text": "chunk-2ZKSKDON.js?v=5d788242: 0 KB\n"
+                        },
+                        {
+                          "text": "chunk-ZF5EFE3L.js?v=5d788242: 3 KB\n"
+                        },
+                        {
+                          "text": "chunk-UDBFACYY.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-MZVJP6II.js?v=5d788242: 0 KB\n"
+                        },
+                        {
+                          "text": "chunk-4TCTBZMT.js?v=5d788242: 4 KB\n"
+                        },
+                        {
+                          "text": "chunk-G6LIGQAO.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-KIZP73Z2.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-OBM5OER2.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-MQAFKPFN.js?v=5d788242: 5 KB\n"
+                        },
+                        {
+                          "text": "chunk-2CEPIFBD.js?v=5d788242: 126 KB\n"
+                        },
+                        {
+                          "text": "chunk-IWK5ARHP.js?v=5d788242: 115 KB\n"
+                        },
+                        {
+                          "text": "chunk-GDXWXBUR.js?v=5d788242: 222 KB\n"
+                        },
+                        {
+                          "text": "chunk-PVIEQFZT.js?v=5d788242: 6 KB\n"
+                        },
+                        {
+                          "text": "chunk-YMONA5SV.js?v=5d788242: 1 KB\n"
+                        },
+                        {
+                          "text": "chunk-5BWW7PHP.js?v=5d788242: 0 KB\n"
+                        },
+                        {
+                          "text": "chunk-GGHF5J72.js?v=5d788242: 2 KB\n"
+                        },
+                        {
+                          "text": "chunk-PGQSZCA3.js?v=5d788242: 23 KB\n"
+                        },
+                        {
+                          "text": "chunk-EHVFY6DU.js?v=5d788242: 3 KB\n"
+                        },
+                        {
+                          "text": "chunk-LBC6N7UV.js?v=5d788242: 17 KB\n"
+                        },
+                        {
+                          "text": "chunk-YYW3PXY3.js: 18 KB\n"
+                        },
+                        {
+                          "text": "@angular_material_divider.js?v=5d788242: 12 KB\n"
+                        },
+                        {
+                          "text": "chunk-HD4IPYGA.js?v=5d788242: 4 KB\n"
+                        },
+                        {
+                          "text": "\nTotal bundle size: 3367 KB\n"
+                        },
+                        {
+                          "text": "\nMain bundle size: 58 KB\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:07:59.961Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Performance-Metrics-should-measure-bundle-sizes-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-b1492e392d7d50ea0c96",
+              "file": "performance.spec.ts",
+              "line": 25,
+              "column": 7
+            },
+            {
+              "title": "should measure First Contentful Paint (FCP)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 4096,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n=== Performance Metrics ===\n"
+                        },
+                        {
+                          "text": "DOM Content Loaded: \u001b[33m2102.6000000089407\u001b[39m ms\n"
+                        },
+                        {
+                          "text": "Load Complete: \u001b[33m2103.7000000029802\u001b[39m ms\n"
+                        },
+                        {
+                          "text": "\n=== Paint Metrics ===\n"
+                        },
+                        {
+                          "text": "first-paint: 2116.00 ms\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:07:59.966Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Performance-Me-a5f96-First-Contentful-Paint-FCP--chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-273fcbc50b3ff3e15ced",
+              "file": "performance.spec.ts",
+              "line": 64,
+              "column": 7
+            },
+            {
+              "title": "should measure Time to Interactive (TTI)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4358,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Time to Interactive: 3287ms\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:08:00.020Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Performance-Me-f25b6-re-Time-to-Interactive-TTI--chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-bcc1457bb021952cc59f",
+              "file": "performance.spec.ts",
+              "line": 94,
+              "column": 7
+            },
+            {
+              "title": "should check for render-blocking resources",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "passed",
+                      "duration": 3863,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n=== Render-Blocking Resources ===\n"
+                        },
+                        {
+                          "text": "Found 11 potentially blocking resources\n"
+                        },
+                        {
+                          "text": "- styles-WIJX7IUF.css\n"
+                        },
+                        {
+                          "text": "- polyfills-FWSH6SFJ.js\n"
+                        },
+                        {
+                          "text": "- main-NHS2RZWC.js\n"
+                        },
+                        {
+                          "text": "- chunk-WQ2QIZZU.js\n"
+                        },
+                        {
+                          "text": "- chunk-CGSLYVCE.js\n"
+                        },
+                        {
+                          "text": "- chunk-T6PPH43S.js\n"
+                        },
+                        {
+                          "text": "- chunk-DIRO5ALZ.js\n"
+                        },
+                        {
+                          "text": "- chunk-GG6GVMAA.js\n"
+                        },
+                        {
+                          "text": "- chunk-SDXQR7QM.js\n"
+                        },
+                        {
+                          "text": "- chunk-IOBXYQSS.js\n"
+                        },
+                        {
+                          "text": "- chunk-Y5RQAIA6.js\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:08:00.012Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Performance-Me-40bc3-r-render-blocking-resources-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-aca1c7d539037c550304",
+              "file": "performance.spec.ts",
+              "line": 109,
+              "column": 7
+            },
+            {
+              "title": "should measure navigation timing for dashboard",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "passed",
+                      "duration": 4086,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n=== Navigation Timing ===\n"
+                        },
+                        {
+                          "text": "DNS Lookup: 0ms\n"
+                        },
+                        {
+                          "text": "TCP Connection: 15ms\n"
+                        },
+                        {
+                          "text": "Request Time: 115ms\n"
+                        },
+                        {
+                          "text": "Response Time: 0ms\n"
+                        },
+                        {
+                          "text": "DOM Processing: 2192ms\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:08:00.015Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Performance-Me-66441-gation-timing-for-dashboard-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-a86d2034b6111299d3c7",
+              "file": "performance.spec.ts",
+              "line": 133,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Mobile Performance",
+          "file": "performance.spec.ts",
+          "line": 163,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load quickly on mobile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 1893,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Mobile load time: 1277ms\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:08:04.650Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Mobile-Performance-should-load-quickly-on-mobile-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-d8956d44a8688ddf3820",
+              "file": "performance.spec.ts",
+              "line": 169,
+              "column": 7
+            },
+            {
+              "title": "should have mobile-optimized bundles",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "failed",
+                      "duration": 1988,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m2048\u001b[39m\nReceived:   \u001b[31m3369.912109375\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m2048\u001b[39m\nReceived:   \u001b[31m3369.912109375\u001b[39m\n    at D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts:201:23",
+                        "location": {
+                          "file": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts",
+                          "column": 23,
+                          "line": 201
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 199 |\u001b[39m\n \u001b[90m 200 |\u001b[39m     \u001b[90m// Mobile total should be under 2MB\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 201 |\u001b[39m     expect(totalSize)\u001b[33m.\u001b[39mtoBeLessThan(\u001b[35m2048\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 202 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 203 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 204 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts",
+                            "column": 23,
+                            "line": 201
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m2048\u001b[39m\nReceived:   \u001b[31m3369.912109375\u001b[39m\n\n\u001b[0m \u001b[90m 199 |\u001b[39m\n \u001b[90m 200 |\u001b[39m     \u001b[90m// Mobile total should be under 2MB\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 201 |\u001b[39m     expect(totalSize)\u001b[33m.\u001b[39mtoBeLessThan(\u001b[35m2048\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 202 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 203 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 204 |\u001b[39m\u001b[0m\n\u001b[2m    at D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts:201:23\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Total mobile bundle size: 3369.91 KB\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:08:04.674Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Mobile-Perform-8ee7b-ve-mobile-optimized-bundles-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Mobile-Perform-8ee7b-ve-mobile-optimized-bundles-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Mobile-Perform-8ee7b-ve-mobile-optimized-bundles-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts",
+                        "column": 23,
+                        "line": 201
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-18b44eabcfb62516d7c7",
+              "file": "performance.spec.ts",
+              "line": 181,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Resource Optimization",
+          "file": "performance.spec.ts",
+          "line": 205,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should check for duplicate resources",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "failed",
+                      "duration": 2071,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts:231:31",
+                        "location": {
+                          "file": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts",
+                          "column": 31,
+                          "line": 231
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 229 |\u001b[39m\n \u001b[90m 230 |\u001b[39m     \u001b[90m// Ideally, no resources should be loaded more than once\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 231 |\u001b[39m     expect(duplicates\u001b[33m.\u001b[39mlength)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 232 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 233 |\u001b[39m\n \u001b[90m 234 |\u001b[39m   test(\u001b[32m'should check for compression'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts",
+                            "column": 31,
+                            "line": 231
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n\u001b[0m \u001b[90m 229 |\u001b[39m\n \u001b[90m 230 |\u001b[39m     \u001b[90m// Ideally, no resources should be loaded more than once\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 231 |\u001b[39m     expect(duplicates\u001b[33m.\u001b[39mlength)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 232 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 233 |\u001b[39m\n \u001b[90m 234 |\u001b[39m   test(\u001b[32m'should check for compression'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[2m    at D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts:231:31\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "\n=== Duplicate Resources ===\n"
+                        },
+                        {
+                          "text": "Found duplicate resource requests:\n"
+                        },
+                        {
+                          "text": "/socket.io/: loaded 4 times\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:08:05.048Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Resource-Optim-b2e7b-eck-for-duplicate-resources-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Resource-Optim-b2e7b-eck-for-duplicate-resources-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Resource-Optim-b2e7b-eck-for-duplicate-resources-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\e2e\\performance.spec.ts",
+                        "column": 31,
+                        "line": 231
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-f9247cddf4641fd2f0e5",
+              "file": "performance.spec.ts",
+              "line": 206,
+              "column": 7
+            },
+            {
+              "title": "should check for compression",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 1854,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n=== Compression Check ===\n"
+                        },
+                        {
+                          "text": "Uncompressed resources found:\n"
+                        },
+                        {
+                          "text": "- \n"
+                        },
+                        {
+                          "text": "- styles-WIJX7IUF.css\n"
+                        },
+                        {
+                          "text": "- polyfills-FWSH6SFJ.js\n"
+                        },
+                        {
+                          "text": "- main-NHS2RZWC.js\n"
+                        },
+                        {
+                          "text": "- client\n"
+                        },
+                        {
+                          "text": "- zone__js.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-WQ2QIZZU.js\n"
+                        },
+                        {
+                          "text": "- chunk-CGSLYVCE.js\n"
+                        },
+                        {
+                          "text": "- chunk-IOBXYQSS.js\n"
+                        },
+                        {
+                          "text": "- chunk-T6PPH43S.js\n"
+                        },
+                        {
+                          "text": "- chunk-DIRO5ALZ.js\n"
+                        },
+                        {
+                          "text": "- chunk-GG6GVMAA.js\n"
+                        },
+                        {
+                          "text": "- chunk-Y5RQAIA6.js\n"
+                        },
+                        {
+                          "text": "- @angular_platform-browser.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-SDXQR7QM.js\n"
+                        },
+                        {
+                          "text": "- @angular_core.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_router.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- rxjs.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_material_button.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_forms.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_material_form-field.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_material_progress-spinner.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_material_dialog.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_material_input.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_material_icon.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_common.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_platform-browser_animations_async.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_common_http.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- env.mjs\n"
+                        },
+                        {
+                          "text": "- chunk-4MWRP73S.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- @angular_material_snack-bar.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-W2WIUP6R.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-XRLCXNHV.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-SCVAXWF3.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-DGGZ4VGZ.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-Y6CBSXH6.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-JRFR6BLO.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-HWYXSU2G.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-PVIEQFZT.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- rxjs_operators.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-MARUHEWW.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-VENV3F3G.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-OBM5OER2.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-GGHF5J72.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-YMONA5SV.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- socket__io-client.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-DXFB6AFC.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-PGQSZCA3.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-R36V3OD6.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-XXIXCHYC.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-SOMXCMHV.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-GWFLKVBH.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-7UGEZNGG.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-ZF5EFE3L.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-2ZKSKDON.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-RAZPNIZY.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-UDBFACYY.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-G6LIGQAO.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-4TCTBZMT.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-5EG33CFQ.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-GDXWXBUR.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-KIZP73Z2.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-IWK5ARHP.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-MQAFKPFN.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-WRNMBYJG.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-43HO45VL.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-2CEPIFBD.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-3MTSODG6.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-5BWW7PHP.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-MZVJP6II.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-OG27FDGW.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-EHVFY6DU.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-LBC6N7UV.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-JL33DVDI.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-UWYTGBQW.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-YYW3PXY3.js\n"
+                        },
+                        {
+                          "text": "- ?EIO=4&transport=polling&t=5f4wohwv&sid=1ZWvWriquR2PejTwAABC\n"
+                        },
+                        {
+                          "text": "- @angular_material_divider.js?v=5d788242\n"
+                        },
+                        {
+                          "text": "- chunk-HD4IPYGA.js?v=5d788242\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-13T13:08:05.483Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Documents\\Programming\\Angular\\SDP\\SDPWeb\\test-results\\performance-Resource-Optim-7b39b-hould-check-for-compression-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b15d6361b2fc38288977-91eab0b063e1acf825df",
+              "file": "performance.spec.ts",
+              "line": 234,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-10-13T13:07:57.384Z",
+    "duration": 10338.154000000002,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

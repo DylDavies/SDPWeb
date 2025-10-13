@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,7 +11,8 @@ import { StudyGroupCalendarComponent } from './components/study-group-calendar/s
   standalone: true,
   imports: [CommonModule, MatTabsModule, MatIconModule, WelcomeCard, CalendarComponent, StudyGroupCalendarComponent],
   templateUrl: './client-dashboard.html',
-  styleUrl: './client-dashboard.scss'
+  styleUrl: './client-dashboard.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientDashboard {
 

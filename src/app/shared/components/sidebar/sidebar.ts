@@ -54,14 +54,16 @@ export class Sidebar implements OnInit, OnDestroy {
   private sideBarSubscription: Subscription | null = null;
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.breakpointObserver.observe([
+        Breakpoints.XSmall,
+        Breakpoints.Small
+      ]).subscribe(result => {
+        this.isMobile = result.matches;
+      });
+    }, 100);
+
     this.userSubscription = this.authService.currentUser$.subscribe((user) => this.user = user);
-    
-    this.breakpointObserver.observe([
-      Breakpoints.XSmall,
-      Breakpoints.Small
-    ]).subscribe(result => {
-      this.isMobile = result.matches;
-    });
 
     this.sideBarSubscription = this.sideBarService.sidebarItems$.subscribe((items) => this.sideBarLinks = items);
   }

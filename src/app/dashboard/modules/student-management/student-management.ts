@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StudentsTable } from './components/students-table/students-table';
 
@@ -7,7 +7,8 @@ import { StudentsTable } from './components/students-table/students-table';
   standalone: true,
   imports: [CommonModule, StudentsTable],
   templateUrl: './student-management.html',
-  styleUrl: './student-management.scss'
+  styleUrl: './student-management.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudentManagement {
 }

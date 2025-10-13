@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { EPermission } from '../../../models/enums/permission.enum';
@@ -15,7 +15,8 @@ import { RemarkTemplateManagement } from './components/remark-template-managemen
   selector: 'app-admin-dashboard',
   imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement, BadgeManagement, SidebarCustomization, RemarkTemplateManagement],
   templateUrl: './admin-dashboard.html',
-  styleUrl: './admin-dashboard.scss'
+  styleUrl: './admin-dashboard.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminDashboard {
   private authService = inject(AuthService);
