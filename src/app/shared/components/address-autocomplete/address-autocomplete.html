@@ -1,0 +1,62 @@
+<div class="address-autocomplete-wrapper">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>{{ label }}</mat-label>
+    <input
+      matInput
+      type="text"
+      [placeholder]="placeholder"
+      [formControl]="searchCtrl"
+      [matAutocomplete]="auto"
+      (input)="onInputChange()"
+    />
+    <mat-icon matSuffix *ngIf="isSearching">
+      <mat-spinner diameter="20"></mat-spinner>
+    </mat-icon>
+    <mat-icon matSuffix *ngIf="isValidating">
+      <mat-spinner diameter="20"></mat-spinner>
+    </mat-icon>
+    <mat-icon matSuffix *ngIf="currentAddress && !isValidating && !isSearching" class="success-icon">
+      check_circle
+    </mat-icon>
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      [displayWith]="displaySuggestion"
+      (optionSelected)="onSuggestionSelected($event.option.value)"
+    >
+      <mat-option *ngFor="let suggestion of suggestions$ | async" [value]="suggestion">
+        <div class="suggestion-item">
+          <div class="main-text">{{ suggestion.mainText }}</div>
+          <div class="secondary-text">{{ suggestion.secondaryText }}</div>
+        </div>
+      </mat-option>
+    </mat-autocomplete>
+    <mat-hint *ngIf="currentAddress && !isValidating">
+      <span class="validation-hint">Address validated</span>
+    </mat-hint>
+    <mat-error *ngIf="searchCtrl.hasError('required')">
+      Address is required
+    </mat-error>
+  </mat-form-field>
+
+  <!-- Display validated address details -->
+  <div class="validated-address-card" *ngIf="currentAddress">
+    <div class="address-header">
+      <mat-icon class="check-icon">check_circle</mat-icon>
+      <strong>Validated Address</strong>
+    </div>
+    <div class="address-content">
+      <div class="address-line" *ngIf="currentAddress.streetAddress">
+        {{ currentAddress.streetAddress }}
+      </div>
+      <div class="address-line" *ngIf="currentAddress.city || currentAddress.state || currentAddress.postalCode">
+        <span *ngIf="currentAddress.city">{{ currentAddress.city }}</span>
+        <span *ngIf="currentAddress.city && currentAddress.state">, </span>
+        <span *ngIf="currentAddress.state">{{ currentAddress.state }}</span>
+        <span *ngIf="currentAddress.postalCode"> {{ currentAddress.postalCode }}</span>
+      </div>
+      <div class="address-line" *ngIf="currentAddress.country">
+        {{ currentAddress.country }}
+      </div>
+    </div>
+  </div>
+</div>

@@ -60,3 +60,91 @@ button[mat-flat-button] {
     margin-bottom: 1rem;
     margin-top: -1rem;
 }
+
+.stakeholders-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
+.stakeholder-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px 4px 12px;
+    background-color: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+    border-radius: 16px;
+    font-size: 14px;
+
+    button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        align-self: flex-start; // Aligns the button to the top of the flex container
+
+        mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            //align-self: flex-start;
+        }
+    }
+}
+
+.labeled-spinner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+
+    .input-label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--mat-sys-on-surface-variant);
+    }
+}
+
+.validation-error-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+    border-radius: 4px;
+
+    @media (prefers-color-scheme: dark) {
+        background-color: rgba(244, 67, 54, 0.15);
+        border-left-color: #ef5350;
+    }
+
+    mat-icon {
+        color: #f44336;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+
+        @media (prefers-color-scheme: dark) {
+            color: #ef5350;
+        }
+    }
+
+    span {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #c62828;
+        flex: 1;
+
+        @media (prefers-color-scheme: dark) {
+            color: #ffcdd2;
+        }
+    }
+}
