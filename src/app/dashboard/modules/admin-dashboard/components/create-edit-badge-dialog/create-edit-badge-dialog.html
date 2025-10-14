@@ -78,13 +78,17 @@
 
     <mat-slide-toggle formControlName="permanent">Permanent Badge</mat-slide-toggle>
 
-    <mat-form-field appearance="outline" *ngIf="!badgeForm.get('permanent')?.value">
-      <mat-label>Expiration Date</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="expirationDate">
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-      @if (badgeForm.get('expirationDate')?.hasError('pastDate')) {
-        <mat-error>Expiration date cannot be in the past.</mat-error>
+  <mat-form-field appearance="outline" *ngIf="!badgeForm.get('permanent')?.value">
+      <mat-label>Duration (in days)</mat-label>
+      <input matInput type="number" formControlName="duration">
+      @if (badgeForm.get('duration')?.hasError('required')) {
+        <mat-error>Duration is required for temporary badges.</mat-error>
+      }
+      @if (badgeForm.get('duration')?.hasError('min')) {
+        <mat-error>Duration must be at least 1 day.</mat-error>
+      }
+      @if (badgeForm.get('duration')?.hasError('max')) {
+        <mat-error>Duration cannot exceed 365 days.</mat-error>
       }
     </mat-form-field>
   </form>

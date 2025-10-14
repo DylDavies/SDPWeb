@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, filter, Observable } from 'rxjs';
+import { of, filter, Observable, throwError } from 'rxjs';
 import { HttpService } from './http-service';
 import { SocketService } from './socket-service';
 import { UserService } from './user-service';
@@ -23,7 +23,10 @@ const mockUsers: IUser[] = [
     pending: false,
     disabled: false,
     leave: [],
-    theme: 'system'
+    theme: 'system',
+    paymentType: 'Contract' as const,
+    monthlyMinimum: 0,
+    rateAdjustments: []
   },
 ];
 
@@ -73,8 +76,7 @@ describe('UserService', () => {
 
       service.fetchAllUsers().subscribe(users => {
         expect(users).toEqual(mockUsers);
-        
-        // Because allUsers$ now uses the mocked customObservableService, it directly reflects the internal users$
+
         service.allUsers$.subscribe(usersFromStream => {
           expect(usersFromStream).toEqual(mockUsers);
           done();
@@ -146,7 +148,7 @@ describe('UserService', () => {
       });
     });
   });
-  
+
   describe('updateLeaveStatus', () => {
     it('should update leave status and refresh the user list', (done: DoneFn) => {
       const status = ELeave.Approved;

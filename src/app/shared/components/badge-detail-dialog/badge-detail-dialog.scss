@@ -8,13 +8,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px; // Reduced vertical padding to make header smaller
+  padding: 12px 24px; 
   background-color: var(--mat-sys-primary-container);
   color: var(--mat-sys-on-primary-container);
+}
 
-  h1[mat-dialog-title] {
-    margin: 0;
-  }
+h1[mat-dialog-title] {
+  margin: 0;
 }
 
 .tla-chip {
@@ -63,21 +63,26 @@
     margin-bottom: 4px;
     display: block;
   }
+}
 
-  .detail-value {
-    font-size: 1rem;
-    line-height: 1.5;
-    margin: 0;
+.detail-value {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}
 
-    &.summary {
-      font-style: italic;
-    }
+.summary {
+  font-style: italic;
+}
 
-    &.bonus {
-      font-weight: bold;
-      color: var(--mat-sys-tertiary);
-    }
-  }
+.bonus {
+  font-weight: bold;
+  color: var(--mat-sys-tertiary);
+}
+
+.remaining-days {
+  font-weight: bold;
+  color: var(--mat-sys-error);
 }
 
 .detail-item-row {

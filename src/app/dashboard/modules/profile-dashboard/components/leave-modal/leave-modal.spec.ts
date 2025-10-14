@@ -36,6 +36,9 @@ const mockUser: IUser = {
       approved: ELeave.Pending,
     },
   ],
+  paymentType: 'Contract' as const,
+  monthlyMinimum: 0,
+  rateAdjustments: [],
 };
 
 describe('LeaveModal', () => {

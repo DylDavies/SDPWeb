@@ -6,6 +6,19 @@
 import { EBundleStatus } from "../enums/bundle-status.enum";
 
 /**
+ * Represents a structured address with Google Place ID reference.
+ */
+export interface IAddress {
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  placeId?: string;
+  formattedAddress?: string;
+}
+
+/**
  * Represents a simplified, populated user object as returned by the backend.
  */
 export interface IPopulatedUser {
@@ -22,7 +35,7 @@ export interface IBundleSubject {
   subject: string; // The ID of the subject being taught
   grade: string; // The grade for the subject
   tutor: string | IPopulatedUser; // The ID of the assigned tutor, or the populated tutor object
-  hours: number; // The number of tutoring hours for this subject
+  durationMinutes: number; // The number of tutoring minutes for this subject
 }
 
 /**
@@ -34,9 +47,12 @@ export interface IBundle {
   _id: string; // The unique identifier for the bundle
   student: string | IPopulatedUser; // The ID of the student this bundle is for, or the populated student object
   subjects: IBundleSubject[]; // An array of subjects included in the bundle
-  creator: string; // The ID of the user who created the bundle
+  createdBy: string | IPopulatedUser; // The ID of the user who created the bundle
   status: EBundleStatus; // The current status of the bundle (e.g., pending, approved)
   isActive: boolean; // Whether the bundle is currently active or not
+  lessonLocation?: IAddress; // The structured address where lessons take place
+  manager?: string | IPopulatedUser; // The ID of the staff member managing this bundle, or the populated manager object
+  stakeholders?: (string | IPopulatedUser)[]; // An array of user IDs who are stakeholders in this bundle, or populated user objects
   createdAt: Date; // The timestamp when the bundle was created
   updatedAt: Date; // The timestamp when the bundle was last updated
 }

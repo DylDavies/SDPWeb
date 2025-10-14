@@ -1,6 +1,5 @@
-    <div class="admin-container">
+<div class="admin-container">
       <mat-tab-group animationDuration="300ms" color="primary">
-        <!-- User Management Tab -->
         @if (canViewUsers) {
           <mat-tab>
             <ng-template mat-tab-label>
@@ -15,7 +14,6 @@
           </mat-tab>
         }
 
-        <!-- Role Management Tab -->
         @if (canViewRoles) {
           <mat-tab>
             <ng-template mat-tab-label>
@@ -66,6 +64,18 @@
             </ng-template>
             <div class="tab-content">
                <app-badge-management></app-badge-management>
+            </div>
+          </mat-tab>
+        }
+
+        @if (canManageRemarks) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">edit_note</mat-icon>
+              <span>Remark Management</span>
+            </ng-template>
+            <div class="tab-content">
+              <app-remark-template-management></app-remark-template-management>
             </div>
           </mat-tab>
         }

@@ -1,0 +1,706 @@
+:host {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background-color: var(--mat-sys-surface-container-lowest);
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  color: var(--mat-sys-on-surface);
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
+.payslip-container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.payslip-document {
+  background-color: var(--mat-sys-surface-container-low);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--mat-sys-elevation-level2);
+  color: var(--mat-sys-on-surface);
+}
+
+/* Header Section */
+.payslip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  .header-left {
+    flex: 1;
+
+    .header-info {
+      p {
+        margin: 4px 0;
+        font-size: 12px;
+        color: var(--mat-sys-on-surface-variant);
+
+        strong {
+          color: var(--mat-sys-on-surface);
+        }
+      }
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+
+      .company-logo {
+        height: 50px;
+        margin-right: 15px;
+      }
+
+      .company-name {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .company-text {
+          font-size: 24px;
+          font-weight: bold;
+          color: var(--mat-sys-primary);
+          letter-spacing: 2px;
+        }
+      }
+    }
+  }
+}
+
+/* Status Chip Styling */
+.status-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.9em;
+  font-weight: 500;
+  color: #fff;
+
+  &.Draft { background-color: var(--mat-warn-color, #757575); }
+  &.Query { background-color: #f57c00; }
+  &.QueryHandled { background-color: var(--mat-primary-color, #1976d2); }
+  &.StaffApproved { background-color: var(--mat-accent-color, #388e3c); }
+  &.Locked { background-color: #d32f2f; }
+  &.Paid { background-color: #673ab7; }
+}
+
+/* Company and Employee Information */
+.info-section {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding: 15px 0;
+
+  .company-info, .employee-info {
+    flex: 1;
+
+    h3 {
+      margin: 0 0 10px 0;
+      color: var(--mat-sys-on-surface);
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    p {
+      margin: 2px 0;
+      font-size: 12px;
+      color: var(--mat-sys-on-surface-variant);
+
+      strong {
+        color: var(--mat-sys-on-surface);
+      }
+    }
+  }
+
+  .employee-info {
+    text-align: right;
+  }
+}
+
+/* Main Content */
+.payslip-content {
+  display: flex;
+  gap: 30px;
+}
+
+.left-column {
+  flex: 2;
+}
+
+.right-column {
+  flex: 1;
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+
+/* Section Containers */
+.section-container {
+  margin-bottom: 30px;
+
+  h3 {
+    margin: 0 0 10px 0;
+    color: var(--mat-sys-on-surface);
+    font-size: 16px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--mat-sys-primary);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+
+    .bonus-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      mat-select {
+        min-width: 300px;
+        font-size: 14px;
+      }
+
+      .add-bonus-btn {
+        &:hover {
+          background-color: var(--mat-sys-primary-container);
+        }
+      }
+    }
+  }
+}
+
+/* Tables */
+.payslip-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 10px;
+  table-layout: fixed;
+
+  th, td {
+    padding: 8px 10px;
+    text-align: left;
+    border: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  th {
+    background-color: var(--mat-sys-surface-container);
+    font-weight: bold;
+    color: var(--mat-sys-on-surface);
+    font-size: 11px;
+  }
+
+  td {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  tbody tr {
+    &:nth-child(even) {
+      background-color: var(--mat-sys-surface-container-lowest);
+    }
+
+    &.clickable-row {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--mat-sys-primary-container) !important;
+      }
+
+      &.has-query {
+        background-color: var(--mat-sys-error-container);
+      }
+    }
+
+    &.locked-row {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: var(--mat-sys-surface-container-low);
+
+      &:hover {
+        background-color: var(--mat-sys-surface-container-low) !important;
+      }
+
+      &.bonus-row {
+        .bonus-description {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .delete-bonus-btn {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            margin-left: 10px;
+          }
+        }
+
+        &:hover .delete-bonus-btn {
+          opacity: 1;
+        }
+      }
+    }
+
+    &.total-row {
+      background-color: var(--mat-sys-surface-container-high);
+      font-weight: bold;
+
+      td {
+        color: var(--mat-sys-on-surface);
+        border-top: 2px solid var(--mat-sys-on-surface);
+      }
+    }
+  }
+
+  .cell-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .query-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--mat-sys-error);
+      animation: pulse 2s infinite;
+    }
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  // Column widths for earnings table (main table with Date, Description, Base Rate, Hours, Hourly Rate, Total, Actions)
+  &:not(.description-amount-table) {
+    // When Actions column is shown (7 columns)
+    &:has(th:nth-child(7)) {
+      th:nth-child(1), td:nth-child(1) { width: 10%; } // Date
+      th:nth-child(2), td:nth-child(2) { width: 25%; } // Description
+      th:nth-child(3), td:nth-child(3) { width: 13%; } // Base Rate
+      th:nth-child(4), td:nth-child(4) { width: 10%; } // Hours
+      th:nth-child(5), td:nth-child(5) { width: 13%; } // Hourly Rate
+      th:nth-child(6), td:nth-child(6) { width: 13%; } // Total
+      th:nth-child(7), td:nth-child(7) {
+        width: 16%;
+        text-align: center;
+      } // Actions
+    }
+
+    // When Actions column is hidden (6 columns)
+    &:not(:has(th:nth-child(7))) {
+      th:nth-child(1), td:nth-child(1) { width: 12%; } // Date
+      th:nth-child(2), td:nth-child(2) { width: 30%; } // Description
+      th:nth-child(3), td:nth-child(3) { width: 15%; } // Base Rate
+      th:nth-child(4), td:nth-child(4) { width: 10%; } // Hours
+      th:nth-child(5), td:nth-child(5) { width: 15%; } // Hourly Rate
+      th:nth-child(6), td:nth-child(6) { width: 18%; } // Total
+    }
+  }
+
+  // Column widths for description/amount tables (misc earnings and deductions)
+  &.description-amount-table {
+    // When Actions column is shown (3 columns)
+    &:has(th:nth-child(3)) {
+      th:nth-child(1), td:nth-child(1) {
+        width: 45%;
+        min-width: 45%;
+        max-width: 45%;
+      } // Description
+      th:nth-child(2), td:nth-child(2) {
+        width: 30%;
+        min-width: 30%;
+        max-width: 30%;
+      } // Amount
+      th:nth-child(3), td:nth-child(3) {
+        width: 25%;
+        min-width: 25%;
+        max-width: 25%;
+        text-align: center;
+      } // Actions
+    }
+
+    // When Actions column is hidden (2 columns)
+    &:not(:has(th:nth-child(3))) {
+      th:nth-child(1), td:nth-child(1) { width: 70%; } // Description
+      th:nth-child(2), td:nth-child(2) { width: 30%; } // Amount
+    }
+
+    // Fallback for browsers that don't support :has()
+    th:nth-child(1), td:nth-child(1) {
+      width: 45%;
+      min-width: 45%;
+      max-width: 45%;
+    } // Description
+    th:nth-child(2), td:nth-child(2) {
+      width: 30%;
+      min-width: 30%;
+      max-width: 30%;
+    } // Amount
+    th:nth-child(3), td:nth-child(3) {
+      width: 25%;
+      min-width: 25%;
+      max-width: 25%;
+      text-align: center;
+    } // Actions
+  }
+}
+
+/* Right Column Summary */
+.summary-container {
+  background-color: var(--mat-sys-surface-container);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--mat-sys-outline-variant);
+
+  .summary-section {
+    margin-bottom: 10px;
+
+    h4 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--mat-sys-on-surface);
+    }
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 14px;
+
+    span {
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    strong {
+      color: var(--mat-sys-on-surface);
+      font-weight: bold;
+    }
+
+    &.income-item strong {
+      color: var(--mat-sys-tertiary);
+    }
+
+    &.deduction-item strong {
+      color: var(--mat-sys-error);
+    }
+
+    &.total {
+      font-size: 18px;
+      padding: 12px 0;
+      margin-top: 8px;
+      color: var(--mat-sys-tertiary);
+      border-top: 2px solid var(--mat-sys-tertiary);
+
+      span strong, strong {
+        color: var(--mat-sys-tertiary);
+        font-size: 20px;
+      }
+    }
+  }
+
+  .subtotal-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+
+    span, strong {
+      color: var(--mat-sys-primary);
+    }
+  }
+
+  .calculation-hint {
+    text-align: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+
+    small {
+      color: var(--mat-sys-on-surface-variant);
+      font-style: italic;
+      font-size: 12px;
+    }
+  }
+
+  hr {
+    margin: 15px 0;
+    border: none;
+    border-top: 2px solid var(--mat-sys-outline-variant);
+  }
+}
+
+/* Inline Editing */
+.inline-edit-input {
+  width: 100%;
+  max-width: 100%;
+  padding: 2px 4px;
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: 2px;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font-size: 12px;
+  font-family: inherit;
+  box-sizing: border-box;
+  margin: 0;
+
+  &:focus {
+    outline: none;
+    border-color: var(--mat-sys-primary);
+    box-shadow: 0 0 0 1px var(--mat-sys-primary-container);
+  }
+}
+
+/* Material Form Fields in Tables */
+.table-form-field {
+  width: 100%;
+  margin: 0 !important;
+
+  ::ng-deep {
+    .mat-mdc-form-field-infix {
+      min-height: 40px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      padding-bottom: 0;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mat-mdc-form-field-bottom-align::before {
+      display: none;
+    }
+
+    input {
+      font-size: 12px;
+      font-family: inherit;
+    }
+  }
+}
+
+.calculated-total {
+  font-weight: bold;
+  color: var(--mat-sys-primary);
+}
+
+/* Section Controls */
+.section-header {
+  .deduction-controls, .misc-earnings-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .add-deduction-btn, .add-misc-earning-btn {
+      &:hover {
+        background-color: var(--mat-sys-primary-container);
+      }
+    }
+  }
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .payslip-content {
+    flex-direction: column;
+  }
+
+  .right-column {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .info-section {
+    flex-direction: column;
+    gap: 20px;
+
+    .employee-info {
+      text-align: left;
+    }
+  }
+
+  .payslip-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .payslip-table {
+    font-size: 10px;
+
+    th, td {
+      padding: 4px 6px;
+    }
+  }
+
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+}
+
+/* Admin Controls Section */
+.admin-controls {
+  margin-top: 40px;
+  padding: 20px;
+  background-color: var(--mat-sys-surface-container-high);
+  border-radius: 8px;
+  border: 2px solid var(--mat-sys-primary);
+
+  h3 {
+    margin: 0 0 15px 0;
+    color: var(--mat-sys-primary);
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+
+    button {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .history-log {
+    margin-top: 15px;
+
+    h4 {
+      margin: 0 0 10px 0;
+      color: var(--mat-sys-on-surface);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .history-timeline {
+      position: relative;
+      padding-left: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: var(--mat-sys-surface-container-low);
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--mat-sys-outline-variant);
+        border-radius: 3px;
+
+        &:hover {
+          background: var(--mat-sys-outline);
+        }
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: var(--mat-sys-outline-variant);
+      }
+
+      .history-entry {
+        position: relative;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: flex-start;
+
+        .history-marker {
+          position: absolute;
+          left: -18px;
+          top: 3px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: var(--mat-sys-primary);
+          border: 2px solid var(--mat-sys-surface-container-high);
+        }
+
+        .history-content {
+          flex: 1;
+          padding: 4px 8px;
+          background-color: transparent;
+          border-radius: 0;
+          border-left: none;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+
+          .history-status {
+            font-weight: 500;
+            color: var(--mat-sys-on-surface);
+            font-size: 12px;
+            white-space: nowrap;
+
+            .history-user {
+              font-weight: 400;
+              color: var(--mat-sys-on-surface-variant);
+              font-style: italic;
+              margin-left: 4px;
+            }
+          }
+
+          .history-timestamp {
+            font-size: 11px;
+            color: var(--mat-sys-on-surface-variant);
+            white-space: nowrap;
+          }
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}

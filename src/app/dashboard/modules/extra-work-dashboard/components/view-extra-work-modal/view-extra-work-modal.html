@@ -1,0 +1,82 @@
+<header class="dialog-header">
+  <mat-icon color="primary">visibility</mat-icon>
+  <h1 mat-dialog-title>View Extra Work Details</h1>
+</header>
+<mat-dialog-content>
+  <div class="details-grid">
+
+    <div class="detail-item">
+      <span class="detail-label">Student</span>
+      <span class="detail-value">{{ getStudentName() }}</span>
+    </div>
+
+    <div class="detail-item">
+      <span class="detail-label">Commissioned By</span>
+      <span class="detail-value">{{ getCommissionerName() }}</span>
+    </div>
+
+    <div class="detail-item full-width">
+      <span class="detail-label">Work Type</span>
+      <span class="detail-value">{{ data.item.workType }}</span>
+    </div>
+
+    <div class="detail-item full-width details-box">
+      <span class="detail-label">Details</span>
+      <p class="detail-value">{{ data.item.details }}</p>
+    </div>
+
+    <div class="detail-item">
+      <span class="detail-label">Remuneration</span>
+      <span class="detail-value">R{{ data.item.remuneration.toFixed(2) }}</span>
+    </div>
+
+    <div class="detail-item">
+        <span class="detail-label">Status</span>
+        <span class="status-chip" [ngClass]="data.item.status.replace(' ', '-').toLowerCase()">{{ data.item.status }}</span>
+    </div>
+    
+    <div class="detail-item full-width">
+      <mat-divider></mat-divider>
+    </div>
+
+    <div class="detail-item">
+        <span class="detail-label">Created By</span>
+        <span class="detail-value">{{ getCreatorName() }}</span>
+    </div>
+
+    <div class="detail-item">
+        <span class="detail-label">Date Created</span>
+        <span class="detail-value">{{ data.item.createdAt | date:'mediumDate' }}</span>
+    </div>
+
+    <div class="detail-item full-width">
+        <span class="detail-label">Date Completed</span>
+        <span class="detail-value">
+            {{ data.item.dateCompleted ? (data.item.dateCompleted | date:'mediumDate') : 'Not yet completed' }}
+        </span>
+    </div>
+
+  </div>
+
+  @if (data.canEdit && !data.item.dateCompleted && data.item.status !== EExtraWorkStatus.Approved) {
+    <mat-divider class="calendar-divider"></mat-divider>
+    <div class="calendar-section">
+      <h3>Set Completion Date</h3>
+      <mat-calendar
+        [selected]="selectedDate"
+        (selectedChange)="onDateSelected($event)"
+        [minDate]="data.item.createdAt"
+        [maxDate]="today">
+      </mat-calendar>
+    </div>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Close</button>
+  @if (data.canEdit && !data.item.dateCompleted && data.item.status !== EExtraWorkStatus.Approved) {
+    <button mat-flat-button color="primary" (click)="onSetCompleteDate()" [disabled]="!selectedDate">
+      <mat-icon>check_circle</mat-icon>
+      Confirm Date
+    </button>
+  }
+</mat-dialog-actions>

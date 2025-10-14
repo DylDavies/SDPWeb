@@ -9,7 +9,7 @@ import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 import { SidebarService } from './sidebar-service';
 
-const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
+export const TOKEN_STORAGE_KEY = 'tutorcore-auth-token';
 
 @Injectable({
   providedIn: 'root'
@@ -119,6 +119,11 @@ export class AuthService {
     this.removeToken();
     this.httpService.post('auth/logout', {}).subscribe({
       next: () => {
+        this.router.navigateByUrl('/');
+      },
+      error: (err) => {
+        console.error('Logout API call failed:', err);
+        // Token is already removed, so we can still navigate to root
         this.router.navigateByUrl('/');
       }
     })

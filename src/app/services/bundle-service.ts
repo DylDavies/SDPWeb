@@ -7,7 +7,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http-service';
 import { EBundleStatus } from '../models/enums/bundle-status.enum';
-import { IBundleSubject, IBundle } from '../models/interfaces/IBundle.interface';
+import { IBundleSubject, IBundle, IAddress } from '../models/interfaces/IBundle.interface';
 
 /**
  * A service for managing tutoring bundles.
@@ -38,10 +38,30 @@ export class BundleService {
    * The creator is handled automatically by the backend using the user's auth token.
    * @param studentId The ID of the student for whom the bundle is being created.
    * @param subjects An array of subjects to include in the new bundle.
+   * @param lessonLocation Optional structured address where lessons will take place.
+   * @param managerId Optional ID of the staff member managing this bundle.
+   * @param stakeholderIds Optional array of user IDs who are stakeholders in this bundle.
    * @returns An Observable that emits the newly created bundle.
    */
-  createBundle(studentId: string, subjects: Partial<IBundleSubject>[]): Observable<IBundle> {
-    const payload = { student: studentId, subjects };
+  createBundle(
+    studentId: string,
+    subjects: Partial<IBundleSubject>[],
+    lessonLocation?: IAddress,
+    managerId?: string,
+    stakeholderIds?: string[]
+  ): Observable<IBundle> {
+    interface CreateBundlePayload {
+      student: string;
+      subjects: Partial<IBundleSubject>[];
+      lessonLocation?: IAddress;
+      manager?: string;
+      stakeholders?: string[];
+    }
+
+    const payload: CreateBundlePayload = { student: studentId, subjects };
+    if (lessonLocation) payload.lessonLocation = lessonLocation;
+    if (managerId) payload.manager = managerId;
+    if (stakeholderIds && stakeholderIds.length > 0) payload.stakeholders = stakeholderIds;
     return this.httpService.post<IBundle>('bundle', payload);
   }
 

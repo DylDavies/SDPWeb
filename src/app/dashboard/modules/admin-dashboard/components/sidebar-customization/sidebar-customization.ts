@@ -216,7 +216,7 @@ export class SidebarCustomization implements OnInit, OnDestroy {
 
   findParent(tree: ISidebarItem[], child: ISidebarItem): ISidebarItem | null {
     for (const item of tree) {
-      if (item.children?.some(c => c._id === child._id)) {
+      if (item.children?.some(c => c.label === child.label)) {
         return item;
       }
       if (item.children) {
@@ -229,7 +229,7 @@ export class SidebarCustomization implements OnInit, OnDestroy {
 
   isDescendant(potentialParent: ISidebarItem, draggedNode: ISidebarItem): boolean {
     if (!potentialParent.children) return false;
-    if (potentialParent.children.some(child => child._id === draggedNode._id)) return true;
+    if (potentialParent.children.some(child => child.label === draggedNode.label)) return true;
     for (const child of potentialParent.children) {
       if (this.isDescendant(child, draggedNode)) return true;
     }
@@ -248,7 +248,8 @@ export class SidebarCustomization implements OnInit, OnDestroy {
   }
   
   private removeItemFromTree(tree: ISidebarItem[], itemToRemove: ISidebarItem): boolean {
-    const index = tree.findIndex(item => item._id === itemToRemove._id);
+    const index = tree.findIndex(item => item.label === itemToRemove.label);
+
     if (index > -1) {
       if (itemToRemove.children?.length) {
           const parent = this.findParent(this.currentSidebarItems, itemToRemove);
@@ -362,6 +363,11 @@ export class SidebarCustomization implements OnInit, OnDestroy {
         labels = labels.concat(this.getAllLabels(item.children));
       }
     }
+
+    for (const item of AVAILABLE_SIDEBAR_LINKS) {
+      labels.push(item.label);
+    }
+
     return labels;
   }
 

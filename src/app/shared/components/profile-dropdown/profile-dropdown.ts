@@ -32,10 +32,6 @@ export class ProfileDropdown implements OnInit{
     });
   }
 
-  // onSettingsClick(){
-  //   //console.log("Navigate user to settings page");
-  // }
-
   onLogoutClick(){
     this.router.navigateByUrl("/logout");
   }

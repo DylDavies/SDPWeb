@@ -12,17 +12,23 @@
     <div *ngFor="let dayName of weekDays" class="day-name-cell">
       {{ dayName }}
     </div>
-    <button *ngFor="let day of daysInMonth" 
+    <button *ngFor="let day of daysInMonth"
          class="day-cell"
          [class.empty-cell]="!day"
          (click)="onDayClick(day)"
          [disabled]="!day">
       <span *ngIf="day" class="day-number">{{ day.getDate() }}</span>
       <div *ngIf="day" class="event-container">
-        <div *ngFor="let event of getEventsForDay(day)" class="event-chip">
-          <span class="event-time">{{ event.startTime }} - {{ event.endTime }}: </span>
-          <span class="event-name">{{ event.name }}</span>
-        </div>
+        <button *ngFor="let event of getEventsForDay(day)" class="event-chip" (click)="onEventClick(event, $event)" type="button">
+          <div class="event-content">
+            <span class="event-time">{{ getEventTime(event) }} - </span>
+            <span class="event-name">{{ event.subject }}</span>
+          </div>
+          <ng-container [ngSwitch]="getEventStatusIcon(event)">
+            <mat-icon *ngSwitchCase="'completed'" class="remark-icon">check_circle</mat-icon>
+            <mat-icon *ngSwitchCase="'pending'" class="pending-icon">pending</mat-icon>
+          </ng-container>
+        </button>
       </div>
     </button>
   </div>

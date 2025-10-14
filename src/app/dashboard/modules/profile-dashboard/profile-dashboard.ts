@@ -90,6 +90,10 @@ export class Profile implements OnInit {
     });
   }
 
+  refreshUserData(): void {
+    this.userService.fetchAllUsers().subscribe();
+  }
+
   openLeaveModal(): void {
     if (this.user) {
       this.dialog.open(LeaveModal, {
@@ -112,7 +116,7 @@ export class Profile implements OnInit {
         if (this.isOwnProfile) {
           this.authService.updateCurrentUserState(updatedUser);
         }
-        this.loadUser(); // Refresh user data
+        this.refreshUserData();
       }
     });
   }

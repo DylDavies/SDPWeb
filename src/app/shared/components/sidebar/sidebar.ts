@@ -78,4 +78,10 @@ export class Sidebar implements OnInit, OnDestroy {
 
     return requiredPermissions.every(p => this.authService.hasPermission(p)); 
   }
+
+  public shouldShow(item: ISidebarItem) {
+    const isCat = (!item.route || item.route == '') && item.children && item.children.length > 0;
+
+    return isCat ? item.children!.some(c => this.canView(c.requiredPermissions)) : this.canView(item.requiredPermissions);
+  }
 }

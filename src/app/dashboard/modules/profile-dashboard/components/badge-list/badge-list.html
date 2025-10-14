@@ -14,19 +14,25 @@
       }
     </div>
   </div>
-  @if (badges && badges.length > 0) {
-    <div class="badge-grid">
-      @for (badge of badges; track badge._id) {
-        <app-badge-card 
-          [badge]="badge"
-          [context]="'profile'"
-          [userId]="user!._id">
-        </app-badge-card>
-      }
-    </div>
+
+  @if (combinedBadges$ | async; as combinedBadges) {
+    @if (combinedBadges.length > 0) {
+      <div class="badge-grid">
+        @for (item of combinedBadges; track item.badge._id) {
+          <app-badge-card
+            [badge]="item.badge"
+            [userBadge]="item.userBadge"
+            [context]="'profile'"
+            [userId]="user!._id"
+            (badgeRemoved)="userUpdated.emit()">
+          </app-badge-card>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <p>This user hasn't earned any badges yet.</p>
+      </div>
+    }
   } @else {
-    <div class="empty-state">
-      <p>This user hasn't earned any badges yet.</p>
-    </div>
-  }
+    }
 </div>

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, of, tap, map } from 'rxjs'; 
 import { HttpService } from './http-service';
 import IBadge from '../models/interfaces/IBadge.interface';
 import { IBadgeRequirement } from '../models/interfaces/IBadgeRequirement.interface';
@@ -41,6 +41,21 @@ export class BadgeService {
   public getBadges(): Observable<IBadge[]> {
     return this.httpService.get<IBadge[]>('badges').pipe(
       tap(badges => this.badges$.next(badges))
+    );
+  }
+
+    /**
+   * This makes any component using this method reactive to real-time updates.
+   * @param ids - An array of badge ID strings.
+   * @returns A reactive Observable array of the requested badges.
+   */
+  getBadgesByIds(ids: string[]): Observable<IBadge[]> {
+    if (!ids || ids.length === 0) {
+      return of([]);
+    }
+
+    return this.allBadges$.pipe(
+      map(allBadges => allBadges.filter(badge => ids.includes(badge._id)))
     );
   }
 

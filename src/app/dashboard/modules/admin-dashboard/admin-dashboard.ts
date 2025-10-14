@@ -9,11 +9,12 @@ import { AdminProficiencyManagement } from './components/admin-proficiency-manag
 import { UserTable } from '../../../shared/components/user-table/user-table';
 import { SidebarCustomization } from './components/sidebar-customization/sidebar-customization';
 import { BadgeManagement } from "./components/badge-management/badge-management";
+import { RemarkTemplateManagement } from './components/remark-template-management/remark-template-management';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement, BadgeManagement, SidebarCustomization],
+  imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement, BadgeManagement, SidebarCustomization, RemarkTemplateManagement],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
@@ -28,6 +29,7 @@ export class AdminDashboard implements OnInit{
   public canManageProficiencies = this.authService.hasPermission(EPermission.PROFICIENCIES_MANAGE);
   public canManageSidebar = this.authService.hasPermission(EPermission.SIDEBAR_MANAGE);
   public canManageBadges = this.authService.hasPermission(EPermission.BADGES_CREATE);
+  public canManageRemarks = this.authService.hasPermission(EPermission.REMARKS_MANAGE);
 
   ngOnInit(): void {
     this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Tablet]).subscribe(result =>{
