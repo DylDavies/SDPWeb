@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -19,6 +19,7 @@ import { UserService } from '../../../services/user-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { RateAdjustmentDialogComponent } from './components/rate-adjustment-dialog/rate-adjustment-dialog.component';
 import { RateHistoryDialogComponent } from './components/rate-history-dialog/rate-history-dialog.component';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-rate-management',
@@ -46,16 +47,19 @@ import { RateHistoryDialogComponent } from './components/rate-history-dialog/rat
 export class RateManagementComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
+  private cdRef = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
 
   public users$: Observable<IUser[]> = this.userService.allUsers$;
   public filteredUsers: IUser[] = [];
   public displayedColumns: string[] = ['picture', 'displayName', 'email', 'currentRate', 'lastAdjustment', 'actions'];
+  public isMobile = false;
 
   // Search, pagination and sorting properties
   public searchTerm = '';
   public currentPage = 0;
-  public pageSize = 25;
+  public pageSize = 10;
   public totalUsers = 0;
   private allUsers: IUser[] = [];
   private currentSort: Sort = { active: 'displayName', direction: 'asc' };
@@ -70,6 +74,16 @@ export class RateManagementComponent implements OnInit, OnDestroy {
       this.allUsers = users;
       this.totalUsers = users.length;
       this.applyFilters();
+    });
+
+    this.breakpointObserver.observe([
+      Breakpoints.Handset,
+      Breakpoints.Tablet
+    ]).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(result => {
+      this.isMobile = result.matches;
+      this.cdRef.markForCheck();
     });
   }
 

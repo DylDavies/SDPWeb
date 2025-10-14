@@ -24,8 +24,6 @@ import { UserService } from '../../../../../services/user-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { IBackendProficiency } from '../../../../../models/interfaces/IBackendProficiency.interface';
-import * as _ from 'lodash';
- 
 import { lastValueFrom } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
