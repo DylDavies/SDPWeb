@@ -51,7 +51,7 @@ export class BundleDashboard implements OnInit, AfterViewInit {
   public EBundleStatus = EBundleStatus;
 
   // Table properties
-  displayedColumns: string[] = ['student', 'status', 'createdAt', 'actions'];
+  displayedColumns: string[] = ['student', 'lessonLocation', 'manager', 'status', 'createdAt', 'actions'];
   dataSource: MatTableDataSource<IBundle>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
