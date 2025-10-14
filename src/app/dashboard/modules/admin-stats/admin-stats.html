@@ -1,0 +1,281 @@
+<div class="admin-stats-container">
+  <h1>Platform Statistics</h1>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (stats) {
+    <!-- User Statistics Section -->
+    <div class="stats-section">
+      <h2>User Statistics</h2>
+
+      <div class="kpi-grid">
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">people</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ stats.userStatistics.totalUsers }}</div>
+              <div class="kpi-label">Total Users</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">school</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ stats.userStatistics.usersByType.tutors }}</div>
+              <div class="kpi-label">Tutors</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">person</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ stats.userStatistics.usersByType.students }}</div>
+              <div class="kpi-label">Students</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">shield</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ stats.userStatistics.usersByType.admins }}</div>
+              <div class="kpi-label">Admins</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">pending</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ stats.userStatistics.pendingApprovals }}</div>
+              <div class="kpi-label">Pending Approvals</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- New User Registrations -->
+      <mat-card class="chart-card-full">
+        <mat-card-header>
+          <mat-card-title>New User Registrations</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (stats.userStatistics.newUsersOverTime.length > 0) {
+            <div class="horizontal-bar-chart">
+              @for (item of stats.userStatistics.newUsersOverTime; track item.month) {
+                <div class="horizontal-bar-item">
+                  <div class="horizontal-bar-label">{{ item.month }}</div>
+                  <div class="horizontal-bar-visual">
+                    <div
+                      class="horizontal-bar new-users-bar"
+                      [style.width.%]="(item.count / getMaxNewUsers()) * 100"
+                    ></div>
+                  </div>
+                  <div class="horizontal-bar-value new-users-value">{{ item.count }}</div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="no-data">No registration data available</div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Charts Grid -->
+      <div class="charts-grid">
+        <!-- Tutor Status Pie Chart -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Tutor Status Distribution</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (getTutorStatusSegments().length > 0) {
+              <div class="chart-placeholder">
+                <div class="pie-chart-container">
+                  <svg class="pie-chart" viewBox="0 0 200 200">
+                    @for (segment of getTutorStatusSegments(); track segment.label) {
+                      <path
+                        [attr.d]="segment.path"
+                        [attr.fill]="segment.color"
+                        class="pie-slice"
+                      />
+                    }
+                  </svg>
+                  <div class="pie-legend">
+                    @for (segment of getTutorStatusSegments(); track segment.label) {
+                      <div class="legend-item">
+                        <div class="legend-color" [style.background-color]="segment.color"></div>
+                        <div class="legend-text">
+                          <span class="legend-label">{{ segment.label }}</span>
+                          <span class="legend-value">{{ segment.count }} ({{ segment.percentage.toFixed(1) }}%)</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="no-data">No tutor data available</div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Platform Activity Section -->
+    <div class="stats-section">
+      <h2>Platform Activity</h2>
+
+      <div class="kpi-grid">
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">schedule</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ stats.platformActivity.totalTutoringHours.toFixed(2) }}</div>
+              <div class="kpi-label">Total Tutoring Hours</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">inventory</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ stats.platformActivity.activeBundles }}</div>
+              <div class="kpi-label">Active Bundles</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">star</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">{{ getOverallRatingDisplay() }}</div>
+              <div class="kpi-label">Overall Tutor Rating</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Most Popular Subjects -->
+      <mat-card class="chart-card-full">
+        <mat-card-header>
+          <mat-card-title>Most Popular Subjects</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (stats.platformActivity.mostPopularSubjects.length > 0) {
+            <div class="horizontal-bar-chart">
+              @for (item of stats.platformActivity.mostPopularSubjects; track item.subject) {
+                <div class="horizontal-bar-item">
+                  <div class="horizontal-bar-label">{{ item.subject }}</div>
+                  <div class="horizontal-bar-visual">
+                    <div
+                      class="horizontal-bar"
+                      [style.width.%]="(item.count / getMaxSubjectCount()) * 100"
+                    ></div>
+                  </div>
+                  <div class="horizontal-bar-value">{{ item.count }}</div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="no-data">No subject data available</div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Financial Overview Section -->
+    <div class="stats-section">
+      <h2>Financial Overview</h2>
+
+      <div class="kpi-grid">
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <div class="kpi-icon">
+              <mat-icon color="primary">payments</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <div class="kpi-value">R{{ stats.financialOverview.totalPayouts.toFixed(2) }}</div>
+              <div class="kpi-label">Total Payouts</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Tutor Leaderboard Section -->
+    <div class="stats-section">
+      <h2>Tutor Performance Leaderboard</h2>
+      <mat-card>
+        <mat-card-content>
+          @if (stats.tutorLeaderboard.length > 0) {
+            <table mat-table [dataSource]="stats.tutorLeaderboard" class="leaderboard-table">
+              <!-- Rank Column -->
+              <ng-container matColumnDef="rank">
+                <th mat-header-cell *matHeaderCellDef>Rank</th>
+                <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+              </ng-container>
+
+              <!-- Tutor Name Column -->
+              <ng-container matColumnDef="tutorName">
+                <th mat-header-cell *matHeaderCellDef>Tutor Name</th>
+                <td mat-cell *matCellDef="let element">{{ element.tutorName }}</td>
+              </ng-container>
+
+              <!-- Total Hours Column -->
+              <ng-container matColumnDef="totalHours">
+                <th mat-header-cell *matHeaderCellDef>Total Hours</th>
+                <td mat-cell *matCellDef="let element">{{ element.totalHours.toFixed(2) }}</td>
+              </ng-container>
+
+              <!-- Average Rating Column -->
+              <ng-container matColumnDef="averageRating">
+                <th mat-header-cell *matHeaderCellDef>Average Rating</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.averageRating > 0 ? element.averageRating.toFixed(1) + '/5' : 'N/A' }}
+                </td>
+              </ng-container>
+
+              <!-- Missions Completed Column -->
+              <ng-container matColumnDef="missionsCompleted">
+                <th mat-header-cell *matHeaderCellDef>Missions Completed</th>
+                <td mat-cell *matCellDef="let element">{{ element.missionsCompleted }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="leaderboardColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: leaderboardColumns;"></tr>
+            </table>
+          } @else {
+            <div class="no-data">No tutor performance data available</div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

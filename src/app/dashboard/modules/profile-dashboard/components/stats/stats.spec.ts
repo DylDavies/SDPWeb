@@ -155,9 +155,32 @@ describe('StatsComponent', () => {
       component.loadStats();
     });
 
-    it('should return the maximum earnings value', () => {
+    it('should return 120% of average when max is below that threshold', () => {
+      // mockStats earnings: [8000, 9000, 8000]
+      // Average: 8333.33, Baseline: 10000, Max: 9000
+      // Should return: 10000
       const max = component.getMaxEarnings();
-      expect(max).toBe(9000.00);
+      expect(max).toBe(10000);
+    });
+
+    it('should return actual max when it exceeds 120% of average', () => {
+      const statsWithHighMax = {
+        ...mockStats,
+        charts: {
+          ...mockStats.charts,
+          monthlyEarnings: [
+            { month: '2024-01', earnings: 5000.00 },
+            { month: '2024-02', earnings: 15000.00 }, // Much higher
+            { month: '2024-03', earnings: 5000.00 }
+          ]
+        }
+      };
+      component.stats = statsWithHighMax;
+
+      // Average: 8333.33, Baseline: 10000, Max: 15000
+      // Should return: 15000
+      const max = component.getMaxEarnings();
+      expect(max).toBe(15000);
     });
 
     it('should return 1 if stats is null', () => {
@@ -170,6 +193,26 @@ describe('StatsComponent', () => {
       component.stats = { ...mockStats, charts: { ...mockStats.charts, monthlyEarnings: [] } };
       const max = component.getMaxEarnings();
       expect(max).toBe(1);
+    });
+
+    it('should handle all equal earnings correctly', () => {
+      const statsWithEqualEarnings = {
+        ...mockStats,
+        charts: {
+          ...mockStats.charts,
+          monthlyEarnings: [
+            { month: '2024-01', earnings: 5000.00 },
+            { month: '2024-02', earnings: 5000.00 },
+            { month: '2024-03', earnings: 5000.00 }
+          ]
+        }
+      };
+      component.stats = statsWithEqualEarnings;
+
+      // Average: 5000, Baseline: 6000, Max: 5000
+      // Should return: 6000
+      const max = component.getMaxEarnings();
+      expect(max).toBe(6000);
     });
   });
 
@@ -214,6 +257,15 @@ describe('StatsComponent', () => {
       expect(component.getPieChartSegments()).toEqual([]);
     });
 
+    it('should return empty array when total hours is 0', () => {
+      component.stats = {
+        ...mockStats,
+        kpis: { ...mockStats.kpis, totalHoursTaught: 0 },
+        charts: { ...mockStats.charts, hoursPerSubject: [{ subject: 'Math', hours: 0 }] }
+      };
+      expect(component.getPieChartSegments()).toEqual([]);
+    });
+
     it('should calculate correct percentages and paths', () => {
       const segments = component.getPieChartSegments();
 
@@ -226,6 +278,12 @@ describe('StatsComponent', () => {
       expect(segments[0].path).toBeDefined();
       expect(typeof segments[0].path).toBe('string');
       expect(segments[0].path).toContain('M 100 100'); // Path starts from center
+    });
+
+    it('should have percentages that sum to approximately 100', () => {
+      const segments = component.getPieChartSegments();
+      const totalPercentage = segments.reduce((sum, seg) => sum + seg.percentage, 0);
+      expect(totalPercentage).toBeCloseTo(100, 1);
     });
 
     it('should render a full circle for single subject', () => {
@@ -253,6 +311,23 @@ describe('StatsComponent', () => {
       expect(segments[2].color).toBe('#FBBC04');
     });
 
+    it('should wrap colors for more than 8 subjects', () => {
+      const manySubjects = Array.from({ length: 10 }, (_, i) => ({
+        subject: `Subject${i + 1}`,
+        hours: 10
+      }));
+      component.stats = {
+        ...mockStats,
+        kpis: { ...mockStats.kpis, totalHoursTaught: 100 },
+        charts: { ...mockStats.charts, hoursPerSubject: manySubjects }
+      };
+
+      const segments = component.getPieChartSegments();
+      expect(segments.length).toBe(10);
+      // Check that color wrapping works (9th subject should have same color as 1st)
+      expect(segments[8].color).toBe(segments[0].color);
+    });
+
     it('should include subject and hours in segments', () => {
       const segments = component.getPieChartSegments();
 
@@ -260,6 +335,25 @@ describe('StatsComponent', () => {
       expect(segments[0].hours).toBe(60.0);
       expect(segments[1].subject).toBe('Science');
       expect(segments[1].hours).toBe(40.5);
+    });
+
+    it('should generate valid SVG paths for large arc (>50%)', () => {
+      component.stats = {
+        ...mockStats,
+        kpis: { ...mockStats.kpis, totalHoursTaught: 100 },
+        charts: {
+          ...mockStats.charts,
+          hoursPerSubject: [
+            { subject: 'Mathematics', hours: 70 },
+            { subject: 'Science', hours: 30 }
+          ]
+        }
+      };
+
+      const segments = component.getPieChartSegments();
+      // First segment is 70%, should use large arc flag
+      expect(segments[0].path).toContain('1 1'); // Large arc flag should be 1
+      expect(segments[0].percentage).toBe(70);
     });
   });
 
@@ -286,12 +380,113 @@ describe('StatsComponent', () => {
       expect(kpiCards.length).toBeGreaterThan(0);
     });
 
+    it('should display all 5 KPI cards', () => {
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const kpiCards = fixture.nativeElement.querySelectorAll('.kpi-card');
+      expect(kpiCards.length).toBe(5); // Total hours, net pay, rating, missions, leave days
+    });
+
     it('should display recent activity table', () => {
       component.ngOnInit();
       fixture.detectChanges();
 
       const table = fixture.nativeElement.querySelector('.activity-table');
       expect(table).toBeTruthy();
+    });
+
+    it('should display "No recent activity" when recentActivity is empty', () => {
+      mockUserService.getTutorStats.and.returnValue(of({
+        ...mockStats,
+        recentActivity: []
+      }));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const noDataMessage = fixture.nativeElement.querySelector('.recent-activity-section .no-data');
+      expect(noDataMessage).toBeTruthy();
+      expect(noDataMessage.textContent).toContain('No recent activity');
+    });
+
+    it('should display "No subject data available" when hoursPerSubject is empty', () => {
+      mockUserService.getTutorStats.and.returnValue(of({
+        ...mockStats,
+        charts: { ...mockStats.charts, hoursPerSubject: [] }
+      }));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const noDataMessage = fixture.nativeElement.querySelector('.chart-card .no-data');
+      expect(noDataMessage).toBeTruthy();
+      expect(noDataMessage.textContent).toContain('No subject data available');
+    });
+
+    it('should display "No earnings data available" when monthlyEarnings is empty', () => {
+      mockUserService.getTutorStats.and.returnValue(of({
+        ...mockStats,
+        charts: { ...mockStats.charts, monthlyEarnings: [] }
+      }));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const chartCards = fixture.nativeElement.querySelectorAll('.chart-card');
+      const earningsCard = Array.from(chartCards).find((card: any) =>
+        card.textContent.includes('Monthly Earnings')
+      );
+      expect(earningsCard).toBeTruthy();
+      const noDataMessage = earningsCard?.querySelector('.no-data');
+      expect(noDataMessage?.textContent).toContain('No earnings data available');
+    });
+
+    it('should display leave days taken value', () => {
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const kpiCards = fixture.nativeElement.querySelectorAll('.kpi-card');
+      const leaveDaysCard = Array.from(kpiCards).find((card: any) =>
+        card.textContent.includes('Leave Days Taken')
+      );
+      expect(leaveDaysCard).toBeTruthy();
+      expect(leaveDaysCard?.textContent).toContain('5');
+    });
+
+    it('should not display stats container when stats is null', () => {
+      component.stats = null;
+      component.isLoading = false;
+      fixture.detectChanges();
+
+      const kpiSection = fixture.nativeElement.querySelector('.kpi-section');
+      expect(kpiSection).toBeFalsy();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle undefined userId gracefully', () => {
+      component.userId = undefined as any;
+      expect(() => component.ngOnInit()).not.toThrow();
+    });
+
+    it('should handle very large duration values', () => {
+      const largeMinutes = 10000; // ~166 hours
+      const result = component.formatDuration(largeMinutes);
+      expect(result).toBe('166h 40m');
+    });
+
+    it('should handle decimal hours correctly', () => {
+      const segments = component.getPieChartSegments();
+      // Science has 40.5 hours
+      expect(segments[1].hours).toBe(40.5);
+    });
+
+    it('should handle rating with decimal precision', () => {
+      mockUserService.getTutorStats.and.returnValue(of({
+        ...mockStats,
+        kpis: { ...mockStats.kpis, averageRating: 3.7 }
+      }));
+      component.userId = 'user123';
+      component.loadStats();
+      expect(component.getAverageRatingDisplay()).toBe('3.7/5');
     });
   });
 });
