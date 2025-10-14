@@ -47,7 +47,7 @@ export const routes: Routes = [
         canActivate: [permissionGuard([EPermission.CAN_MANAGE_PAYSLIPS])]
       },
       { path: 'profile', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
-      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
+      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       {path: 'students', component: StudentManagement},
       {path: 'student-info/:id',component: StudentInformationPage},

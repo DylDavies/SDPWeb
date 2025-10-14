@@ -114,7 +114,13 @@
               <app-badge-list [user]="user" (userUpdated)="loadUser()"></app-badge-list>
             </div>
           </mat-tab>
-          
+
+          <mat-tab label="Stats">
+            <div class="profile-content">
+              <app-stats [userId]="user._id"></app-stats>
+            </div>
+          </mat-tab>
+
         </mat-tab-group>
       </div>
     }

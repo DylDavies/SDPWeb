@@ -245,4 +245,13 @@ export class UserService {
       tap(() => this.fetchAllUsers().subscribe())
     );
   }
+
+  /**
+   * Gets tutor statistics including KPIs, charts data, and recent activity.
+   * @param tutorId - The ID of the tutor to fetch stats for.
+   * @returns An Observable that emits the tutor's statistics.
+   */
+  getTutorStats(tutorId: string): Observable<any> {
+    return this.httpService.get<any>(`user/stats/${tutorId}`);
+  }
 } 
