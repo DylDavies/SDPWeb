@@ -8,14 +8,17 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  flex-wrap: wrap; 
+  gap: 16px;       
 
   mat-form-field {
-    max-width: 600px;
+    min-width: 300px;
     width: 100%;
+    flex: 1 1 300px;
   }
 }
 
-.table-container {
+.desktop-view {
   position: relative;
   overflow: auto;
   width: 100%;
@@ -51,13 +54,71 @@ table {
   text-transform: capitalize;
   color: #fff;
 
-  &.pending {
+  &.pending, &.Pending {
     background-color: #ffc107;
+    color: #000;
   }
-  &.approved {
+  &.approved, &.Approved {
     background-color: #4caf50;
   }
-  &.denied {
+  &.denied, &.Denied, &.Rejected {
     background-color: #f44336;
+  }
+  &.active, &.Active {
+      background-color: #2196F3;
+  }
+  &.archived, &.Archived {
+      background-color: #607D8B;
+  }
+}
+
+// Responsive logic
+.mobile-view {
+  display: none;
+}
+
+.bundle-card {
+  margin-bottom: 16px;
+
+  .mat-card-header .mat-card-subtitle {
+    margin-top: 8px;
+  }
+
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    strong {
+      color: var(--mat-sys-color-primary);
+      margin-right: 8px;
+    }
+
+    span {
+      text-align: right;
+      font-weight: 500;
+    }
+  }
+
+  mat-card-actions {
+    gap: 8px;
+    padding: 8px 16px !important;
+  }
+}
+
+@media (max-width: 959px) {
+  .desktop-view {
+    display: none;
+  }
+
+  .mobile-view {
+    display: block;
   }
 }
