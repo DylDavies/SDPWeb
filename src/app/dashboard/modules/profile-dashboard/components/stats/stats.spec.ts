@@ -385,7 +385,7 @@ describe('StatsComponent', () => {
       fixture.detectChanges();
 
       const kpiCards = fixture.nativeElement.querySelectorAll('.kpi-card');
-      expect(kpiCards.length).toBe(5); // Total hours, net pay, rating, missions, leave days
+      expect(kpiCards.length).toBe(5); // Total hours, net pay, rating, missions achieved, leave days
     });
 
     it('should display recent activity table', () => {
@@ -491,6 +491,23 @@ describe('StatsComponent', () => {
       component.userId = 'user123';
       component.loadStats();
       expect(component.getAverageRatingDisplay()).toBe('3.7/5');
+    });
+  });
+
+  describe('Missions Achieved Display', () => {
+    it('should display missions achieved with correct label', () => {
+      mockUserService.getTutorStats.and.returnValue(of(mockStats));
+      component.userId = 'user123';
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const kpiCards = fixture.nativeElement.querySelectorAll('.kpi-card');
+      const missionsCard = Array.from(kpiCards).find((card: any) =>
+        card.textContent.includes('Missions Achieved')
+      ) as HTMLElement;
+
+      expect(missionsCard).toBeTruthy();
+      expect(missionsCard?.textContent).toContain('15'); // mockStats.kpis.missionsCompleted = 15
     });
   });
 });

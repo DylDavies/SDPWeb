@@ -12,6 +12,8 @@ import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
 import { Subscription } from 'rxjs';
 
+type TutorLeaderboardItem = PlatformStats['tutorLeaderboard'][number];
+
 @Component({
   selector: 'app-admin-stats',
   standalone: true,
@@ -35,7 +37,7 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
   public stats: PlatformStats | null = null;
   public isLoading = true;
   public leaderboardColumns = ['rank', 'tutorName', 'totalHours', 'averageRating', 'missionsCompleted'];
-  public leaderboardDataSource = new MatTableDataSource<any>([]);
+  public leaderboardDataSource = new MatTableDataSource<TutorLeaderboardItem>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -55,7 +57,7 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
         case 'missionsCompleted':
           return item.missionsCompleted;
         default:
-          return item[property];
+          return item[property as keyof TutorLeaderboardItem];
       }
     };
   }
@@ -100,11 +102,11 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.stats = data;
         this.leaderboardDataSource.data = data.tutorLeaderboard;
 
-        // Reconnect paginator and sort after data is loaded
-        setTimeout(() => {
+        // Reconnect paginator and sort if they exist
+        if (this.paginator && this.sort) {
           this.leaderboardDataSource.paginator = this.paginator;
           this.leaderboardDataSource.sort = this.sort;
-        });
+        }
 
         this.isLoading = false;
       },
