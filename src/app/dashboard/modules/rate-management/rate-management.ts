@@ -120,7 +120,7 @@ export class RateManagementComponent implements OnInit, OnDestroy {
    */
   public openRateAdjustmentDialog(user: IUser): void {
     const dialogRef = this.dialog.open(RateAdjustmentDialogComponent, {
-      width: '600px',
+      width: 'clamp(320px, 90vw, 500px)', 
       data: { user }
     });
 
@@ -136,8 +136,8 @@ export class RateManagementComponent implements OnInit, OnDestroy {
    */
   public viewRateHistory(user: IUser): void {
     this.dialog.open(RateHistoryDialogComponent, {
-      width: '1200px',
-      maxWidth: '90vw',
+      width: 'clamp(320px, 95vw, 1200px)', 
+      maxWidth: '95vw',
       data: { user }
     });
   }
