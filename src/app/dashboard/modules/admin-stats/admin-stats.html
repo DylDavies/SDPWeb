@@ -185,7 +185,7 @@
       <!-- Most Popular Subjects -->
       <mat-card class="chart-card-full">
         <mat-card-header>
-          <mat-card-title>Most Popular Subjects</mat-card-title>
+          <mat-card-title>Most Popular Subjects (by Hours)</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           @if (stats.platformActivity.mostPopularSubjects.length > 0) {
@@ -199,7 +199,7 @@
                       [style.width.%]="(item.count / getMaxSubjectCount()) * 100"
                     ></div>
                   </div>
-                  <div class="horizontal-bar-value">{{ item.count }}</div>
+                  <div class="horizontal-bar-value">{{ item.count }} hrs</div>
                 </div>
               }
             </div>

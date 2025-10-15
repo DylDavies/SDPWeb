@@ -1,45 +1,14 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { AdminStatsService } from '../../../services/admin-stats-service';
+import { AdminStatsService, PlatformStats } from '../../../services/admin-stats-service';
 import { SnackBarService } from '../../../services/snackbar-service';
-
-interface PlatformStats {
-  userStatistics: {
-    totalUsers: number;
-    usersByType: {
-      tutors: number;
-      students: number;
-      admins: number;
-    };
-    newUsersOverTime: Array<{ month: string; count: number }>;
-    pendingApprovals: number;
-    tutorStatus: {
-      active: number;
-      onLeave: number;
-      inactive: number;
-    };
-  };
-  platformActivity: {
-    totalTutoringHours: number;
-    mostPopularSubjects: Array<{ subject: string; count: number }>;
-    activeBundles: number;
-    overallTutorRating: number;
-  };
-  financialOverview: {
-    totalPayouts: number;
-  };
-  tutorLeaderboard: Array<{
-    tutorId: string;
-    tutorName: string;
-    totalHours: number;
-    averageRating: number;
-    missionsCompleted: number;
-  }>;
-}
+import { SocketService } from '../../../services/socket-service';
+import { ESocketMessage } from '../../../models/enums/socket-message.enum';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-stats',
@@ -54,16 +23,43 @@ interface PlatformStats {
   templateUrl: './admin-stats.html',
   styleUrl: './admin-stats.scss'
 })
-export class AdminStatsComponent implements OnInit {
+export class AdminStatsComponent implements OnInit, OnDestroy {
   private adminStatsService = inject(AdminStatsService);
   private snackbarService = inject(SnackBarService);
+  private socketService = inject(SocketService);
 
   public stats: PlatformStats | null = null;
   public isLoading = true;
   public leaderboardColumns = ['rank', 'tutorName', 'totalHours', 'averageRating', 'missionsCompleted'];
 
+  private statsUpdateSubscription?: Subscription;
+
   ngOnInit(): void {
     this.loadStats();
+    this.subscribeToStatsUpdates();
+  }
+
+  ngOnDestroy(): void {
+    if (this.statsUpdateSubscription) {
+      this.statsUpdateSubscription.unsubscribe();
+    }
+    this.socketService.unsubscribe(ESocketMessage.PlatformStatsUpdated);
+  }
+
+  private subscribeToStatsUpdates(): void {
+    this.socketService.subscribe(ESocketMessage.PlatformStatsUpdated);
+
+    this.statsUpdateSubscription = this.socketService
+      .listen<unknown>(ESocketMessage.PlatformStatsUpdated)
+      .subscribe({
+        next: () => {
+          console.log('Platform stats update detected, refreshing data...');
+          this.loadStats();
+        },
+        error: (error) => {
+          console.error('Error listening to platform stats updates:', error);
+        }
+      });
   }
 
   loadStats(): void {
@@ -81,7 +77,7 @@ export class AdminStatsComponent implements OnInit {
     });
   }
 
-  getTutorStatusSegments(): Array<{ label: string; count: number; percentage: number; color: string; path: string }> {
+  getTutorStatusSegments(): { label: string; count: number; percentage: number; color: string; path: string }[] {
     if (!this.stats?.userStatistics.tutorStatus) return [];
 
     const { active, onLeave, inactive } = this.stats.userStatistics.tutorStatus;
@@ -117,7 +113,7 @@ export class AdminStatsComponent implements OnInit {
 
     return data
       .filter(item => item.count > 0)
-      .map((item, index) => {
+      .map((item) => {
         const percentage = (item.count / total) * 100;
         const angle = (percentage / 100) * 2 * Math.PI;
 

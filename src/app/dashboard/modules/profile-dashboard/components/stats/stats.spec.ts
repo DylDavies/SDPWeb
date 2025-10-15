@@ -433,9 +433,9 @@ describe('StatsComponent', () => {
       const chartCards = fixture.nativeElement.querySelectorAll('.chart-card');
       const earningsCard = Array.from(chartCards).find((card: any) =>
         card.textContent.includes('Monthly Earnings')
-      );
+      ) as HTMLElement;
       expect(earningsCard).toBeTruthy();
-      const noDataMessage = earningsCard?.querySelector('.no-data');
+      const noDataMessage = earningsCard?.querySelector('.no-data') as HTMLElement;
       expect(noDataMessage?.textContent).toContain('No earnings data available');
     });
 
@@ -446,7 +446,7 @@ describe('StatsComponent', () => {
       const kpiCards = fixture.nativeElement.querySelectorAll('.kpi-card');
       const leaveDaysCard = Array.from(kpiCards).find((card: any) =>
         card.textContent.includes('Leave Days Taken')
-      );
+      ) as HTMLElement;
       expect(leaveDaysCard).toBeTruthy();
       expect(leaveDaysCard?.textContent).toContain('5');
     });
@@ -474,6 +474,10 @@ describe('StatsComponent', () => {
     });
 
     it('should handle decimal hours correctly', () => {
+      mockUserService.getTutorStats.and.returnValue(of(mockStats));
+      component.userId = 'user123';
+      component.loadStats();
+
       const segments = component.getPieChartSegments();
       // Science has 40.5 hours
       expect(segments[1].hours).toBe(40.5);

@@ -4,30 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { UserService } from '../../../../../services/user-service';
+import { UserService, TutorStats } from '../../../../../services/user-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
-
-interface TutorStats {
-  kpis: {
-    totalHoursTaught: number;
-    netPay: number;
-    averageRating: number;
-    missionsCompleted: number;
-  };
-  charts: {
-    hoursPerSubject: Array<{ subject: string; hours: number }>;
-    monthlyEarnings: Array<{ month: string; earnings: number }>;
-  };
-  recentActivity: Array<{
-    _id: string;
-    student: string;
-    subject: string;
-    duration: number;
-    startTime: Date;
-    remarked: boolean;
-  }>;
-  leaveDaysTaken: number;
-}
 
 @Component({
   selector: 'app-stats',
@@ -99,7 +77,7 @@ export class StatsComponent implements OnInit {
     return this.stats.kpis.averageRating === 0 ? 'N/A' : `${this.stats.kpis.averageRating.toFixed(1)}/5`;
   }
 
-  getPieChartSegments(): Array<{ subject: string; hours: number; percentage: number; color: string; path: string }> {
+  getPieChartSegments(): { subject: string; hours: number; percentage: number; color: string; path: string }[] {
     if (!this.stats?.charts.hoursPerSubject.length) return [];
 
     const colors = [
