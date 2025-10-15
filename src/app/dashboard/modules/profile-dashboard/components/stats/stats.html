@@ -51,7 +51,7 @@
             </div>
             <div class="kpi-details">
               <div class="kpi-value">{{ stats.kpis.missionsCompleted }}</div>
-              <div class="kpi-label">Missions Completed</div>
+              <div class="kpi-label">Missions Achieved</div>
             </div>
           </mat-card-content>
         </mat-card>
@@ -119,21 +119,19 @@
           </mat-card-header>
           <mat-card-content>
             @if (stats.charts.monthlyEarnings.length > 0) {
-              <div class="chart-placeholder">
-                <div class="earnings-line">
-                  @for (item of stats.charts.monthlyEarnings; track item.month) {
-                    <div class="earnings-item">
-                      <div class="earnings-bar-container">
-                        <div
-                          class="earnings-bar"
-                          [style.height.%]="(item.earnings / getMaxEarnings()) * 100"
-                        ></div>
-                      </div>
-                      <div class="earnings-month">{{ item.month }}</div>
-                      <div class="earnings-value">R{{ item.earnings.toFixed(0) }}</div>
+              <div class="horizontal-bar-chart">
+                @for (item of stats.charts.monthlyEarnings; track item.month) {
+                  <div class="horizontal-bar-item">
+                    <div class="horizontal-bar-label">{{ item.month }}</div>
+                    <div class="horizontal-bar-visual">
+                      <div
+                        class="horizontal-bar earnings-bar"
+                        [style.width.%]="(item.earnings / getMaxEarnings()) * 100"
+                      ></div>
                     </div>
-                  }
-                </div>
+                    <div class="horizontal-bar-value earnings-value">R{{ item.earnings.toFixed(0) }}</div>
+                  </div>
+                }
               </div>
             } @else {
               <div class="no-data">No earnings data available</div>
