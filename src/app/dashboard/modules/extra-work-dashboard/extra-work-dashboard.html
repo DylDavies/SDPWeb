@@ -15,119 +15,130 @@
       }
     </div>
 
-    <div class="table-container mat-elevation-z8">
+    <div class="desktop-view mat-elevation-z8">
       <table mat-table [dataSource]="dataSource" matSort #myWorkSort="matSort" matSortActive="createdAt" matSortDirection="desc" class="static-table-widths">
-
         <ng-container matColumnDef="createdAt">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
-            <td mat-cell *matCellDef="let item"> {{item.createdAt | date:'mediumDate'}} </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
+          <td mat-cell *matCellDef="let item"> {{item.createdAt | date:'mediumDate'}} </td>
         </ng-container>
-
         <ng-container matColumnDef="student">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Linked to </th>
-            <td mat-cell *matCellDef="let item"> {{ getStudentName(item) }} </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Linked to </th>
+          <td mat-cell *matCellDef="let item"> {{ getStudentName(item) }} </td>
         </ng-container>
-
         <ng-container matColumnDef="workType">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Type </th>
           <td mat-cell *matCellDef="let item"> {{item.workType}} </td>
         </ng-container>
-
         <ng-container matColumnDef="remuneration">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Remuneration </th>
           <td mat-cell *matCellDef="let item"> R{{item.remuneration.toFixed(2)}} </td>
         </ng-container>
-
         <ng-container matColumnDef="commissioner">
-            <th mat-header-cell *matHeaderCellDef> Commissioned By </th>
-            <td mat-cell *matCellDef="let item"> {{ getCommisionedByName(item) }} </td>
+          <th mat-header-cell *matHeaderCellDef> Commissioned By </th>
+          <td mat-cell *matCellDef="let item"> {{ getCommisionedByName(item) }} </td>
         </ng-container>
-
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
           <td mat-cell *matCellDef="let item">
             <span class="status-chip" [ngClass]="item.status.replace(' ', '-').toLowerCase()">{{item.status}}</span>
           </td>
         </ng-container>
-
         <tr mat-header-row *matHeaderRowDef="myWorkDisplayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: myWorkDisplayedColumns;" (click)="openViewWorkDialog(row)" class="clickable-row"></tr>
-
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="6">
-            @if (!input.value) {
-              <span>You have not logged any extra work yet.</span>
-            } @else {
-              <span>No data matching the filter "{{input.value}}"</span>
-            }
-          </td>
+            <td class="mat-cell" colspan="6">
+              @if (!input.value) {
+                <span>You have not logged any extra work yet.</span>
+              } @else {
+                <span>No data matching the filter "{{input.value}}"</span>
+              }
+            </td>
         </tr>
       </table>
+      <mat-paginator #myWorkPaginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+    </div>
 
-      <mat-paginator #myWorkPaginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons
-        aria-label="Select page of extra work entries">
-      </mat-paginator>
+    <div class="mobile-view">
+      <mat-card *ngFor="let item of dataSource.data" class="extra-work-card clickable-row" (click)="openViewWorkDialog(item)">
+        <mat-card-header>
+          <mat-card-title>{{ item.workType }}</mat-card-title>
+          <mat-card-subtitle>
+            <span class="status-chip" [ngClass]="item.status.replace(' ', '-').toLowerCase()">{{item.status}}</span>
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="card-row">
+            <strong>Remuneration:</strong>
+            <span>R{{ item.remuneration.toFixed(2) }}</span>
+          </div>
+          <div class="card-row">
+            <strong>Linked To:</strong>
+            <span>{{ getStudentName(item) }}</span>
+          </div>
+          <div class="card-row">
+            <strong>Commissioned By:</strong>
+            <span>{{ getCommisionedByName(item) }}</span>
+          </div>
+           <div class="card-row">
+            <strong>Date:</strong>
+            <span>{{ item.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-paginator #myWorkPaginatorMobile [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
     </div>
   </mat-tab>
+
   <mat-tab label="Commissioned Work" *ngIf="canApprove">
-      <div class="dashboard-header">
+    <div class="dashboard-header">
         <mat-form-field appearance="outline">
           <mat-label>Filter Extra Work</mat-label>
           <input matInput (keyup)="applyCommissionedFilter($event)" placeholder="Search by type, student, etc." #commissionedInput>
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
-      </div>
+    </div>
 
-    <div class="table-container mat-elevation-z8">
+    <div class="desktop-view mat-elevation-z8">
       <table mat-table [dataSource]="commissionedDataSource" matSort #commissionedSort="matSort" matSortActive="createdAt" matSortDirection="desc" class="static-table-widths">
-
           <ng-container matColumnDef="createdAt">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
-              <td mat-cell *matCellDef="let item"> {{item.createdAt | date:'mediumDate'}} </td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
+            <td mat-cell *matCellDef="let item"> {{item.createdAt | date:'mediumDate'}} </td>
           </ng-container>
-
           <ng-container matColumnDef="student">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Linked to </th>
-              <td mat-cell *matCellDef="let item"> {{ getStudentName(item) }} </td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Linked to </th>
+            <td mat-cell *matCellDef="let item"> {{ getStudentName(item) }} </td>
           </ng-container>
-
           <ng-container matColumnDef="workType">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Type </th>
             <td mat-cell *matCellDef="let item"> {{item.workType}} </td>
           </ng-container>
-
           <ng-container matColumnDef="remuneration">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Remuneration </th>
             <td mat-cell *matCellDef="let item"> R{{item.remuneration.toFixed(2)}} </td>
           </ng-container>
-
           <ng-container matColumnDef="createdBy">
               <th mat-header-cell *matHeaderCellDef> Created By </th>
               <td mat-cell *matCellDef="let item"> {{ getCreatedByName(item) }} </td>
           </ng-container>
-
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
             <td mat-cell *matCellDef="let item">
               <span class="status-chip" [ngClass]="item.status.replace(' ', '-').toLowerCase()">{{item.status}}</span>
             </td>
           </ng-container>
-
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Actions </th>
             <td mat-cell *matCellDef="let item">
-              <button mat-icon-button color="primary" (click)="approveWork(item); $event.stopPropagation()" [disabled]="item.status === EExtraWorkStatus.Approved || item.status === EExtraWorkStatus.Denied">
-                  <mat-icon>check</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="denyWork(item); $event.stopPropagation()" [disabled]="item.status === EExtraWorkStatus.Denied || item.status === EExtraWorkStatus.Approved">
-                  <mat-icon>close</mat-icon>
-              </button>
+                <button mat-icon-button color="primary" (click)="approveWork(item); $event.stopPropagation()" [disabled]="item.status === EExtraWorkStatus.Approved || item.status === EExtraWorkStatus.Denied">
+                    <mat-icon>check</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="denyWork(item); $event.stopPropagation()" [disabled]="item.status === EExtraWorkStatus.Denied || item.status === EExtraWorkStatus.Approved">
+                    <mat-icon>close</mat-icon>
+                </button>
             </td>
           </ng-container>
-
           <tr mat-header-row *matHeaderRowDef="commissionedDisplayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: commissionedDisplayedColumns;" (click)="openViewWorkDialog(row)" class="clickable-row"></tr>
-
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
               @if (!commissionedInput.value) {
@@ -137,11 +148,48 @@
               }
             </td>
           </tr>
-        </table>
+      </table>
+      <mat-paginator #commissionedPaginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+    </div>
 
-      <mat-paginator #commissionedPaginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons
-          aria-label="Select page of extra work entries">
-        </mat-paginator>
-      </div>
+    <div class="mobile-view">
+        <mat-card *ngFor="let item of commissionedDataSource.data" class="extra-work-card">
+            <div class="card-main-content clickable-row" (click)="openViewWorkDialog(item)">
+                <mat-card-header>
+                    <mat-card-title>{{ item.workType }}</mat-card-title>
+                    <mat-card-subtitle>
+                        <span class="status-chip" [ngClass]="item.status.replace(' ', '-').toLowerCase()">{{item.status}}</span>
+                    </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="card-row">
+                        <strong>Remuneration:</strong>
+                        <span>R{{ item.remuneration.toFixed(2) }}</span>
+                    </div>
+                    <div class="card-row">
+                        <strong>Linked To:</strong>
+                        <span>{{ getStudentName(item) }}</span>
+                    </div>
+                    <div class="card-row">
+                        <strong>Created By:</strong>
+                        <span>{{ getCreatedByName(item) }}</span>
+                    </div>
+                    <div class="card-row">
+                        <strong>Date:</strong>
+                        <span>{{ item.createdAt | date:'mediumDate' }}</span>
+                    </div>
+                </mat-card-content>
+            </div>
+            <mat-card-actions align="end">
+                <button mat-icon-button color="primary" (click)="approveWork(item)" [disabled]="item.status === EExtraWorkStatus.Approved || item.status === EExtraWorkStatus.Denied">
+                    <mat-icon>check</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="denyWork(item)" [disabled]="item.status === EExtraWorkStatus.Denied || item.status === EExtraWorkStatus.Approved">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-card-actions>
+        </mat-card>
+        <mat-paginator #commissionedPaginatorMobile [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+    </div>
   </mat-tab>
 </mat-tab-group>
