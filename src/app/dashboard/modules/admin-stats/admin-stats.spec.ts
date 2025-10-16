@@ -477,6 +477,18 @@ describe('AdminStatsComponent', () => {
     });
   });
 
+  describe('ngAfterViewInit', () => {
+    it('should set paginator and sort on data source after view init', () => {
+      mockAdminStatsService.getPlatformStats.and.returnValue(of(mockPlatformStats));
+      fixture.detectChanges();
+
+      component.ngAfterViewInit();
+
+      expect(component.leaderboardDataSource.paginator).toBeDefined();
+      expect(component.leaderboardDataSource.sort).toBeDefined();
+    });
+  });
+
   // Pagination and Sorting tests removed due to RxJS cleanup issues
   // The functionality works correctly in the app, but the tests were causing false failures
 });
