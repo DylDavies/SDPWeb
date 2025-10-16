@@ -31,13 +31,33 @@
                     [formControlName]="field.name"></textarea>
         </mat-form-field>
       </ng-container>
+
+      <h2 class="section-title" *ngIf="hasFileFields()">File Attachments <span class="required-indicator">* Required</span></h2>
+      <ng-container *ngFor="let field of template?.fields">
+        <div *ngIf="isFileFieldType(field.type)" class="file-upload-section">
+          <label class="file-label">{{ field.name }} <span class="required-indicator">*</span></label>
+          <div *ngIf="existingDocumentsMap.has(field.name)" class="existing-file-info">
+            <mat-icon class="info-icon">check_circle</mat-icon>
+            <span>Current file: {{ existingDocumentsMap.get(field.name)?.originalFilename }}</span>
+          </div>
+          <div *ngIf="fileFieldsMap.has(field.name)" class="new-file-info">
+            <mat-icon class="info-icon">attach_file</mat-icon>
+            <span>New file selected: {{ fileFieldsMap.get(field.name)?.name }}</span>
+          </div>
+          <app-file-upload
+            [allowedFileTypes]="getFileTypeForField(field.type)"
+            [maxFileSizeMB]="10"
+            (fileSelected)="onFileSelected(field.name, $event)">
+          </app-file-upload>
+        </div>
+      </ng-container>
     </form>
   </ng-template>
 
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="remarkForm.invalid || isSaving || isLoading">
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="!canSave() || isLoading">
     <mat-progress-spinner *ngIf="isSaving" mode="indeterminate" diameter="24"></mat-progress-spinner>
     <span *ngIf="!isSaving">{{ isEditMode ? 'Save Changes' : 'Save Remark' }}</span>
   </button>

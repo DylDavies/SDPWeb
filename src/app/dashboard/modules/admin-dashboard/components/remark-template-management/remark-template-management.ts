@@ -38,7 +38,7 @@ export class RemarkTemplateManagement implements OnInit {
   public fields: IRemarkField[] = [];
   public newFieldName = '';
   public newFieldType: RemarkFieldType = 'string';
-  public fieldTypes: RemarkFieldType[] = ['string', 'boolean', 'number', 'time'];
+  public fieldTypes: RemarkFieldType[] = ['string', 'boolean', 'number', 'time', 'pdf', 'image', 'audio'];
   private initialFields: IRemarkField[] = [];
 
   ngOnInit(): void {

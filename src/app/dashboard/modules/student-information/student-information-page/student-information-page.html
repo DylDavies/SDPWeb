@@ -73,6 +73,12 @@
                 </button>
                 </mat-card-actions>
             </mat-tab>
+            <mat-tab label="Lessons">
+                <app-lessons-table [bundleId]="bundleId"></app-lessons-table>
+            </mat-tab>
+            <mat-tab label="Remarks">
+                <app-remarks-display [studentId]="studentId"></app-remarks-display>
+            </mat-tab>
             <mat-tab label="Missions">
                 <div class = missions-dashboard-header>
                   @if(canCreateMissions){
@@ -82,7 +88,7 @@
                     </button>
 
                   }
-                   
+
                 </div>
                   <app-missions-table [bundleId]="bundleId"></app-missions-table>
             </mat-tab>

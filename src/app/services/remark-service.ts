@@ -28,5 +28,9 @@ export class RemarkService {
   getRemarkForEvent(eventId: string): Observable<IRemark> {
     return this.httpService.get<IRemark>(`remarks/${eventId}`);
   }
+
+  getRemarksForStudent(studentId: string): Observable<IRemark[]> {
+    return this.httpService.get<IRemark[]>(`remarks/student/${studentId}`);
+  }
 }
 
