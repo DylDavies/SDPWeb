@@ -38,7 +38,21 @@ describe('ProfileDashboardComponent', () => {
       updateCurrentUserState: jasmine.createSpy('updateCurrentUserState'),
       hasPermission: jasmine.createSpy('hasPermission').and.returnValue(true),
     };
-    mockUserService = jasmine.createSpyObj('UserService', ['getUserById', 'updateUserAvailability', 'fetchAllUsers']);
+    mockUserService = jasmine.createSpyObj('UserService', ['getUserById', 'updateUserAvailability', 'fetchAllUsers', 'getTutorStats']);
+    mockUserService.getTutorStats.and.returnValue(of({
+      kpis: {
+        totalHoursTaught: 0,
+        netPay: 0,
+        averageRating: 0,
+        missionsCompleted: 0
+      },
+      charts: {
+        hoursPerSubject: [],
+        monthlyEarnings: []
+      },
+      recentActivity: [],
+      leaveDaysTaken: 0
+    }));
     mockRouter = jasmine.createSpyObj('Router', ['navigateByUrl']);
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackbarService = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);

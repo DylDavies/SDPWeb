@@ -27,4 +27,5 @@ export const AVAILABLE_SIDEBAR_LINKS: ISidebarLinkDefinition[] = [
   { label: 'Rate Management', icon: 'price_change', route: '/dashboard/rates', requiredPermissions: [EPermission.CAN_ADJUST_RATES] },
   { label: 'Extra Work', icon: 'work', route: '/dashboard/extrawork', requiredPermissions: [EPermission.EXTRA_WORK_VIEW] },
   { label: 'Payslip Management', icon: 'request_quote', route: '/dashboard/admin/payslips', requiredPermissions: [EPermission.CAN_MANAGE_PAYSLIPS] },
+  { label: 'Platform Stats', icon: 'analytics', route: '/dashboard/platform-stats', requiredPermissions: [EPermission.PLATFORM_STATS_VIEW] },
 ];

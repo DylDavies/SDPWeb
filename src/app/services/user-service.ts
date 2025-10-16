@@ -13,6 +13,28 @@ import { IBackendProficiency } from '../models/interfaces/IBackendProficiency.in
 import { CustomObservableService } from './custom-observable-service';
 import { EPermission } from '../models/enums/permission.enum';
 
+export interface TutorStats {
+  kpis: {
+    totalHoursTaught: number;
+    netPay: number;
+    averageRating: number;
+    missionsCompleted: number;
+  };
+  charts: {
+    hoursPerSubject: { subject: string; hours: number }[];
+    monthlyEarnings: { month: string; earnings: number }[];
+  };
+  recentActivity: {
+    _id: string;
+    student: string;
+    subject: string;
+    duration: number;
+    startTime: Date;
+    remarked: boolean;
+  }[];
+  leaveDaysTaken: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -244,5 +266,14 @@ export class UserService {
     return this.httpService.delete<IUser>(`users/${userId}/rate-adjustments/${adjustmentIndex}`).pipe(
       tap(() => this.fetchAllUsers().subscribe())
     );
+  }
+
+  /**
+   * Gets tutor statistics including KPIs, charts data, and recent activity.
+   * @param tutorId - The ID of the tutor to fetch stats for.
+   * @returns An Observable that emits the tutor's statistics.
+   */
+  getTutorStats(tutorId: string): Observable<TutorStats> {
+    return this.httpService.get<TutorStats>(`user/stats/${tutorId}`);
   }
 } 

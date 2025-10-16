@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common'; 
+import { CommonModule, DatePipe } from '@angular/common';
 import { AuthService } from '../../../services/auth-service';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,9 +19,10 @@ import { UserService } from '../../../services/user-service';
 import { LeaveManagement } from './components/leave-management/leave-management';
 import { EditAvailabilityDialog } from './components/edit-availability-dialog/edit-availability-dialog';
 import { filter } from 'rxjs';
-import { SnackBarService } from '../../../services/snackbar-service'; 
+import { SnackBarService } from '../../../services/snackbar-service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BadgeListComponent } from './components/badge-list/badge-list';
+import { StatsComponent } from './components/stats/stats';
 
 @Component({
   selector: 'app-profile-dashboard',
@@ -29,7 +30,7 @@ import { BadgeListComponent } from './components/badge-list/badge-list';
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatDividerModule,
     MatProgressSpinnerModule, UserTypePipe, DatePipe, DisplayNamePipe,
-    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement, MatTooltip, BadgeListComponent
+    RoleChipRow, MatDialogModule,MatTabsModule,LeaveManagement, ProficiencyManagement, MatTooltip, BadgeListComponent, StatsComponent
   ],
   templateUrl: './profile-dashboard.html',
   styleUrl: './profile-dashboard.scss'

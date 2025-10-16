@@ -26,6 +26,7 @@ import { PayslipDashboard } from './dashboard/modules/payslip-dashboard/payslip-
 import { RateManagementComponent } from './dashboard/modules/rate-management/rate-management';
 import { ExtraWorkDashboard } from './dashboard/modules/extra-work-dashboard/extra-work-dashboard';
 import { AdminPayslipDashboard } from './dashboard/modules/admin-dashboard/components/admin-payslip-dashboard/admin-payslip-dashboard';
+import { AdminStatsComponent } from './dashboard/modules/admin-stats/admin-stats';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -47,7 +48,7 @@ export const routes: Routes = [
         canActivate: [permissionGuard([EPermission.CAN_MANAGE_PAYSLIPS])]
       },
       { path: 'profile', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
-      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
+      { path: 'profile/:id', component: Profile, canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])] },
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       {path: 'students', component: StudentManagement},
       {path: 'student-info/:id',component: StudentInformationPage},
@@ -82,7 +83,12 @@ export const routes: Routes = [
         component: RateManagementComponent,
         canActivate: [permissionGuard([EPermission.CAN_ADJUST_RATES])]
       },
-      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] }
+      { path: 'extrawork', component: ExtraWorkDashboard, canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])] },
+      {
+        path: 'platform-stats',
+        component: AdminStatsComponent,
+        canActivate: [permissionGuard([EPermission.PLATFORM_STATS_VIEW])]
+      }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]
   },
