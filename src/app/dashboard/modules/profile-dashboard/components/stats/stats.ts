@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -6,6 +6,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { UserService, TutorStats } from '../../../../../services/user-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Subscription } from 'rxjs';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-stats',
@@ -15,24 +18,42 @@ import { SnackBarService } from '../../../../../services/snackbar-service';
     MatCardModule,
     MatTableModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    MatDividerModule
   ],
   templateUrl: './stats.html',
   styleUrl: './stats.scss'
 })
-export class StatsComponent implements OnInit {
+export class StatsComponent implements OnInit, OnDestroy {
   @Input() userId!: string;
 
   private userService = inject(UserService);
   private snackbarService = inject(SnackBarService);
+  private breakpointObserver = inject(BreakpointObserver);
+  private cdr = inject(ChangeDetectorRef);
 
   public stats: TutorStats | null = null;
   public isLoading = true;
   public displayedColumns = ['student', 'subject', 'duration', 'startTime', 'remarked'];
+  public isMobile = false;
+  private breakpointSubscription!: Subscription;
 
   ngOnInit(): void {
+    this.breakpointSubscription = this.breakpointObserver
+      .observe([Breakpoints.XSmall, Breakpoints.Small])
+      .subscribe(result => {
+        this.isMobile = result.matches;
+        this.cdr.detectChanges();
+      });
+
     if (this.userId) {
       this.loadStats();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.breakpointSubscription) {
+      this.breakpointSubscription.unsubscribe();
     }
   }
 
@@ -69,7 +90,8 @@ export class StatsComponent implements OnInit {
     const baseline = average * 1.2;
     const actualMax = Math.max(...earnings);
 
-    return Math.max(baseline, actualMax);
+    const max = Math.max(baseline, actualMax);
+    return max === 0 ? 1 : max;
   }
 
   getAverageRatingDisplay(): string {
@@ -81,14 +103,8 @@ export class StatsComponent implements OnInit {
     if (!this.stats?.charts.hoursPerSubject.length) return [];
 
     const colors = [
-      '#4285F4', // Blue
-      '#EA4335', // Red
-      '#FBBC04', // Yellow
-      '#34A853', // Green
-      '#FF6D00', // Orange
-      '#9C27B0', // Purple
-      '#00BCD4', // Cyan
-      '#795548'  // Brown
+      '#4285F4', '#EA4335', '#FBBC04', '#34A853',
+      '#FF6D00', '#9C27B0', '#00BCD4', '#795548'
     ];
 
     const total = this.stats.kpis.totalHoursTaught;
@@ -98,7 +114,6 @@ export class StatsComponent implements OnInit {
     const centerY = 100;
     const radius = 90;
 
-    // Special case: if there's only one subject, render a full circle
     if (this.stats.charts.hoursPerSubject.length === 1) {
       const item = this.stats.charts.hoursPerSubject[0];
       return [{
@@ -119,16 +134,13 @@ export class StatsComponent implements OnInit {
       const startAngle = cumulativeAngle;
       const endAngle = cumulativeAngle + angle;
 
-      // Calculate start and end points for the arc
       const x1 = centerX + radius * Math.cos(startAngle - Math.PI / 2);
       const y1 = centerY + radius * Math.sin(startAngle - Math.PI / 2);
       const x2 = centerX + radius * Math.cos(endAngle - Math.PI / 2);
       const y2 = centerY + radius * Math.sin(endAngle - Math.PI / 2);
 
-      // Determine if we need the large arc flag
       const largeArcFlag = angle > Math.PI ? 1 : 0;
 
-      // Build the SVG path
       const path = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
 
       cumulativeAngle = endAngle;
@@ -143,3 +155,4 @@ export class StatsComponent implements OnInit {
     });
   }
 }
+
