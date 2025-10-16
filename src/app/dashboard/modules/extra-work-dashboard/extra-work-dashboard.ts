@@ -102,9 +102,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.add(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
-        if (user) {
-          this.loadExtraWork();
-        }
+        this.loadExtraWork();
       })
     );
 
@@ -112,9 +110,7 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.add(
       this.socketService.listen(ESocketMessage.ExtraWorkUpdated).subscribe(() => {
         console.log('Received extra-work-updated event. Refreshing lists.');
-        if (this.currentUser) {
-          this.loadExtraWork();
-        }
+        this.loadExtraWork();
       })
     );
   }
