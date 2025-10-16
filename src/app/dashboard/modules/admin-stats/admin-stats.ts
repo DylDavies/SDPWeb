@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -33,14 +33,15 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
   private adminStatsService = inject(AdminStatsService);
   private snackbarService = inject(SnackBarService);
   private socketService = inject(SocketService);
+  private cdr = inject(ChangeDetectorRef);
 
   public stats: PlatformStats | null = null;
   public isLoading = true;
   public leaderboardColumns = ['rank', 'tutorName', 'totalHours', 'averageRating', 'missionsCompleted'];
   public leaderboardDataSource = new MatTableDataSource<TutorLeaderboardItem>([]);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator?: MatPaginator;
+  @ViewChild(MatSort) sort?: MatSort;
 
   private statsUpdateSubscription?: Subscription;
 
@@ -68,8 +69,13 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.leaderboardDataSource.paginator = this.paginator;
-    this.leaderboardDataSource.sort = this.sort;
+    // Set paginator and sort after view is initialized
+    if (this.paginator) {
+      this.leaderboardDataSource.paginator = this.paginator;
+    }
+    if (this.sort) {
+      this.leaderboardDataSource.sort = this.sort;
+    }
   }
 
   ngOnDestroy(): void {
@@ -101,14 +107,18 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (data) => {
         this.stats = data;
         this.leaderboardDataSource.data = data.tutorLeaderboard;
-
-        // Reconnect paginator and sort if they exist
-        if (this.paginator && this.sort) {
-          this.leaderboardDataSource.paginator = this.paginator;
-          this.leaderboardDataSource.sort = this.sort;
-        }
-
         this.isLoading = false;
+
+        // Reconnect paginator and sort after data is set
+        setTimeout(() => {
+          if (this.paginator) {
+            this.leaderboardDataSource.paginator = this.paginator;
+            this.paginator.firstPage();
+          }
+          if (this.sort) {
+            this.leaderboardDataSource.sort = this.sort;
+          }
+        });
       },
       error: (error) => {
         this.snackbarService.showError('Failed to load platform statistics');

@@ -240,7 +240,7 @@
               <ng-container matColumnDef="rank">
                 <th mat-header-cell *matHeaderCellDef>Rank</th>
                 <td mat-cell *matCellDef="let element; let i = index">
-                  {{ (paginator?.pageIndex || 0) * (paginator?.pageSize || 10) + i + 1 }}
+                  {{ ((paginator?.pageIndex ?? 0) * (paginator?.pageSize ?? 10)) + i + 1 }}
                 </td>
               </ng-container>
 
