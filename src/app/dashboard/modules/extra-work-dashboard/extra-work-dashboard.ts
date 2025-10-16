@@ -23,7 +23,7 @@ import { IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
 import { AddExtraWorkModal } from './components/add-extra-work-modal/add-extra-work-modal';
 import { ViewExtraWorkModal } from './components/view-extra-work-modal/view-extra-work-modal';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Subscription, take } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
