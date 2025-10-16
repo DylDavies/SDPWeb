@@ -38,7 +38,7 @@
                 <mat-divider></mat-divider>
                 
                 <div class="lists-container">
-                  <div class="list-wrapper">
+                    <div class="list-wrapper">
                     <h2>Subjects</h2>
                     <mat-list>
                         @for (subject of bundle.subjects; track subject._id || $index) {
@@ -48,21 +48,21 @@
                         </mat-list-item>
                         }
                     </mat-list>
-                  </div>
+                    </div>
 
-                  <div class="list-wrapper">
+                    <div class="list-wrapper">
                     <h2>Tutors</h2>
                     <mat-list>
-                      @for (tutor of tutors; track tutor._id || $index) {
+                        @for (tutor of tutors; track tutor._id || $index) {
                         <mat-list-item>
-                          <mat-icon matListItemIcon>supervisor_account</mat-icon>
-                          <div matListItemTitle>{{ tutor.displayName || 'Unknown Tutor' }}</div>
+                            <mat-icon matListItemIcon>supervisor_account</mat-icon>
+                            <div matListItemTitle>{{ tutor.displayName || 'Unknown Tutor' }}</div>
                         </mat-list-item>
-                      } @empty {
+                        } @empty {
                         <mat-list-item>No tutors assigned</mat-list-item>
-                      }
+                        }
                     </mat-list>
-                  </div>
+                    </div>
                 </div>
 
                 </mat-card-content>
@@ -81,19 +81,20 @@
             </mat-tab>
             <mat-tab label="Missions">
                 <div class = missions-dashboard-header>
-                  @if(canCreateMissions){
-                     <button mat-flat-button color="primary" (click)="openCreateDialog()">
-                      <mat-icon>add</mat-icon>
-                      Add New Mission
-                    </button>
+                    @if(canCreateMissions){
+                        <button mat-flat-button color="primary" (click)="openCreateDialog()">
+                        <mat-icon>add</mat-icon>
+                        Add New Mission
+                        </button>
 
-                  }
+                    }
 
                 </div>
-                  <app-missions-table [bundleId]="bundleId"></app-missions-table>
+                    <app-missions-table [bundleId]="bundleId"></app-missions-table>
             </mat-tab>
         </mat-tab-group>
        </mat-card>
     }
   }
 </div>
+

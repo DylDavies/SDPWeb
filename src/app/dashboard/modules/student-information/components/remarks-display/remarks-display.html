@@ -16,10 +16,16 @@
             <div class="remark-header" (click)="toggleRemark(remark._id)">
               <div class="header-left">
                 <mat-icon class="expand-icon">{{ isExpanded(remark._id) ? 'expand_more' : 'chevron_right' }}</mat-icon>
-                <mat-icon class="tutor-icon">person</mat-icon>
-                <span class="tutor-name">{{ getTutorName(remark) }}</span>
-                <mat-icon class="subject-icon">school</mat-icon>
-                <span class="subject-name">{{ getSubject(remark) }}</span>
+                <div class="header-main-info">
+                    <div class="info-row">
+                        <mat-icon class="tutor-icon">person</mat-icon>
+                        <span class="tutor-name">{{ getTutorName(remark) }}</span>
+                    </div>
+                    <div class="info-row subject-row">
+                        <mat-icon class="subject-icon">school</mat-icon>
+                        <span class="subject-name">{{ getSubject(remark) }}</span>
+                    </div>
+                </div>
               </div>
               <div class="header-right">
                 <mat-icon class="date-icon">event</mat-icon>
@@ -96,3 +102,4 @@
     }
   }
 </div>
+

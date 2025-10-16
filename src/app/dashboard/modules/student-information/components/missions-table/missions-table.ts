@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, inject, AfterViewInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +12,7 @@ import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interfa
 import { AuthService } from '../../../../../services/auth-service';
 import { MissionService } from '../../../../../services/missions-service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { EMissionStatus } from '../../../../../models/enums/mission-status.enum';
 import { MissionsModal } from '../missions-modal/missions-modal';
@@ -22,15 +22,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ViewMissionModal } from '../view-mission-modal/view-mission-modal';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatCardModule } from "@angular/material/card";
 
 @Component({
   selector: 'app-missions-table',
   standalone: true,
   imports: [
     CommonModule, MatTableModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTooltipModule, MatDialogModule, DatePipe,
-    MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule
-  ],
+    MatProgressSpinnerModule, MatTooltipModule, MatDialogModule, DatePipe, TitleCasePipe,
+    MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule,
+    MatCardModule
+],
   templateUrl: './missions-table.html',
   styleUrls: ['./missions-table.scss']
 })
@@ -40,9 +43,10 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
   private snackBarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
   private missionService = inject(MissionService);
+  private breakpointObserver = inject(BreakpointObserver);
 
   public dataSource = new MatTableDataSource<IMissions>();
-  public displayedColumns: string[] = ['tutor', 'createdAt', 'remuneration', 'hoursCompleted', 'dateCompleted'];
+  public displayedColumns: string[] = ['tutor', 'createdAt', 'remuneration', 'hoursCompleted', 'dateCompleted', 'status', 'viewPdf'];
   public canEditMissions = false;
   public canDeleteMissions = false;
   public isLoading = true;
@@ -54,11 +58,11 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
 
   constructor() {
     this.dataSource.sortingDataAccessor = (data: IMissions, sortHeaderId: string) => {
-       const tutor = data.tutor as IPopulatedUser;
-       const value = data[sortHeaderId as keyof IMissions];
+        const tutor = data.tutor as IPopulatedUser;
+        const value = data[sortHeaderId as keyof IMissions];
       switch (sortHeaderId) {
         case 'tutor':
-         
+          
           return tutor?.displayName?.toLowerCase() || '';
         case 'createdAt':
           return new Date(data.createdAt).getTime();
@@ -137,11 +141,21 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
   }
 
   viewMission(mission: IMissions): void {
-    this.dialog.open(ViewMissionModal, {
-      width: 'clamp(500px, 70vw, 800px)',
-      height: '85vh',
-      data: mission
-    });
+    this.breakpointObserver
+      .observe(Breakpoints.Handset)
+      .pipe(take(1))
+      .subscribe((result) => {
+        const isHandset = result.matches;
+        const dialogConfig = {
+          data: mission,
+          width: isHandset ? '100vw' : '80vw',
+          height: isHandset ? '100vh' : '80vh',
+          maxWidth: isHandset ? '100vw' : '1400px',
+          maxHeight: isHandset ? '100vh' : '90vh',
+          panelClass: isHandset ? 'mission-modal-fullscreen' : '',
+        };
+        this.dialog.open(ViewMissionModal, dialogConfig);
+      });
   }
 
   editMission(mission: IMissions): void {
@@ -183,3 +197,4 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
     return tutor?.displayName || 'N/A';
   }
 }
+

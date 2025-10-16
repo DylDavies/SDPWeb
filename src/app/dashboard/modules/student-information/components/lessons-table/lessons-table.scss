@@ -1,8 +1,12 @@
+:host {
+    display: block;
+    margin-top: 24px;
+}
+
 .lessons-table-container {
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 12px;
   overflow: hidden;
-  margin-top: 24px;
 
   .spinner-container {
     display: flex;
@@ -92,3 +96,61 @@
     }
   }
 }
+
+// --- MOBILE STYLES ---
+.mobile-view {
+    display: none; // Hidden by default
+}
+
+@media (max-width: 960px) {
+    .desktop-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .lesson-card {
+        cursor: pointer;
+        transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+        background-color: var(--mat-sys-surface-container-high); 
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    }
+
+    .card-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 14px;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid var(--mat-sys-outline-variant);
+        }
+    }
+
+    .detail-label {
+        color: var(--mat-sys-on-surface-variant);
+    }
+
+    .detail-value {
+        font-weight: 500;
+    }
+
+    mat-card-actions {
+        padding: 8px 16px;
+    }
+
+    .lessons-table-container .empty-state {
+        display: none; 
+    }
+}
+

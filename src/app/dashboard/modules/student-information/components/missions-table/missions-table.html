@@ -10,7 +10,8 @@
 
   @if (!isLoading) {
     @if (dataSource.data.length > 0) {
-      <div class="table-responsive-wrapper">
+      <!-- Desktop View -->
+      <div class="table-responsive-wrapper desktop-view">
         <table mat-table [dataSource]="dataSource" matSort>
 
           <ng-container matColumnDef="tutor">
@@ -38,6 +39,24 @@
             <td mat-cell *matCellDef="let mission"> {{ mission.dateCompleted | date:'mediumDate' }} </td>
           </ng-container>
 
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+            <td mat-cell *matCellDef="let mission">
+              <span class="status-badge" [ngClass]="'status-' + mission.status">
+                {{ mission.status | titlecase }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="viewPdf">
+            <th mat-header-cell *matHeaderCellDef> View PDF </th>
+            <td mat-cell *matCellDef="let mission">
+              <button mat-icon-button color="primary" (click)="viewMission(mission); $event.stopPropagation()" matTooltip="View Mission PDF">
+                <mat-icon>picture_as_pdf</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Actions </th>
             <td mat-cell *matCellDef="let mission">
@@ -57,18 +76,71 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row 
               *matRowDef="let row; columns: displayedColumns;"
-              (click)="viewMission(row)"
               class="mission-table-row">
           </tr>
         </table>
       </div>
       
+      <!-- Mobile View -->
+      <div class="mobile-view">
+        @if (dataSource.filteredData.length > 0) {
+          @for(mission of dataSource.filteredData; track mission._id) {
+            <mat-card class="mission-card">
+              <mat-card-header>
+                  <mat-card-title>{{ getTutorName(mission) }}</mat-card-title>
+                  <mat-card-subtitle>Created: {{ mission.createdAt | date:'mediumDate' }}</mat-card-subtitle>
+                  <span class="status-badge" [ngClass]="'status-' + mission.status">
+                    {{ mission.status | titlecase }}
+                  </span>
+              </mat-card-header>
+              <mat-card-content>
+                  <div class="card-item">
+                      <span class="label">Remuneration</span>
+                      <span class="value">R{{ mission.remuneration }}</span>
+                  </div>
+                  <div class="card-item">
+                      <span class="label">Hours Completed</span>
+                      <span class="value">{{ mission.hoursCompleted }}</span>
+                  </div>
+                   <div class="card-item">
+                      <span class="label">Deadline</span>
+                      <span class="value">{{ mission.dateCompleted | date:'mediumDate' }}</span>
+                  </div>
+              </mat-card-content>
+              <mat-card-actions align="end">
+                  <button mat-icon-button color="primary" (click)="viewMission(mission); $event.stopPropagation()" matTooltip="View Mission PDF">
+                    <mat-icon>picture_as_pdf</mat-icon>
+                  </button>
+                  @if (canEditMissions) {
+                    <button mat-icon-button color="primary" (click)="editMission(mission); $event.stopPropagation()" matTooltip="Edit Mission">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  }
+                  @if (canDeleteMissions) {
+                    <button mat-icon-button color="warn" (click)="deactivateMission(mission); $event.stopPropagation()" matTooltip="Deactivate Mission">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+              </mat-card-actions>
+            </mat-card>
+          }
+        } @else {
+          <div class="empty-state">
+            <mat-icon>search_off</mat-icon>
+            <h2>No Missions Match Filter</h2>
+            <p>Try a different search term.</p>
+          </div>
+        }
+      </div>
+      
       <mat-paginator 
+        class="desktop-view"
         [pageSizeOptions]="[5, 10, 25]" 
         showFirstLastButtons
         [pageSize]="5"
         aria-label="Select page of missions">
       </mat-paginator>
+
     } @else {
       <div class="empty-state">
         <mat-icon>assignment_late</mat-icon>
@@ -82,3 +154,4 @@
     </div>
   }
 </div>
+
