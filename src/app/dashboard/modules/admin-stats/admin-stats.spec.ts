@@ -1,16 +1,20 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError, Subject } from 'rxjs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { AdminStatsComponent } from './admin-stats';
-import { AdminStatsService } from '../../../services/admin-stats-service';
+import { AdminStatsService, PlatformStats } from '../../../services/admin-stats-service';
 import { SnackBarService } from '../../../services/snackbar-service';
 import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 
-const mockPlatformStats = {
+const mockPlatformStats: PlatformStats = {
   userStatistics: {
     totalUsers: 150,
     usersByType: {
@@ -67,29 +71,36 @@ describe('AdminStatsComponent', () => {
   let mockAdminStatsService: jasmine.SpyObj<AdminStatsService>;
   let mockSnackbarService: jasmine.SpyObj<SnackBarService>;
   let mockSocketService: jasmine.SpyObj<SocketService>;
+  let mockBreakpointObserver: jasmine.SpyObj<BreakpointObserver>;
   let statsUpdateSubject: Subject<any>;
 
   beforeEach(async () => {
-    // Create a fresh subject for each test
     statsUpdateSubject = new Subject<any>();
 
     mockAdminStatsService = jasmine.createSpyObj('AdminStatsService', ['getPlatformStats']);
     mockSnackbarService = jasmine.createSpyObj('SnackBarService', ['showError', 'showSuccess']);
     mockSocketService = jasmine.createSpyObj('SocketService', ['subscribe', 'unsubscribe', 'listen']);
+    mockBreakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
 
-    // Set default return values to prevent undefined errors
     mockAdminStatsService.getPlatformStats.and.returnValue(of(mockPlatformStats));
-    // Use callFake to ensure we always return the current subject's observable
     mockSocketService.listen.and.callFake(() => statsUpdateSubject.asObservable());
+    mockBreakpointObserver.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
 
     await TestBed.configureTestingModule({
-      imports: [AdminStatsComponent, NoopAnimationsModule],
+      imports: [
+        AdminStatsComponent,
+        NoopAnimationsModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTableModule
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AdminStatsService, useValue: mockAdminStatsService },
         { provide: SnackBarService, useValue: mockSnackbarService },
-        { provide: SocketService, useValue: mockSocketService }
+        { provide: SocketService, useValue: mockSocketService },
+        { provide: BreakpointObserver, useValue: mockBreakpointObserver }
       ],
     }).compileComponents();
 
@@ -98,14 +109,12 @@ describe('AdminStatsComponent', () => {
   });
 
   afterEach(() => {
-    // Complete the subject to prevent memory leaks, but do it in a try-catch
-    // in case any subscriptions are still active
     try {
       if (statsUpdateSubject && !statsUpdateSubject.closed) {
         statsUpdateSubject.complete();
       }
     } catch (e) {
-      // Ignore cleanup errors - this can happen if subscriptions have already unsubscribed
+      // Ignore cleanup errors
     }
   });
 
@@ -187,10 +196,8 @@ describe('AdminStatsComponent', () => {
 
       component.ngOnInit();
 
-      // Clear previous calls
       (component.loadStats as jasmine.Spy).calls.reset();
 
-      // Simulate socket update
       statsUpdateSubject.next({ change: {} });
 
       expect(component.loadStats).toHaveBeenCalled();
@@ -202,7 +209,6 @@ describe('AdminStatsComponent', () => {
 
       component.ngOnInit();
 
-      // Simulate socket error
       statsUpdateSubject.error(new Error('Socket error'));
 
       expect(console.error).toHaveBeenCalledWith('Error listening to platform stats updates:', jasmine.any(Error));
@@ -212,7 +218,6 @@ describe('AdminStatsComponent', () => {
   describe('getTutorStatusSegments', () => {
     beforeEach(() => {
       mockAdminStatsService.getPlatformStats.and.returnValue(of(mockPlatformStats));
-      // Set stats directly instead of calling loadStats to avoid async issues
       component.stats = mockPlatformStats;
     });
 
@@ -260,7 +265,6 @@ describe('AdminStatsComponent', () => {
   describe('getMaxSubjectCount', () => {
     beforeEach(() => {
       mockAdminStatsService.getPlatformStats.and.returnValue(of(mockPlatformStats));
-      // Set stats directly instead of calling loadStats to avoid async issues
       component.stats = mockPlatformStats;
     });
 
@@ -298,7 +302,6 @@ describe('AdminStatsComponent', () => {
   describe('getMaxNewUsers', () => {
     beforeEach(() => {
       mockAdminStatsService.getPlatformStats.and.returnValue(of(mockPlatformStats));
-      // Set stats directly instead of calling loadStats to avoid async issues
       component.stats = mockPlatformStats;
     });
 
@@ -315,34 +318,26 @@ describe('AdminStatsComponent', () => {
 
   describe('Data Display', () => {
     it('should display loading spinner when isLoading is true', () => {
-      // Spy on loadStats to prevent it from completing during ngOnInit
       spyOn(component, 'loadStats');
-
-      // Set loading state
       component.isLoading = true;
       component.stats = null;
-
-      // Trigger change detection (ngOnInit will be called but loadStats is spied)
       fixture.detectChanges();
-
       const spinner = fixture.nativeElement.querySelector('mat-spinner');
       expect(spinner).toBeTruthy();
     });
 
     it('should display stats when loaded', () => {
       mockAdminStatsService.getPlatformStats.and.returnValue(of(mockPlatformStats));
-      fixture.detectChanges(); // This calls ngOnInit
-      fixture.detectChanges(); // Update view after stats load
-
+      fixture.detectChanges();
+      fixture.detectChanges();
       const kpiCards = fixture.nativeElement.querySelectorAll('.kpi-card');
       expect(kpiCards.length).toBeGreaterThan(0);
     });
 
     it('should display leaderboard table', () => {
       mockAdminStatsService.getPlatformStats.and.returnValue(of(mockPlatformStats));
-      fixture.detectChanges(); // This calls ngOnInit
-      fixture.detectChanges(); // Update view after stats load
-
+      fixture.detectChanges();
+      fixture.detectChanges();
       const table = fixture.nativeElement.querySelector('.leaderboard-table');
       expect(table).toBeTruthy();
     });
