@@ -23,7 +23,7 @@ import { IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
 import { AddExtraWorkModal } from './components/add-extra-work-modal/add-extra-work-modal';
 import { ViewExtraWorkModal } from './components/view-extra-work-modal/view-extra-work-modal';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { IUser } from '../../../models/interfaces/IUser.interface';
 import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
@@ -102,7 +102,9 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.add(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
-        this.loadExtraWork();
+        if (user) {
+          this.loadExtraWork();
+        }
       })
     );
 
@@ -110,7 +112,9 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.add(
       this.socketService.listen(ESocketMessage.ExtraWorkUpdated).subscribe(() => {
         console.log('Received extra-work-updated event. Refreshing lists.');
-        this.loadExtraWork();
+        if (this.currentUser) {
+          this.loadExtraWork();
+        }
       })
     );
   }
@@ -155,10 +159,18 @@ export class ExtraWorkDashboard implements OnInit, AfterViewInit, OnDestroy {
                 this.isCommissionedLoading = false;
               }
             } else {
-              this.dataSource.data = workItems.filter(v => v.commissionerId !== userId);
+              // "My extra work" - show work where I am the creator (userId)
+              this.dataSource.data = workItems.filter(v => {
+                const creatorId = typeof v.userId === 'string' ? v.userId : (v.userId as IPopulatedUser)?._id;
+                return creatorId === userId;
+              });
               this.isLoading = false;
               if (this.canApprove) {
-                  this.commissionedDataSource.data = workItems.filter(v => v.userId !== userId);
+                  // "Commissioned work" - show work where I am the commissioner
+                  this.commissionedDataSource.data = workItems.filter(v => {
+                    const commissionerId = typeof v.commissionerId === 'string' ? v.commissionerId : (v.commissionerId as IPopulatedUser)?._id;
+                    return commissionerId === userId;
+                  });
                   this.isCommissionedLoading = false;
               }
             }
