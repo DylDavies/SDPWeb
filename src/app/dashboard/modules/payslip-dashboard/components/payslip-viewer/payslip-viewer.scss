@@ -288,78 +288,41 @@
     100% { opacity: 1; }
   }
 
-  // Column widths for earnings table (main table with Date, Description, Base Rate, Hours, Hourly Rate, Total, Actions)
   &:not(.description-amount-table) {
-    // When Actions column is shown (7 columns)
     &:has(th:nth-child(7)) {
-      th:nth-child(1), td:nth-child(1) { width: 10%; } // Date
-      th:nth-child(2), td:nth-child(2) { width: 25%; } // Description
-      th:nth-child(3), td:nth-child(3) { width: 13%; } // Base Rate
-      th:nth-child(4), td:nth-child(4) { width: 10%; } // Hours
-      th:nth-child(5), td:nth-child(5) { width: 13%; } // Hourly Rate
-      th:nth-child(6), td:nth-child(6) { width: 13%; } // Total
+      th:nth-child(1), td:nth-child(1) { width: 10%; }
+      th:nth-child(2), td:nth-child(2) { width: 25%; }
+      th:nth-child(3), td:nth-child(3) { width: 13%; }
+      th:nth-child(4), td:nth-child(4) { width: 10%; }
+      th:nth-child(5), td:nth-child(5) { width: 13%; }
+      th:nth-child(6), td:nth-child(6) { width: 13%; }
       th:nth-child(7), td:nth-child(7) {
         width: 16%;
         text-align: center;
-      } // Actions
+      }
     }
 
-    // When Actions column is hidden (6 columns)
     &:not(:has(th:nth-child(7))) {
-      th:nth-child(1), td:nth-child(1) { width: 12%; } // Date
-      th:nth-child(2), td:nth-child(2) { width: 30%; } // Description
-      th:nth-child(3), td:nth-child(3) { width: 15%; } // Base Rate
-      th:nth-child(4), td:nth-child(4) { width: 10%; } // Hours
-      th:nth-child(5), td:nth-child(5) { width: 15%; } // Hourly Rate
-      th:nth-child(6), td:nth-child(6) { width: 18%; } // Total
+      th:nth-child(1), td:nth-child(1) { width: 12%; }
+      th:nth-child(2), td:nth-child(2) { width: 30%; }
+      th:nth-child(3), td:nth-child(3) { width: 15%; }
+      th:nth-child(4), td:nth-child(4) { width: 10%; }
+      th:nth-child(5), td:nth-child(5) { width: 15%; }
+      th:nth-child(6), td:nth-child(6) { width: 18%; }
     }
   }
 
-  // Column widths for description/amount tables (misc earnings and deductions)
   &.description-amount-table {
-    // When Actions column is shown (3 columns)
     &:has(th:nth-child(3)) {
-      th:nth-child(1), td:nth-child(1) {
-        width: 45%;
-        min-width: 45%;
-        max-width: 45%;
-      } // Description
-      th:nth-child(2), td:nth-child(2) {
-        width: 30%;
-        min-width: 30%;
-        max-width: 30%;
-      } // Amount
-      th:nth-child(3), td:nth-child(3) {
-        width: 25%;
-        min-width: 25%;
-        max-width: 25%;
-        text-align: center;
-      } // Actions
+      th:nth-child(1), td:nth-child(1) { width: 45%; }
+      th:nth-child(2), td:nth-child(2) { width: 30%; }
+      th:nth-child(3), td:nth-child(3) { width: 25%; text-align: center; }
     }
 
-    // When Actions column is hidden (2 columns)
     &:not(:has(th:nth-child(3))) {
-      th:nth-child(1), td:nth-child(1) { width: 70%; } // Description
-      th:nth-child(2), td:nth-child(2) { width: 30%; } // Amount
+      th:nth-child(1), td:nth-child(1) { width: 70%; }
+      th:nth-child(2), td:nth-child(2) { width: 30%; }
     }
-
-    // Fallback for browsers that don't support :has()
-    th:nth-child(1), td:nth-child(1) {
-      width: 45%;
-      min-width: 45%;
-      max-width: 45%;
-    } // Description
-    th:nth-child(2), td:nth-child(2) {
-      width: 30%;
-      min-width: 30%;
-      max-width: 30%;
-    } // Amount
-    th:nth-child(3), td:nth-child(3) {
-      width: 25%;
-      min-width: 25%;
-      max-width: 25%;
-      text-align: center;
-    } // Actions
   }
 }
 
@@ -534,45 +497,7 @@
   margin-top: 30px;
   padding-top: 20px;
   border-top: 1px solid var(--mat-sys-outline-variant);
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .payslip-content {
-    flex-direction: column;
-  }
-
-  .right-column {
-    position: static;
-  }
-}
-
-@media (max-width: 768px) {
-  .info-section {
-    flex-direction: column;
-    gap: 20px;
-
-    .employee-info {
-      text-align: left;
-    }
-  }
-
-  .payslip-header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .payslip-table {
-    font-size: 10px;
-
-    th, td {
-      padding: 4px 6px;
-    }
-  }
-
-  .action-buttons {
-    flex-wrap: wrap;
-  }
+  flex-wrap: wrap;
 }
 
 /* Admin Controls Section */
@@ -620,24 +545,10 @@
       overflow-y: auto;
       overflow-x: hidden;
 
-      &::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: var(--mat-sys-surface-container-low);
-        border-radius: 3px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: var(--mat-sys-outline-variant);
-        border-radius: 3px;
-
-        &:hover {
-          background: var(--mat-sys-outline);
-        }
-      }
-
+      &::-webkit-scrollbar { width: 6px; }
+      &::-webkit-scrollbar-track { background: var(--mat-sys-surface-container-low); border-radius: 3px; }
+      &::-webkit-scrollbar-thumb { background: var(--mat-sys-outline-variant); border-radius: 3px; }
+      &::-webkit-scrollbar-thumb:hover { background: var(--mat-sys-outline); }
       &::before {
         content: '';
         position: absolute;
@@ -668,9 +579,6 @@
         .history-content {
           flex: 1;
           padding: 4px 8px;
-          background-color: transparent;
-          border-radius: 0;
-          border-left: none;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -696,11 +604,88 @@
             white-space: nowrap;
           }
         }
-
-        &:last-child {
-          margin-bottom: 0;
-        }
       }
     }
   }
 }
+
+// Mobile view styling
+.mobile-view { display: none; }
+
+.mobile-card {
+  margin-bottom: 16px;
+  background-color: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
+  transition: box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: var(--mat-sys-elevation-level2);
+  }
+  
+  mat-card-header {
+    padding-bottom: 8px;
+  }
+  mat-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--mat-sys-primary);
+  }
+  mat-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  mat-card-subtitle {
+    font-size: 0.9rem;
+  }
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    &:last-child {
+      border-bottom: none;
+    }
+    strong {
+      color: var(--mat-sys-on-surface-variant);
+    }
+    span.total {
+      font-weight: bold;
+      color: var(--mat-sys-primary);
+    }
+     span.total.deduction {
+      color: var(--mat-sys-error);
+    }
+  }
+
+  mat-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0px 8px 8px;
+  }
+}
+
+@media (max-width: 959px) {
+  .desktop-view { display: none; }
+  .mobile-view { display: block; }
+  
+  .payslip-content {
+    flex-direction: column;
+  }
+
+  .right-column {
+    position: static;
+    order: -1; 
+  }
+
+  .info-section, .payslip-header {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+
+    .employee-info, .header-right {
+      text-align: left;
+    }
+  }
+}
+
