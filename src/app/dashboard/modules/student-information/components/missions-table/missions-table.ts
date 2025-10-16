@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, inject, AfterViewInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,7 +28,7 @@ import { ViewMissionModal } from '../view-mission-modal/view-mission-modal';
   standalone: true,
   imports: [
     CommonModule, MatTableModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTooltipModule, MatDialogModule, DatePipe,
+    MatProgressSpinnerModule, MatTooltipModule, MatDialogModule, DatePipe, TitleCasePipe,
     MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule
   ],
   templateUrl: './missions-table.html',
@@ -42,7 +42,7 @@ export class MissionsTable implements OnInit, OnChanges, AfterViewInit, OnDestro
   private missionService = inject(MissionService);
 
   public dataSource = new MatTableDataSource<IMissions>();
-  public displayedColumns: string[] = ['tutor', 'createdAt', 'remuneration', 'hoursCompleted', 'dateCompleted'];
+  public displayedColumns: string[] = ['tutor', 'createdAt', 'remuneration', 'hoursCompleted', 'dateCompleted', 'status', 'viewPdf'];
   public canEditMissions = false;
   public canDeleteMissions = false;
   public isLoading = true;
