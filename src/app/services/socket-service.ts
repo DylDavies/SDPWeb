@@ -1,4 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -9,14 +10,19 @@ import { TOKEN_STORAGE_KEY } from './auth-service';
   providedIn: 'root'
 })
 export class SocketService implements OnDestroy {
-  private socket: Socket;
+  private socket: Socket | null = null;
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   constructor() {
+    // Only initialize socket in browser environment
+    if (!this.isBrowser) return;
+
     this.socket = io(environment.apiUrl.slice(0, -4), {
       reconnectionAttempts: 5,
       reconnectionDelay: 3000,
     });
-    
+
     this.socket.on('connect', () => {
       console.log("Socket.IO Connected");
     });
@@ -31,10 +37,12 @@ export class SocketService implements OnDestroy {
   }
 
   public connectionHook(cb: () => void) {
+    if (!this.socket) return;
     this.socket.on('connect', cb);
   }
 
   authenticate(token: string) {
+    if (!this.socket) return;
     this.socket.emit('authenticate', token);
   }
 
@@ -43,11 +51,13 @@ export class SocketService implements OnDestroy {
    * @param topic The name of the topic to subscribe to.
    */
   subscribe(topic: ESocketMessage) {
+    if (!this.socket) return;
     this.socket.emit('subscribe', {topic, token: this.getToken()});
   }
 
-  
+
   private getToken(): string | null {
+    if (!this.isBrowser) return null;
     return localStorage.getItem(TOKEN_STORAGE_KEY);
   }
 
@@ -56,6 +66,7 @@ export class SocketService implements OnDestroy {
    * @param topic The name of the topic to unsubscribe from.
    */
   unsubscribe(topic: ESocketMessage) {
+    if (!this.socket) return;
     this.socket.emit('unsubscribe', topic);
   }
 
@@ -66,6 +77,10 @@ export class SocketService implements OnDestroy {
    */
   listen<T>(eventName: ESocketMessage): Observable<T> {
     return new Observable((subscriber) => {
+      if (!this.socket) {
+        subscriber.complete();
+        return;
+      }
       this.socket.on(eventName, (data: T) => {
         subscriber.next(data);
       });

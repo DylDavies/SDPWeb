@@ -8,6 +8,7 @@ import { BadgeService } from '../../../../../services/badge-service';
 import { CreateEditBadgeDialogComponent } from '../create-edit-badge-dialog/create-edit-badge-dialog';
 import { BadgeCardComponent } from '../../../../../shared/components/badge-card/badge-card';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { TrackByUtils } from '../../../../../core/utils/trackby.utils';
 
 @Component({
   selector: 'app-badge-management',
@@ -22,7 +23,7 @@ export class BadgeManagement implements OnInit {
   private snackbarService = inject(SnackBarService);
 
   public badges: IBadge[] = [];
-
+  public trackById = TrackByUtils.trackBy_id;
 
   ngOnInit(): void {
     this.loadBadges();

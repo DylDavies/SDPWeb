@@ -3,7 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { of, throwError } from 'rxjs';
-import * as _ from 'lodash';
+import { cloneDeep, isEqual } from 'lodash-es';
 
 import { RemarkTemplateManagement } from './remark-template-management';
 import { RemarkService } from '../../../../../services/remark-service';

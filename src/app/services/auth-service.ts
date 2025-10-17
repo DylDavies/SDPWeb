@@ -1,4 +1,5 @@
-import { DOCUMENT, inject, Injectable } from '@angular/core';
+import { DOCUMENT, inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable, of, catchError, tap, shareReplay, startWith, pairwise } from 'rxjs';
 import { Router } from '@angular/router';
 import { IUser } from '../models/interfaces/IUser.interface';
@@ -23,6 +24,8 @@ export class AuthService {
   private router = inject(Router);
   private socketService = inject(SocketService);
   private sidebarService = inject(SidebarService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   private document = inject(DOCUMENT);
   private window = this.document.defaultView;
@@ -70,15 +73,18 @@ export class AuthService {
   }
 
   getToken(): string | null {
+    if (!this.isBrowser) return null;
     return localStorage.getItem(TOKEN_STORAGE_KEY);
   }
 
   saveToken(token: string): void {
+    if (!this.isBrowser) return;
     localStorage.setItem(TOKEN_STORAGE_KEY, token);
     this.verification$ = null; // Force re-verification on next check
   }
 
   removeToken(): void {
+    if (!this.isBrowser) return;
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     this.currentUserSubject.next(null);
     this.verification$ = null;

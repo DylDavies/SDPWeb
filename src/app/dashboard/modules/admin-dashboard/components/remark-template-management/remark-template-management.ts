@@ -11,6 +11,7 @@ import { RemarkService } from '../../../../../services/remark-service';
 import { IRemarkTemplate, IRemarkField, RemarkFieldType } from '../../../../../models/interfaces/IRemark.interface';
 import { MatSelectModule } from '@angular/material/select';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { TrackByUtils } from '../../../../../core/utils/trackby.utils';
 
 /**
  * OPTIMIZED VERSION: Replaced lodash with native methods
@@ -45,6 +46,8 @@ export class RemarkTemplateManagement implements OnInit {
   public newFieldType: RemarkFieldType = 'string';
   public fieldTypes: RemarkFieldType[] = ['string', 'boolean', 'number', 'time'];
   private initialFields: IRemarkField[] = [];
+  public trackByFieldName = TrackByUtils.trackByName;
+  public trackByIndex = TrackByUtils.trackByIndex;
 
   ngOnInit(): void {
     this.loadActiveTemplate();
