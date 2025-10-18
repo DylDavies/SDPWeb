@@ -1,0 +1,20 @@
+mat-dialog-content {
+  max-height: 60vh;
+  min-width: 400px;
+  padding-top: 16px;
+}
+
+.dialog-description {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+button[mat-flat-button],
+button[mat-stroked-button] {
+  min-width: 100px;
+}
+
+mat-progress-spinner {
+  margin: 0 auto;
+}

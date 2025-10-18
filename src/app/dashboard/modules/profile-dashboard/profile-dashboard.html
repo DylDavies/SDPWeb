@@ -68,7 +68,7 @@
                     <span class="detail-value">{{ user.email }}</span>
                   </div>
                 </div>
-                
+
                 <div class="detail-item editable">
                   <mat-icon class="detail-icon" color="primary">event_available</mat-icon>
                   <div class="detail-text">
@@ -90,6 +90,32 @@
                   <div class="detail-text">
                     <span class="detail-label">Member Since</span>
                     <span class="detail-value">{{ user.createdAt | date:'longDate' }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item editable address-item">
+                  <mat-icon class="detail-icon" color="primary">location_on</mat-icon>
+                  <div class="detail-text">
+                    <span class="detail-label">Address</span>
+                    <span class="detail-value">
+                      @if (user.address?.formattedAddress || user.address?.streetAddress) {
+                        @if (user.address?.formattedAddress) {
+                          {{ user.address?.formattedAddress }}
+                        } @else {
+                          {{ user.address?.streetAddress }}
+                          @if (user.address?.city) { , {{ user.address?.city }} }
+                          @if (user.address?.state) { , {{ user.address?.state }} }
+                          @if (user.address?.postalCode) {  {{ user.address?.postalCode }} }
+                        }
+                      } @else {
+                        <span class="detail-value-empty">Not set</span>
+                      }
+                    </span>
+                    @if (isOwnProfile) {
+                      <button mat-icon-button (click)="openEditAddressDialog()" class="edit-icon">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
                   </div>
                 </div>
               </div>

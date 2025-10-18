@@ -26,6 +26,7 @@ import { PayslipDashboard } from './dashboard/modules/payslip-dashboard/payslip-
 import { RateManagementComponent } from './dashboard/modules/rate-management/rate-management';
 import { ExtraWorkDashboard } from './dashboard/modules/extra-work-dashboard/extra-work-dashboard';
 import { AdminPayslipDashboard } from './dashboard/modules/admin-dashboard/components/admin-payslip-dashboard/admin-payslip-dashboard';
+import { TutorMatchmaking } from './dashboard/modules/tutor-matchmaking/tutor-matchmaking';
 
 export const routes: Routes = [
   { path: '', component: Landing, canActivate: [loginGuard] },
@@ -51,15 +52,20 @@ export const routes: Routes = [
       { path: 'users', component: UserManagement, canActivate: [permissionGuard([EPermission.USERS_VIEW])] },
       {path: 'students', component: StudentManagement},
       {path: 'student-info/:id',component: StudentInformationPage},
-      { 
-        path: 'bundles', 
+      {
+        path: 'bundles',
         component: BundleDashboard,
         canActivate: [permissionGuard([
           EPermission.BUNDLES_VIEW,
           EPermission.BUNDLES_CREATE,
           EPermission.BUNDLES_EDIT,
           EPermission.BUNDLES_DELETE
-        ], true)] 
+        ], true)]
+      },
+      {
+        path: 'tutor-matchmaking',
+        component: TutorMatchmaking,
+        canActivate: [permissionGuard([EPermission.TUTOR_MATCHMAKING_ACCESS])]
       },
       { path: 'badges', component: BadgeLibrary, canActivate: [permissionGuard([EPermission.BADGES_VIEW])] },
       {

@@ -82,7 +82,12 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  position: relative; 
+  position: relative;
+}
+
+// Make address span full width for more space
+.detail-item.address-item {
+  grid-column: 1 / -1;
 }
 
 // Style for the edit icon on hover
@@ -185,6 +190,12 @@
   align-items: center;
   font-size: 1rem;
   font-weight: 500;
+}
+
+.detail-value-empty {
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+  opacity: 0.7;
 }
 
 .ava-edit-icon {

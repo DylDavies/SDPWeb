@@ -1,0 +1,24 @@
+<h1 mat-dialog-title>Edit Your Address</h1>
+<mat-dialog-content>
+    <p class="dialog-description">Search for your address using Google Maps autocomplete</p>
+
+    <app-address-autocomplete
+        [initialAddress]="data.address"
+        [label]="'Your Address'"
+        [placeholder]="'Start typing your address...'"
+        (addressSelected)="onAddressSelected($event)">
+    </app-address-autocomplete>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="clearAddress()" [disabled]="isSaving || !selectedAddress">
+        Clear Address
+    </button>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-stroked-button color="primary" (click)="onSave()" [disabled]="isSaving">
+        @if (isSaving) {
+            <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+        } @else {
+            <span>Save Changes</span>
+        }
+    </button>
+</mat-dialog-actions>

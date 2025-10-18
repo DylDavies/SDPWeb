@@ -178,5 +178,84 @@ describe('MissionService', () => {
       req.flush(null); // DELETE requests often have no body in response
     });
   });
+
+  describe('findMissionByBundleAndTutor', () => {
+    it('should send a GET request to find mission by bundle and tutor', () => {
+      const bundleId = 'bundle1';
+      const tutorId = 'tutor1';
+
+      service.findMissionByBundleAndTutor(bundleId, tutorId).subscribe(mission => {
+        expect(mission).toEqual(mockMission);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/find/bundle/${bundleId}/tutor/${tutorId}`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockMission);
+    });
+
+    it('should return null when no mission found', () => {
+      const bundleId = 'bundle1';
+      const tutorId = 'tutor2';
+
+      service.findMissionByBundleAndTutor(bundleId, tutorId).subscribe(mission => {
+        expect(mission).toBeNull();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/find/bundle/${bundleId}/tutor/${tutorId}`);
+      req.flush(null);
+    });
+  });
+
+  describe('updateMissionHours', () => {
+    it('should send a PATCH request to update mission hours', () => {
+      const missionId = 'mission1';
+      const hoursToAdd = 3;
+
+      service.updateMissionHours(missionId, hoursToAdd).subscribe(mission => {
+        expect(mission).toEqual(mockMission);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/${missionId}/hours`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ hours: hoursToAdd });
+      req.flush(mockMission);
+    });
+
+    it('should log error message when update fails with 403', (done) => {
+      const missionId = 'mission1';
+      const hoursToAdd = 3;
+      const consoleErrorSpy = spyOn(console, 'error');
+
+      service.updateMissionHours(missionId, hoursToAdd).subscribe(
+        () => fail('should have failed'),
+        (error) => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith('Error updating mission hours:', error);
+          expect(consoleErrorSpy).toHaveBeenCalledWith('Permission denied. User may not have MISSIONS_EDIT permission.');
+          done();
+        }
+      );
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/${missionId}/hours`);
+      req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+    });
+
+    it('should log error message when update fails with non-403 error', (done) => {
+      const missionId = 'mission1';
+      const hoursToAdd = 3;
+      const consoleErrorSpy = spyOn(console, 'error');
+
+      service.updateMissionHours(missionId, hoursToAdd).subscribe(
+        () => fail('should have failed'),
+        (error) => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith('Error updating mission hours:', error);
+          expect(consoleErrorSpy).not.toHaveBeenCalledWith('Permission denied. User may not have MISSIONS_EDIT permission.');
+          done();
+        }
+      );
+
+      const req = httpMock.expectOne(`${apiUrl}/missions/${missionId}/hours`);
+      req.flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
+    });
+  });
 });
 

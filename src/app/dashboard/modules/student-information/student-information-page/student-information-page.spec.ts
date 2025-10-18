@@ -98,7 +98,7 @@ describe('StudentInformationPage', () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['hasPermission']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    eventServiceSpy = jasmine.createSpyObj('EventService', ['getEvents']);
+    eventServiceSpy = jasmine.createSpyObj('EventService', ['getEvents', 'getEventsByBundle']);
     missionServiceSpy = jasmine.createSpyObj('MissionService', [
       'findMissionByBundleAndTutor',
       'updateMissionHours',
@@ -131,6 +131,7 @@ describe('StudentInformationPage', () => {
     missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission])); // Mock for child component
     // Provide a mock for the services called within getTutorsFromBundle -> updateAllMissionHours
     eventServiceSpy.getEvents.and.returnValue(of([]));
+    eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
     createComponentWithParams({ id: 'bundle123' });
     fixture.detectChanges();
     expect(component).toBeTruthy();
@@ -142,6 +143,7 @@ describe('StudentInformationPage', () => {
       missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission]));
       authServiceSpy.hasPermission.and.returnValue(true);
       eventServiceSpy.getEvents.and.returnValue(of([])); // Prevent error from updateAllMissionHours
+      eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
       createComponentWithParams({ id: 'bundle123' });
 
       fixture.detectChanges(); // Triggers ngOnInit
@@ -193,6 +195,7 @@ describe('StudentInformationPage', () => {
         bundleServiceSpy.getBundleById.and.returnValue(of(mockBundle));
         missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission]));
         eventServiceSpy.getEvents.and.returnValue(of([]));
+        eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
         createComponentWithParams({ id: 'bundle123' });
         fixture.detectChanges();
     });
@@ -215,6 +218,7 @@ describe('StudentInformationPage', () => {
         bundleServiceSpy.getBundleById.and.returnValue(of(mockBundle));
         missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission]));
         eventServiceSpy.getEvents.and.returnValue(of([]));
+        eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
         createComponentWithParams({ id: 'bundle123' });
         fixture.detectChanges();
       });
