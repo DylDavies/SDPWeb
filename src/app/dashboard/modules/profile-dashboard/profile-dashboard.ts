@@ -11,6 +11,7 @@ import { DisplayNamePipe } from '../../../pipes/display-name-pipe-pipe';
 import { RoleChipRow } from '../../components/role-chip-row/role-chip-row';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProfileComponent } from '../../../shared/components/edit-profile-component/edit-profile-component';
+import { EditAddressDialog } from './components/edit-address-dialog/edit-address-dialog';
 import { LeaveModal } from "./components/leave-modal/leave-modal";
 import { ProficiencyManagement } from './components/proficiency-management/proficiency-management';
 import {MatTabsModule} from '@angular/material/tabs';
@@ -152,7 +153,7 @@ export class Profile implements OnInit, OnDestroy {
     dialogRef.afterClosed().pipe(filter(result => typeof result === 'number')).subscribe((newAvailability: number) => {
       this.userService.updateUserAvailability(this.user!._id, newAvailability).subscribe({
         next: (updatedUser) => {
-          this.snackbarService.showSuccess('Availability updated successfully!'); 
+          this.snackbarService.showSuccess('Availability updated successfully!');
           this.user = updatedUser;
           if (this.isOwnProfile) {
             this.authService.updateCurrentUserState(updatedUser);
@@ -162,6 +163,25 @@ export class Profile implements OnInit, OnDestroy {
           this.snackbarService.showError('Failed to update availability.');
         }
       });
+    });
+  }
+
+  openEditAddressDialog(): void {
+    if (!this.user) return;
+
+    const dialogRef = this.dialog.open(EditAddressDialog, {
+      width: 'clamp(400px, 90vw, 600px)',
+      data: this.user
+    });
+
+    dialogRef.afterClosed().subscribe(updatedUser => {
+      if (updatedUser) {
+        this.user = updatedUser;
+        if (this.isOwnProfile) {
+          this.authService.updateCurrentUserState(updatedUser);
+        }
+        this.refreshUserData();
+      }
     });
   }
 

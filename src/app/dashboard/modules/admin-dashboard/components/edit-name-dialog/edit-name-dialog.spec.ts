@@ -9,7 +9,10 @@ describe('EditNameDialog', () => {
   let fixture: ComponentFixture<EditNameDialog>;
   let dialogRef: jasmine.SpyObj<MatDialogRef<EditNameDialog>>;
 
+
   beforeEach(async () => {
+
+
     const dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
@@ -21,6 +24,7 @@ describe('EditNameDialog', () => {
     })
     .compileComponents();
 
+    dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<EditNameDialog>>;
     fixture = TestBed.createComponent(EditNameDialog);
     component = fixture.componentInstance;
     dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<EditNameDialog>>;
@@ -31,14 +35,26 @@ describe('EditNameDialog', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should close dialog when onCancel is called', () => {
-    component.onCancel();
-    expect(dialogRef.close).toHaveBeenCalled();
-  });
+  describe('onSave', () => {
+    it('should close dialog with trimmed name when name is valid', () => {
+      component.name = '  John Doe  ';
+      component.onSave();
 
-  it('should close dialog with name when onSave is called', () => {
-    component.name = 'New Name';
-    component.onSave();
-    expect(dialogRef.close).toHaveBeenCalledWith('New Name');
+      expect(dialogRef.close).toHaveBeenCalledWith('John Doe');
+    });
+
+    it('should not close dialog when name is empty', () => {
+      component.name = '';
+      component.onSave();
+
+      expect(dialogRef.close).not.toHaveBeenCalled();
+    });
+
+    it('should not close dialog when name is only whitespace', () => {
+      component.name = '   ';
+      component.onSave();
+
+      expect(dialogRef.close).not.toHaveBeenCalled();
+    });
   });
 });

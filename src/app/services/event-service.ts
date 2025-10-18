@@ -57,4 +57,13 @@ export class EventService {
   rateEvent(eventId: string, rating: number): Observable<IEvent> {
     return this.httpService.patch<IEvent>(`events/${eventId}/rate`, { rating });
   }
+
+  /**
+   * Retrieves all events for a specific bundle.
+   * @param {string} bundleId - The ID of the bundle.
+   * @returns {Observable<IEvent[]>} A list of events for the bundle.
+   */
+  getEventsByBundle(bundleId: string): Observable<IEvent[]> {
+    return this.httpService.get<IEvent[]>(`events/bundle/${bundleId}`);
+  }
 }

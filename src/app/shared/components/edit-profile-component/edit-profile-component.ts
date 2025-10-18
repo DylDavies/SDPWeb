@@ -47,7 +47,7 @@ export class EditProfileComponent {
 
     this.isSaving = true;
     const updatedData = { displayName: this.editForm.value.displayName! };
-    
+
     this.userService.updateProfile(updatedData).subscribe({
       next: (updatedUser) => {
         this.snackbarService.showSuccess('Profile updated successfully!');

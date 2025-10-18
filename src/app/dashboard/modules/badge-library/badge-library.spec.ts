@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of, take } from 'rxjs';
+import { of, skip } from 'rxjs';
 
 import { BadgeLibrary } from './badge-library';
 import { BadgeService } from '../../../services/badge-service';
@@ -15,35 +15,57 @@ describe('BadgeLibrary', () => {
   let badgeService: jasmine.SpyObj<BadgeService>;
   let authService: jasmine.SpyObj<AuthService>;
 
-  const mockBadges: IBadge[] = [
-    { _id: '1', name: 'Badge 1', description: 'Desc 1', image: '', TLA: 'B1', summary: 'Summary 1', permanent: true, bonus: 0 },
-    { _id: '2', name: 'Badge 2', description: 'Desc 2', image: '', TLA: 'B2', summary: 'Summary 2', permanent: true, bonus: 0 }
-  ];
+  const mockBadge1: IBadge = {
+    _id: 'badge1',
+    name: 'Test Badge 1',
+    image: 'test-image-1.png',
+    TLA: 'TB1',
+    summary: 'Test summary 1',
+    description: 'Test description 1',
+    permanent: true,
+    bonus: 10
+  };
+
+  const mockBadge2: IBadge = {
+    _id: 'badge2',
+    name: 'Test Badge 2',
+    image: 'test-image-2.png',
+    TLA: 'TB2',
+    summary: 'Test summary 2',
+    description: 'Test description 2',
+    permanent: true,
+    bonus: 20
+  };
 
   const mockUser: Partial<IUser> = {
     _id: 'user1',
+    displayName: 'Test User',
     badges: [
-      { badge: { _id: '1', name: 'Badge 1', description: '', image: '', TLA: 'B1', summary: '', permanent: true, bonus: 0 }, dateAdded: new Date().toISOString() }
+      { badge: mockBadge1, dateAdded: new Date().toISOString() }
     ]
   };
 
   beforeEach(async () => {
-    const badgeSpy = jasmine.createSpyObj('BadgeService', ['getBadges']);
-    const authSpy = jasmine.createSpyObj('AuthService', ['hasPermission'], { currentUser$: of(mockUser as IUser) });
-
-    badgeSpy.getBadges.and.returnValue(of(mockBadges));
-    authSpy.hasPermission.and.returnValue(true);
+    const badgeServiceSpy = jasmine.createSpyObj('BadgeService', ['getBadges']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['hasPermission'], {
+      currentUser$: of(mockUser)
+    });
+    authServiceSpy.hasPermission.and.returnValue(false);
 
     await TestBed.configureTestingModule({
       imports: [BadgeLibrary],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: BadgeService, useValue: badgeSpy },
-        { provide: AuthService, useValue: authSpy }
+        { provide: BadgeService, useValue: badgeServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy }
       ]
     })
     .compileComponents();
+
+    badgeService = TestBed.inject(BadgeService) as jasmine.SpyObj<BadgeService>;
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    badgeService.getBadges.and.returnValue(of([mockBadge1, mockBadge2]));
 
     fixture = TestBed.createComponent(BadgeLibrary);
     component = fixture.componentInstance;
@@ -56,12 +78,27 @@ describe('BadgeLibrary', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with all badges observable', () => {
-    expect(component.allBadges$).toBeDefined();
-    expect(component.filteredBadges$).toBeDefined();
-  });
+  describe('Badge Filtering', () => {
+    it('should show all badges when filter is set to "all"', (done) => {
+      component.filterCtrl.setValue('all');
 
-  it('should have filterCtrl initialized with default value', () => {
-    expect(component.filterCtrl).toBeDefined();
+      component.filteredBadges$.subscribe(badges => {
+        expect(badges.length).toBe(2);
+        expect(badges).toContain(mockBadge1);
+        expect(badges).toContain(mockBadge2);
+        done();
+      });
+    });
+
+    it('should show only user badges when filter is set to "my"', (done) => {
+      component.filteredBadges$.pipe(skip(1)).subscribe(badges => {
+        expect(badges.length).toBe(1);
+        expect(badges).toContain(mockBadge1);
+        expect(badges).not.toContain(mockBadge2);
+        done();
+      });
+
+      component.filterCtrl.setValue('my');
+    });
   });
 });

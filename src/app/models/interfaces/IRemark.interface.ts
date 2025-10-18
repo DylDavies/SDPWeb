@@ -1,4 +1,7 @@
-export type RemarkFieldType = 'string' | 'boolean' | 'number' | 'time';
+import { IDocument } from './IDocument.interface';
+
+export type RemarkFieldType = 'string' | 'boolean' | 'number' | 'time' | 'pdf' | 'image' | 'audio';
+
 
 export interface IRemarkField {
     name: string;
@@ -12,7 +15,7 @@ export interface IRemark {
     remarkedAt: Date;
     entries: {
         field: string;
-        value: string | number | boolean;
+        value: string | number | boolean | Date | IDocument | null;
     }[];
 }
 
@@ -22,4 +25,6 @@ export interface IRemarkTemplate {
     fields: IRemarkField[];
     isActive: boolean;
 }
+
+export type { IDocument };
 

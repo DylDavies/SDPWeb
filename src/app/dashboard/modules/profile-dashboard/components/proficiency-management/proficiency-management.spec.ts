@@ -115,6 +115,31 @@ describe('ProficiencyManagement', () => {
         expect(component.selectedUserSyllabus).toBeNull();
     }));
 
+    it('should handle initialization with undefined user proficiencies', fakeAsync(() => {
+        const userWithoutProficiencies = { ...mockUser, proficiencies: undefined };
+        authServiceSpy.currentUser$.next(userWithoutProficiencies);
+        fixture.detectChanges();
+        tick();
+        expect(component.userProficiencies.length).toBe(0);
+    }));
+
+    it('should handle initialization when proficiencies array is empty', fakeAsync(() => {
+        proficiencyServiceSpy.fetchAllProficiencies.and.returnValue(of([]));
+        authServiceSpy.currentUser$.next(mockUser);
+        fixture.detectChanges();
+        tick();
+        expect(component.proficiencies.length).toBe(0);
+        expect(component.selectedSyllabus).toBeNull();
+    }));
+
+    it('should use existing selectedSyllabus if already set', fakeAsync(() => {
+        component.selectedSyllabus = 'Cambridge';
+        authServiceSpy.currentUser$.next(mockUser);
+        fixture.detectChanges();
+        tick();
+        expect(component.selectedSyllabus).toBe('Cambridge');
+    }));
+
      it('should handle errors during initialization', () => {
         const consoleErrorSpy = spyOn(console, 'error');
         authServiceSpy.currentUser$.next(mockUser);
@@ -182,6 +207,22 @@ describe('ProficiencyManagement', () => {
         expect(matDialogSpy.open).not.toHaveBeenCalled();
     });
 
+    it('should show error and not call dialog if user is null', () => {
+        component.user = null;
+        component.deleteSubject('Cambridge', mockSubjectMath);
+        expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('Cannot delete subject without a valid ID.');
+        expect(matDialogSpy.open).not.toHaveBeenCalled();
+    });
+
+    it('should handle deleteSubject when selectedUserSyllabus is null', fakeAsync(() => {
+        component.selectedUserSyllabus = null;
+        matDialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
+        component.deleteSubject('Cambridge', mockSubjectMath);
+        tick();
+        // Should not throw and should still delete
+        expect(userServiceSpy.deleteSubjectFromProficiency).toHaveBeenCalled();
+    }));
+
     it('should return an empty string for grades if grades property is missing', () => {
         expect(component.getGradeNames(mockSubjectMusic)).toBe('');
     });
@@ -243,6 +284,71 @@ describe('ProficiencyManagement', () => {
         // @ts-expect-error - Accessing private method for test
         component.clearInput(false);
         expect(component.subjectInput.nativeElement.focus).not.toHaveBeenCalled();
+    });
+
+    it('should not add subject to selection if selectedSyllabus is null', () => {
+        component.selectedSyllabus = null;
+        component.selectedSubjects = [];
+        // @ts-expect-error - Accessing private method for test
+        component.addSubjectToSelection('Physics');
+        expect(component.selectedSubjects.length).toBe(0);
+    });
+
+    it('should not update available grades if selectedSyllabus is null', () => {
+        component.selectedSyllabus = null;
+        // @ts-expect-error - Accessing private method for test
+        component.updateAvailableGrades('Physics');
+        expect(component.availableGrades.length).toBe(0);
+    });
+
+    it('should not update available grades if syllabus is not found', () => {
+        component.selectedSyllabus = 'NonExistent';
+        // @ts-expect-error - Accessing private method for test
+        component.updateAvailableGrades('Physics');
+        expect(component.availableGrades.length).toBe(0);
+    });
+
+    it('should not add subject with grades if selectedSyllabus is null', () => {
+        component.selectedSyllabus = null;
+        component.selectedSubject = 'Physics';
+        component.syllabusSelections = {};
+        component.addSubjectWithGrades();
+        expect(component.syllabusSelections).toEqual({});
+    });
+
+    it('should not add subject with grades if selectedSubject is null', () => {
+        component.selectedSyllabus = 'Cambridge';
+        component.selectedSubject = null;
+        component.addSubjectWithGrades();
+        // Should not throw and syllabusSelections should not have undefined keys
+        expect(Object.keys(component.syllabusSelections['Cambridge'] || {}).includes('undefined')).toBe(false);
+    });
+
+    it('should not remove subject if selectedSyllabus is null', () => {
+        component.selectedSyllabus = null;
+        component.selectedSubjects = [];
+        component.syllabusSelections = {};
+        component.removeSubject('Physics');
+        // Should not throw
+        expect(component.selectedSubjects.length).toBe(0);
+    });
+
+    it('should remove a subject that IS the currently selected subject', () => {
+        component.onSyllabusSelect('Cambridge');
+        component.onAutocompleteSelected({ option: { value: 'Physics' } } as MatAutocompleteSelectedEvent);
+        expect(component.selectedSubject).toBe('Physics');
+
+        component.removeSubject('Physics');
+        expect(component.selectedSubjects).not.toContain('Physics');
+        expect(component.selectedSubject).toBeNull();
+        expect(component.selectedGrades).toEqual([]);
+    });
+
+    it('should handle onSyllabusSelect when syllabusSelections already exists for the name', () => {
+        component.syllabusSelections['Cambridge'] = { Mathematics: ['10'] };
+        component.onSyllabusSelect('Cambridge');
+        expect(component.syllabusSelections['Cambridge']).toBeDefined();
+        expect(component.selectedSubjects).toContain('Mathematics');
     });
   });
 

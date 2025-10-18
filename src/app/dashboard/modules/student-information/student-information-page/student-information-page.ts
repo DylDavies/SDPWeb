@@ -12,6 +12,8 @@ import { IBundle, IPopulatedUser } from '../../../../models/interfaces/IBundle.i
 import { MatTabsModule } from "@angular/material/tabs";
 import { MissionsModal } from '../components/missions-modal/missions-modal';
 import { MissionsTable } from '../components/missions-table/missions-table';
+import { LessonsTable } from '../components/lessons-table/lessons-table';
+import { RemarksDisplay } from '../components/remarks-display/remarks-display';
 import { MatDialog } from '@angular/material/dialog';
 import { IUser } from '../../../../models/interfaces/IUser.interface';
 import { EPermission } from '../../../../models/enums/permission.enum';
@@ -27,7 +29,7 @@ import { EMissionStatus } from '../../../../models/enums/mission-status.enum';
   selector: 'app-student-information-page',
   standalone: true,
   imports: [CommonModule, DatePipe, TitleCasePipe, MatCardModule, MatProgressSpinnerModule,
-    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsTable],
+    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsTable, LessonsTable, RemarksDisplay],
   templateUrl: './student-information-page.html',
   styleUrl: './student-information-page.scss'
 })
@@ -44,6 +46,7 @@ export class StudentInformationPage implements OnInit {
   public isLoading = true;
   public bundleNotFound = false;
   public bundleId: string | null = null;
+  public studentId: string | null = null;
   public canCreateMissions = false;
   public isUpdatingMissions = false;
 
@@ -64,6 +67,7 @@ export class StudentInformationPage implements OnInit {
       next: (bundle) => {
         if (bundle) {
           this.bundle = bundle;
+          this.studentId = typeof bundle.student === 'object' ? bundle.student._id : bundle.student;
           this.getTutorsFromBundle();
         } else {
           this.bundleNotFound = true;

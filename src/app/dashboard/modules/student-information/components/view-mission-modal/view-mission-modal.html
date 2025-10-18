@@ -1,30 +1,29 @@
 <div class="dialog-header">
   <h1 mat-dialog-title>{{ pdfFilename }}</h1>
   <div class="header-actions">
-    <button  mat-icon-button (click)="close()" matTooltip="Close" class="close-button">
-      <mat-icon >close</mat-icon>
+    <button mat-icon-button (click)="close()" matTooltip="Close" class="close-button">
+      <mat-icon>close</mat-icon>
     </button>
   </div>
 </div>
 <mat-dialog-content>
   @if(isLoading) {
     <div class="message-container">
-        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-        <p>Loading document...</p>
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      <p>Loading document...</p>
     </div>
   } @else {
     @if(pdfUrl) {
-        <iframe 
-            [src]="pdfUrl" 
-            width="100%" 
-            height="600px" 
-            style="border: none;"
-        ></iframe>
+      <iframe 
+          [src]="pdfUrl" 
+          style="border: none;"
+      ></iframe>
     } @else {
-        <div class="message-container error">
-            <mat-icon>error_outline</mat-icon>
-            <p>Could not load PDF.</p>
-        </div>
+      <div class="message-container error">
+        <mat-icon>error_outline</mat-icon>
+        <p>Could not load PDF.</p>
+      </div>
     }
   }
 </mat-dialog-content>
+

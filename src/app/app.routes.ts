@@ -5,11 +5,8 @@ import { profileCompletionGuard } from './guards/profile-completion-guard';
 import { permissionGuard } from './guards/permission-guard';
 import { EPermission } from './models/enums/permission.enum';
 import { accountStatusGuard } from './guards/account-status-guard';
+import { TutorMatchmaking } from './dashboard/modules/tutor-matchmaking/tutor-matchmaking';
 
-/**
- * Optimized routes with lazy loading for all major modules
- * This significantly reduces the initial bundle size
- */
 export const routes: Routes = [
   {
     path: '',
@@ -85,6 +82,11 @@ export const routes: Routes = [
           EPermission.BUNDLES_EDIT,
           EPermission.BUNDLES_DELETE
         ], true)]
+      },
+      {
+        path: 'tutor-matchmaking',
+        component: TutorMatchmaking,
+        canActivate: [permissionGuard([EPermission.TUTOR_MATCHMAKING_ACCESS])]
       },
       {
         path: 'badges',
