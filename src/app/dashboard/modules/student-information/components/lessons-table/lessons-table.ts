@@ -15,6 +15,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RemarkModal } from '../../../client-dashboard/components/remark-modal/remark-modal';
+import { MatCardModule } from "@angular/material/card";
 
 @Component({
   selector: 'app-lessons-table',
@@ -22,8 +23,9 @@ import { RemarkModal } from '../../../client-dashboard/components/remark-modal/r
   imports: [
     CommonModule, MatTableModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatTooltipModule, DatePipe,
-    MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule
-  ],
+    MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule,
+    MatCardModule
+],
   templateUrl: './lessons-table.html',
   styleUrls: ['./lessons-table.scss']
 })
