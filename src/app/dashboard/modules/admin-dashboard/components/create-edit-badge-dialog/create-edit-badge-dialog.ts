@@ -62,7 +62,7 @@ export class CreateEditBadgeDialogComponent implements OnInit {
     });
 
     if (!this.isEditMode) {
-      this.badgeForm.addControl('requirements', this.fb.control(''));
+      this.badgeForm.addControl('requirements', this.fb.control('', Validators.required));
     }
 
     // Duration on appears when is permanent is false

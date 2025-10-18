@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,6 +11,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Subscription } from 'rxjs';
 
 import { BundleService } from '../../../../../services/bundle-service';
 import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
@@ -41,15 +42,17 @@ import { SnackBarService } from '../../../../../services/snackbar-service';
   templateUrl: './students-table.html',
   styleUrls: ['./students-table.scss']
 })
-export class StudentsTable implements OnInit, AfterViewInit {
+export class StudentsTable implements OnInit, OnDestroy, AfterViewInit {
   private bundleService = inject(BundleService);
   private snackbarService = inject(SnackBarService);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   public isLoading = true;
   public EBundleStatus = EBundleStatus;
   private currentUser: IUser | null = null;
+  private subscription = new Subscription();
 
   displayedColumns: string[] = ['student', 'createdBy', 'totalHours'];
   dataSource = new MatTableDataSource<IBundle>([]);
@@ -91,10 +94,13 @@ export class StudentsTable implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-      this.loadBundles();
-    });
+    this.subscription.add(
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+        this.loadBundles();
+        this.cdr.detectChanges();
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -109,33 +115,37 @@ export class StudentsTable implements OnInit, AfterViewInit {
     }
 
     this.isLoading = true;
-    this.bundleService.getBundles().subscribe({
-      next: bundles => {
-        let filteredBundles = bundles.filter(b => b.isActive);
+    this.subscription.add(
+      this.bundleService.getBundles().subscribe({
+        next: bundles => {
+          let filteredBundles = bundles.filter(b => b.isActive);
 
-        if (this.currentUser?.type === EUserType.Staff) {
-          filteredBundles = filteredBundles.filter(bundle =>
-            bundle.subjects.some(subject => {
-              const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
-              return tutorId === this.currentUser?._id;
-            })
-          );
+          if (this.currentUser?.type === EUserType.Staff) {
+            filteredBundles = filteredBundles.filter(bundle =>
+              bundle.subjects.some(subject => {
+                const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
+                return tutorId === this.currentUser?._id;
+              })
+            );
+          }
+
+          this.dataSource.data = filteredBundles;
+
+          setTimeout(() => {
+            this.dataSource.paginator = this.paginator;
+            this.dataSource.sort = this.sort;
+          });
+
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: err => {
+          this.snackbarService.showError(err.error?.message || 'Failed to load bundles.');
+          this.isLoading = false;
+          this.cdr.detectChanges();
         }
-
-        this.dataSource.data = filteredBundles;
-        
-        setTimeout(() => {
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        });
-        
-        this.isLoading = false;
-      },
-      error: err => {
-        this.snackbarService.showError(err.error?.message || 'Failed to load bundles.');
-        this.isLoading = false;
-      }
-    });
+      })
+    );
   }
 
   applyFilter(event: Event) {
@@ -166,5 +176,9 @@ export class StudentsTable implements OnInit, AfterViewInit {
           return (bundle.createdBy as IPopulatedUser).displayName || 'N/A';
       }
       return 'N/A';
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

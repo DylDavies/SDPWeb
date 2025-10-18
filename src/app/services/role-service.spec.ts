@@ -33,7 +33,9 @@ describe('RoleService', () => {
 
   beforeEach(() => {
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch', 'delete']);
-    const socketSpy = jasmine.createSpyObj('SocketService', ['listen']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'isSocketConnected', 'connectionHook']);
+    socketSpy.isSocketConnected.and.returnValue(true);
+    socketSpy.connectionHook.and.callFake((cb: () => void) => cb());
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
 
     // IMPORTANT: Set up httpSpy.get BEFORE injecting the service

@@ -62,6 +62,9 @@
         <mat-label>Requirements</mat-label>
         <textarea matInput formControlName="requirements" rows="6"
                   placeholder="Describe how to earn this badge. You can use Markdown."></textarea>
+        @if (badgeForm.get('requirements')?.hasError('required')) {
+          <mat-error>Requirements are required.</mat-error>
+        }
       </mat-form-field>
     }
 
