@@ -145,7 +145,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 JWT_SECRET=generate_a_long_random_and_secure_string_for_this
 
 # Application URLs
-FRONTEND_URL=http://localhost:4200
+FRONTEND_URL=http://your-domain-name.com
 EXTERNAL_API_BASE_URL=https://your-external-api-url.com/api/external
 
 # Debugging
