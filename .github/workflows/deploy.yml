@@ -60,9 +60,4 @@ jobs:
             cd /var/www/angular
             npm ci --omit=dev
 
-            # Restart the Node.js SSR server (assuming PM2 or systemd)
-            # Option 1: Using PM2
-            pm2 restart tutorcore-ssr || pm2 start server/server.mjs --name tutorcore-ssr
-
-            # Option 2: Using systemd (uncomment if using systemd)
-            # sudo systemctl restart tutorcore-ssr
+            sudo systemctl restart tutorcore-ssr.service
