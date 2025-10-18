@@ -62,7 +62,12 @@ export class Profile implements OnInit {
         
         if (idToFetch) {
           this.isOwnProfile = !userIdFromRoute || userIdFromRoute === currentUser?._id;
-          this.fetchUserById(idToFetch);
+          if (!this.isOwnProfile) this.fetchUserById(idToFetch);
+          else {
+            this.user = currentUser;
+            this.userNotFound = false;
+            this.isLoading = false;
+          }
         } else {
           // This handles the case where there is no route ID and the currentUser$ is initially null
           this.isLoading = false;
@@ -92,6 +97,7 @@ export class Profile implements OnInit {
   }
 
   refreshUserData(): void {
+    console.log("refreshing")
     this.userService.fetchAllUsers().subscribe();
   }
 
