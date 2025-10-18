@@ -1,5 +1,6 @@
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, tap, map } from 'rxjs'; 
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { BehaviorSubject, Observable, of, tap, map } from 'rxjs';
 import { HttpService } from './http-service';
 import IBadge from '../models/interfaces/IBadge.interface';
 import { IBadgeRequirement } from '../models/interfaces/IBadgeRequirement.interface';
@@ -14,24 +15,54 @@ export class BadgeService {
   private httpService = inject(HttpService);
   private socketService = inject(SocketService);
   private observableService = inject(CustomObservableService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   private badges$ = new BehaviorSubject<IBadge[]>([]);
   public allBadges$: Observable<IBadge[]>;
+  private socketListenerSetup = false;
 
   /**
    * Initializes the service, sets up WebSocket listeners, and creates the public observable.
    */
   constructor(){
-    this.socketService.listen<unknown>(ESocketMessage.BadgesUpdated).subscribe(() =>{
-      console.log('Received badges-updated event. Refreshing badge list.');
-      this.getBadges().subscribe();
-    });
-
     this.allBadges$ = this.observableService.createManagedTopicObservable(
       ESocketMessage.BadgesUpdated,
       this.badges$.asObservable(),
       () => this.getBadges()
     );
+
+    // Setup socket listener when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListener();
+    }
+  }
+
+  /**
+   * Sets up the socket listener for badge updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListener() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen<unknown>(ESocketMessage.BadgesUpdated).subscribe(() => {
+        console.log('Received badges-updated event. Refreshing badge list.');
+        this.getBadges().subscribe();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listener
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen<unknown>(ESocketMessage.BadgesUpdated).subscribe(() => {
+            console.log('Received badges-updated event. Refreshing badge list.');
+            this.getBadges().subscribe();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
     /**

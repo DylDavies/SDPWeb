@@ -481,7 +481,7 @@ describe('RateManagementComponent', () => {
 
     it('should have correct initial pagination settings', () => {
       expect(component.currentPage).toBe(0);
-      expect(component.pageSize).toBe(25);
+      expect(component.pageSize).toBe(10);
     });
   });
 

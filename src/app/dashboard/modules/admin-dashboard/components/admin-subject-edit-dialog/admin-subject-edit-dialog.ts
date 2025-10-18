@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -27,7 +27,8 @@ import { SnackBarService } from '../../../../../services/snackbar-service';
     MatIconModule
   ],
   templateUrl: './admin-subject-edit-dialog.html',
-  styleUrls: ['./admin-subject-edit-dialog.scss']
+  styleUrls: ['./admin-subject-edit-dialog.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminSubjectEditDialog {
   private fb = inject(FormBuilder);

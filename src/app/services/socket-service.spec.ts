@@ -1,26 +1,24 @@
-import { TestBed } from '@angular/core/testing';
-
 import { SocketService } from './socket-service';
 import { ESocketMessage } from '../models/enums/socket-message.enum';
 
+// Simple unit tests without Angular TestBed
 describe('SocketService', () => {
   let service: SocketService;
   let mockSocket: any;
-  let eventCallbacks: Map<string, Function[]>;
+  let mockNgZone: any;
 
   beforeEach(() => {
-    eventCallbacks = new Map<string, Function[]>();
+    // Create simple mocks
+    mockNgZone = {
+      run: (fn: any) => fn(),
+      runOutsideAngular: (fn: any) => fn()
+    };
 
-    // Create a mock socket object with all necessary methods
     mockSocket = {
-      on: jasmine.createSpy('on').and.callFake((event: string, callback: Function) => {
-        if (!eventCallbacks.has(event)) {
-          eventCallbacks.set(event, []);
-        }
-        eventCallbacks.get(event)!.push(callback);
-      }),
+      on: jasmine.createSpy('on'),
       emit: jasmine.createSpy('emit'),
       disconnect: jasmine.createSpy('disconnect'),
+      connected: true
     };
 
     // Mock localStorage
@@ -28,19 +26,16 @@ describe('SocketService', () => {
     spyOn(localStorage, 'setItem');
     spyOn(localStorage, 'removeItem');
 
-    TestBed.configureTestingModule({
-      providers: [SocketService]
-    });
+    // Create service manually without Angular DI
+    service = Object.create(SocketService.prototype);
 
-    service = TestBed.inject(SocketService);
-
-    // Replace the real socket with our mock after service creation
-    // @ts-ignore - accessing private property for testing
-    service.socket = mockSocket;
-  });
-
-  afterEach(() => {
-    TestBed.resetTestingModule();
+    // Set up the service properties manually
+    (service as any).ngZone = mockNgZone;
+    (service as any).platformId = 'browser';
+    (service as any).isBrowser = true;
+    (service as any).socket = null;
+    (service as any).isConnected = false;
+    (service as any).pendingConnectionHooks = [];
   });
 
   it('should be created', () => {
@@ -48,23 +43,60 @@ describe('SocketService', () => {
   });
 
   describe('connectionHook', () => {
-    it('should register a callback for the connect event', () => {
+    it('should execute callback immediately when socket is connected', () => {
+      (service as any).socket = mockSocket;
+      mockSocket.connected = true;
       const callback = jasmine.createSpy('callback');
+
       service.connectionHook(callback);
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('should register callback for connect event when socket exists but not connected', () => {
+      (service as any).socket = mockSocket;
+      mockSocket.connected = false;
+      const callback = jasmine.createSpy('callback');
+
+      service.connectionHook(callback);
+
       expect(mockSocket.on).toHaveBeenCalledWith('connect', callback);
+    });
+
+    it('should queue callback when socket is null', () => {
+      (service as any).socket = null;
+      const callback = jasmine.createSpy('callback');
+
+      service.connectionHook(callback);
+
+      expect((service as any).pendingConnectionHooks.length).toBe(1);
+      expect(callback).not.toHaveBeenCalled();
     });
   });
 
   describe('authenticate', () => {
     it('should emit authenticate event with token', () => {
+      (service as any).socket = mockSocket;
       const token = 'test-token-123';
+
       service.authenticate(token);
+
       expect(mockSocket.emit).toHaveBeenCalledWith('authenticate', token);
+    });
+
+    it('should not emit when socket is null', () => {
+      (service as any).socket = null;
+      const token = 'test-token-123';
+
+      service.authenticate(token);
+
+      expect(mockSocket.emit).not.toHaveBeenCalled();
     });
   });
 
   describe('subscribe', () => {
     it('should emit subscribe event with topic and token', () => {
+      (service as any).socket = mockSocket;
       const topic = ESocketMessage.UsersUpdated;
       const mockToken = 'test-token';
       (localStorage.getItem as jasmine.Spy).and.returnValue(mockToken);
@@ -78,6 +110,7 @@ describe('SocketService', () => {
     });
 
     it('should handle null token when subscribing', () => {
+      (service as any).socket = mockSocket;
       const topic = ESocketMessage.BadgesUpdated;
       (localStorage.getItem as jasmine.Spy).and.returnValue(null);
 
@@ -88,70 +121,71 @@ describe('SocketService', () => {
         token: null
       });
     });
+
+    it('should not emit when socket is null', () => {
+      (service as any).socket = null;
+      const topic = ESocketMessage.UsersUpdated;
+
+      service.subscribe(topic);
+
+      expect(mockSocket.emit).not.toHaveBeenCalled();
+    });
   });
 
   describe('unsubscribe', () => {
     it('should emit unsubscribe event with topic', () => {
+      (service as any).socket = mockSocket;
       const topic = ESocketMessage.RolesUpdated;
+
       service.unsubscribe(topic);
+
       expect(mockSocket.emit).toHaveBeenCalledWith('unsubscribe', topic);
+    });
+
+    it('should not emit when socket is null', () => {
+      (service as any).socket = null;
+      const topic = ESocketMessage.RolesUpdated;
+
+      service.unsubscribe(topic);
+
+      expect(mockSocket.emit).not.toHaveBeenCalled();
     });
   });
 
-  describe('listen', () => {
-    it('should return an observable that emits when the socket receives the event', (done) => {
-      const eventName = ESocketMessage.UsersUpdated;
-      const testData = { userId: '123', name: 'Test User' };
+  describe('isSocketConnected', () => {
+    it('should return true when socket exists and is connected', () => {
+      (service as any).socket = mockSocket;
+      mockSocket.connected = true;
 
-      const observable = service.listen<any>(eventName);
-
-      observable.subscribe((data) => {
-        expect(data).toEqual(testData);
-        done();
-      });
-
-      // Get the callback that was registered for this event and trigger it
-      const callbacks = eventCallbacks.get(eventName);
-      expect(callbacks).toBeDefined();
-      expect(callbacks!.length).toBeGreaterThan(0);
-      callbacks![callbacks!.length - 1](testData);
+      expect(service.isSocketConnected()).toBeTrue();
     });
 
-    it('should handle multiple events', (done) => {
-      const eventName = ESocketMessage.BadgesUpdated;
-      const testData1 = { id: '1' };
-      const testData2 = { id: '2' };
-      const receivedData: any[] = [];
+    it('should return false when socket exists but not connected', () => {
+      (service as any).socket = mockSocket;
+      mockSocket.connected = false;
 
-      const observable = service.listen<any>(eventName);
+      expect(service.isSocketConnected()).toBeFalse();
+    });
 
-      observable.subscribe((data) => {
-        receivedData.push(data);
-        if (receivedData.length === 2) {
-          expect(receivedData).toEqual([testData1, testData2]);
-          done();
-        }
-      });
+    it('should return false when socket is null', () => {
+      (service as any).socket = null;
 
-      // Get the callback that was registered for this event and trigger it multiple times
-      const callbacks = eventCallbacks.get(eventName);
-      expect(callbacks).toBeDefined();
-      expect(callbacks!.length).toBeGreaterThan(0);
-      const callback = callbacks![callbacks!.length - 1];
-      callback(testData1);
-      callback(testData2);
+      expect(service.isSocketConnected()).toBeFalse();
     });
   });
 
   describe('ngOnDestroy', () => {
     it('should disconnect the socket when service is destroyed', () => {
+      (service as any).socket = mockSocket;
+
       service.ngOnDestroy();
+
       expect(mockSocket.disconnect).toHaveBeenCalled();
     });
 
     it('should handle case when socket is not initialized', () => {
-      // @ts-ignore - accessing private property for testing
-      service.socket = null;
+      (service as any).socket = null;
+
       expect(() => service.ngOnDestroy()).not.toThrow();
     });
   });

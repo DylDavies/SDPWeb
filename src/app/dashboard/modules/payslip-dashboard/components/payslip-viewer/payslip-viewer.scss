@@ -227,6 +227,16 @@
       &.has-query {
         background-color: var(--mat-sys-error-container);
       }
+    }
+
+    &.locked-row {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: var(--mat-sys-surface-container-low);
+
+      &:hover {
+        background-color: var(--mat-sys-surface-container-low) !important;
+      }
 
       &.bonus-row {
         .bonus-description {
@@ -278,51 +288,41 @@
     100% { opacity: 1; }
   }
 
-  // Column widths for description/amount tables (misc earnings and deductions)
-  &.description-amount-table {
-    // When Actions column is shown (3 columns)
-    &:has(th:nth-child(3)) {
-      th:nth-child(1), td:nth-child(1) {
-        width: 45%;
-        min-width: 45%;
-        max-width: 45%;
-      } // Description
-      th:nth-child(2), td:nth-child(2) {
-        width: 30%;
-        min-width: 30%;
-        max-width: 30%;
-      } // Amount
-      th:nth-child(3), td:nth-child(3) {
-        width: 25%;
-        min-width: 25%;
-        max-width: 25%;
+  &:not(.description-amount-table) {
+    &:has(th:nth-child(7)) {
+      th:nth-child(1), td:nth-child(1) { width: 10%; }
+      th:nth-child(2), td:nth-child(2) { width: 25%; }
+      th:nth-child(3), td:nth-child(3) { width: 13%; }
+      th:nth-child(4), td:nth-child(4) { width: 10%; }
+      th:nth-child(5), td:nth-child(5) { width: 13%; }
+      th:nth-child(6), td:nth-child(6) { width: 13%; }
+      th:nth-child(7), td:nth-child(7) {
+        width: 16%;
         text-align: center;
-      } // Actions
+      }
     }
 
-    // When Actions column is hidden (2 columns)
+    &:not(:has(th:nth-child(7))) {
+      th:nth-child(1), td:nth-child(1) { width: 12%; }
+      th:nth-child(2), td:nth-child(2) { width: 30%; }
+      th:nth-child(3), td:nth-child(3) { width: 15%; }
+      th:nth-child(4), td:nth-child(4) { width: 10%; }
+      th:nth-child(5), td:nth-child(5) { width: 15%; }
+      th:nth-child(6), td:nth-child(6) { width: 18%; }
+    }
+  }
+
+  &.description-amount-table {
+    &:has(th:nth-child(3)) {
+      th:nth-child(1), td:nth-child(1) { width: 45%; }
+      th:nth-child(2), td:nth-child(2) { width: 30%; }
+      th:nth-child(3), td:nth-child(3) { width: 25%; text-align: center; }
+    }
+
     &:not(:has(th:nth-child(3))) {
-      th:nth-child(1), td:nth-child(1) { width: 70%; } // Description
-      th:nth-child(2), td:nth-child(2) { width: 30%; } // Amount
+      th:nth-child(1), td:nth-child(1) { width: 70%; }
+      th:nth-child(2), td:nth-child(2) { width: 30%; }
     }
-
-    // Fallback for browsers that don't support :has()
-    th:nth-child(1), td:nth-child(1) {
-      width: 45%;
-      min-width: 45%;
-      max-width: 45%;
-    } // Description
-    th:nth-child(2), td:nth-child(2) {
-      width: 30%;
-      min-width: 30%;
-      max-width: 30%;
-    } // Amount
-    th:nth-child(3), td:nth-child(3) {
-      width: 25%;
-      min-width: 25%;
-      max-width: 25%;
-      text-align: center;
-    } // Actions
   }
 }
 
@@ -438,6 +438,37 @@
   }
 }
 
+/* Material Form Fields in Tables */
+.table-form-field {
+  width: 100%;
+  margin: 0 !important;
+
+  ::ng-deep {
+    .mat-mdc-form-field-infix {
+      min-height: 40px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      padding-bottom: 0;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mat-mdc-form-field-bottom-align::before {
+      display: none;
+    }
+
+    input {
+      font-size: 12px;
+      font-family: inherit;
+    }
+  }
+}
+
 .calculated-total {
   font-weight: bold;
   color: var(--mat-sys-primary);
@@ -466,43 +497,195 @@
   margin-top: 30px;
   padding-top: 20px;
   border-top: 1px solid var(--mat-sys-outline-variant);
+  flex-wrap: wrap;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
+/* Admin Controls Section */
+.admin-controls {
+  margin-top: 40px;
+  padding: 20px;
+  background-color: var(--mat-sys-surface-container-high);
+  border-radius: 8px;
+  border: 2px solid var(--mat-sys-primary);
+
+  h3 {
+    margin: 0 0 15px 0;
+    color: var(--mat-sys-primary);
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+
+    button {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .history-log {
+    margin-top: 15px;
+
+    h4 {
+      margin: 0 0 10px 0;
+      color: var(--mat-sys-on-surface);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .history-timeline {
+      position: relative;
+      padding-left: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      &::-webkit-scrollbar { width: 6px; }
+      &::-webkit-scrollbar-track { background: var(--mat-sys-surface-container-low); border-radius: 3px; }
+      &::-webkit-scrollbar-thumb { background: var(--mat-sys-outline-variant); border-radius: 3px; }
+      &::-webkit-scrollbar-thumb:hover { background: var(--mat-sys-outline); }
+      &::before {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: var(--mat-sys-outline-variant);
+      }
+
+      .history-entry {
+        position: relative;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: flex-start;
+
+        .history-marker {
+          position: absolute;
+          left: -18px;
+          top: 3px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: var(--mat-sys-primary);
+          border: 2px solid var(--mat-sys-surface-container-high);
+        }
+
+        .history-content {
+          flex: 1;
+          padding: 4px 8px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+
+          .history-status {
+            font-weight: 500;
+            color: var(--mat-sys-on-surface);
+            font-size: 12px;
+            white-space: nowrap;
+
+            .history-user {
+              font-weight: 400;
+              color: var(--mat-sys-on-surface-variant);
+              font-style: italic;
+              margin-left: 4px;
+            }
+          }
+
+          .history-timestamp {
+            font-size: 11px;
+            color: var(--mat-sys-on-surface-variant);
+            white-space: nowrap;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mobile view styling
+.mobile-view { display: none; }
+
+.mobile-card {
+  margin-bottom: 16px;
+  background-color: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
+  transition: box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: var(--mat-sys-elevation-level2);
+  }
+  
+  mat-card-header {
+    padding-bottom: 8px;
+  }
+  mat-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--mat-sys-primary);
+  }
+  mat-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  mat-card-subtitle {
+    font-size: 0.9rem;
+  }
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    &:last-child {
+      border-bottom: none;
+    }
+    strong {
+      color: var(--mat-sys-on-surface-variant);
+    }
+    span.total {
+      font-weight: bold;
+      color: var(--mat-sys-primary);
+    }
+     span.total.deduction {
+      color: var(--mat-sys-error);
+    }
+  }
+
+  mat-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0px 8px 8px;
+  }
+}
+
+@media (max-width: 959px) {
+  .desktop-view { display: none; }
+  .mobile-view { display: block; }
+  
   .payslip-content {
     flex-direction: column;
   }
 
   .right-column {
     position: static;
+    order: -1; 
   }
-}
 
-@media (max-width: 768px) {
-  .info-section {
+  .info-section, .payslip-header {
     flex-direction: column;
     gap: 20px;
+    align-items: stretch;
 
-    .employee-info {
+    .employee-info, .header-right {
       text-align: left;
     }
   }
-
-  .payslip-header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .payslip-table {
-    font-size: 10px;
-
-    th, td {
-      padding: 4px 6px;
-    }
-  }
-
-  .action-buttons {
-    flex-wrap: wrap;
-  }
 }
+

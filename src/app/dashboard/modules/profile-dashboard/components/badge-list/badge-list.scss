@@ -28,3 +28,18 @@
   border-radius: 8px;
   margin-top: 1rem;
 }
+
+@media (max-width: 576px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start; 
+  }
+
+  .header-actions {
+    width: 100%;
+    
+    button {
+      width: 100%; 
+    }
+  }
+}

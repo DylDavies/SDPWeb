@@ -29,6 +29,10 @@ export enum EPermission {
     BUNDLES_EDIT = 'bundles:edit',
     BUNDLES_DELETE = 'bundles:delete',
     BUNDLES_APPROVE = 'bundles:approve',
+    TUTOR_MATCHMAKING_ACCESS = 'tutor_matchmaking:access',
+
+    // Student Management Permissions
+    STUDENTS_VIEW = 'students:view',
 
     //Missions Management Permissions
     MISSIONS_CREATE = 'missions:create',
@@ -61,5 +65,8 @@ export enum EPermission {
     CAN_ADJUST_RATES = 'payslips:rate_adjustment',
 
     // Remark Management Permissions
-    REMARKS_MANAGE = 'remarks:manage'
+    REMARKS_MANAGE = 'remarks:manage',
+
+    // Platform Stats Permissions
+    PLATFORM_STATS_VIEW = 'platform_stats:view'
 }

@@ -1,0 +1,214 @@
+<div class="matchmaking-container">
+  <mat-card class="search-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>person_search</mat-icon>
+        Find the Perfect Tutor
+      </mat-card-title>
+      <mat-card-subtitle>
+        Search for tutors based on availability and distance. Optionally filter by subject expertise.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+        <!-- Lesson Location -->
+        <div class="form-section">
+          <h3 class="section-title">Lesson Location</h3>
+          <app-address-autocomplete
+            [label]="'Where will lessons take place?'"
+            [placeholder]="'Enter the lesson address...'"
+            (addressSelected)="onAddressSelected($event)">
+          </app-address-autocomplete>
+        </div>
+
+        <!-- Subject Selection -->
+        <div class="form-section">
+          <h3 class="section-title">Subject Requirements</h3>
+          <div class="subject-fields">
+            <mat-form-field appearance="outline" class="proficiency-field">
+              <mat-label>Proficiency (Optional)</mat-label>
+              <mat-select formControlName="proficiency" (selectionChange)="onProficiencyChange($event.value)">
+                <mat-option value="">Any Proficiency</mat-option>
+                @for (prof of proficiencies; track prof.name) {
+                  <mat-option [value]="prof.name">{{ prof.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="subject-field">
+              <mat-label>Subject (Optional)</mat-label>
+              <mat-select formControlName="subject" (selectionChange)="onSubjectChange($event.value)">
+                <mat-option value="">Any Subject</mat-option>
+                @if (selectedProficiency && subjects.length > 0) {
+                  @for (subject of subjects; track subject._id) {
+                    <mat-option [value]="subject.name">{{ subject.name }}</mat-option>
+                  }
+                } @else {
+                  <mat-option value="" disabled>Select a proficiency first to filter by subject</mat-option>
+                }
+              </mat-select>
+              <mat-hint>Optional: Filter by specific subject</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="grade-field">
+              <mat-label>Grade (Optional)</mat-label>
+              <mat-select formControlName="grade">
+                <mat-option value="">Any Grade</mat-option>
+                @if (selectedSubject && grades.length > 0) {
+                  @for (grade of grades; track grade) {
+                    <mat-option [value]="grade">{{ grade }}</mat-option>
+                  }
+                } @else {
+                  <mat-option value="" disabled>Select a subject first</mat-option>
+                }
+              </mat-select>
+              <mat-hint>Narrow down by grade level</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Availability and Distance -->
+        <div class="form-section">
+          <h3 class="section-title">Requirements</h3>
+          <div class="requirements-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Hours Per Week *</mat-label>
+              <input matInput type="number" formControlName="hoursPerWeek" min="1" required>
+              <mat-icon matIconPrefix>schedule</mat-icon>
+              <mat-hint>Minimum hours needed per week</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Max Distance (km)</mat-label>
+              <input matInput type="number" formControlName="maxDistance" min="1">
+              <mat-icon matIconPrefix>location_on</mat-icon>
+              <mat-hint>Leave blank for no limit</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+          <div class="form-actions">
+          <button mat-button type="button" (click)="resetSearch()" [disabled]="isSearching">
+            <span class="button-content-wrapper">
+              <mat-icon>refresh</mat-icon>
+              Reset
+            </span>
+          </button>
+          
+          <button mat-raised-button color="primary" type="submit" [disabled]="isSearching || !searchForm.valid || !selectedAddress" class="search-button">
+            
+            <div class="button-content-wrapper">
+              @if (isSearching) {
+                <mat-spinner diameter="24"></mat-spinner>
+                <span>Searching...</span>
+              } @else {
+                <mat-icon>search</mat-icon>
+                <span>Find Tutors</span>
+              }
+            </div>
+
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Results Section -->
+  @if (hasSearched) {
+    <mat-card class="results-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>group</mat-icon>
+          Matching Tutors ({{ matchedTutors.length }})
+        </mat-card-title>
+        @if (matchedTutors.length > 0) {
+          <mat-card-subtitle>
+            Sorted by best match - closest distance and highest availability
+          </mat-card-subtitle>
+        }
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (matchedTutors.length === 0) {
+          <div class="no-results">
+            <mat-icon>search_off</mat-icon>
+            <h3>No Tutors Found</h3>
+            <p>Try adjusting your search criteria:</p>
+            <ul>
+              <li>Increase the maximum distance</li>
+              <li>Reduce the hours per week required</li>
+              <li>Select a different subject or proficiency</li>
+            </ul>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table mat-table [dataSource]="matchedTutors" class="tutors-table">
+              <!-- Display Name Column -->
+              <ng-container matColumnDef="displayName">
+                <th mat-header-cell *matHeaderCellDef>Tutor Name</th>
+                <td mat-cell *matCellDef="let tutor">
+                  <div class="tutor-name">
+                    <mat-icon>person</mat-icon>
+                    {{ tutor.displayName }}
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Email Column -->
+              <ng-container matColumnDef="email">
+                <th mat-header-cell *matHeaderCellDef>Email</th>
+                <td mat-cell *matCellDef="let tutor">{{ tutor.email }}</td>
+              </ng-container>
+
+              <!-- Location Column -->
+              <ng-container matColumnDef="location">
+                <th mat-header-cell *matHeaderCellDef>Location</th>
+                <td mat-cell *matCellDef="let tutor">
+                  <div class="location-cell" [matTooltip]="formatLocation(tutor.address)">
+                    <mat-icon>location_city</mat-icon>
+                    <span class="location-text">{{ formatLocation(tutor.address) }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Proficiencies Column -->
+              <ng-container matColumnDef="proficiencies">
+                <th mat-header-cell *matHeaderCellDef>Proficiencies</th>
+                <td mat-cell *matCellDef="let tutor">
+                  <span class="proficiencies-text">{{ formatProficiencies(tutor.proficiencies) }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Availability Column -->
+              <ng-container matColumnDef="availability">
+                <th mat-header-cell *matHeaderCellDef>Availability</th>
+                <td mat-cell *matCellDef="let tutor">
+                  <div class="availability-cell">
+                    <mat-icon>schedule</mat-icon>
+                    {{ tutor.availability }} hrs/week
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Distance Column -->
+              <ng-container matColumnDef="distance">
+                <th mat-header-cell *matHeaderCellDef>Distance</th>
+                <td mat-cell *matCellDef="let tutor">
+                  <div class="distance-cell">
+                    <mat-icon>location_on</mat-icon>
+                    {{ formatDistance(tutor.distance) }}
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="tutor-row"></tr>
+            </table>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

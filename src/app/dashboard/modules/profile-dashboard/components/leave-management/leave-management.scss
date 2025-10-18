@@ -72,3 +72,18 @@ tr.leave-element-row:not(.leave-expanded-row):active {
     line-height: 1.5;
   }
 }
+
+@media (max-width: 576px) {
+  .mat-elevation-z8 {
+    overflow-x: auto;
+  }
+
+  th.mat-header-cell, td.mat-cell {
+    min-width: 130px; 
+    white-space: nowrap; 
+  }
+
+  .actions-cell {
+    min-width: 100px;
+  }
+}

@@ -9,9 +9,9 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { RemarkService } from '../../../../../services/remark-service';
 import { IRemarkTemplate, IRemarkField, RemarkFieldType } from '../../../../../models/interfaces/IRemark.interface';
-import * as _ from 'lodash';
 import { MatSelectModule } from '@angular/material/select';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { TrackByUtils } from '../../../../../core/utils/trackby.utils';
 
 @Component({
   selector: 'app-remark-template-management',
@@ -38,8 +38,10 @@ export class RemarkTemplateManagement implements OnInit {
   public fields: IRemarkField[] = [];
   public newFieldName = '';
   public newFieldType: RemarkFieldType = 'string';
-  public fieldTypes: RemarkFieldType[] = ['string', 'boolean', 'number', 'time'];
+  public fieldTypes: RemarkFieldType[] = ['string', 'boolean', 'number', 'time', 'pdf', 'image', 'audio'];
   private initialFields: IRemarkField[] = [];
+  public trackByFieldName = TrackByUtils.trackByName;
+  public trackByIndex = TrackByUtils.trackByIndex;
 
   ngOnInit(): void {
     this.loadActiveTemplate();
@@ -48,10 +50,10 @@ export class RemarkTemplateManagement implements OnInit {
   loadActiveTemplate(): void {
     this.remarkService.getActiveTemplate().subscribe(template => {
         if (template) {
-
             this.template = template;
-            this.fields = _.cloneDeep(template.fields);
-            this.initialFields = _.cloneDeep(template.fields);
+            // OPTIMIZED: Use structuredClone instead of lodash cloneDeep
+            this.fields = structuredClone(template.fields);
+            this.initialFields = structuredClone(template.fields);
         }
     });
   }
@@ -76,11 +78,11 @@ export class RemarkTemplateManagement implements OnInit {
   }
 
   isSaveDisabled(): boolean {
-    return _.isEqual(this.fields, this.initialFields);
+    // OPTIMIZED: Use JSON.stringify for deep equality instead of lodash isEqual
+    return JSON.stringify(this.fields) === JSON.stringify(this.initialFields);
   }
 
   saveChanges(): void {
-
     if (this.template) {
       this.remarkService.updateTemplate(this.fields).subscribe({
         next: () => {
@@ -94,4 +96,3 @@ export class RemarkTemplateManagement implements OnInit {
     }
   }
 }
-

@@ -15,6 +15,7 @@ import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interfa
 import { IDocument } from '../../../../../models/interfaces/IDocument.interface';
 import { ViewMissionModal } from '../view-mission-modal/view-mission-modal';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 describe('MissionsTable', () => {
   let component: MissionsTable;
@@ -22,6 +23,7 @@ describe('MissionsTable', () => {
   let missionServiceSpy: jasmine.SpyObj<MissionService>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let snackBarSpy: jasmine.SpyObj<SnackBarService>;
+  let breakpointObserverSpy: jasmine.SpyObj<BreakpointObserver>;
   let dialogOpenSpy: jasmine.Spy;
 
   const mockDocument: IDocument = {
@@ -69,6 +71,9 @@ describe('MissionsTable', () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['hasPermission']);
     missionServiceSpy = jasmine.createSpyObj('MissionService', ['getMissionsByBundleId', 'setMissionStatus']);
     snackBarSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
+    breakpointObserverSpy = jasmine.createSpyObj('BreakpointObserver', ['observe']);
+    // Mock breakpoint observer to simulate desktop (non-handset) behavior
+    breakpointObserverSpy.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
 
     await TestBed.configureTestingModule({
       imports: [
@@ -82,6 +87,7 @@ describe('MissionsTable', () => {
         { provide: AuthService, useValue: authServiceSpy },
         { provide: MissionService, useValue: missionServiceSpy },
         { provide: SnackBarService, useValue: snackBarSpy },
+        { provide: BreakpointObserver, useValue: breakpointObserverSpy },
       ]
     }).compileComponents();
 
@@ -104,6 +110,8 @@ describe('MissionsTable', () => {
     expect(component.canEditMissions).toBeTrue();
     expect(component.canDeleteMissions).toBeFalse();
     expect(component.displayedColumns.includes('actions')).toBeTrue();
+    expect(component.displayedColumns.includes('status')).toBeTrue();
+    expect(component.displayedColumns.includes('viewPdf')).toBeTrue();
   });
 
   it('should NOT add actions column if no permissions', () => {
@@ -113,6 +121,9 @@ describe('MissionsTable', () => {
     expect(component.canEditMissions).toBeFalse();
     expect(component.canDeleteMissions).toBeFalse();
     expect(component.displayedColumns.includes('actions')).toBeFalse();
+    // Status and viewPdf columns should still be present
+    expect(component.displayedColumns.includes('status')).toBeTrue();
+    expect(component.displayedColumns.includes('viewPdf')).toBeTrue();
   });
 
   it('should load and filter out inactive missions on ngOnChanges', () => {
@@ -198,9 +209,12 @@ describe('MissionsTable', () => {
   it('should open viewMission dialog', () => {
     component.viewMission(mockMissions[0]);
     expect(dialogOpenSpy).toHaveBeenCalledWith(ViewMissionModal, {
-        width: 'clamp(500px, 70vw, 800px)',
-        height: '85vh',
-        data: mockMissions[0]
+        data: mockMissions[0],
+        width: '80vw',
+        height: '80vh',
+        maxWidth: '1400px',
+        maxHeight: '90vh',
+        panelClass: ''
     });
   });
 

@@ -1,0 +1,115 @@
+.admin-payslip-dashboard-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+mat-card-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.filters-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+  align-items: center;
+  .filter-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+.table-container { 
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+}
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: white;
+  &.Draft { background-color: #757575; }
+  &.Query { background-color: #f57c00; }
+  &.QueryHandled { background-color: #1976d2; }
+  &.StaffApproved { background-color: #388e3c; }
+  &.Locked { background-color: #d32f2f; }
+  &.Paid { background-color: #673ab7; }
+}
+.action-btn mat-icon {
+  margin-right: 6px;
+  font-size: 18px;
+}
+.no-data, .loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #757575;
+  mat-icon { font-size: 64px; width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.5; }
+  p { margin: 0; font-size: 16px; }
+}
+
+.mobile-view { display: none; }
+.desktop-view { display: block; }
+
+.payslip-card-admin {
+  margin-bottom: 16px;
+  background-color: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+
+  mat-card-header {
+    padding-bottom: 8px;
+  }
+  mat-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--mat-sys-color-primary);
+  }
+  mat-card-subtitle {
+    font-size: 0.9rem;
+  }
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 14px;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    strong { color: var(--mat-sys-on-surface-variant); }
+    &.net-pay {
+      font-weight: bold;
+      font-size: 15px;
+    }
+  }
+  mat-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 16px !important;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    .action-btn {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 959px) {
+  .admin-payslip-dashboard-container {
+    padding: 10px;
+  }
+  .filters-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .desktop-view {
+    display: none;
+  }
+  .mobile-view {
+    display: block;
+  }
+}

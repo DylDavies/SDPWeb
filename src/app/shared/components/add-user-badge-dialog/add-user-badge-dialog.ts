@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -25,6 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
   ],
   templateUrl: './add-user-badge-dialog.html',
   styleUrls: ['./add-user-badge-dialog.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddUserBadgeDialogComponent implements OnInit {
   private userService = inject(UserService);

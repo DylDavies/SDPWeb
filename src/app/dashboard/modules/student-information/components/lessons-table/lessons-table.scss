@@ -1,0 +1,156 @@
+:host {
+    display: block;
+    margin-top: 24px;
+}
+
+.lessons-table-container {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  overflow: hidden;
+
+  .spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+  }
+
+  .table-toolbar {
+    padding: 16px;
+    background-color: var(--mat-sys-surface-container);
+  }
+
+  .filter-field {
+    width: 100%;
+  }
+
+  .table-responsive-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  .lessons-table-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+
+    &:hover {
+      background-color: var(--mat-sys-state-hover-layer) !important;
+    }
+  }
+
+  .date-time-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .date {
+      font-weight: 500;
+    }
+
+    .time {
+      font-size: 12px;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  .rating-display {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    .star-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--mat-sys-outline);
+
+      &.filled {
+        color: var(--mat-sys-primary);
+      }
+    }
+  }
+
+  .no-rating {
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+    }
+  }
+}
+
+// --- MOBILE STYLES ---
+.mobile-view {
+    display: none; // Hidden by default
+}
+
+@media (max-width: 960px) {
+    .desktop-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .lesson-card {
+        cursor: pointer;
+        transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+        background-color: var(--mat-sys-surface-container-high); 
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    }
+
+    .card-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 14px;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid var(--mat-sys-outline-variant);
+        }
+    }
+
+    .detail-label {
+        color: var(--mat-sys-on-surface-variant);
+    }
+
+    .detail-value {
+        font-weight: 500;
+    }
+
+    mat-card-actions {
+        padding: 8px 16px;
+    }
+
+    .lessons-table-container .empty-state {
+        display: none; 
+    }
+}
+

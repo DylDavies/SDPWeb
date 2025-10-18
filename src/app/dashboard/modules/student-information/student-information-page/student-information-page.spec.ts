@@ -98,7 +98,7 @@ describe('StudentInformationPage', () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['hasPermission']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    eventServiceSpy = jasmine.createSpyObj('EventService', ['getEvents']);
+    eventServiceSpy = jasmine.createSpyObj('EventService', ['getEvents', 'getEventsByBundle']);
     missionServiceSpy = jasmine.createSpyObj('MissionService', [
       'findMissionByBundleAndTutor',
       'updateMissionHours',
@@ -131,6 +131,7 @@ describe('StudentInformationPage', () => {
     missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission])); // Mock for child component
     // Provide a mock for the services called within getTutorsFromBundle -> updateAllMissionHours
     eventServiceSpy.getEvents.and.returnValue(of([]));
+    eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
     createComponentWithParams({ id: 'bundle123' });
     fixture.detectChanges();
     expect(component).toBeTruthy();
@@ -142,6 +143,7 @@ describe('StudentInformationPage', () => {
       missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission]));
       authServiceSpy.hasPermission.and.returnValue(true);
       eventServiceSpy.getEvents.and.returnValue(of([])); // Prevent error from updateAllMissionHours
+      eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
       createComponentWithParams({ id: 'bundle123' });
 
       fixture.detectChanges(); // Triggers ngOnInit
@@ -193,6 +195,7 @@ describe('StudentInformationPage', () => {
         bundleServiceSpy.getBundleById.and.returnValue(of(mockBundle));
         missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission]));
         eventServiceSpy.getEvents.and.returnValue(of([]));
+        eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
         createComponentWithParams({ id: 'bundle123' });
         fixture.detectChanges();
     });
@@ -215,6 +218,7 @@ describe('StudentInformationPage', () => {
         bundleServiceSpy.getBundleById.and.returnValue(of(mockBundle));
         missionServiceSpy.getMissionsByBundleId.and.returnValue(of([mockMission]));
         eventServiceSpy.getEvents.and.returnValue(of([]));
+        eventServiceSpy.getEventsByBundle.and.returnValue(of([]));
         createComponentWithParams({ id: 'bundle123' });
         fixture.detectChanges();
       });
@@ -308,6 +312,58 @@ describe('StudentInformationPage', () => {
 
         expect(missionServiceSpy.findMissionByBundleAndTutor).toHaveBeenCalled();
         expect(missionServiceSpy.updateMissionHours).not.toHaveBeenCalled();
+        expect(component.isUpdatingMissions).toBeFalse();
+    }));
+
+    it('should NOT update mission hours for missions that are not active', fakeAsync(() => {
+        const completedMission: IMissions = {
+            ...mockMission,
+            _id: 'mission2',
+            status: EMissionStatus.Completed
+        };
+
+        missionServiceSpy.findMissionByBundleAndTutor.and.returnValue(of(completedMission));
+
+        const tutorHours = new Map<string, number>([['tutor1', 5]]);
+        component.updateMissionsForTutors(tutorHours);
+        tick();
+
+        expect(missionServiceSpy.findMissionByBundleAndTutor).toHaveBeenCalled();
+        // Should NOT call updateMissionHours because the mission status is not Active
+        expect(missionServiceSpy.updateMissionHours).not.toHaveBeenCalled();
+        expect(component.isUpdatingMissions).toBeFalse();
+    }));
+
+    it('should update hours only for active missions and skip non-active ones', fakeAsync(() => {
+        const achievedMission: IMissions = {
+            ...mockMission,
+            _id: 'mission3',
+            status: EMissionStatus.Achieved
+        };
+
+        // Mock different responses for different tutor lookups
+        missionServiceSpy.findMissionByBundleAndTutor.and.callFake((bundleId: string, tutorId: string) => {
+            if (tutorId === 'tutor1') {
+                return of(mockMission); // Active mission
+            } else if (tutorId === 'tutor2') {
+                return of(achievedMission); // Achieved mission
+            }
+            return of(null);
+        });
+
+        missionServiceSpy.updateMissionHours.and.returnValue(of(mockMission));
+
+        const tutorHours = new Map<string, number>([
+            ['tutor1', 2], // Should update
+            ['tutor2', 3]  // Should NOT update (achieved)
+        ]);
+
+        component.updateMissionsForTutors(tutorHours);
+        tick();
+
+        // Should only call updateMissionHours for the active mission (tutor1)
+        expect(missionServiceSpy.updateMissionHours).toHaveBeenCalledTimes(1);
+        expect(missionServiceSpy.updateMissionHours).toHaveBeenCalledWith('mission1', 2);
         expect(component.isUpdatingMissions).toBeFalse();
     }));
   });

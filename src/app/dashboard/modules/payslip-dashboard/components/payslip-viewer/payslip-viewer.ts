@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { switchMap, map, combineLatest, tap, BehaviorSubject, take } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { EPayslipStatus } from '../../../../../models/enums/payslip-status.enum';
 import { IPayslip, IEarning, IBonus, IPreapprovedBonus, INote } from '../../../../../models/interfaces/IPayslip.interface';
 import { PayslipService } from '../../../../../services/payslip-service';
@@ -24,6 +26,7 @@ import { PayslipStatusPipe } from '../../../../../pipes/payslip-status.pipe';
 import { AuthService } from '../../../../../services/auth-service';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
 import { IUser } from '../../../../../models/interfaces/IUser.interface';
+import { UserService } from '../../../../../services/user-service';
 
 @Component({
   selector: 'app-payslip-viewer',
@@ -34,7 +37,6 @@ import { IUser } from '../../../../../models/interfaces/IUser.interface';
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -44,6 +46,8 @@ import { IUser } from '../../../../../models/interfaces/IUser.interface';
     MatTooltipModule,
     MatSelectModule,
     MatOptionModule,
+    MatInputModule,
+    MatFormFieldModule,
     PayPeriodPipe,
     PayslipStatusPipe
   ]
@@ -54,9 +58,12 @@ export class PayslipViewer implements OnInit {
   private snackbarService = inject(SnackBarService);
   public dialog = inject(MatDialog);
   private authService = inject(AuthService);
+  private router = inject(Router);
+  private location = inject(Location);
+  private userService = inject(UserService);
 
   // Use a BehaviorSubject to easily refresh data
-  private payslipDataSubject = new BehaviorSubject<{payslip: IPayslip} | null>(null);
+  private payslipDataSubject = new BehaviorSubject<{payslip: IPayslip; payslipUser?: IUser; allUsers?: IUser[]} | null>(null);
   public payslipData$ = this.payslipDataSubject.asObservable();
 
   public earningsDisplayedColumns: string[] = ['date', 'description', 'baseRate', 'hours', 'rate', 'total'];
@@ -67,6 +74,16 @@ export class PayslipViewer implements OnInit {
 
   // Selected bonus for adding
   public selectedBonusId = '';
+
+  // Editing state for earnings
+  public editingEarning: number | null = null;
+  public editingEarningData: { description: string; baseRate: number; hours: number; rate: number; date: string } = {
+    description: '', baseRate: 0, hours: 0, rate: 0, date: ''
+  };
+
+  // Editing state for bonuses
+  public editingBonus: number | null = null;
+  public editingBonusData: { description: string; amount: number } = { description: '', amount: 0 };
 
   // Editing state for deductions
   public editingDeduction: number | null = null;
@@ -106,14 +123,30 @@ export class PayslipViewer implements OnInit {
     );
 
     const preapprovedItems$ = this.payslipService.getPreapprovedItems();
+    const allUsers$ = this.userService.allUsers$;
 
-    combineLatest([payslip$, preapprovedItems$]).pipe(
-      map(([payslip, _preapprovedItems]) => {
-        // For the new payslip structure, we don't need to split earnings
-        // as we have separate arrays for each type
-        return { payslip };
+    // Fetch users
+    this.userService.fetchAllUsers().subscribe();
+
+    combineLatest([payslip$, preapprovedItems$, allUsers$]).pipe(
+      map(([payslip, _preapprovedItems, users]) => {
+        // Find the user who owns this payslip
+        const payslipUser = users.find(u => u._id === payslip.userId);
+        return { payslip, payslipUser, allUsers: users };
       })
     ).subscribe(data => this.payslipDataSubject.next(data));
+  }
+
+  /**
+   * Sets the payslip status to Query for admin filtering and state tracking.
+   */
+  public setPayslipStatusToQuery(payslip: IPayslip): void {
+    this.payslipService.updatePayslipStatus(payslip._id, EPayslipStatus.QUERY).pipe(
+      tap(() => {
+        this.snackbarService.showSuccess('Payslip marked as Query.');
+        this.loadPayslipData(); // Refresh data
+      })
+    ).subscribe();
   }
 
   /**
@@ -267,17 +300,27 @@ export class PayslipViewer implements OnInit {
   }
 
   /**
-   * Get current user name
+   * Get payslip owner's name (not the logged-in user)
    */
   public getCurrentUserName(): string {
+    const currentData = this.payslipDataSubject.value;
+    if (currentData?.payslipUser) {
+      return currentData.payslipUser.displayName || 'Unknown User';
+    }
+    // Fallback to logged-in user if payslip user not loaded yet
     const user = this.getCurrentUser();
     return user?.displayName || 'Unknown User';
   }
 
   /**
-   * Get current user email
+   * Get payslip owner's email (not the logged-in user)
    */
   public getCurrentUserEmail(): string {
+    const currentData = this.payslipDataSubject.value;
+    if (currentData?.payslipUser) {
+      return currentData.payslipUser.email || 'unknown@tutorcore.com';
+    }
+    // Fallback to logged-in user if payslip user not loaded yet
     const user = this.getCurrentUser();
     return user?.email || 'unknown@tutorcore.com';
   }
@@ -291,10 +334,52 @@ export class PayslipViewer implements OnInit {
   }
 
   /**
-   * Check if the payslip can be edited
+   * Check if earnings can be edited (admin only).
+   * - Only admins can edit earnings when accessing through admin routes
+   * - Cannot edit locked or paid payslips
    */
   public canEditPayslip(payslip: IPayslip): boolean {
-    return payslip.status === EPayslipStatus.DRAFT;
+    // Cannot edit locked or paid payslips
+    if (payslip.status === EPayslipStatus.LOCKED || payslip.status === EPayslipStatus.PAID) {
+      return false;
+    }
+
+    // Only admins can edit earnings
+    return this.isAdmin();
+  }
+
+  /**
+   * Check if bonuses/misc earnings/deductions can be managed.
+   * - Admins can manage when accessing through admin routes
+   * - Staff can manage their own payslips when status is DRAFT or QUERY_HANDLED
+   * - Cannot edit locked or paid payslips
+   */
+  public canManageItems(payslip: IPayslip): boolean {
+    // Cannot edit locked or paid payslips
+    if (payslip.status === EPayslipStatus.LOCKED || payslip.status === EPayslipStatus.PAID) {
+      return false;
+    }
+
+    // Admin managing through admin route
+    if (this.isAdmin()) {
+      return true;
+    }
+
+    // Staff managing their own payslip - only in Draft or QueryHandled status
+    if (this.isOwnPayslip(payslip) &&
+        (payslip.status === EPayslipStatus.DRAFT || payslip.status === EPayslipStatus.QUERY_HANDLED)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if queries can be submitted on this payslip.
+   * Cannot query locked or paid payslips.
+   */
+  public canQueryPayslip(payslip: IPayslip): boolean {
+    return payslip.status !== EPayslipStatus.LOCKED && payslip.status !== EPayslipStatus.PAID;
   }
 
   /**
@@ -750,6 +835,118 @@ export class PayslipViewer implements OnInit {
     });
   }
 
+  // ===== EARNING MANAGEMENT METHODS =====
+
+  /**
+   * Start editing an earning
+   */
+  public editEarning(index: number, earning: IEarning): void {
+    this.editingEarning = index;
+    this.editingEarningData = {
+      description: earning.description,
+      baseRate: earning.baseRate,
+      hours: earning.hours,
+      rate: earning.rate,
+      date: earning.date
+    };
+  }
+
+  /**
+   * Save earning edit
+   */
+  public saveEarningEdit(index: number): void {
+    const currentData = this.payslipDataSubject.value;
+    if (!currentData || this.editingEarning === null) return;
+
+    const payslip = currentData.payslip;
+    if (index < 0 || index >= payslip.earnings.length) return;
+
+    // Calculate total
+    const calculatedTotal = this.editingEarningData.baseRate + (this.editingEarningData.hours * this.editingEarningData.rate);
+    const updatedEarning = {
+      ...this.editingEarningData,
+      total: calculatedTotal
+    };
+
+    // Save to backend
+    this.payslipService.updateEarning(currentData.payslip._id, index, updatedEarning).pipe(
+      tap((updatedPayslip: IPayslip) => {
+        const updatedData = {
+          ...currentData,
+          payslip: updatedPayslip
+        };
+        this.payslipDataSubject.next(updatedData);
+        this.cancelEarningEdit();
+        this.snackbarService.showSuccess('Earning updated successfully');
+      })
+    ).subscribe({
+      error: () => {
+        this.snackbarService.showError('Failed to update earning. Please try again.');
+      }
+    });
+  }
+
+  /**
+   * Cancel earning edit
+   */
+  public cancelEarningEdit(): void {
+    this.editingEarning = null;
+    this.editingEarningData = { description: '', baseRate: 0, hours: 0, rate: 0, date: '' };
+  }
+
+  /**
+   * Calculate earning total dynamically
+   */
+  public getEditingEarningTotal(): number {
+    return this.editingEarningData.baseRate + (this.editingEarningData.hours * this.editingEarningData.rate);
+  }
+
+  // ===== BONUS MANAGEMENT METHODS =====
+
+  /**
+   * Edit a bonus
+   */
+  public editBonus(index: number, bonus: IBonus): void {
+    this.editingBonus = index;
+    this.editingBonusData = { ...bonus };
+  }
+
+  /**
+   * Save bonus edit
+   */
+  public saveBonusEdit(index: number): void {
+    const currentData = this.payslipDataSubject.value;
+    if (!currentData || this.editingBonus === null) return;
+
+    const payslip = currentData.payslip;
+    if (!payslip.bonuses || index < 0 || index >= payslip.bonuses.length) return;
+
+    // Save to backend
+    this.payslipService.updateBonus(currentData.payslip._id, index, this.editingBonusData).pipe(
+      tap((updatedPayslip: IPayslip) => {
+        const updatedData = {
+          ...currentData,
+          payslip: updatedPayslip
+        };
+        this.payslipDataSubject.next(updatedData);
+        this.cancelBonusEdit();
+        this.snackbarService.showSuccess('Bonus updated successfully');
+      })
+    ).subscribe({
+      error: () => {
+        this.snackbarService.showError('Failed to update bonus. Please try again.');
+      }
+    });
+  }
+
+  /**
+   * Cancel bonus edit
+   */
+  public cancelBonusEdit(): void {
+    this.editingBonus = null;
+    this.editingBonusData = { description: '', amount: 0 };
+  }
+
   // ===== DEDUCTION MANAGEMENT METHODS =====
 
   /**
@@ -927,7 +1124,7 @@ export class PayslipViewer implements OnInit {
   /**
    * Handle keydown events to prevent entering more than 2 decimal places
    */
-  public onAmountKeydown(event: KeyboardEvent, _type: 'miscEarning' | 'deduction'): void {
+  public onAmountKeydown(event: KeyboardEvent, _type: 'miscEarning' | 'deduction' | 'bonus'): void {
     const input = event.target as HTMLInputElement;
     const value = input.value;
 
@@ -980,7 +1177,7 @@ export class PayslipViewer implements OnInit {
   /**
    * Handle amount input to clean up any formatting issues
    */
-  public onAmountInput(event: Event, type: 'miscEarning' | 'deduction'): void {
+  public onAmountInput(event: Event, type: 'miscEarning' | 'deduction' | 'bonus'): void {
     const target = event.target as HTMLInputElement;
     const value = target.value;
 
@@ -995,6 +1192,8 @@ export class PayslipViewer implements OnInit {
           this.editingMiscEarningData.amount = parsedValue;
         } else if (type === 'deduction') {
           this.editingDeductionData.amount = parsedValue;
+        } else if (type === 'bonus') {
+          this.editingBonusData.amount = parsedValue;
         }
 
         // Update the input field
@@ -1032,5 +1231,179 @@ export class PayslipViewer implements OnInit {
    */
   public getTotalMiscEarnings(miscEarnings: {amount: number}[]): number {
     return miscEarnings?.reduce((total, earning) => total + earning.amount, 0) || 0;
+  }
+
+  // ===== ADMIN METHODS =====
+
+  /**
+   * Check if admin controls should be shown.
+   * Admin controls are only shown when:
+   * 1. User is an admin (has CAN_MANAGE_PAYSLIPS permission)
+   * 2. Accessing through the admin route (/dashboard/admin/payslips/:id)
+   */
+  public isAdmin(): boolean {
+    const isAdminUser = this.isCurrentUserAdmin();
+    const isAdminRoute = this.router.url.includes('/admin/payslips/');
+
+    // Only show admin controls if user is admin AND on admin route
+    return isAdminUser && isAdminRoute;
+  }
+
+  /**
+   * Check if this is the current user's own payslip
+   */
+  public isOwnPayslip(payslip: IPayslip): boolean {
+    const user = this.getCurrentUser();
+    return user ? payslip.userId === user._id : false;
+  }
+
+  /**
+   * Mark a query as handled (change from Query to QueryHandled)
+   */
+  public markQueryAsHandled(payslip: IPayslip): void {
+    this.payslipService.updatePayslipStatus(payslip._id, EPayslipStatus.QUERY_HANDLED).pipe(
+      tap(() => {
+        this.snackbarService.showSuccess('Query marked as handled');
+        this.loadPayslipData(); // Refresh data
+      })
+    ).subscribe({
+      error: () => {
+        this.snackbarService.showError('Failed to mark query as handled. Please try again.');
+      }
+    });
+  }
+
+  /**
+   * Approve a payslip (change from StaffApproved to Locked)
+   */
+  public approvePayslip(payslip: IPayslip): void {
+    this.payslipService.approvePayslip(payslip._id).pipe(
+      tap(() => {
+        this.snackbarService.showSuccess('Payslip approved successfully');
+        this.loadPayslipData(); // Refresh data
+      })
+    ).subscribe({
+      error: () => {
+        this.snackbarService.showError('Failed to approve payslip. Please try again.');
+      }
+    });
+  }
+
+  /**
+   * Reject a payslip (change from StaffApproved back to Draft)
+   */
+  public rejectPayslip(payslip: IPayslip): void {
+    this.payslipService.rejectPayslip(payslip._id).pipe(
+      tap(() => {
+        this.snackbarService.showSuccess('Payslip rejected and returned to draft');
+        this.loadPayslipData(); // Refresh data
+      })
+    ).subscribe({
+      error: () => {
+        this.snackbarService.showError('Failed to reject payslip. Please try again.');
+      }
+    });
+  }
+
+  /**
+   * Mark a payslip as paid (change from Locked to Paid)
+   */
+  public markAsPaid(payslip: IPayslip): void {
+    this.payslipService.markPayslipAsPaid(payslip._id).pipe(
+      tap(() => {
+        this.snackbarService.showSuccess('Payslip marked as paid');
+        this.loadPayslipData(); // Refresh data
+      })
+    ).subscribe({
+      error: () => {
+        this.snackbarService.showError('Failed to mark payslip as paid. Please try again.');
+      }
+    });
+  }
+
+  /**
+   * Check if mark as handled button should be shown
+   */
+  public canMarkAsHandled(payslip: IPayslip): boolean {
+    return this.isAdmin() && payslip.status === EPayslipStatus.QUERY;
+  }
+
+  /**
+   * Check if approve button should be shown
+   */
+  public canApprove(payslip: IPayslip): boolean {
+    return this.isAdmin() && payslip.status === EPayslipStatus.STAFF_APPROVED;
+  }
+
+  /**
+   * Check if reject button should be shown
+   */
+  public canReject(payslip: IPayslip): boolean {
+    return this.isAdmin() && payslip.status === EPayslipStatus.STAFF_APPROVED;
+  }
+
+  /**
+   * Check if mark as paid button should be shown
+   */
+  public canMarkAsPaid(payslip: IPayslip): boolean {
+    return this.isAdmin() && payslip.status === EPayslipStatus.LOCKED;
+  }
+
+  /**
+   * Get formatted history entry
+   */
+  public getHistoryStatusLabel(status: string): string {
+    switch (status) {
+      case EPayslipStatus.DRAFT:
+        return 'Draft';
+      case EPayslipStatus.QUERY:
+        return 'Query Submitted';
+      case EPayslipStatus.QUERY_HANDLED:
+        return 'Query Handled';
+      case EPayslipStatus.STAFF_APPROVED:
+        return 'Staff Approved';
+      case EPayslipStatus.LOCKED:
+        return 'Approved (Locked)';
+      case EPayslipStatus.PAID:
+        return 'Paid';
+      default:
+        return status;
+    }
+  }
+
+  /**
+   * Get user name for history entry
+   */
+  public getHistoryUserName(updatedBy: string): string {
+    const currentData = this.payslipDataSubject.value;
+    if (!currentData?.allUsers) return '';
+
+    const user = currentData.allUsers.find(u => u._id === updatedBy);
+    return user ? user.displayName || user.email || 'Unknown User' : 'Unknown User';
+  }
+
+  /**
+   * Navigate back to the appropriate list view
+   */
+  public goBack(): void {
+    // Check if we're on an admin route
+    if (this.router.url.includes('/admin/payslips/')) {
+      // Admin accessed this page - go back to admin payslip management
+      this.router.navigate(['/dashboard/admin/payslips']);
+    } else {
+      // Staff accessed this page - go back to their payslip history
+      this.router.navigate(['/dashboard/payslips']);
+    }
+  }
+
+  /**
+   * Get the back button label based on current route
+   */
+  public getBackButtonLabel(): string {
+    if (this.router.url.includes('/admin/payslips/')) {
+      return 'Back to Payslip Management';
+    } else {
+      return 'Back to Payslip History';
+    }
   }
 }

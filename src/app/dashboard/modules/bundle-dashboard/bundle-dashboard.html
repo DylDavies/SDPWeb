@@ -1,76 +1,131 @@
-<div class="bundle-dashboard-header">
-  <mat-form-field appearance="outline">
-    <mat-label>Filter Bundles</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="Search by student, status, etc." #input>
-  </mat-form-field>
+<div class="bundle-dashboard-container">
+  <div class="bundle-dashboard-header">
+    <mat-form-field appearance="outline">
+      <mat-label>Filter Bundles</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Search by student, status, etc." #input>
+    </mat-form-field>
 
-  @if (canCreateBundles) {
-    <button mat-flat-button color="primary" (click)="openCreateDialog()">
-      <mat-icon>add</mat-icon>
-      Create New Bundle
-    </button>
-  }
-</div>
+    @if (canCreateBundles) {
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Create New Bundle
+      </button>
+    }
+  </div>
 
-<div class="table-container mat-elevation-z8">
   @if (isLoading) {
     <div class="spinner-overlay">
       <mat-spinner></mat-spinner>
     </div>
   }
 
-  <table mat-table [dataSource]="dataSource" matSort>
-
-    <ng-container matColumnDef="student">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Student </th>
-      <td mat-cell *matCellDef="let bundle"> {{bundle.student?.displayName || 'N/A'}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
-      <td mat-cell *matCellDef="let bundle">
-        <span class="status-chip" [ngClass]="bundle.status">{{bundle.status | titlecase}}</span>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="createdAt">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
-      <td mat-cell *matCellDef="let bundle"> {{bundle.createdAt | date:'medium'}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef> Actions </th>
-      <td mat-cell *matCellDef="let bundle">
-        <ng-container *ngIf="bundle.status === EBundleStatus.Pending && canApproveBundles; else editActions">
-          <button mat-icon-button color="primary" matTooltip="Approve Bundle" aria-label="Approve bundle" (click)="approveBundle(bundle)">
-            <mat-icon>check_circle</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" matTooltip="Deny Bundle" aria-label="Deny bundle" (click)="denyBundle(bundle)">
-            <mat-icon>cancel</mat-icon>
-          </button>
+  <div class="desktop-view mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="student">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Student </th>
+            <td mat-cell *matCellDef="let bundle"> {{ getDisplayName(bundle.student) }} </td>
         </ng-container>
+        <ng-container matColumnDef="lessonLocation">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Location </th>
+            <td mat-cell *matCellDef="let bundle">
+              @if (bundle.lessonLocation) {
+                {{ bundle.lessonLocation.streetAddress || bundle.lessonLocation.formattedAddress || 'Address available' }}
+              } @else {
+                Not specified
+              }
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="manager">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Manager </th>
+            <td mat-cell *matCellDef="let bundle"> {{ getDisplayName(bundle.manager) || 'Not assigned' }} </td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+            <td mat-cell *matCellDef="let bundle">
+              <span class="status-chip" [ngClass]="bundle.status">{{bundle.status | titlecase}}</span>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Date Created </th>
+            <td mat-cell *matCellDef="let bundle"> {{bundle.createdAt | date:'medium'}} </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let bundle">
+              <ng-container *ngIf="bundle.status === EBundleStatus.Pending && canApproveBundles; else editActions">
+                <button mat-icon-button color="primary" matTooltip="Approve Bundle" (click)="approveBundle(bundle)">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Deny Bundle" (click)="denyBundle(bundle)">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </ng-container>
+              <ng-template #editActions>
+                <button *ngIf="canEditBundles" mat-icon-button color="primary" matTooltip="Edit Bundle" (click)="openEditDialog(bundle)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button *ngIf="canDeleteBundles" mat-icon-button color="warn" matTooltip="Deactivate Bundle" (click)="confirmAndDeactivate(bundle)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </ng-template>
+            </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" colspan="6">No data matching the filter "{{input.value}}"</td>
+        </tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  </div>
 
-        <ng-template #editActions>
-          <button *ngIf="canEditBundles" mat-icon-button color="primary" matTooltip="Edit Bundle" aria-label="Edit bundle" (click)="openEditDialog(bundle)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button *ngIf="canDeleteBundles" mat-icon-button color="warn" matTooltip="Deactivate Bundle" aria-label="Deactivate bundle" (click)="confirmAndDeactivate(bundle)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </ng-template>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" colspan="5">No data matching the filter "{{input.value}}"</td>
-    </tr>
-  </table>
-
-  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons
-    aria-label="Select page of bundles">
-  </mat-paginator>
+  <div class="mobile-view">
+    <mat-card *ngFor="let bundle of dataSource.data" class="bundle-card">
+      <mat-card-header>
+        <mat-card-title>{{ getDisplayName(bundle.student) }}</mat-card-title>
+        <mat-card-subtitle>
+          <span class="status-chip" [ngClass]="bundle.status">{{bundle.status | titlecase}}</span>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="card-row">
+          <strong>Manager:</strong>
+          <span>{{ getDisplayName(bundle.manager) || 'Not assigned' }}</span>
+        </div>
+        <div class="card-row">
+          <strong>Location:</strong>
+          <span>
+            @if (bundle.lessonLocation) {
+              {{ bundle.lessonLocation.streetAddress || bundle.lessonLocation.formattedAddress || 'Address available' }}
+            } @else {
+              Not specified
+            }
+          </span>
+        </div>
+        <div class="card-row">
+            <strong>Created:</strong>
+            <span>{{ bundle.createdAt | date:'short' }}</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+         <ng-container *ngIf="bundle.status === EBundleStatus.Pending && canApproveBundles; else editActionsMobile">
+            <button mat-icon-button color="primary" matTooltip="Approve Bundle" (click)="approveBundle(bundle)">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Deny Bundle" (click)="denyBundle(bundle)">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </ng-container>
+          <ng-template #editActionsMobile>
+            <button *ngIf="canEditBundles" mat-icon-button color="primary" matTooltip="Edit Bundle" (click)="openEditDialog(bundle)">
+                <mat-icon>edit</mat-icon>
+            </button>
+            <button *ngIf="canDeleteBundles" mat-icon-button color="warn" matTooltip="Deactivate Bundle" (click)="confirmAndDeactivate(bundle)">
+                <mat-icon>delete</mat-icon>
+            </button>
+          </ng-template>
+      </mat-card-actions>
+    </mat-card>
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  </div>
 </div>
-

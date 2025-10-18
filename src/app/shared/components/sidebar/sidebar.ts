@@ -17,6 +17,7 @@ import { ThemeToggleButton } from '../theme-toggle-button/theme-toggle-button';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { SidebarService } from '../../../services/sidebar-service';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { UserService } from '../../../services/user-service';
 
 @Component({
   selector: 'app-sidebar',
@@ -46,22 +47,28 @@ export class Sidebar implements OnInit, OnDestroy {
 
   public authService = inject(AuthService);
   public sideBarService = inject(SidebarService);
+  private userService = inject(UserService);
 
   public user: IUser | null = null;
   private userSubscription: Subscription | null = null;
 
-  public sideBarLinks: ISidebarItem[] = []; 
+  public sideBarLinks: ISidebarItem[] = [];
   private sideBarSubscription: Subscription | null = null;
 
+  public tutorRating: number | null = null;
+  private ratingSubscription: Subscription | null = null;
+
   ngOnInit(): void {
-    this.userSubscription = this.authService.currentUser$.subscribe((user) => this.user = user);
+    setTimeout(() => {
+      this.breakpointObserver.observe([
+        Breakpoints.XSmall,
+        Breakpoints.Small
+      ]).subscribe(result => {
+        this.isMobile = result.matches;
+      });
+    }, 100);
     
-    this.breakpointObserver.observe([
-      Breakpoints.XSmall,
-      Breakpoints.Small
-    ]).subscribe(result => {
-      this.isMobile = result.matches;
-    });
+    this.userSubscription = this.authService.currentUser$.subscribe((user) => this.user = user);
 
     this.sideBarSubscription = this.sideBarService.sidebarItems$.subscribe((items) => this.sideBarLinks = items);
   }
@@ -69,6 +76,27 @@ export class Sidebar implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.userSubscription) this.userSubscription.unsubscribe();
     if (this.sideBarSubscription) this.sideBarSubscription.unsubscribe();
+    if (this.ratingSubscription) this.ratingSubscription.unsubscribe();
+  }
+
+  private hasTutorRole(user: IUser): boolean {
+    return user.roles?.some(role => role.name === 'Tutor') ?? false;
+  }
+
+  private loadTutorRating(userId: string): void {
+    if (this.ratingSubscription) {
+      this.ratingSubscription.unsubscribe();
+    }
+
+    this.ratingSubscription = this.userService.getTutorStats(userId).subscribe({
+      next: (stats) => {
+        this.tutorRating = stats.kpis.averageRating;
+      },
+      error: (error) => {
+        console.error('Error loading tutor rating:', error);
+        this.tutorRating = null;
+      }
+    });
   }
   
   public canView(requiredPermissions: EPermission[] | undefined) {

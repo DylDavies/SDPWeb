@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
@@ -79,17 +79,18 @@ describe('Sidebar', () => {
     });
 
     describe('Initialization (ngOnInit)', () => {
-        it('should subscribe to user, sidebar items, and breakpoints', () => {
+        it('should subscribe to user, sidebar items, and breakpoints', fakeAsync(() => {
             mockAuthService.currentUser$.next(mockStaffUser);
             mockSidebarService.sidebarItems$.next(mockSidebarItems);
             breakpointSubject.next({ matches: true, breakpoints: {} });
 
             fixture.detectChanges();
+            tick(100); // Wait for the setTimeout in ngOnInit
 
             expect(component.user).toEqual(mockStaffUser);
             expect(component.sideBarLinks).toEqual(mockSidebarItems);
             expect(component.isMobile).toBeTrue();
-        });
+        }));
     });
 
     describe('ngOnDestroy', () => {
@@ -167,11 +168,11 @@ describe('Sidebar', () => {
 
         it('should show a category if at least one child is viewable', () => {
             const adminCategory = mockSidebarItems[1];
-            
+
             spyOn(component, 'canView').and.callFake((permissions) => {
                 return permissions === adminCategory.children![1].requiredPermissions;
             });
-            
+
             expect(component.shouldShow(adminCategory)).toBeTrue();
         });
 
@@ -179,6 +180,17 @@ describe('Sidebar', () => {
             const adminCategory = mockSidebarItems[1];
             spyOn(component, 'canView').and.returnValue(false);
             expect(component.shouldShow(adminCategory)).toBeFalse();
+        });
+    });
+
+    describe('Tutor Rating', () => {
+        it('should not load tutor rating for non-tutor users', () => {
+            const nonTutorUser: IUser = { _id: 'user1', type: EUserType.Staff, displayName: 'Staff User' } as IUser;
+
+            mockAuthService.currentUser$.next(nonTutorUser);
+            fixture.detectChanges();
+
+            expect(component.tutorRating).toBeNull();
         });
     });
 });

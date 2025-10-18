@@ -12,6 +12,46 @@
       </mat-autocomplete>
     </mat-form-field>
 
+    <app-address-autocomplete
+      [initialAddress]="bundleForm.get('lessonLocation')?.value"
+      label="Lesson Location"
+      placeholder="Enter lesson address"
+      (addressSelected)="onAddressSelected($event)">
+    </app-address-autocomplete>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Manager (Staff Member)</mat-label>
+      <input type="text" matInput [formControl]="managerNameCtrl" [matAutocomplete]="autoManager" placeholder="Search for a staff member...">
+      <mat-autocomplete #autoManager="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onManagerSelected($event)">
+        @for (manager of filteredManagers$ | async; track manager._id) {
+          <mat-option [value]="manager">{{ manager.displayName }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Stakeholders</mat-label>
+      <input type="text" matInput [formControl]="stakeholderNameCtrl" [matAutocomplete]="autoStakeholder" placeholder="Add stakeholders...">
+      <mat-autocomplete #autoStakeholder="matAutocomplete" [displayWith]="displayUser" (optionSelected)="onStakeholderSelected($event)">
+        @for (stakeholder of filteredStakeholders$ | async; track stakeholder._id) {
+          <mat-option [value]="stakeholder">{{ stakeholder.displayName }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+
+    @if (selectedStakeholders.length > 0) {
+      <div class="stakeholders-chips">
+        @for (stakeholder of selectedStakeholders; track stakeholder._id) {
+          <div class="stakeholder-chip">
+            {{ stakeholder.displayName }}
+            <button mat-icon-button (click)="removeStakeholder(stakeholder)" type="button">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+    }
+
     <mat-divider></mat-divider>
 
     <div formArrayName="subjects">
@@ -50,7 +90,7 @@
             </mat-form-field>
           </div>
 
-          <div class="form-row">
+          <div class="form-row" >
             <mat-form-field appearance="outline" class="flex-item">
               <mat-label>Tutor Name</mat-label>
                <input type="text" matInput [formControl]="getFormControl(i, 'tutorName')" [matAutocomplete]="autoTutor" placeholder="Search for a tutor...">
@@ -90,10 +130,17 @@
       }
     </div>
   </form>
+
+  @if (validationError) {
+    <div class="validation-error-banner">
+      <mat-icon>error</mat-icon>
+      <span>{{ validationError }}</span>
+    </div>
+  }
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="bundleForm.invalid || isSaving">
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="bundleForm.invalid || isSaving || validationError">
     @if (isSaving) {
     <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
     } @else {

@@ -5,6 +5,7 @@ import { EUserType } from "../enums/user-type.enum";
 import IBadge from "./IBadge.interface";
 import { ILeave } from "./ILeave.interface";
 import { IProficiency } from "./IProficiency.interface";
+import { IAddress } from "./IAddress.interface";
 
 export interface IRateAdjustment {
     reason: string;
@@ -24,6 +25,7 @@ export interface IUser {
     email: string;
     displayName: string;
     picture?: string;
+    address?: IAddress;
     firstLogin: boolean;
     createdAt: Date;
     roles: RoleNode[];
@@ -39,4 +41,5 @@ export interface IUser {
     paymentType: 'Contract' | 'Salaried';
     monthlyMinimum: number;
     rateAdjustments: IRateAdjustment[];
+    welcomeCardDismissed?: boolean;
 }

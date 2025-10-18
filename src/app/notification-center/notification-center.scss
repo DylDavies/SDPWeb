@@ -1,5 +1,7 @@
 mat-card-header {
     position: relative;
+    // Allow wrapping for header content on small screens
+    flex-wrap: wrap;
 }
 
 .header-actions {
@@ -30,14 +32,14 @@ mat-card-header {
             .notification-main {
                 display: flex;
                 align-items: center;
-                flex-grow: 1; // Allows this section to take up available space
-                margin-right: 16px; // Ensures space between content and meta
+                flex-grow: 1;
+                margin-right: 16px; 
             }
 
             .notification-meta {
                 display: flex;
                 align-items: center;
-                flex-shrink: 0; // Prevents this section from shrinking
+                flex-shrink: 0;
             }
 
             .notification-time {
@@ -53,7 +55,6 @@ mat-card-header {
                 transition: opacity 0.2s ease-in-out;
 
                 button {
-                  // Ensure the button is vertically centered if its size changes
                   display: flex;
                   align-items: center;
                   justify-content: center;
@@ -64,14 +65,14 @@ mat-card-header {
                 background-color: var(--mat-sys-surface);
 
                 .actions-container {
-                    opacity: 1; // Show button on hover
+                    opacity: 1;
                 }
             }
 
             &.unread {
                 background-color: var(--mat-sys-primary-container);
                 color: var(--mat-sys-on-primary-container);
-                cursor: pointer; /* Unread items are clickable */
+                cursor: pointer;
 
                 .content-container .notification-message {
                     color: var(--mat-sys-on-primary-container);
@@ -107,4 +108,28 @@ mat-card-header {
         color: #888;
         font-style: italic;
     }
+}
+
+@media (max-width: 576px) {
+  .notification-center-container {
+    padding: 12px;
+    padding-top: 0;
+  }
+  
+  mat-card-header {
+    position: static;
+    display: block;
+    padding-bottom: 1rem;
+  }
+  
+  .header-actions {
+    position: static;
+    margin-top: 1rem;
+    
+    flex-direction: column;
+
+    button {
+      width: 100%; 
+    }
+  }
 }

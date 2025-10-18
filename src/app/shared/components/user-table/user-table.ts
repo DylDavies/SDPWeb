@@ -26,6 +26,8 @@ import { RoleNode, RoleService } from '../../../services/role-service';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-user-table',
@@ -34,7 +36,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
     CommonModule, MatTableModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatChipsModule, MatTooltipModule, UserTypePipe, MatMenuModule,
     RoleChipRow, MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, ReactiveFormsModule, MatDialogModule
+    MatSelectModule, ReactiveFormsModule, MatDialogModule, MatCardModule
   ],
   templateUrl: './user-table.html',
   styleUrl: './user-table.scss'
@@ -46,7 +48,7 @@ export class UserTable implements OnInit, OnDestroy {
   private roleService = inject(RoleService);
   private userService = inject(UserService);
   private router = inject(Router);
-
+  private breakpointObserver = inject(BreakpointObserver);
 
   public dataSource = new MatTableDataSource<IUser>();
   public displayedColumns: string[] = ['avatar', 'displayName', 'userType', 'roles'];
@@ -55,6 +57,7 @@ export class UserTable implements OnInit, OnDestroy {
   public types = Object.values(EUserType);
   public currentUser: IUser | null = null;
   public isLoading = true;
+  public isMobile = false;
 
   public allRoles: RoleNode[] = [];
   public roleFilterControl = new FormControl<string[]>([]);
@@ -83,6 +86,14 @@ export class UserTable implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.subscriptions.add(
+      this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Tablet]).subscribe(result => {
+        Promise.resolve().then(()=>{
+          this.isMobile = result.matches;
+        })
+      })
+    );
+
     this.isAdminView = this.authService.hasPermission(EPermission.ADMIN_DASHBOARD_VIEW);
     this.canManageRoles = this.authService.hasPermission(EPermission.USERS_MANAGE_ROLES);
 
@@ -95,7 +106,7 @@ export class UserTable implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.authService.currentUser$.subscribe(user => this.currentUser = user)
     );
-      
+
     this.subscriptions.add(
         this.userService.allUsers$.subscribe(users => {
             this.dataSource.data = users;
@@ -128,7 +139,6 @@ export class UserTable implements OnInit, OnDestroy {
 
     this.dataSource.filterPredicate = (data: IUser, filter: string): boolean => {
       const { text, roles } = JSON.parse(filter);
-
       const textMatch = (
         data.displayName.toLowerCase().includes(text) ||
         data.email.toLowerCase().includes(text) ||
@@ -136,11 +146,9 @@ export class UserTable implements OnInit, OnDestroy {
         (data.disabled && 'disabled'.includes(text)) ||
         data.roles.some(r => r.name.toLowerCase().includes(text))
       );
-
-      const roleMatch = roles.length === 0 || roles.every((roleId: string) => 
+      const roleMatch = roles.length === 0 || roles.every((roleId: string) =>
         data.roles.some(userRole => userRole._id === roleId)
       );
-
       return textMatch && roleMatch;
     };
   }

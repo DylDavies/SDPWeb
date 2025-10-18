@@ -7,5 +7,6 @@ export enum ESocketMessage {
     ExtraWorkUpdated = "extra-work-updated",
     SidebarUpdated = "sidebar-updated",
     BadgesUpdated = "badges-updated",
-    NotificationsUpdated = "notifications-updated"
+    NotificationsUpdated = "notifications-updated",
+    PlatformStatsUpdated = "platform-stats-updated"
 }

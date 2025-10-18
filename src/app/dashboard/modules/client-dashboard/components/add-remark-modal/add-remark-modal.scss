@@ -48,3 +48,67 @@ form {
   align-items: center;
   min-height: 250px;
 }
+
+.file-upload-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  background-color: var(--mat-sys-surface-container-low);
+}
+
+.file-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+  margin-bottom: 0.5rem;
+}
+
+.existing-file-info {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background-color: var(--mat-sys-surface-container);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .info-icon {
+    color: var(--mat-sys-tertiary);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.new-file-info {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background-color: var(--mat-sys-primary-container);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-primary-container);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .info-icon {
+    color: var(--mat-sys-primary);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.required-indicator {
+  color: var(--mat-sys-error);
+  font-weight: bold;
+  margin-left: 0.25rem;
+}
+
+.enable-scroll {
+  overflow-y: scroll !important; 
+}

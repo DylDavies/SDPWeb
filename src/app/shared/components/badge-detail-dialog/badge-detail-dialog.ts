@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import IBadge from '../../../models/interfaces/IBadge.interface';
@@ -13,7 +13,8 @@ import { IUserBadge } from '../../../models/interfaces/IUser.interface';
   standalone: true,
   imports: [CommonModule, MatDialogModule, MatIconModule, MatButtonModule, MatDividerModule, MatTooltipModule],
   templateUrl: './badge-detail-dialog.html',
-  styleUrls: ['./badge-detail-dialog.scss']
+  styleUrls: ['./badge-detail-dialog.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BadgeDetailDialogComponent implements OnInit {
   public expirationDate: string | null = null;

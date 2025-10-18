@@ -12,6 +12,8 @@ import { IBundle, IPopulatedUser } from '../../../../models/interfaces/IBundle.i
 import { MatTabsModule } from "@angular/material/tabs";
 import { MissionsModal } from '../components/missions-modal/missions-modal';
 import { MissionsTable } from '../components/missions-table/missions-table';
+import { LessonsTable } from '../components/lessons-table/lessons-table';
+import { RemarksDisplay } from '../components/remarks-display/remarks-display';
 import { MatDialog } from '@angular/material/dialog';
 import { IUser } from '../../../../models/interfaces/IUser.interface';
 import { EPermission } from '../../../../models/enums/permission.enum';
@@ -21,12 +23,13 @@ import { MissionService } from '../../../../services/missions-service';
 import { IEvent } from '../../../../models/interfaces/IEvent.interface';
 import { Observable, switchMap, of, catchError, forkJoin } from 'rxjs';
 import { IMissions } from '../../../../models/interfaces/IMissions.interface';
+import { EMissionStatus } from '../../../../models/enums/mission-status.enum';
 
 @Component({
   selector: 'app-student-information-page',
   standalone: true,
   imports: [CommonModule, DatePipe, TitleCasePipe, MatCardModule, MatProgressSpinnerModule,
-    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsTable],
+    MatIconModule, MatButtonModule, MatDividerModule, MatListModule, MatTabsModule, MissionsTable, LessonsTable, RemarksDisplay],
   templateUrl: './student-information-page.html',
   styleUrl: './student-information-page.scss'
 })
@@ -43,6 +46,7 @@ export class StudentInformationPage implements OnInit {
   public isLoading = true;
   public bundleNotFound = false;
   public bundleId: string | null = null;
+  public studentId: string | null = null;
   public canCreateMissions = false;
   public isUpdatingMissions = false;
 
@@ -63,6 +67,7 @@ export class StudentInformationPage implements OnInit {
       next: (bundle) => {
         if (bundle) {
           this.bundle = bundle;
+          this.studentId = typeof bundle.student === 'object' ? bundle.student._id : bundle.student;
           this.getTutorsFromBundle();
         } else {
           this.bundleNotFound = true;
@@ -104,14 +109,20 @@ updateAllMissionHours(): void {
 
 updateMissionsForTutors(tutorHours: Map<string, number>): void {
   const updatePromises:Observable<IMissions | null>[] = [];
-  
+
   tutorHours.forEach((totalHours, tutorId) => {
-    if (totalHours >= 0) { 
+    if (totalHours >= 0) {
       const missionUpdate$ = this.missionService.findMissionByBundleAndTutor(this.bundleId!, tutorId)
         .pipe(
           switchMap(mission => {
             if (mission) {
-              return this.missionService.updateMissionHours(mission._id, totalHours);
+              // Only update hours if mission is still active
+              if (mission.status === EMissionStatus.Active) {
+                return this.missionService.updateMissionHours(mission._id, totalHours);
+              } else {
+                console.log(`Mission ${mission._id} has status ${mission.status}, skipping hours update`);
+                return of(null);
+              }
             } else {
               console.warn(`No mission found for bundle ${this.bundleId} and tutor ${tutorId}`);
               return of(null);
@@ -122,24 +133,24 @@ updateMissionsForTutors(tutorHours: Map<string, number>): void {
             return of(null);
           })
         );
-      
+
       updatePromises.push(missionUpdate$);
     }
   });
-  
+
   if (updatePromises.length > 0) {
     forkJoin(updatePromises).subscribe({
       next: () => {
-        this.isUpdatingMissions = false;  
+        this.isUpdatingMissions = false;
       },
       error: (error) => {
         console.error('Error updating mission hours:', error);
-        this.isUpdatingMissions = false;  
+        this.isUpdatingMissions = false;
       }
     });
   } else {
     console.log('No missions to update');
-    this.isUpdatingMissions = false;  
+    this.isUpdatingMissions = false;
   }
 }
 

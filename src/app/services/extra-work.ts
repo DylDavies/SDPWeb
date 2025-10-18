@@ -1,4 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IExtraWork, EExtraWorkStatus } from '../models/interfaces/IExtraWork.interface';
@@ -13,21 +14,51 @@ export class ExtraWorkService {
   private httpService = inject(HttpService);
   private socketService = inject(SocketService);
   private observableService = inject(CustomObservableService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   private allExtraWorkSubject$ = new BehaviorSubject<IExtraWork[]>([]);
   public allExtraWork$: Observable<IExtraWork[]>;
+  private socketListenerSetup = false;
 
   constructor() {
-    this.socketService.listen(ESocketMessage.ExtraWorkUpdated).subscribe(() => {
-      console.log('Received extra-work-updated event. Refreshing user list.');
-      this.getAllExtraWork().subscribe();
-    });
-
     this.allExtraWork$ = this.observableService.createManagedTopicObservable(
       ESocketMessage.ExtraWorkUpdated,
       this.allExtraWorkSubject$,
       () => this.getAllExtraWork()
-    )
+    );
+
+    // Setup socket listener when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListener();
+    }
+  }
+
+  /**
+   * Sets up the socket listener for extra work updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListener() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen(ESocketMessage.ExtraWorkUpdated).subscribe(() => {
+        console.log('Received extra-work-updated event. Refreshing user list.');
+        this.getAllExtraWork().subscribe();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listener
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen(ESocketMessage.ExtraWorkUpdated).subscribe(() => {
+            console.log('Received extra-work-updated event. Refreshing user list.');
+            this.getAllExtraWork().subscribe();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
   /**

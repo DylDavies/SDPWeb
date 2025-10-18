@@ -1,7 +1,7 @@
 <div class="rate-history-dialog">
   <h2 mat-dialog-title>
     <mat-icon>history</mat-icon>
-    Rate History for {{ user.displayName }}
+    <span>Rate History for {{ user.displayName }}</span>
   </h2>
 
   <mat-dialog-content>
@@ -15,23 +15,18 @@
         <p>No rate adjustment history found for this user.</p>
       </div>
 
-      <table *ngIf="adjustments.length > 0" mat-table [dataSource]="adjustments" class="mat-elevation-z4">
+      <table *ngIf="adjustments.length > 0" mat-table [dataSource]="adjustments" class="mat-elevation-z4 history-table">
 
-        <!-- Effective Date Column -->
         <ng-container matColumnDef="effectiveDate">
           <th mat-header-cell *matHeaderCellDef>Effective Date</th>
           <td mat-cell *matCellDef="let adjustment">{{ adjustment.effectiveDate | date:'dd/MM/yyyy' }}</td>
         </ng-container>
-
-        <!-- Rate Column -->
         <ng-container matColumnDef="rate">
           <th mat-header-cell *matHeaderCellDef>Rate</th>
           <td mat-cell *matCellDef="let adjustment">
             <span class="rate-value">{{ adjustment.newRate | currency:'R':'symbol':'1.2-2' }}/hr</span>
           </td>
         </ng-container>
-
-        <!-- Reason Column -->
         <ng-container matColumnDef="reason">
           <th mat-header-cell *matHeaderCellDef>Reason</th>
           <td mat-cell *matCellDef="let adjustment">
@@ -39,21 +34,44 @@
           </td>
         </ng-container>
 
-        <!-- Approving Manager Column -->
         <ng-container matColumnDef="approvingManager">
           <th mat-header-cell *matHeaderCellDef>Approved By</th>
           <td mat-cell *matCellDef="let adjustment">
             <div class="approver-info">
-              <span class="approver-name">{{ adjustment.approverName }}</span>
-              <span *ngIf="adjustment.approverEmail" class="approver-email">({{ adjustment.approverEmail }})</span>
+              <span class="approver-name">{{ $any(adjustment).approverName }}</span>
+              <span *ngIf="$any(adjustment).approverEmail" class="approver-email">({{ $any(adjustment).approverEmail }})</span>
             </div>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-            [attr.data-index]="row.effectiveDate"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
+
+      <div *ngIf="adjustments.length > 0" class="card-list">
+        <mat-card *ngFor="let adjustment of adjustments" class="history-card">
+          <div class="card-row">
+            <span class="card-label">Effective Date</span>
+            <span>{{ adjustment.effectiveDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Rate</span>
+            <span class="rate-value">{{ adjustment.newRate | currency:'R':'symbol':'1.2-2' }}/hr</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Approved By</span>
+            <div class="approver-info-mobile">
+               <span class="approver-name">{{ $any(adjustment).approverName }}</span>
+              <span *ngIf="$any(adjustment).approverEmail" class="approver-email">({{ $any(adjustment).approverEmail }})</span>
+            </div>
+          </div>
+          <div class="card-row reason">
+            <span class="card-label">Reason</span>
+            <span class="reason-text-mobile">{{ adjustment.reason }}</span>
+          </div>
+        </mat-card>
+      </div>
+
     </div>
 
     <ng-template #loading>

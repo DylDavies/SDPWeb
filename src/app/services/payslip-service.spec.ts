@@ -247,6 +247,18 @@ describe('PayslipService', () => {
       });
     });
 
+    describe('updateBonus', () => {
+      it('should update bonus in payslip', () => {
+        httpService.put.and.returnValue(of(mockPayslip));
+
+        service.updateBonus('123', 0, bonusData).subscribe(payslip => {
+          expect(payslip).toEqual(mockPayslip);
+        });
+
+        expect(httpService.put).toHaveBeenCalledWith('payslips/123/bonuses/0', bonusData);
+      });
+    });
+
     describe('removeBonus', () => {
       it('should remove bonus from payslip', () => {
         httpService.delete.and.returnValue(of(mockPayslip));
@@ -336,6 +348,134 @@ describe('PayslipService', () => {
         });
 
         expect(httpService.delete).toHaveBeenCalledWith('payslips/123/misc-earnings/0');
+      });
+    });
+  });
+
+  describe('Earnings Management', () => {
+    const earningData = {
+      description: 'Teaching Hours',
+      baseRate: 50,
+      hours: 20,
+      rate: 150,
+      date: '2024-09-15',
+      total: 3050
+    };
+
+    describe('updateEarning', () => {
+      it('should update earning in payslip', () => {
+        httpService.put.and.returnValue(of(mockPayslip));
+
+        service.updateEarning('123', 0, earningData).subscribe(payslip => {
+          expect(payslip).toEqual(mockPayslip);
+        });
+
+        expect(httpService.put).toHaveBeenCalledWith('payslips/123/earnings/0', earningData);
+      });
+    });
+  });
+
+  describe('Admin Methods', () => {
+    describe('getAllPayslips', () => {
+      it('should get all payslips without filters', () => {
+        httpService.get.and.returnValue(of(mockPayslips));
+
+        service.getAllPayslips().subscribe(payslips => {
+          expect(payslips).toEqual(mockPayslips);
+        });
+
+        expect(httpService.get).toHaveBeenCalled();
+      });
+
+      it('should get all payslips with status filter', () => {
+        httpService.get.and.returnValue(of(mockPayslips));
+
+        service.getAllPayslips({ status: 'DRAFT' }).subscribe(payslips => {
+          expect(payslips).toEqual(mockPayslips);
+        });
+
+        expect(httpService.get).toHaveBeenCalled();
+      });
+
+      it('should get all payslips with userId filter', () => {
+        httpService.get.and.returnValue(of(mockPayslips));
+
+        service.getAllPayslips({ userId: 'user1' }).subscribe(payslips => {
+          expect(payslips).toEqual(mockPayslips);
+        });
+
+        expect(httpService.get).toHaveBeenCalled();
+      });
+
+      it('should get all payslips with payPeriod filter', () => {
+        httpService.get.and.returnValue(of(mockPayslips));
+
+        service.getAllPayslips({ payPeriod: '2024-09' }).subscribe(payslips => {
+          expect(payslips).toEqual(mockPayslips);
+        });
+
+        expect(httpService.get).toHaveBeenCalled();
+      });
+    });
+
+    describe('approvePayslip', () => {
+      it('should approve a payslip', () => {
+        httpService.post.and.returnValue(of(mockPayslip));
+
+        service.approvePayslip('123').subscribe(payslip => {
+          expect(payslip).toEqual(mockPayslip);
+        });
+
+        expect(httpService.post).toHaveBeenCalledWith('payslips/123/approve', {});
+      });
+    });
+
+    describe('rejectPayslip', () => {
+      it('should reject a payslip', () => {
+        httpService.post.and.returnValue(of(mockPayslip));
+
+        service.rejectPayslip('123').subscribe(payslip => {
+          expect(payslip).toEqual(mockPayslip);
+        });
+
+        expect(httpService.post).toHaveBeenCalledWith('payslips/123/reject', {});
+      });
+    });
+
+    describe('markPayslipAsPaid', () => {
+      it('should mark payslip as paid', () => {
+        httpService.post.and.returnValue(of(mockPayslip));
+
+        service.markPayslipAsPaid('123').subscribe(payslip => {
+          expect(payslip).toEqual(mockPayslip);
+        });
+
+        expect(httpService.post).toHaveBeenCalledWith('payslips/123/mark-paid', {});
+      });
+    });
+
+    describe('addItemToPayslip', () => {
+      it('should add item to payslip', () => {
+        const itemData = { description: 'Test Item', amount: 100 };
+        httpService.post.and.returnValue(of(mockPayslip));
+
+        service.addItemToPayslip('123', 'bonus', itemData).subscribe(payslip => {
+          expect(payslip).toEqual(mockPayslip);
+        });
+
+        expect(httpService.post).toHaveBeenCalledWith('payslips/123/add-item', { itemType: 'bonus', itemData });
+      });
+    });
+
+    describe('removeItemFromPayslip', () => {
+      it('should remove item from payslip', () => {
+        httpService.delete.and.returnValue(of(mockPayslip));
+
+        service.removeItemFromPayslip('123', 'bonus-0').subscribe(payslip => {
+          expect(payslip).toEqual(mockPayslip);
+        });
+
+        expect(httpService.delete).toHaveBeenCalledWith('payslips/123/item/bonus-0');
       });
     });
   });

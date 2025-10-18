@@ -146,6 +146,93 @@ describe('BundleService', () => {
         done();
       });
     });
+
+    it('should create a bundle with lessonLocation', (done) => {
+      const studentId = 'student-456';
+      const subjects: Partial<IBundleSubject>[] = [
+        { subject: 'math-123', grade: '10', tutor: 'tutor-123', durationMinutes: 120 }
+      ];
+      const lessonLocation = {
+        streetAddress: '101 Library Street',
+        city: 'New York',
+        state: 'NY',
+        postalCode: '10001',
+        country: 'USA',
+        formattedAddress: '101 Library Street, New York, NY 10001, USA'
+      };
+      httpServiceSpy.post.and.returnValue(of(mockBundle));
+
+      service.createBundle(studentId, subjects, lessonLocation).subscribe((bundle) => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('bundle', {
+          student: studentId,
+          subjects: subjects,
+          lessonLocation: lessonLocation
+        });
+        done();
+      });
+    });
+
+    it('should create a bundle with manager', (done) => {
+      const studentId = 'student-456';
+      const subjects: Partial<IBundleSubject>[] = [
+        { subject: 'math-123', grade: '10', tutor: 'tutor-123', durationMinutes: 120 }
+      ];
+      const managerId = 'manager-123';
+      httpServiceSpy.post.and.returnValue(of(mockBundle));
+
+      service.createBundle(studentId, subjects, undefined, managerId).subscribe((bundle) => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('bundle', {
+          student: studentId,
+          subjects: subjects,
+          manager: managerId
+        });
+        done();
+      });
+    });
+
+    it('should create a bundle with stakeholders', (done) => {
+      const studentId = 'student-456';
+      const subjects: Partial<IBundleSubject>[] = [
+        { subject: 'math-123', grade: '10', tutor: 'tutor-123', durationMinutes: 120 }
+      ];
+      const stakeholderIds = ['stakeholder-1', 'stakeholder-2'];
+      httpServiceSpy.post.and.returnValue(of(mockBundle));
+
+      service.createBundle(studentId, subjects, undefined, undefined, stakeholderIds).subscribe((bundle) => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('bundle', {
+          student: studentId,
+          subjects: subjects,
+          stakeholders: stakeholderIds
+        });
+        done();
+      });
+    });
+
+    it('should create a bundle with all optional fields', (done) => {
+      const studentId = 'student-456';
+      const subjects: Partial<IBundleSubject>[] = [
+        { subject: 'math-123', grade: '10', tutor: 'tutor-123', durationMinutes: 120 }
+      ];
+      const lessonLocation = {
+        streetAddress: 'Online',
+        city: 'Virtual',
+        formattedAddress: 'Online - Virtual'
+      };
+      const managerId = 'manager-123';
+      const stakeholderIds = ['stakeholder-1'];
+      httpServiceSpy.post.and.returnValue(of(mockBundle));
+
+      service.createBundle(studentId, subjects, lessonLocation, managerId, stakeholderIds).subscribe((bundle) => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('bundle', {
+          student: studentId,
+          subjects: subjects,
+          lessonLocation: lessonLocation,
+          manager: managerId,
+          stakeholders: stakeholderIds
+        });
+        done();
+      });
+    });
   });
 
   describe('updateBundle', () => {
@@ -169,6 +256,48 @@ describe('BundleService', () => {
     it('should update bundle status only', (done) => {
       const bundleId = 'bundle-456';
       const updateData: Partial<IBundle> = { status: EBundleStatus.Denied };
+      httpServiceSpy.patch.and.returnValue(of(mockBundle));
+
+      service.updateBundle(bundleId, updateData).subscribe(() => {
+        expect(httpServiceSpy.patch).toHaveBeenCalledWith(`bundle/${bundleId}`, updateData);
+        done();
+      });
+    });
+
+    it('should update bundle with lessonLocation', (done) => {
+      const bundleId = 'bundle-123';
+      const updateData: Partial<IBundle> = {
+        lessonLocation: {
+          streetAddress: '200 New Street',
+          city: 'Boston',
+          state: 'MA',
+          postalCode: '02101',
+          country: 'USA',
+          formattedAddress: '200 New Street, Boston, MA 02101, USA'
+        }
+      };
+      httpServiceSpy.patch.and.returnValue(of(mockBundle));
+
+      service.updateBundle(bundleId, updateData).subscribe(() => {
+        expect(httpServiceSpy.patch).toHaveBeenCalledWith(`bundle/${bundleId}`, updateData);
+        done();
+      });
+    });
+
+    it('should update bundle with manager', (done) => {
+      const bundleId = 'bundle-123';
+      const updateData: Partial<IBundle> = { manager: 'manager-456' };
+      httpServiceSpy.patch.and.returnValue(of(mockBundle));
+
+      service.updateBundle(bundleId, updateData).subscribe(() => {
+        expect(httpServiceSpy.patch).toHaveBeenCalledWith(`bundle/${bundleId}`, updateData);
+        done();
+      });
+    });
+
+    it('should update bundle with stakeholders', (done) => {
+      const bundleId = 'bundle-123';
+      const updateData: Partial<IBundle> = { stakeholders: ['stakeholder-1', 'stakeholder-2'] };
       httpServiceSpy.patch.and.returnValue(of(mockBundle));
 
       service.updateBundle(bundleId, updateData).subscribe(() => {
@@ -324,6 +453,60 @@ describe('BundleService', () => {
           `bundle/${bundleId}/status`,
           { status: EBundleStatus.Pending }
         );
+        done();
+      });
+    });
+  });
+
+  describe('createBundle - additional edge cases', () => {
+    it('should create bundle without optional lessonLocation', (done) => {
+      const studentId = 'student-456';
+      const subjects: Partial<IBundleSubject>[] = [
+        { subject: 'math-123', grade: '10', tutor: 'tutor-123', durationMinutes: 120 }
+      ];
+      httpServiceSpy.post.and.returnValue(of(mockBundle));
+
+      service.createBundle(studentId, subjects, undefined, undefined, undefined).subscribe((bundle) => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('bundle', {
+          student: studentId,
+          subjects: subjects
+        });
+        done();
+      });
+    });
+
+    it('should create bundle with only managerId', (done) => {
+      const studentId = 'student-456';
+      const subjects: Partial<IBundleSubject>[] = [
+        { subject: 'math-123', grade: '10', tutor: 'tutor-123', durationMinutes: 120 }
+      ];
+      const managerId = 'manager-999';
+      httpServiceSpy.post.and.returnValue(of(mockBundle));
+
+      service.createBundle(studentId, subjects, undefined, managerId, undefined).subscribe(() => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('bundle', {
+          student: studentId,
+          subjects: subjects,
+          manager: managerId
+        });
+        done();
+      });
+    });
+
+    it('should create bundle with only stakeholderIds', (done) => {
+      const studentId = 'student-456';
+      const subjects: Partial<IBundleSubject>[] = [
+        { subject: 'math-123', grade: '10', tutor: 'tutor-123', durationMinutes: 120 }
+      ];
+      const stakeholderIds = ['stakeholder-1'];
+      httpServiceSpy.post.and.returnValue(of(mockBundle));
+
+      service.createBundle(studentId, subjects, undefined, undefined, stakeholderIds).subscribe(() => {
+        expect(httpServiceSpy.post).toHaveBeenCalledWith('bundle', {
+          student: studentId,
+          subjects: subjects,
+          stakeholders: stakeholderIds
+        });
         done();
       });
     });

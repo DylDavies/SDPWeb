@@ -35,13 +35,15 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'patch', 'delete']);
-    const socketSpy = jasmine.createSpyObj('SocketService', ['listen']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'isSocketConnected', 'connectionHook']);
     currentUserSubject = new BehaviorSubject(null);
     const authSpy = jasmine.createSpyObj('AuthService', [], {
       currentUser$: currentUserSubject.asObservable()
     });
 
     socketSpy.listen.and.returnValue(of({}));
+    socketSpy.isSocketConnected.and.returnValue(false);
+    socketSpy.connectionHook.and.callFake((cb: () => void) => cb());
     httpSpy.get.and.returnValue(of(mockNotifications));
 
     TestBed.configureTestingModule({
