@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -39,7 +39,8 @@ import { ConfirmationDialog } from '../../../shared/components/confirmation-dial
     MatTooltipModule
   ],
   templateUrl: './bundle-dashboard.html',
-  styleUrls: ['./bundle-dashboard.scss']
+  styleUrls: ['./bundle-dashboard.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BundleDashboard implements OnInit, AfterViewInit {
   private bundleService = inject(BundleService);

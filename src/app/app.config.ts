@@ -2,7 +2,7 @@ import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners,
 import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideClientHydration, withEventReplay, withNoHttpTransferCache } from '@angular/platform-browser';
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth-interceptor';
@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'reload' })),
-    provideClientHydration(withEventReplay()),
+    provideClientHydration(withEventReplay(), withNoHttpTransferCache()),
     provideAnimationsAsync(),
     provideHttpClient(withFetch(), withInterceptors([
       authInterceptor

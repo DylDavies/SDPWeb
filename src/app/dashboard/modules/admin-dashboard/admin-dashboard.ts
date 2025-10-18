@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { EPermission } from '../../../models/enums/permission.enum';
@@ -16,7 +16,8 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
   selector: 'app-admin-dashboard',
   imports: [CommonModule, MatTabsModule, MatIconModule, UserTable, RoleManagement, AdminProficiencyManagement, BadgeManagement, SidebarCustomization, RemarkTemplateManagement],
   templateUrl: './admin-dashboard.html',
-  styleUrl: './admin-dashboard.scss'
+  styleUrl: './admin-dashboard.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminDashboard implements OnInit{
   private authService = inject(AuthService);

@@ -40,7 +40,8 @@ describe('UserService', () => {
   beforeEach(() => {
     // Create spy objects for the services, including the new methods and the new service
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch', 'delete']);
-    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe', 'isSocketConnected', 'connectionHook']);
+    socketSpy.isSocketConnected.and.returnValue(false);
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
 
     TestBed.configureTestingModule({

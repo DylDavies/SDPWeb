@@ -47,7 +47,7 @@ describe('ExtraWorkService', () => {
   beforeEach(() => {
     // Create spy objects for the services
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch']);
-    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe', 'isSocketConnected', 'connectionHook']);
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
 
     socketListener$ = new Subject<unknown>();
@@ -67,6 +67,8 @@ describe('ExtraWorkService', () => {
 
     // Default spy implementations
     socketServiceSpy.listen.and.returnValue(socketListener$.asObservable());
+    socketServiceSpy.isSocketConnected.and.returnValue(false);
+    socketServiceSpy.connectionHook.and.callFake((cb: () => void) => cb());
     httpServiceSpy.get.and.returnValue(of(mockExtraWork));
     httpServiceSpy.post.and.returnValue(of(mockExtraWork[0]));
     httpServiceSpy.patch.and.returnValue(of(mockExtraWork[0]));

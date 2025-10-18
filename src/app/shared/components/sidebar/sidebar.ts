@@ -59,23 +59,16 @@ export class Sidebar implements OnInit, OnDestroy {
   private ratingSubscription: Subscription | null = null;
 
   ngOnInit(): void {
-    this.userSubscription = this.authService.currentUser$.subscribe((user) => {
-      this.user = user;
-
-      // Fetch tutor rating if user has tutor role
-      if (user && this.hasTutorRole(user)) {
-        this.loadTutorRating(user._id);
-      } else {
-        this.tutorRating = null;
-      }
-    });
-
-    this.breakpointObserver.observe([
-      Breakpoints.XSmall,
-      Breakpoints.Small
-    ]).subscribe(result => {
-      this.isMobile = result.matches;
-    });
+    setTimeout(() => {
+      this.breakpointObserver.observe([
+        Breakpoints.XSmall,
+        Breakpoints.Small
+      ]).subscribe(result => {
+        this.isMobile = result.matches;
+      });
+    }, 100);
+    
+    this.userSubscription = this.authService.currentUser$.subscribe((user) => this.user = user);
 
     this.sideBarSubscription = this.sideBarService.sidebarItems$.subscribe((items) => this.sideBarLinks = items);
   }

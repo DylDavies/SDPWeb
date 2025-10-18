@@ -8,9 +8,9 @@
   </div>
 
   <div class="badge-grid">
-    <app-badge-card *ngFor="let badge of badges" 
-                    [badge]="badge" 
-                    [context]="'admin'" 
+    <app-badge-card *ngFor="let badge of badges; trackBy: trackById"
+                    [badge]="badge"
+                    [context]="'admin'"
                     (badgeUpdated)="loadBadges()">
     </app-badge-card>
   </div>

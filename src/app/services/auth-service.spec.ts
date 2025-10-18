@@ -42,7 +42,8 @@ const sidebarServiceSpy = jasmine.createSpyObj('SidebarService', ['fetchAndCache
 const socketServiceSpy = {
   listen: jasmine.createSpy('listen').and.returnValue(new Subject<unknown>().asObservable()),
   authenticate: jasmine.createSpy('authenticate'),
-  connectionHook: jasmine.createSpy('connectionHook').and.callFake((cb: () => void) => cb())
+  connectionHook: jasmine.createSpy('connectionHook').and.callFake((cb: () => void) => cb()),
+  isSocketConnected: jasmine.createSpy('isSocketConnected').and.returnValue(false)
 };
 
 describe('AuthService', () => {
