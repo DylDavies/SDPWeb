@@ -41,4 +41,5 @@ export interface IUser {
     paymentType: 'Contract' | 'Salaried';
     monthlyMinimum: number;
     rateAdjustments: IRateAdjustment[];
+    welcomeCardDismissed?: boolean;
 }

@@ -1,6 +1,7 @@
 // src/app/services/user-service.ts
 
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IUser } from '../models/interfaces/IUser.interface';
@@ -42,27 +43,62 @@ export class UserService {
   public httpService = inject(HttpService);
   public socketService = inject(SocketService);
   public observableService = inject(CustomObservableService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   private users$ = new BehaviorSubject<IUser[]>([]);
   public allUsers$: Observable<IUser[]>;
+  private socketListenerSetup = false;
 
   constructor() {
-    this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
-      console.log('Received users-updated event. Refreshing user list.');
-      this.fetchAllUsers().subscribe();
-    });
-
-    this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
-      console.log('Received roles-updated event. Refreshing user list to update roles.');
-      this.fetchAllUsers().subscribe();
-    });
-
     // Initialize the managed observable
     this.allUsers$ = this.observableService.createManagedTopicObservable(
       ESocketMessage.UsersUpdated,
       this.users$.asObservable(),
       () => this.fetchAllUsers()
     );
+
+    // Setup socket listeners when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListeners();
+    }
+  }
+
+  /**
+   * Sets up the socket listeners for user and role updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListeners() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+        console.log('Received users-updated event. Refreshing user list.');
+        this.fetchAllUsers().subscribe();
+      });
+
+      this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+        console.log('Received roles-updated event. Refreshing user list to update roles.');
+        this.fetchAllUsers().subscribe();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listeners
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+            console.log('Received users-updated event. Refreshing user list.');
+            this.fetchAllUsers().subscribe();
+          });
+
+          this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+            console.log('Received roles-updated event. Refreshing user list to update roles.');
+            this.fetchAllUsers().subscribe();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
   /**

@@ -30,7 +30,6 @@ mat-tab-group {
 }
 
 .tab-content-container {
-  padding: 1.5rem;
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
@@ -40,7 +39,6 @@ mat-tab-group {
   display: flex;
   flex-direction: column;
   height: 100%;
-
 
   .subject-list {
     margin-top: 1.5rem;
@@ -62,7 +60,7 @@ mat-tab-group {
 
     mat-list {
       overflow-y: auto;
-      padding-right: 0.5rem; 
+      padding-right: 0.5rem;
 
       &::-webkit-scrollbar {
         width: 8px;
@@ -185,7 +183,9 @@ mat-chip-row {
     width: 100%;
     margin-top: 0.5rem;
     min-height: 2.5rem;
-    span { margin-left: 0.5rem; }
+    span {
+      margin-left: 0.5rem;
+    }
   }
 }
 
@@ -223,5 +223,16 @@ mat-chip-row {
     border-radius: 0.75rem;
     min-height: 12.5rem;
     box-sizing: border-box;
+  }
+}
+
+@media (max-width: 768px) {
+  .edit-tab {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .tab-content-container {
+    padding: 0.1rem; 
   }
 }

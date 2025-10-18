@@ -1,4 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { IProficiency } from '../models/interfaces/IProficiency.interface';
@@ -15,21 +16,51 @@ export class ProficiencyService {
   public httpService = inject(HttpService);
   public socketService = inject(SocketService);
   public observableService = inject(CustomObservableService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   private proficiencies$ = new BehaviorSubject<IProficiency[]>([]);
   public allProficiencies$: Observable<IProficiency[]>;
+  private socketListenerSetup = false;
 
   constructor() {
-    this.socketService.listen<unknown>(ESocketMessage.ProficienciesUpdated).subscribe(() => {
-      console.log('Received proficiencies-updated event. Refreshing proficiency list.');
-      this.fetchAllProficiencies().subscribe();
-    });
-
     this.allProficiencies$ = this.observableService.createManagedTopicObservable(
       ESocketMessage.ProficienciesUpdated,
       this.proficiencies$.asObservable(),
       () => this.fetchAllProficiencies()
-    )
+    );
+
+    // Setup socket listener when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListener();
+    }
+  }
+
+  /**
+   * Sets up the socket listener for proficiency updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListener() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen<unknown>(ESocketMessage.ProficienciesUpdated).subscribe(() => {
+        console.log('Received proficiencies-updated event. Refreshing proficiency list.');
+        this.fetchAllProficiencies().subscribe();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listener
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen<unknown>(ESocketMessage.ProficienciesUpdated).subscribe(() => {
+            console.log('Received proficiencies-updated event. Refreshing proficiency list.');
+            this.fetchAllProficiencies().subscribe();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
   /**

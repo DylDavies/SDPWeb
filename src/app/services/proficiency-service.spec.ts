@@ -24,7 +24,7 @@ describe('ProficiencyService', () => {
   beforeEach(() => {
     // Create spy objects for the services, including the new methods and the new service
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch', 'delete']);
-    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe', 'isSocketConnected', 'connectionHook']);
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
 
     TestBed.configureTestingModule({
@@ -42,6 +42,8 @@ describe('ProficiencyService', () => {
 
     // Default spy implementations
     socketServiceSpy.listen.and.returnValue(of(null));
+    socketServiceSpy.isSocketConnected.and.returnValue(false);
+    socketServiceSpy.connectionHook.and.callFake((cb: () => void) => cb());
     httpServiceSpy.get.and.returnValue(of([]));
 
     // Bypass the logic of the custom observable service for this unit test

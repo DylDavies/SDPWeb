@@ -1,4 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, PLATFORM_ID, inject, NgZone } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -11,9 +12,28 @@ import { TOKEN_STORAGE_KEY } from './auth-service';
 export class SocketService implements OnDestroy {
   private socket: Socket | null = null;
   private isTestEnvironment = false;
+  private platformId = inject(PLATFORM_ID);
+  private ngZone = inject(NgZone);
+  private isBrowser = isPlatformBrowser(this.platformId);
+  private isConnected = false;
+  private pendingConnectionHooks: (() => void)[] = [];
 
   constructor() {
-    // Detect test environment (Karma/Jasmine)
+    // Don't auto-initialize - wait for explicit connect() call
+  }
+
+  /**
+   * Initializes the socket connection.
+   * This should be called when navigating away from the landing page.
+   */
+  connect() {
+    // Prevent multiple connections
+    if (this.isConnected || this.socket) return;
+
+    // Only initialize socket in browser environment
+    if (!this.isBrowser) return;
+
+        // Detect test environment (Karma/Jasmine)
     this.isTestEnvironment = typeof (window as Window & { jasmine?: unknown; __karma__?: unknown }).jasmine !== 'undefined' ||
                               typeof (window as Window & { jasmine?: unknown; __karma__?: unknown }).__karma__ !== 'undefined';
 
@@ -22,27 +42,64 @@ export class SocketService implements OnDestroy {
       return;
     }
 
-    this.socket = io(environment.apiUrl.slice(0, -4), {
-      reconnectionAttempts: 5,
-      reconnectionDelay: 3000,
-    });
+    console.log('Initializing Socket.IO connection...');
+    this.isConnected = true;
 
-    this.socket.on('connect', () => {
-      console.log("Socket.IO Connected");
-    });
+    // Run socket connection outside Angular zone to prevent blocking stability
+    this.ngZone.runOutsideAngular(() => {
+      this.socket = io(environment.apiUrl.slice(0, -4), {
+        reconnectionAttempts: 5,
+        reconnectionDelay: 3000,
+      });
 
-    this.socket.on('disconnect', (reason) => {
-      console.warn(`Socket.IO Disconnected: ${reason}`);
-    });
+      this.socket!.on('connect', () => {
+        console.log("Socket.IO Connected");
+        // Execute all pending connection hooks inside Angular zone
+        this.ngZone.run(() => {
+          this.pendingConnectionHooks.forEach(hook => hook());
+          this.pendingConnectionHooks = [];
+        });
+      });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('%cSocket.IO Connection Error:', 'color: #f44336; font-weight: bold;', error);
+      this.socket!.on('disconnect', (reason) => {
+        console.warn(`Socket.IO Disconnected: ${reason}`);
+      });
+
+      this.socket!.on('connect_error', (error) => {
+        console.error('%cSocket.IO Connection Error:', 'color: #f44336; font-weight: bold;', error);
+      });
     });
   }
 
+  /**
+   * Check if socket is connected
+   */
+  isSocketConnected(): boolean {
+    return this.socket !== null && this.socket.connected;
+  }
+
+  /**
+   * Register a callback to be executed when the socket connects.
+   * If the socket is already connected, the callback is executed immediately.
+   * If the socket doesn't exist yet, the callback is queued and will be executed when the socket connects.
+   */
   public connectionHook(cb: () => void) {
-    if (!this.socket) return;
-    this.socket.on('connect', cb);
+    if (!this.socket) {
+      // Socket doesn't exist yet, queue the callback
+      console.log('SocketService: Queueing connection hook (socket not created yet)');
+      this.pendingConnectionHooks.push(cb);
+      return;
+    }
+
+    if (this.socket.connected) {
+      // Already connected, execute immediately
+      console.log('SocketService: Executing connection hook immediately (already connected)');
+      cb();
+    } else {
+      // Not yet connected, register listener
+      console.log('SocketService: Registering connection hook (socket exists but not connected yet)');
+      this.socket.on('connect', cb);
+    }
   }
 
   authenticate(token: string) {
@@ -61,6 +118,7 @@ export class SocketService implements OnDestroy {
 
 
   private getToken(): string | null {
+    if (!this.isBrowser) return null;
     return localStorage.getItem(TOKEN_STORAGE_KEY);
   }
 
@@ -81,11 +139,14 @@ export class SocketService implements OnDestroy {
   listen<T>(eventName: ESocketMessage): Observable<T> {
     return new Observable((subscriber) => {
       if (!this.socket) {
-        // In test environment, return an observable that never emits
+        subscriber.complete();
         return;
       }
       this.socket.on(eventName, (data: T) => {
-        subscriber.next(data);
+        // Run inside Angular zone to trigger change detection
+        this.ngZone.run(() => {
+          subscriber.next(data);
+        });
       });
     });
   }

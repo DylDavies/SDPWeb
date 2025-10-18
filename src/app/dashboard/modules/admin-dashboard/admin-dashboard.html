@@ -4,7 +4,9 @@
           <mat-tab>
             <ng-template mat-tab-label>
               <mat-icon class="tab-icon">group</mat-icon>
-              <span>User Management</span>
+              @if (!isMobile){
+                <span>User Management</span>
+              }
             </ng-template>
             <div class="tab-content">
               <app-user-table></app-user-table>
@@ -16,7 +18,9 @@
           <mat-tab>
             <ng-template mat-tab-label>
               <mat-icon class="tab-icon">admin_panel_settings</mat-icon>
-              <span>Role Management</span>
+              @if (!isMobile){
+                <span>Role Management</span>
+              }
             </ng-template>
             <div class="tab-content">
               <app-role-management></app-role-management>
@@ -28,7 +32,9 @@
           <mat-tab>
             <ng-template mat-tab-label>
               <mat-icon class="tab-icon">school</mat-icon>
-              <span>Proficiency Management</span>
+              @if (!isMobile){
+                <span>Proficiency Management</span>
+              }
             </ng-template>
             <app-admin-proficiency-management></app-admin-proficiency-management>
           </mat-tab>
@@ -38,7 +44,9 @@
           <mat-tab>
             <ng-template mat-tab-label>
               <mat-icon class="tab-icon">view_sidebar</mat-icon>
-              <span>Sidebar Layout</span>
+              @if (!isMobile){
+                <span>Sidebar Layout</span>
+              }
             </ng-template>
             <div class="tab-content">
               <app-sidebar-customization></app-sidebar-customization>
@@ -50,7 +58,9 @@
           <mat-tab>
             <ng-template mat-tab-label>
               <mat-icon class="tab-icon">military_tech</mat-icon>
-              <span>Badge Management</span>
+              @if (!isMobile){
+                <span>Badge Management</span>
+              }
             </ng-template>
             <div class="tab-content">
                <app-badge-management></app-badge-management>

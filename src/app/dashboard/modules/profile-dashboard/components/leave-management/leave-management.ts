@@ -64,7 +64,7 @@ export class LeaveManagement implements OnInit, OnDestroy, AfterViewInit {
 
     
   
-    if (targetUserId) {
+    if (targetUserId && targetUserId != this.loggedInUser?._id) {
       const userSub = this.userService.getUserById(targetUserId).subscribe(profileUser => {
         if (profileUser) {
           this.viewedUser = profileUser;

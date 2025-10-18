@@ -1,4 +1,4 @@
-name: Build and Deploy AngularJS App
+name: Build and Deploy Angular SSR App
 
 # This workflow triggers when a new release is published
 on:
@@ -19,18 +19,46 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build the application
+      - name: Build SSR application
         run: npm run build -- --configuration production
+        env:
+          NODE_ENV: production
 
-      - name: Copy files to server
-        # This action will copy the contents of your build output to the server
+      - name: Copy SSR files to server
+        # Copy both browser and server bundles for SSR
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "dist/SDPWeb/browser/"
+          source: "dist/SDPWeb/*"
           target: "/var/www/angular"
-          strip_components: 3
+          strip_components: 2
+
+      - name: Copy package.json for production dependencies
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "package.json,package-lock.json"
+          target: "/var/www/angular"
+
+      - name: Install production dependencies and restart server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/angular
+            npm ci --omit=dev
+
+            # Restart the Node.js SSR server (assuming PM2 or systemd)
+            # Option 1: Using PM2
+            pm2 restart tutorcore-ssr || pm2 start server/server.mjs --name tutorcore-ssr
+
+            # Option 2: Using systemd (uncomment if using systemd)
+            # sudo systemctl restart tutorcore-ssr

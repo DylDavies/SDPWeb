@@ -16,8 +16,10 @@ describe('SidebarService', () => {
     // Create spies for HttpService and SocketService
     httpServiceSpy = jasmine.createSpyObj('HttpService', ['get', 'put']);
     socketSubject = new Subject();
-    socketServiceSpy = jasmine.createSpyObj('SocketService', ['listen']);
+    socketServiceSpy = jasmine.createSpyObj('SocketService', ['listen', 'isSocketConnected', 'connectionHook']);
     socketServiceSpy.listen.and.returnValue(socketSubject.asObservable());
+    socketServiceSpy.isSocketConnected.and.returnValue(false);
+    socketServiceSpy.connectionHook.and.callFake((cb: () => void) => cb());
 
     TestBed.configureTestingModule({
       providers: [

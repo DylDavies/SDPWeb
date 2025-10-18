@@ -11,6 +11,10 @@ import { SnackBarService } from '../../../services/snackbar-service';
 import { SocketService } from '../../../services/socket-service';
 import { ESocketMessage } from '../../../models/enums/socket-message.enum';
 import { Subscription } from 'rxjs';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 type TutorLeaderboardItem = PlatformStats['tutorLeaderboard'][number];
 
@@ -24,7 +28,10 @@ type TutorLeaderboardItem = PlatformStats['tutorLeaderboard'][number];
     MatProgressSpinnerModule,
     MatIconModule,
     MatPaginatorModule,
-    MatSortModule
+    MatSortModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MatInputModule
   ],
   templateUrl: './admin-stats.html',
   styleUrl: './admin-stats.scss'
@@ -34,13 +41,25 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
   private snackbarService = inject(SnackBarService);
   private socketService = inject(SocketService);
   private cdr = inject(ChangeDetectorRef);
+  private breakpointObserver = inject(BreakpointObserver);
 
   public stats: PlatformStats | null = null;
   public isLoading = true;
+  public isMobile = false;
   public leaderboardColumns = ['rank', 'tutorName', 'totalHours', 'averageRating', 'missionsCompleted'];
   public leaderboardDataSource = new MatTableDataSource<TutorLeaderboardItem>([]);
 
-  @ViewChild(MatPaginator) paginator?: MatPaginator;
+  private _paginator: MatPaginator | undefined;
+  @ViewChild(MatPaginator) set paginator(paginator: MatPaginator | undefined) {
+    if (paginator) {
+      this._paginator = paginator;
+      this.leaderboardDataSource.paginator = this._paginator;
+    }
+  }
+  get paginator(): MatPaginator | undefined {
+    return this._paginator;
+  }
+  
   @ViewChild(MatSort) sort?: MatSort;
 
   private statsUpdateSubscription?: Subscription;
@@ -58,14 +77,26 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
         case 'missionsCompleted':
           return item.missionsCompleted;
         default:
-          return item[property as keyof TutorLeaderboardItem];
+          // The type assertion is safe here because the property will be one of the keys of TutorLeaderboardItem
+          return item[property as keyof TutorLeaderboardItem] as string | number;
       }
+    };
+    
+    this.leaderboardDataSource.filterPredicate = (data: TutorLeaderboardItem, filter: string) => {
+      return data.tutorName.trim().toLowerCase().includes(filter);
     };
   }
 
   ngOnInit(): void {
     this.loadStats();
     this.subscribeToStatsUpdates();
+    this.breakpointObserver.observe([
+      Breakpoints.XSmall,
+      Breakpoints.Small
+    ]).subscribe(result => {
+      this.isMobile = result.matches;
+      this.cdr.detectChanges();
+    });
   }
 
   ngAfterViewInit(): void {
@@ -83,6 +114,15 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.statsUpdateSubscription.unsubscribe();
     }
     this.socketService.unsubscribe(ESocketMessage.PlatformStatsUpdated);
+  }
+
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.leaderboardDataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.leaderboardDataSource.paginator) {
+      this.leaderboardDataSource.paginator.firstPage();
+    }
   }
 
   private subscribeToStatsUpdates(): void {
@@ -146,7 +186,6 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
     const centerY = 100;
     const radius = 90;
 
-    // Special case: if there's only one category with all tutors
     const nonZeroCount = data.filter(d => d.count > 0).length;
     if (nonZeroCount === 1) {
       const item = data.find(d => d.count > 0)!;
@@ -212,3 +251,4 @@ export class AdminStatsComponent implements OnInit, OnDestroy, AfterViewInit {
     return max || 1;
   }
 }
+

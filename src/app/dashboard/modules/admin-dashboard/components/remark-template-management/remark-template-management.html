@@ -3,7 +3,7 @@
   <p>Drag and drop the fields to reorder them. Add or remove fields as needed. Saving will create a new, active version of the template.</p>
 
   <div cdkDropList class="field-list" (cdkDropListDropped)="drop($event)">
-    <div class="field-box" *ngFor="let field of fields" cdkDrag>
+    <div class="field-box" *ngFor="let field of fields; trackBy: trackByFieldName" cdkDrag>
       <div class="drag-handle" cdkDragHandle>
         <mat-icon>drag_indicator</mat-icon>
       </div>
@@ -24,7 +24,7 @@
     <mat-form-field appearance="outline" class="field-type-select">
       <mat-label>Field Type</mat-label>
       <mat-select [(ngModel)]="newFieldType">
-        <mat-option *ngFor="let type of fieldTypes" [value]="type">{{ type | titlecase }}</mat-option>
+        <mat-option *ngFor="let type of fieldTypes; trackBy: trackByIndex" [value]="type">{{ type | titlecase }}</mat-option>
       </mat-select>
     </mat-form-field>
 

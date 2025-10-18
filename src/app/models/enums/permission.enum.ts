@@ -31,6 +31,9 @@ export enum EPermission {
     BUNDLES_APPROVE = 'bundles:approve',
     TUTOR_MATCHMAKING_ACCESS = 'tutor_matchmaking:access',
 
+    // Student Management Permissions
+    STUDENTS_VIEW = 'students:view',
+
     //Missions Management Permissions
     MISSIONS_CREATE = 'missions:create',
     MISSIONS_VIEW = 'missions:view',

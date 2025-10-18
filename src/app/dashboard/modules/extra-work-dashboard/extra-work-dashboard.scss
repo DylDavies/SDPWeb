@@ -13,16 +13,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 10px;    // Adds space above the filter bar
-  padding-bottom: 10px; // Adds space below the filter bar
+  padding: 10px 0;
+  flex-wrap: wrap;
+  gap: 16px;
 
   mat-form-field {
     max-width: 600px;
     width: 100%;
-  }
-
-  button {
-    margin-left: 16px; // Adds space to the left of the "Add Extra Work" button
+    flex: 1 1 300px;
   }
 }
 
@@ -33,28 +31,28 @@ mat-tab-group {
 .static-table-widths {
   table-layout: fixed;
   width: 100%;
-}
 
-.static-table-widths th {
-  &.mat-column-createdAt { width: 12%; }
-  &.mat-column-student { width: 15%; }
-  &.mat-column-commissioner { width: 15%; }
-  &.mat-column-workType { width: 20%; }
-  &.mat-column-remuneration { width: 13%; }
-  &.mat-column-status { width: 12%; }
-  &.mat-column-actions { width: 8%; }
-}
+  th {
+    &.mat-column-createdAt { width: 12%; }
+    &.mat-column-student { width: 15%; }
+    &.mat-column-commissioner, &.mat-column-createdBy { width: 15%; }
+    &.mat-column-workType { width: 20%; }
+    &.mat-column-remuneration { width: 13%; }
+    &.mat-column-status { width: 12%; }
+    &.mat-column-actions { width: 8%; }
+  }
 
-.static-table-widths td {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .clickable-row {
   cursor: pointer;
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--mat-sys-color-primary-container, rgba(0, 0, 0, 0.04)); 
   }
 }
 
@@ -65,9 +63,110 @@ mat-tab-group {
   font-weight: 500;
   color: #fff;
   display: inline-block;
+
+  &.in-progress { background-color: #2196F3; }
+  &.completed { background-color: #FFC107; color: #000; }
+  &.approved { background-color: #4CAF50; }
+  &.denied { background-color: #f44336; }
 }
 
-.status-chip.in-progress { background-color: #2196F3; }
-.status-chip.completed { background-color: #FFC107; }
-.status-chip.approved { background-color: #4CAF50; }
-.status-chip.denied { background-color: #f44336; }
+
+.mobile-view {
+  display: none;
+}
+.desktop-view {
+  display: block;
+}
+
+.extra-work-card {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mat-sys-surface-container-low, #2a2a2a);
+  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  box-shadow: var(--mat-sys-elevation-level-1, 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12));
+  transition: box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: var(--mat-sys-elevation-level-3, 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12));
+  }
+
+  .card-main-content {
+      flex-grow: 1;
+      padding: 16px;
+  }
+
+  mat-card-header {
+      padding-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+
+      mat-card-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--mat-sys-color-primary); 
+          flex-grow: 1;
+      }
+      mat-card-subtitle {
+          margin-top: 0;
+          font-size: 0.9rem;
+          color: var(--mat-sys-on-surface-variant, rgba(255, 255, 255, 0.7));
+          align-self: flex-start;
+      }
+  }
+
+  mat-card-content {
+      padding: 0 16px 16px;
+  }
+
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 15px;
+    border-bottom: 1px solid var(--mat-sys-outline, rgba(255, 255, 255, 0.08));
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    strong {
+      color: var(--mat-sys-on-surface-variant, rgba(255, 255, 255, 0.7));
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    span {
+      text-align: right;
+      font-weight: 400;
+      color: var(--mat-sys-on-surface, #ffffff);
+    }
+  }
+
+  mat-card-actions {
+    padding: 8px 16px !important; 
+    border-top: 1px solid var(--mat-sys-outline, rgba(255, 255, 255, 0.08));
+    margin-top: auto;
+
+    button mat-icon {
+        font-size: 20px; 
+        height: 20px;
+        width: 20px;
+    }
+  }
+}
+
+@media (max-width: 959px) {
+  .desktop-view {
+    display: none;
+  }
+  .mobile-view {
+    display: block;
+  }
+
+  .dashboard-header {
+      padding: 10px 0;
+  }
+}

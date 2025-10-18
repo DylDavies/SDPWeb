@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -28,6 +28,7 @@ import { SnackBarService } from '../../../../../services/snackbar-service';
   ],
   templateUrl: './create-edit-badge-dialog.html',
   styleUrls: ['./create-edit-badge-dialog.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEditBadgeDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -61,7 +62,7 @@ export class CreateEditBadgeDialogComponent implements OnInit {
     });
 
     if (!this.isEditMode) {
-      this.badgeForm.addControl('requirements', this.fb.control(''));
+      this.badgeForm.addControl('requirements', this.fb.control('', Validators.required));
     }
 
     // Duration on appears when is permanent is false

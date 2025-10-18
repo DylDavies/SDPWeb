@@ -11,3 +11,14 @@
 .tab-content {
     padding-top: 24px;
 }
+
+@media (max-width: 576px) {
+    .admin-container {
+        padding: 12px;
+        margin-top: -20px;
+    }
+
+    .tab-icon {
+        margin-right: 0; 
+    }
+}

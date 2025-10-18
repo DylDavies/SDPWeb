@@ -3,7 +3,7 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="tab-icon">visibility</mat-icon>
-      <span>My Proficiencies</span>
+      <span *ngIf="!isMobile">My Proficiencies</span>
     </ng-template>
     <div class="tab-content-container view-tab">
       @if (userProficiencies && userProficiencies.length > 0) {
@@ -52,7 +52,7 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="tab-icon">edit</mat-icon>
-      <span>Edit Proficiencies</span>
+      <span *ngIf="!isMobile">Edit Proficiencies</span>
     </ng-template>
     <div class="tab-content-container edit-tab">
 

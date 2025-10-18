@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { WelcomeCard } from './welcome-card';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -12,13 +14,15 @@ describe('WelcomeCard', () => {
   let clipboard: jasmine.SpyObj<Clipboard>;
 
   beforeEach(async () => {
-    const snackbarSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess']);
+    const snackbarSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
     const clipboardSpy = jasmine.createSpyObj('Clipboard', ['copy']);
 
     await TestBed.configureTestingModule({
       imports: [WelcomeCard],
       providers: [
         provideAnimationsAsync(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: SnackBarService, useValue: snackbarSpy },
         { provide: Clipboard, useValue: clipboardSpy }
       ]

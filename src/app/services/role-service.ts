@@ -1,4 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { EPermission } from '../models/enums/permission.enum';
@@ -22,6 +23,8 @@ export class RoleService {
   private httpService = inject(HttpService);
   private socketService = inject(SocketService);
   private observableService = inject(CustomObservableService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   private roleTree$ = new BehaviorSubject<RoleNode | null>(null);
 
@@ -29,18 +32,46 @@ export class RoleService {
    * A public observable that components can subscribe to for the role tree.
    */
   public allRoles$: Observable<RoleNode | null>;
+  private socketListenerSetup = false;
 
   constructor() {
-    this.socketService.listen<unknown>(ESocketMessage.RolesUpdated).subscribe(() => {
-      console.log('Received roles-updated event. Refreshing role tree.');
-      this.getRoleTree().subscribe();
-    });
-
     this.allRoles$ = this.observableService.createManagedTopicObservable(
       ESocketMessage.RolesUpdated,
       this.roleTree$.asObservable(),
       () => this.getRoleTree()
-    )
+    );
+
+    // Setup socket listener when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListener();
+    }
+  }
+
+  /**
+   * Sets up the socket listener for role updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListener() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen<unknown>(ESocketMessage.RolesUpdated).subscribe(() => {
+        console.log('Received roles-updated event. Refreshing role tree.');
+        this.getRoleTree().subscribe();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listener
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen<unknown>(ESocketMessage.RolesUpdated).subscribe(() => {
+            console.log('Received roles-updated event. Refreshing role tree.');
+            this.getRoleTree().subscribe();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
   /**

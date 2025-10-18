@@ -11,13 +11,13 @@ export type ISidebarLinkDefinition = ISidebarLink & ISidebarRemovable;
 
 export const AVAILABLE_SIDEBAR_LINKS: ISidebarLinkDefinition[] = [
   { label: 'Home', icon: 'dashboard', route: '/dashboard', requiredPermissions: [], stopRemove: true },
-  { label: 'Profile', icon: 'person', route: '/dashboard/profile', requiredPermissions: [] },
+  { label: 'Profile', icon: 'person', route: '/dashboard/profile', requiredPermissions: [EPermission.PROFILE_PAGE_VIEW] },
   { label: 'User Management', icon: 'people', route: '/dashboard/users', requiredPermissions: [EPermission.USERS_VIEW] },
-  { label: 'Students', icon: 'school', route: '/dashboard/students'},
-  {
-    label: 'Bundles',
-    icon: 'inventory',
-    route: '/dashboard/bundles',
+  { label: 'Students', icon: 'school', route: '/dashboard/students', requiredPermissions: [EPermission.STUDENTS_VIEW] },
+  { 
+    label: 'Bundles', 
+    icon: 'inventory', 
+    route: '/dashboard/bundles', 
     requiredPermissions: [
       EPermission.BUNDLES_VIEW
     ]

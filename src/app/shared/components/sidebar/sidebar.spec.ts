@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
@@ -79,17 +79,18 @@ describe('Sidebar', () => {
     });
 
     describe('Initialization (ngOnInit)', () => {
-        it('should subscribe to user, sidebar items, and breakpoints', () => {
+        it('should subscribe to user, sidebar items, and breakpoints', fakeAsync(() => {
             mockAuthService.currentUser$.next(mockStaffUser);
             mockSidebarService.sidebarItems$.next(mockSidebarItems);
             breakpointSubject.next({ matches: true, breakpoints: {} });
 
             fixture.detectChanges();
+            tick(100); // Wait for the setTimeout in ngOnInit
 
             expect(component.user).toEqual(mockStaffUser);
             expect(component.sideBarLinks).toEqual(mockSidebarItems);
             expect(component.isMobile).toBeTrue();
-        });
+        }));
     });
 
     describe('ngOnDestroy', () => {

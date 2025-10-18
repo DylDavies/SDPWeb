@@ -1,4 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpService } from './http-service';
 import { SocketService } from './socket-service';
@@ -13,15 +14,18 @@ export class NotificationService {
   private httpService = inject(HttpService);
   private socketService = inject(SocketService);
   private authService = inject(AuthService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   private notifications$ = new BehaviorSubject<INotification[]>([]);
   public allNotifications$ = this.notifications$.asObservable();
+  private socketListenerSetup = false;
 
   constructor() {
-    // Listen for new notifications in real-time
-    this.socketService.listen<INotification>(ESocketMessage.NotificationsUpdated).subscribe(() => {
-      this.fetchNotifications().subscribe();
-    });
+    // Setup socket listener when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListener();
+    }
 
     // When user logs in, fetch their notifications
     this.authService.currentUser$.subscribe(user => {
@@ -31,6 +35,31 @@ export class NotificationService {
             this.notifications$.next([]); // Clear notifications on logout
         }
     })
+  }
+
+  /**
+   * Sets up the socket listener for notification updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListener() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen<INotification>(ESocketMessage.NotificationsUpdated).subscribe(() => {
+        this.fetchNotifications().subscribe();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listener
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen<INotification>(ESocketMessage.NotificationsUpdated).subscribe(() => {
+            this.fetchNotifications().subscribe();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
   /**

@@ -26,7 +26,7 @@ describe('BadgeService', () => {
 
   beforeEach(() => {
     const httpSpy = jasmine.createSpyObj('HttpService', ['get', 'post', 'patch', 'delete']);
-    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe']);
+    const socketSpy = jasmine.createSpyObj('SocketService', ['listen', 'subscribe', 'unsubscribe', 'isSocketConnected', 'connectionHook']);
     const observableSpy = jasmine.createSpyObj('CustomObservableService', ['createManagedTopicObservable']);
 
     socketListener$ = new Subject<unknown>();
@@ -45,6 +45,8 @@ describe('BadgeService', () => {
     customObservableServiceSpy = TestBed.inject(CustomObservableService) as jasmine.SpyObj<CustomObservableService>;
 
     socketServiceSpy.listen.and.returnValue(socketListener$.asObservable());
+    socketServiceSpy.isSocketConnected.and.returnValue(false);
+    socketServiceSpy.connectionHook.and.callFake((cb: () => void) => cb());
     httpServiceSpy.get.and.returnValue(of(mockBadges));
 
     customObservableServiceSpy.createManagedTopicObservable.and.callFake((topic, source$) => {
