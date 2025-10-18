@@ -20,9 +20,10 @@ import { ProficiencyService } from '../../../../../services/proficiency-service'
 import { IProficiency } from '../../../../../models/interfaces/IProficiency.interface';
 import { ISubject } from '../../../../../models/interfaces/ISubject.interface';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
-import { IBundle, IBundleSubject, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
+import { IBundle, IBundleSubject, IPopulatedUser, IAddress } from '../../../../../models/interfaces/IBundle.interface';
 import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
 import { TimeSpinner } from '../../../../../shared/components/time-spinner/time-spinner';
+import { AddressAutocompleteComponent } from '../../../../../shared/components/address-autocomplete/address-autocomplete';
 
 @Component({
   selector: 'app-create-edit-bundle-modal', // Updated selector
@@ -30,7 +31,8 @@ import { TimeSpinner } from '../../../../../shared/components/time-spinner/time-
   imports: [
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatButtonModule, MatIconModule, MatDividerModule,
-    MatProgressSpinnerModule, MatAutocompleteModule, MatSelectModule, TimeSpinner
+    MatProgressSpinnerModule, MatAutocompleteModule, MatSelectModule, TimeSpinner,
+    AddressAutocompleteComponent
   ],
   templateUrl: './create-edit-bundle-modal.html', // Updated template URL
   styleUrls: ['./create-edit-bundle-modal.scss'] // Updated style URL
@@ -47,20 +49,29 @@ export class CreateEditBundleModal implements OnInit {
   public bundleForm: FormGroup;
   public isSaving = false;
   public isEditMode = false;
+  public validationError: string | null = null;
 
   public studentNameCtrl = new FormControl({ value: '', disabled: false }, [Validators.required]);
+  public managerNameCtrl = new FormControl('');
+  public stakeholderNameCtrl = new FormControl('');
   public filteredStudents$: Observable<IUser[]>;
+  public filteredManagers$: Observable<IUser[]>;
+  public filteredStakeholders$: Observable<IUser[]>;
   public filteredTutors$: Observable<IUser[]>[] = [];
   public proficiencies$: Observable<IProficiency[]>;
   public filteredProficiencies$: Observable<IProficiency[]>[] = [];
   public filteredSubjects$: Observable<ISubject[]>[] = [];
   public grades$: BehaviorSubject<string[]>[] = [];
+  public selectedStakeholders: IPopulatedUser[] = [];
 
   constructor() {
     this.isEditMode = !!this.data?.bundle;
 
     this.bundleForm = this.fb.group({
       student: ['', Validators.required],
+      lessonLocation: [''],
+      manager: [''],
+      stakeholders: [[]],
       subjects: this.fb.array([])
     });
 
@@ -77,15 +88,63 @@ export class CreateEditBundleModal implements OnInit {
         return this._filterUsers(clients, searchValue);
       })
     );
+
+    this.filteredManagers$ = combineLatest([
+      this.userService.allUsers$,
+      this.managerNameCtrl.valueChanges.pipe(startWith(''))
+    ]).pipe(
+      map(([users, searchValue]) => {
+        const staff = users.filter(user => user.type === EUserType.Staff || user.type === EUserType.Admin);
+        return this._filterUsers(staff, searchValue);
+      })
+    );
+
+    this.filteredStakeholders$ = combineLatest([
+      this.userService.allUsers$,
+      this.stakeholderNameCtrl.valueChanges.pipe(startWith(''))
+    ]).pipe(
+      map(([users, searchValue]) => {
+        const allUsers = users.filter(user =>
+          !this.selectedStakeholders.find(s => s._id === user._id)
+        );
+        return this._filterUsers(allUsers, searchValue);
+      })
+    );
+
     this.proficiencies$ = this.proficiencyService.allProficiencies$;
   }
 
   ngOnInit(): void {
     this.userService.fetchAllUsers().subscribe();
+
+    // Run validation whenever subjects change
+    this.subjects.valueChanges.subscribe(() => {
+      this.validationError = this.validateNoDuplicateTutorSubjects();
+    });
+
     this.proficiencyService.fetchAllProficiencies().subscribe(() => {
         if (this.isEditMode && this.data.bundle) {
             this.bundleForm.get('student')?.setValue((this.data.bundle.student as IPopulatedUser)._id);
             this.studentNameCtrl.setValue((this.data.bundle.student as IPopulatedUser).displayName);
+
+            // Set lesson location
+            if (this.data.bundle.lessonLocation) {
+              this.bundleForm.get('lessonLocation')?.setValue(this.data.bundle.lessonLocation);
+            }
+
+            // Set manager
+            if (this.data.bundle.manager) {
+              const manager = this.data.bundle.manager as IPopulatedUser;
+              this.bundleForm.get('manager')?.setValue(manager._id);
+              this.managerNameCtrl.setValue(manager.displayName);
+            }
+
+            // Set stakeholders
+            if (this.data.bundle.stakeholders && Array.isArray(this.data.bundle.stakeholders) && this.data.bundle.stakeholders.length > 0) {
+              this.selectedStakeholders = (this.data.bundle.stakeholders as IPopulatedUser[]);
+              this.bundleForm.get('stakeholders')?.setValue(this.selectedStakeholders.map(s => s._id));
+            }
+
             this.data.bundle.subjects.forEach(subject => this.addSubject(subject));
         } else {
             this.addSubject();
@@ -101,15 +160,15 @@ export class CreateEditBundleModal implements OnInit {
     return (this.subjects.at(index) as FormGroup).get(controlName) as FormControl;
   }
 
-  private _filterUsers(users: IUser[], value: string | IUser | null): IUser[] {
+  private _filterUsers(users: IUser[], value: string | IUser | IPopulatedUser | null): IUser[] {
     let filterValue = '';
     if (typeof value === 'string') {
         filterValue = value.toLowerCase();
-    } else if (value) {
+    } else if (value && value.displayName) {
         filterValue = value.displayName.toLowerCase();
     }
 
-    return users.filter(user => user.displayName.toLowerCase().includes(filterValue));
+    return users.filter(user => user.displayName && user.displayName.toLowerCase().includes(filterValue));
   }
   
   private _filterProficiencies(profs: IProficiency[], value: string | IProficiency | null): IProficiency[] {
@@ -134,7 +193,7 @@ export class CreateEditBundleModal implements OnInit {
       return subjects.filter(subject => subject.name.toLowerCase().includes(filterValue));
   }
 
-  displayUser(user: IUser): string {
+  displayUser(user: IUser | IPopulatedUser | null): string {
     return user && user.displayName ? user.displayName : '';
   }
   
@@ -149,6 +208,27 @@ export class CreateEditBundleModal implements OnInit {
   onStudentSelected(event: MatAutocompleteSelectedEvent): void {
     const selectedStudentId = event.option.value._id;
     this.bundleForm.get('student')?.setValue(selectedStudentId);
+  }
+
+  onManagerSelected(event: MatAutocompleteSelectedEvent): void {
+    const selectedManagerId = event.option.value._id;
+    this.bundleForm.get('manager')?.setValue(selectedManagerId);
+  }
+
+  onStakeholderSelected(event: MatAutocompleteSelectedEvent): void {
+    const selectedStakeholder: IPopulatedUser = event.option.value;
+    this.selectedStakeholders.push(selectedStakeholder);
+    this.bundleForm.get('stakeholders')?.setValue(this.selectedStakeholders.map(s => s._id));
+    this.stakeholderNameCtrl.setValue('');
+  }
+
+  removeStakeholder(stakeholder: IPopulatedUser): void {
+    this.selectedStakeholders = this.selectedStakeholders.filter(s => s._id !== stakeholder._id);
+    this.bundleForm.get('stakeholders')?.setValue(this.selectedStakeholders.map(s => s._id));
+  }
+
+  onAddressSelected(address: IAddress | undefined): void {
+    this.bundleForm.get('lessonLocation')?.setValue(address);
   }
 
   createSubjectGroup(): FormGroup {
@@ -182,7 +262,7 @@ export class CreateEditBundleModal implements OnInit {
     this.filteredSubjects$[index] = combineLatest([
       subjectGroup.get('proficiency')!.valueChanges.pipe(
         startWith(subjectGroup.get('proficiency')!.value),
-        map(prof => prof ? Object.values(prof.subjects) as ISubject[] : [])
+        map(prof => (prof && prof.subjects) ? Object.values(prof.subjects) as ISubject[] : [])
       ),
       subjectGroup.get('subjectName')!.valueChanges.pipe(startWith(''))
     ]).pipe(
@@ -276,11 +356,15 @@ export class CreateEditBundleModal implements OnInit {
     this.filteredProficiencies$.splice(index, 1);
     this.filteredSubjects$.splice(index, 1);
     this.grades$.splice(index, 1);
+    // Re-run validation after removing a subject
+    this.validationError = this.validateNoDuplicateTutorSubjects();
   }
 
   onTutorSelected(event: MatAutocompleteSelectedEvent, index: number): void {
     const selectedTutorId = event.option.value._id;
     this.subjects.at(index).get('tutor')?.setValue(selectedTutorId);
+    // Run validation immediately after tutor selection
+    this.validationError = this.validateNoDuplicateTutorSubjects();
   }
 
   onProficiencySelected(event: MatAutocompleteSelectedEvent, index: number): void {
@@ -291,30 +375,67 @@ export class CreateEditBundleModal implements OnInit {
   onSubjectSelected(event: MatAutocompleteSelectedEvent, index: number): void {
       const selectedSubject = event.option.value;
       this.subjects.at(index).get('subjectName')?.setValue(selectedSubject);
+      // Run validation immediately after subject selection
+      this.validationError = this.validateNoDuplicateTutorSubjects();
   }
 
   onCancel(): void {
     this.dialogRef.close();
   }
 
+  private validateNoDuplicateTutorSubjects(): string | null {
+    const subjects = this.bundleForm.value.subjects;
+    const tutorSubjectMap = new Map<string, string>();
+
+    for (let i = 0; i < subjects.length; i++) {
+      const subject = subjects[i];
+      if (!subject.tutor || !subject.subjectName?.name) {
+        continue;
+      }
+
+      const key = `${subject.tutor}-${subject.subjectName.name}`;
+
+      if (tutorSubjectMap.has(key)) {
+        // Find tutor name for better error message
+        const tutorControl = this.getFormControl(i, 'tutorName');
+        const tutorName = tutorControl.value?.displayName || 'this tutor';
+        return `Duplicate tutor-subject combination: ${tutorName} is already assigned to ${subject.subjectName.name}. Each tutor can only be assigned to a subject once per bundle.`;
+      }
+
+      tutorSubjectMap.set(key, subject.subjectName.name);
+    }
+
+    return null;
+  }
+
   onSave(): void {
-    if (this.bundleForm.invalid || this.isSaving) {
+    if (this.bundleForm.invalid || this.isSaving || this.validationError) {
       return;
     }
+
     this.isSaving = true;
-    
-    const subjectsPayload = this.bundleForm.value.subjects.map((s: { _id: string, subjectName: ISubject, grade: string, tutor: string, duration: number }) => ({
-        _id: s._id,
-        subject: s.subjectName.name,
-        grade: s.grade,
-        tutor: s.tutor,
-        durationMinutes: s.duration
-    }));
+
+    const subjectsPayload = this.bundleForm.value.subjects.map((s: { _id: string | null, subjectName: ISubject, grade: string, tutor: string, duration: number }) => {
+        const payload: Partial<IBundleSubject> & { subject: string; grade: string; tutor: string; durationMinutes: number } = {
+            subject: s.subjectName.name,
+            grade: s.grade,
+            tutor: s.tutor,
+            durationMinutes: s.duration
+        };
+        // Only include _id if it exists and is not empty (for edit mode)
+        if (s._id && s._id !== '') {
+            payload._id = s._id;
+        }
+        return payload;
+    });
 
     if (this.isEditMode) {
-      const payload = {
-        subjects: subjectsPayload,
-        status: EBundleStatus.Pending
+      const payload: Partial<IBundle> = {
+        subjects: subjectsPayload as IBundleSubject[],
+        status: EBundleStatus.Pending,
+        lessonLocation: this.bundleForm.value.lessonLocation || undefined,
+        manager: this.bundleForm.value.manager as string | undefined,
+        stakeholders: this.bundleForm.value.stakeholders || []
       };
       this.bundleService.updateBundle(this.data.bundle!._id, payload).subscribe({
         next: (updatedBundle) => {
@@ -327,11 +448,13 @@ export class CreateEditBundleModal implements OnInit {
         }
       });
     } else {
-        const payload = {
-            student: this.bundleForm.value.student,
-            subjects: subjectsPayload
-        };
-      this.bundleService.createBundle(payload.student, payload.subjects).subscribe({
+      this.bundleService.createBundle(
+        this.bundleForm.value.student,
+        subjectsPayload,
+        this.bundleForm.value.lessonLocation || undefined,
+        this.bundleForm.value.manager || undefined,
+        this.bundleForm.value.stakeholders || []
+      ).subscribe({
         next: (newBundle) => {
           this.snackbarService.showSuccess('Bundle created successfully!');
           this.dialogRef.close(newBundle);

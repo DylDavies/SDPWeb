@@ -4,6 +4,12 @@
       <section class="profile-area">
         <img [src]="user.picture || '/no_profile_pic.png'" alt="Profile Picture" class="profile-pic" referrerpolicy="no-referrer">
         <h4 class="user-name">{{(user.displayName | displayNamePipe) || "Loading..."}}</h4>
+        @if (tutorRating !== null) {
+          <div class="tutor-rating">
+            <mat-icon class="rating-icon">star</mat-icon>
+            <span class="rating-value">{{ tutorRating > 0 ? (tutorRating.toFixed(1) + '/5') : 'N/A' }}</span>
+          </div>
+        }
       </section>
     }
     

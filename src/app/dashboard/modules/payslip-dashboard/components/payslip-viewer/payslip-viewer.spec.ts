@@ -1,5 +1,5 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject, throwError, delay } from 'rxjs';
@@ -8,6 +8,7 @@ import { PayslipViewer } from './payslip-viewer';
 import { PayslipService } from '../../../../../services/payslip-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { AuthService } from '../../../../../services/auth-service';
+import { UserService } from '../../../../../services/user-service';
 import { EPayslipStatus } from '../../../../../models/enums/payslip-status.enum';
 import { EUserType } from '../../../../../models/enums/user-type.enum';
 import { IPayslip } from '../../../../../models/interfaces/IPayslip.interface';
@@ -21,6 +22,7 @@ describe('PayslipViewer', () => {
   let mockPayslipService: jasmine.SpyObj<PayslipService>;
   let mockSnackBarService: jasmine.SpyObj<SnackBarService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockUserService: jasmine.SpyObj<UserService>;
   let mockDialog: jasmine.SpyObj<MatDialog>;
 
   // Mock data
@@ -114,6 +116,9 @@ describe('PayslipViewer', () => {
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['currentUser$'], {
       currentUser$: of(mockUser)
     });
+    const userServiceSpy = jasmine.createSpyObj('UserService', ['fetchAllUsers'], {
+      allUsers$: of([mockUser])
+    });
     const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
@@ -123,6 +128,7 @@ describe('PayslipViewer', () => {
         { provide: PayslipService, useValue: payslipServiceSpy },
         { provide: SnackBarService, useValue: snackBarServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
+        { provide: UserService, useValue: userServiceSpy },
         { provide: MatDialog, useValue: dialogSpy }
       ]
     })
@@ -135,11 +141,13 @@ describe('PayslipViewer', () => {
     mockPayslipService = TestBed.inject(PayslipService) as jasmine.SpyObj<PayslipService>;
     mockSnackBarService = TestBed.inject(SnackBarService) as jasmine.SpyObj<SnackBarService>;
     mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    mockUserService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;
     mockDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
 
     // Setup default returns
     mockPayslipService.getPayslipById.and.returnValue(of(mockPayslip));
     mockPayslipService.getPreapprovedItems.and.returnValue(of(mockPreapprovedItems));
+    mockUserService.fetchAllUsers.and.returnValue(of([mockUser]));
   });
 
   it('should create', () => {
@@ -174,7 +182,7 @@ describe('PayslipViewer', () => {
     beforeEach(() => {
       fixture.detectChanges();
       // Set up payslip data in component
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
     });
 
     it('should show error if no bonus selected', () => {
@@ -212,7 +220,7 @@ describe('PayslipViewer', () => {
   describe('removeBonus', () => {
     beforeEach(() => {
       fixture.detectChanges();
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
     });
 
     it('should remove bonus successfully', () => {
@@ -228,7 +236,7 @@ describe('PayslipViewer', () => {
   describe('Deduction Management', () => {
     beforeEach(() => {
       fixture.detectChanges();
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
     });
 
     it('should add new deduction', () => {
@@ -269,7 +277,7 @@ describe('PayslipViewer', () => {
   describe('Misc Earnings Management', () => {
     beforeEach(() => {
       fixture.detectChanges();
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
     });
 
     it('should add new misc earning', () => {
@@ -351,7 +359,7 @@ describe('PayslipViewer', () => {
   describe('Query Management', () => {
     beforeEach(() => {
       fixture.detectChanges();
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
     });
 
     it('should check if item has query', () => {
@@ -359,7 +367,7 @@ describe('PayslipViewer', () => {
         ...mockPayslip,
         notes: [{ itemId: 'earning-0', resolved: false, note: 'Test query' }]
       };
-      component['payslipDataSubject'].next({ payslip: payslipWithQuery });
+      component['payslipDataSubject'].next({ payslip: payslipWithQuery, payslipUser: mockUser, allUsers: [mockUser] });
 
       const hasQuery = component.hasQuery('Test Item', 'earning', 0);
 
@@ -372,7 +380,7 @@ describe('PayslipViewer', () => {
         ...mockPayslip,
         notes: [testNote]
       };
-      component['payslipDataSubject'].next({ payslip: payslipWithQuery });
+      component['payslipDataSubject'].next({ payslip: payslipWithQuery, payslipUser: mockUser, allUsers: [mockUser] });
 
       const queryDetails = component.getQueryDetails('Test Item', 'earning', 0);
 
@@ -401,10 +409,11 @@ describe('PayslipViewer', () => {
   });
 
   describe('Payslip Status Methods', () => {
-    it('should determine if payslip can be edited', () => {
+    it('should determine that staff users cannot edit payslip earnings', () => {
+      // mockUser is EUserType.Staff, so canEditPayslip should return false
       const canEdit = component.canEditPayslip(mockPayslip);
 
-      expect(canEdit).toBe(true);
+      expect(canEdit).toBe(false);
     });
 
     it('should determine if approved payslip cannot be edited', () => {
@@ -451,7 +460,7 @@ describe('PayslipViewer', () => {
 
     it('should return false when checking for queries with no notes', () => {
       const payslipWithoutNotes = { ...mockPayslip, notes: [] };
-      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes });
+      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes, payslipUser: mockUser, allUsers: [mockUser] });
 
       const hasQuery = component.hasQuery('Test Description', 'bonus');
 
@@ -463,7 +472,7 @@ describe('PayslipViewer', () => {
         ...mockPayslip,
         notes: [{ itemId: 'Test Description', note: 'Query content', resolved: false }]
       };
-      component['payslipDataSubject'].next({ payslip: payslipWithNotes });
+      component['payslipDataSubject'].next({ payslip: payslipWithNotes, payslipUser: mockUser, allUsers: [mockUser] });
 
       const hasQuery = component.hasQuery('Test Description', 'bonus');
 
@@ -473,7 +482,7 @@ describe('PayslipViewer', () => {
     it('should get query details when query exists', () => {
       const note = { itemId: 'Test Description', note: 'Query content', resolved: false };
       const payslipWithNotes = { ...mockPayslip, notes: [note] };
-      component['payslipDataSubject'].next({ payslip: payslipWithNotes });
+      component['payslipDataSubject'].next({ payslip: payslipWithNotes, payslipUser: mockUser, allUsers: [mockUser] });
 
       const queryDetails = component.getQueryDetails('Test Description', 'bonus');
 
@@ -482,7 +491,7 @@ describe('PayslipViewer', () => {
 
     it('should return undefined when query does not exist', () => {
       const payslipWithNotes = { ...mockPayslip, notes: [] };
-      component['payslipDataSubject'].next({ payslip: payslipWithNotes });
+      component['payslipDataSubject'].next({ payslip: payslipWithNotes, payslipUser: mockUser, allUsers: [mockUser] });
 
       const queryDetails = component.getQueryDetails('Non-existent', 'bonus');
 
@@ -531,7 +540,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should open query dialog with correct data', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       const mockDialogRef = { afterClosed: () => of(true) };
       mockDialog.open.and.returnValue(mockDialogRef as any);
 
@@ -671,7 +680,7 @@ describe('PayslipViewer', () => {
   describe('Bonus Management', () => {
     it('should not add a bonus if the selected bonus ID is invalid', () => {
       fixture.detectChanges();
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       component.selectedBonusId = 'invalid-id'; // Use an ID that doesn't exist
 
       component.addSelectedBonus();
@@ -683,7 +692,7 @@ describe('PayslipViewer', () => {
     it('should handle an error when removing a bonus', () => {
         mockPayslipService.removeBonus.and.returnValue(throwError(() => new Error('API Error')));
         fixture.detectChanges();
-        component['payslipDataSubject'].next({ payslip: mockPayslip });
+        component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
 
         component.removeBonus(0);
 
@@ -694,7 +703,7 @@ describe('PayslipViewer', () => {
   describe('Deduction and Misc Earning Error Handling', () => {
     beforeEach(() => {
         fixture.detectChanges();
-        component['payslipDataSubject'].next({ payslip: mockPayslip });
+        component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
     });
 
     it('should handle an error when adding a new deduction', () => {
@@ -847,7 +856,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should not add selected bonus when preapproved bonus not found', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       component.selectedBonusId = 'non-existent-id';
 
       component.addSelectedBonus();
@@ -865,7 +874,7 @@ describe('PayslipViewer', () => {
 
     it('should not remove bonus when bonuses array is missing', () => {
       const payslipNoBonuses = { ...mockPayslip, bonuses: undefined };
-      component['payslipDataSubject'].next({ payslip: payslipNoBonuses as any });
+      component['payslipDataSubject'].next({ payslip: payslipNoBonuses as any, payslipUser: mockUser, allUsers: [mockUser] });
 
       component.removeBonus(0);
 
@@ -890,7 +899,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should not save deduction edit when editingDeduction is null', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       component.editingDeduction = null;
 
       component.saveDeductionEdit(0);
@@ -924,7 +933,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should not save misc earning edit when editingMiscEarning is null', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       component.editingMiscEarning = null;
 
       component.saveMiscEarningEdit(0);
@@ -1023,6 +1032,8 @@ describe('PayslipViewer', () => {
     });
 
     it('should handle getCurrentUserName with null user', () => {
+      // Set payslipDataSubject to have no payslipUser
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: undefined, allUsers: [mockUser] });
       spyOn(component as any, 'getCurrentUser').and.returnValue(null);
 
       const userName = component.getCurrentUserName();
@@ -1031,6 +1042,8 @@ describe('PayslipViewer', () => {
     });
 
     it('should handle getCurrentUserEmail with null user', () => {
+      // Set payslipDataSubject to have no payslipUser
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: undefined, allUsers: [mockUser] });
       spyOn(component as any, 'getCurrentUser').and.returnValue(null);
 
       const userEmail = component.getCurrentUserEmail();
@@ -1063,7 +1076,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should refresh data when openQueryDialog is closed with result', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       const mockDialogRef = { afterClosed: () => of(true) };
       mockDialog.open.and.returnValue(mockDialogRef as any);
       spyOn(component, 'loadPayslipData');
@@ -1074,7 +1087,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should not refresh data when openQueryDialog is closed without result', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       const mockDialogRef = { afterClosed: () => of(false) };
       mockDialog.open.and.returnValue(mockDialogRef as any);
       spyOn(component, 'loadPayslipData');
@@ -1085,7 +1098,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should call getQueryDetails with itemIndex in openQueryDialog', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       const mockDialogRef = { afterClosed: () => of(false) };
       mockDialog.open.and.returnValue(mockDialogRef as any);
       spyOn(component, 'getQueryDetails');
@@ -1098,7 +1111,7 @@ describe('PayslipViewer', () => {
     it('should handle hasQuery when payslip has no notes property', () => {
       const payslipWithoutNotes = { ...mockPayslip };
       delete (payslipWithoutNotes as any).notes;
-      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes as any });
+      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes as any, payslipUser: mockUser, allUsers: [mockUser] });
 
       const hasQuery = component.hasQuery('Test', 'earning', 0);
 
@@ -1108,7 +1121,7 @@ describe('PayslipViewer', () => {
     it('should handle getQueryDetails when payslip has no notes property', () => {
       const payslipWithoutNotes = { ...mockPayslip };
       delete (payslipWithoutNotes as any).notes;
-      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes as any });
+      component['payslipDataSubject'].next({ payslip: payslipWithoutNotes as any, payslipUser: mockUser, allUsers: [mockUser] });
 
       const queryDetails = component.getQueryDetails('Test', 'earning', 0);
 
@@ -1136,7 +1149,7 @@ describe('PayslipViewer', () => {
         ...mockPayslip,
         notes: [{ itemId: 'earning-0', resolved: false, note: 'Test' }]
       };
-      component['payslipDataSubject'].next({ payslip: payslipWithNote });
+      component['payslipDataSubject'].next({ payslip: payslipWithNote, payslipUser: mockUser, allUsers: [mockUser] });
 
       const hasQuery = component.hasQuery('Test', 'earning', 0);
 
@@ -1148,7 +1161,7 @@ describe('PayslipViewer', () => {
         ...mockPayslip,
         notes: [{ itemId: 'earning-0', resolved: true, note: 'Test' }]
       };
-      component['payslipDataSubject'].next({ payslip: payslipWithNote });
+      component['payslipDataSubject'].next({ payslip: payslipWithNote, payslipUser: mockUser, allUsers: [mockUser] });
 
       const hasQuery = component.hasQuery('Test', 'earning', 0);
 
@@ -1164,7 +1177,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should handle error when removing deduction', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       mockPayslipService.removeDeduction.and.returnValue(throwError(() => new Error('API Error')));
 
       component.removeDeduction(0);
@@ -1173,7 +1186,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should handle error when adding misc earning', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       mockPayslipService.addMiscEarning.and.returnValue(throwError(() => new Error('API Error')));
 
       component.addNewMiscEarning();
@@ -1182,7 +1195,7 @@ describe('PayslipViewer', () => {
     });
 
     it('should add dummy data successfully', () => {
-      component['payslipDataSubject'].next({ payslip: mockPayslip });
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
       spyOn(component, 'getDummyEarnings').and.returnValue([]);
       spyOn(component, 'getDummyBonuses').and.returnValue([]);
       spyOn(component, 'getDummyMiscEarnings').and.returnValue([]);
@@ -1290,6 +1303,619 @@ describe('PayslipViewer', () => {
 
       expect(component.editingMiscEarning).toBeNull();
       expect(component.editingMiscEarningData).toEqual({ description: '', amount: 0 });
+    });
+  });
+
+  describe('Admin Methods', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
+    });
+
+    it('should mark query as handled', () => {
+      const queryPayslip = { ...mockPayslip, status: EPayslipStatus.QUERY };
+      mockPayslipService.updatePayslipStatus.and.returnValue(of(queryPayslip));
+      spyOn(component, 'loadPayslipData');
+
+      component.markQueryAsHandled(queryPayslip);
+
+      expect(mockPayslipService.updatePayslipStatus).toHaveBeenCalledWith(queryPayslip._id, EPayslipStatus.QUERY_HANDLED);
+      expect(component.loadPayslipData).toHaveBeenCalled();
+    });
+
+    it('should handle error when marking query as handled', () => {
+      const queryPayslip = { ...mockPayslip, status: EPayslipStatus.QUERY };
+      mockPayslipService.updatePayslipStatus.and.returnValue(throwError(() => new Error('API Error')));
+
+      component.markQueryAsHandled(queryPayslip);
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to mark query as handled. Please try again.');
+    });
+
+    it('should approve payslip', () => {
+      const approvedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+      (mockPayslipService as any).approvePayslip = jasmine.createSpy('approvePayslip').and.returnValue(of(approvedPayslip));
+      spyOn(component, 'loadPayslipData');
+
+      component.approvePayslip(approvedPayslip);
+
+      expect((mockPayslipService as any).approvePayslip).toHaveBeenCalledWith(approvedPayslip._id);
+      expect(component.loadPayslipData).toHaveBeenCalled();
+    });
+
+    it('should handle error when approving payslip', () => {
+      const approvedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+      (mockPayslipService as any).approvePayslip = jasmine.createSpy('approvePayslip').and.returnValue(throwError(() => new Error('API Error')));
+
+      component.approvePayslip(approvedPayslip);
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to approve payslip. Please try again.');
+    });
+
+    it('should reject payslip', () => {
+      const approvedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+      (mockPayslipService as any).rejectPayslip = jasmine.createSpy('rejectPayslip').and.returnValue(of(mockPayslip));
+      spyOn(component, 'loadPayslipData');
+
+      component.rejectPayslip(approvedPayslip);
+
+      expect((mockPayslipService as any).rejectPayslip).toHaveBeenCalledWith(approvedPayslip._id);
+      expect(component.loadPayslipData).toHaveBeenCalled();
+    });
+
+    it('should handle error when rejecting payslip', () => {
+      const approvedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+      (mockPayslipService as any).rejectPayslip = jasmine.createSpy('rejectPayslip').and.returnValue(throwError(() => new Error('API Error')));
+
+      component.rejectPayslip(approvedPayslip);
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to reject payslip. Please try again.');
+    });
+
+    it('should mark payslip as paid', () => {
+      const lockedPayslip = { ...mockPayslip, status: EPayslipStatus.LOCKED };
+      (mockPayslipService as any).markPayslipAsPaid = jasmine.createSpy('markPayslipAsPaid').and.returnValue(of(lockedPayslip));
+      spyOn(component, 'loadPayslipData');
+
+      component.markAsPaid(lockedPayslip);
+
+      expect((mockPayslipService as any).markPayslipAsPaid).toHaveBeenCalledWith(lockedPayslip._id);
+      expect(component.loadPayslipData).toHaveBeenCalled();
+    });
+
+    it('should handle error when marking as paid', () => {
+      const lockedPayslip = { ...mockPayslip, status: EPayslipStatus.LOCKED };
+      (mockPayslipService as any).markPayslipAsPaid = jasmine.createSpy('markPayslipAsPaid').and.returnValue(throwError(() => new Error('API Error')));
+
+      component.markAsPaid(lockedPayslip);
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to mark payslip as paid. Please try again.');
+    });
+
+    it('should return true for canMarkAsHandled when payslip is in QUERY status', () => {
+      const queryPayslip = { ...mockPayslip, status: EPayslipStatus.QUERY };
+      spyOn(component, 'isAdmin').and.returnValue(true);
+
+      const canMark = component.canMarkAsHandled(queryPayslip);
+
+      expect(canMark).toBe(true);
+    });
+
+    it('should return true for canApprove when payslip is STAFF_APPROVED', () => {
+      const approvedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+      spyOn(component, 'isAdmin').and.returnValue(true);
+
+      const canApprove = component.canApprove(approvedPayslip);
+
+      expect(canApprove).toBe(true);
+    });
+
+    it('should return true for canReject when payslip is STAFF_APPROVED', () => {
+      const approvedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+      spyOn(component, 'isAdmin').and.returnValue(true);
+
+      const canReject = component.canReject(approvedPayslip);
+
+      expect(canReject).toBe(true);
+    });
+
+    it('should return true for canMarkAsPaid when payslip is LOCKED', () => {
+      const lockedPayslip = { ...mockPayslip, status: EPayslipStatus.LOCKED };
+      spyOn(component, 'isAdmin').and.returnValue(true);
+
+      const canMarkAsPaid = component.canMarkAsPaid(lockedPayslip);
+
+      expect(canMarkAsPaid).toBe(true);
+    });
+
+    it('should return correct history status label', () => {
+      expect(component.getHistoryStatusLabel(EPayslipStatus.DRAFT)).toBe('Draft');
+      expect(component.getHistoryStatusLabel(EPayslipStatus.QUERY)).toBe('Query Submitted');
+      expect(component.getHistoryStatusLabel(EPayslipStatus.QUERY_HANDLED)).toBe('Query Handled');
+      expect(component.getHistoryStatusLabel(EPayslipStatus.STAFF_APPROVED)).toBe('Staff Approved');
+      expect(component.getHistoryStatusLabel(EPayslipStatus.LOCKED)).toBe('Approved (Locked)');
+      expect(component.getHistoryStatusLabel(EPayslipStatus.PAID)).toBe('Paid');
+      expect(component.getHistoryStatusLabel('Unknown')).toBe('Unknown');
+    });
+
+    it('should return history user name from allUsers', () => {
+      const userName = component.getHistoryUserName('user1');
+
+      expect(userName).toBe('Test User');
+    });
+
+    it('should return Unknown User when user not found in allUsers', () => {
+      const userName = component.getHistoryUserName('nonexistent');
+
+      expect(userName).toBe('Unknown User');
+    });
+
+    it('should return empty string when no allUsers data', () => {
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: undefined });
+
+      const userName = component.getHistoryUserName('user1');
+
+      expect(userName).toBe('');
+    });
+  });
+
+  describe('Permission and Status Checks', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
+    });
+
+    it('should return false for canManageItems when payslip is LOCKED', () => {
+      const lockedPayslip = { ...mockPayslip, status: EPayslipStatus.LOCKED };
+
+      const canManage = component.canManageItems(lockedPayslip);
+
+      expect(canManage).toBe(false);
+    });
+
+    it('should return false for canManageItems when payslip is PAID', () => {
+      const paidPayslip = { ...mockPayslip, status: EPayslipStatus.PAID };
+
+      const canManage = component.canManageItems(paidPayslip);
+
+      expect(canManage).toBe(false);
+    });
+
+    it('should return true for canManageItems when admin', () => {
+      spyOn(component, 'isAdmin').and.returnValue(true);
+
+      const canManage = component.canManageItems(mockPayslip);
+
+      expect(canManage).toBe(true);
+    });
+
+    it('should return true for canManageItems when own payslip in DRAFT status', () => {
+      spyOn(component, 'isAdmin').and.returnValue(false);
+      spyOn(component, 'isOwnPayslip').and.returnValue(true);
+      const draftPayslip = { ...mockPayslip, status: EPayslipStatus.DRAFT };
+
+      const canManage = component.canManageItems(draftPayslip);
+
+      expect(canManage).toBe(true);
+    });
+
+    it('should return true for canManageItems when own payslip in QUERY_HANDLED status', () => {
+      spyOn(component, 'isAdmin').and.returnValue(false);
+      spyOn(component, 'isOwnPayslip').and.returnValue(true);
+      const queryHandledPayslip = { ...mockPayslip, status: EPayslipStatus.QUERY_HANDLED };
+
+      const canManage = component.canManageItems(queryHandledPayslip);
+
+      expect(canManage).toBe(true);
+    });
+
+    it('should return false for canManageItems when own payslip in other status', () => {
+      spyOn(component, 'isAdmin').and.returnValue(false);
+      spyOn(component, 'isOwnPayslip').and.returnValue(true);
+      const staffApprovedPayslip = { ...mockPayslip, status: EPayslipStatus.STAFF_APPROVED };
+
+      const canManage = component.canManageItems(staffApprovedPayslip);
+
+      expect(canManage).toBe(false);
+    });
+
+    it('should return false for canQueryPayslip when payslip is LOCKED', () => {
+      const lockedPayslip = { ...mockPayslip, status: EPayslipStatus.LOCKED };
+
+      const canQuery = component.canQueryPayslip(lockedPayslip);
+
+      expect(canQuery).toBe(false);
+    });
+
+    it('should return false for canQueryPayslip when payslip is PAID', () => {
+      const paidPayslip = { ...mockPayslip, status: EPayslipStatus.PAID };
+
+      const canQuery = component.canQueryPayslip(paidPayslip);
+
+      expect(canQuery).toBe(false);
+    });
+
+    it('should return true for canQueryPayslip when payslip is DRAFT', () => {
+      const draftPayslip = { ...mockPayslip, status: EPayslipStatus.DRAFT };
+
+      const canQuery = component.canQueryPayslip(draftPayslip);
+
+      expect(canQuery).toBe(true);
+    });
+
+    it('should return false for isOwnPayslip when user is null', () => {
+      spyOn(component as any, 'getCurrentUser').and.returnValue(null);
+
+      const isOwn = component.isOwnPayslip(mockPayslip);
+
+      expect(isOwn).toBe(false);
+    });
+
+    it('should return true for isOwnPayslip when user matches payslip userId', () => {
+      const isOwn = component.isOwnPayslip(mockPayslip);
+
+      expect(isOwn).toBe(true);
+    });
+  });
+
+  describe('Earning Edit Management', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
+      (mockPayslipService as any).updateEarning = jasmine.createSpy('updateEarning').and.returnValue(of(mockPayslip));
+    });
+
+    it('should not save earning edit when no current data', () => {
+      component['payslipDataSubject'].next(null);
+      component.editingEarning = 0;
+
+      component.saveEarningEdit(0);
+
+      expect((mockPayslipService as any).updateEarning).not.toHaveBeenCalled();
+    });
+
+    it('should not save earning edit when editingEarning is null', () => {
+      component.editingEarning = null;
+
+      component.saveEarningEdit(0);
+
+      expect((mockPayslipService as any).updateEarning).not.toHaveBeenCalled();
+    });
+
+    it('should not save earning edit when index is negative', () => {
+      component.editingEarning = 0;
+
+      component.saveEarningEdit(-1);
+
+      expect((mockPayslipService as any).updateEarning).not.toHaveBeenCalled();
+    });
+
+    it('should not save earning edit when index exceeds array length', () => {
+      component.editingEarning = 0;
+
+      component.saveEarningEdit(999);
+
+      expect((mockPayslipService as any).updateEarning).not.toHaveBeenCalled();
+    });
+
+    it('should save earning edit successfully', () => {
+      component.editingEarning = 0;
+      component.editingEarningData = {
+        description: 'Updated',
+        baseRate: 100,
+        hours: 10,
+        rate: 150,
+        date: '2024-09-20'
+      };
+
+      component.saveEarningEdit(0);
+
+      expect((mockPayslipService as any).updateEarning).toHaveBeenCalled();
+      expect(mockSnackBarService.showSuccess).toHaveBeenCalledWith('Earning updated successfully');
+    });
+
+    it('should handle error when saving earning edit', () => {
+      (mockPayslipService as any).updateEarning.and.returnValue(throwError(() => new Error('API Error')));
+      component.editingEarning = 0;
+      component.editingEarningData = {
+        description: 'Updated',
+        baseRate: 100,
+        hours: 10,
+        rate: 150,
+        date: '2024-09-20'
+      };
+
+      component.saveEarningEdit(0);
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to update earning. Please try again.');
+    });
+
+    it('should set edit state when editing earning', () => {
+      const earning = mockPayslip.earnings[0];
+
+      component.editEarning(0, earning);
+
+      expect(component.editingEarning).toBe(0);
+      expect(component.editingEarningData).toEqual({
+        description: earning.description,
+        baseRate: earning.baseRate,
+        hours: earning.hours,
+        rate: earning.rate,
+        date: earning.date
+      });
+    });
+
+    it('should cancel earning edit', () => {
+      component.editingEarning = 5;
+      component.editingEarningData = { description: 'Test', baseRate: 50, hours: 10, rate: 100, date: '2024-01-01' };
+
+      component.cancelEarningEdit();
+
+      expect(component.editingEarning).toBeNull();
+      expect(component.editingEarningData).toEqual({ description: '', baseRate: 0, hours: 0, rate: 0, date: '' });
+    });
+
+    it('should get editing earning total', () => {
+      component.editingEarningData = { description: 'Test', baseRate: 50, hours: 10, rate: 100, date: '2024-01-01' };
+
+      const total = component.getEditingEarningTotal();
+
+      expect(total).toBe(1050); // baseRate + (hours * rate) = 50 + (10 * 100)
+    });
+  });
+
+  describe('Bonus Edit Management', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
+      (mockPayslipService as any).updateBonus = jasmine.createSpy('updateBonus').and.returnValue(of(mockPayslip));
+    });
+
+    it('should not save bonus edit when no current data', () => {
+      component['payslipDataSubject'].next(null);
+      component.editingBonus = 0;
+
+      component.saveBonusEdit(0);
+
+      expect((mockPayslipService as any).updateBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not save bonus edit when editingBonus is null', () => {
+      component.editingBonus = null;
+
+      component.saveBonusEdit(0);
+
+      expect((mockPayslipService as any).updateBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not save bonus edit when bonuses array is missing', () => {
+      const payslipNoBonuses = { ...mockPayslip, bonuses: undefined };
+      component['payslipDataSubject'].next({ payslip: payslipNoBonuses as any, payslipUser: mockUser, allUsers: [mockUser] });
+      component.editingBonus = 0;
+
+      component.saveBonusEdit(0);
+
+      expect((mockPayslipService as any).updateBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not save bonus edit when index is negative', () => {
+      component.editingBonus = 0;
+
+      component.saveBonusEdit(-1);
+
+      expect((mockPayslipService as any).updateBonus).not.toHaveBeenCalled();
+    });
+
+    it('should not save bonus edit when index exceeds array length', () => {
+      component.editingBonus = 0;
+
+      component.saveBonusEdit(999);
+
+      expect((mockPayslipService as any).updateBonus).not.toHaveBeenCalled();
+    });
+
+    it('should save bonus edit successfully', () => {
+      component.editingBonus = 0;
+      component.editingBonusData = { description: 'Updated Bonus', amount: 600 };
+
+      component.saveBonusEdit(0);
+
+      expect((mockPayslipService as any).updateBonus).toHaveBeenCalled();
+      expect(mockSnackBarService.showSuccess).toHaveBeenCalledWith('Bonus updated successfully');
+    });
+
+    it('should handle error when saving bonus edit', () => {
+      (mockPayslipService as any).updateBonus.and.returnValue(throwError(() => new Error('API Error')));
+      component.editingBonus = 0;
+      component.editingBonusData = { description: 'Updated Bonus', amount: 600 };
+
+      component.saveBonusEdit(0);
+
+      expect(mockSnackBarService.showError).toHaveBeenCalledWith('Failed to update bonus. Please try again.');
+    });
+
+    it('should set edit state when editing bonus', () => {
+      const bonus = mockPayslip.bonuses[0];
+
+      component.editBonus(0, bonus);
+
+      expect(component.editingBonus).toBe(0);
+      expect(component.editingBonusData).toEqual(bonus);
+    });
+
+    it('should cancel bonus edit', () => {
+      component.editingBonus = 5;
+      component.editingBonusData = { description: 'Test', amount: 100 };
+
+      component.cancelBonusEdit();
+
+      expect(component.editingBonus).toBeNull();
+      expect(component.editingBonusData).toEqual({ description: '', amount: 0 });
+    });
+  });
+
+  describe('PDF Generation Edge Cases', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [mockUser] });
+    });
+
+    it('should handle payslip with no bonuses in PDF', () => {
+      const payslipNoBonuses = { ...mockPayslip, bonuses: [] };
+
+      expect(() => component.downloadPDF(payslipNoBonuses)).not.toThrow();
+    });
+
+    it('should handle payslip with no misc earnings in PDF', () => {
+      const payslipNoMiscEarnings = { ...mockPayslip, miscEarnings: [] };
+
+      expect(() => component.downloadPDF(payslipNoMiscEarnings)).not.toThrow();
+    });
+
+    it('should handle payslip with no deductions in PDF', () => {
+      const payslipNoDeductions = { ...mockPayslip, deductions: [] };
+
+      expect(() => component.downloadPDF(payslipNoDeductions)).not.toThrow();
+    });
+
+    it('should handle earnings with undefined values in PDF', () => {
+      const payslipWithUndefined = {
+        ...mockPayslip,
+        earnings: [
+          { description: 'Test', baseRate: undefined, hours: undefined, rate: undefined, total: undefined, date: '2024-01-01' } as any
+        ]
+      };
+
+      expect(() => component.downloadPDF(payslipWithUndefined)).not.toThrow();
+    });
+
+    it('should handle bonuses with undefined amount in PDF', () => {
+      const payslipWithUndefined = {
+        ...mockPayslip,
+        bonuses: [{ description: 'Test', amount: undefined } as any]
+      };
+
+      expect(() => component.downloadPDF(payslipWithUndefined)).not.toThrow();
+    });
+
+    it('should handle deductions with undefined amount in PDF', () => {
+      const payslipWithUndefined = {
+        ...mockPayslip,
+        deductions: [{ description: 'Test', amount: undefined } as any]
+      };
+
+      expect(() => component.downloadPDF(payslipWithUndefined)).not.toThrow();
+    });
+
+    it('should handle misc earnings with undefined amount in PDF', () => {
+      const payslipWithUndefined = {
+        ...mockPayslip,
+        miscEarnings: [{ description: 'Test', amount: undefined } as any]
+      };
+
+      expect(() => component.downloadPDF(payslipWithUndefined)).not.toThrow();
+    });
+
+    it('should handle payslip with undefined grossEarnings in PDF', () => {
+      const payslipUndefinedGross = { ...mockPayslip, grossEarnings: undefined } as any;
+
+      expect(() => component.downloadPDF(payslipUndefinedGross)).not.toThrow();
+    });
+
+    it('should handle payslip with undefined totalDeductions in PDF', () => {
+      const payslipUndefinedDeductions = { ...mockPayslip, totalDeductions: undefined } as any;
+
+      expect(() => component.downloadPDF(payslipUndefinedDeductions)).not.toThrow();
+    });
+
+    it('should handle payslip with undefined paye and uif in PDF', () => {
+      const payslipUndefinedTaxes = { ...mockPayslip, paye: undefined, uif: undefined } as any;
+
+      expect(() => component.downloadPDF(payslipUndefinedTaxes)).not.toThrow();
+    });
+
+    it('should handle payslip with undefined payPeriod in PDF', () => {
+      const payslipUndefinedPeriod = { ...mockPayslip, payPeriod: undefined } as any;
+
+      expect(() => component.downloadPDF(payslipUndefinedPeriod)).not.toThrow();
+    });
+  });
+
+  describe('Navigation Methods', () => {
+    it('should navigate to admin payslips when on admin route', () => {
+      const mockRouter = TestBed.inject(Router) as any;
+      spyOn(mockRouter, 'navigate');
+      Object.defineProperty(mockRouter, 'url', { value: '/dashboard/admin/payslips/payslip1' });
+
+      component.goBack();
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/dashboard/admin/payslips']);
+    });
+
+    it('should navigate to staff payslips when on staff route', () => {
+      const mockRouter = TestBed.inject(Router) as any;
+      spyOn(mockRouter, 'navigate');
+      Object.defineProperty(mockRouter, 'url', { value: '/dashboard/payslips/payslip1' });
+
+      component.goBack();
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/dashboard/payslips']);
+    });
+
+    it('should return admin label when on admin route', () => {
+      const mockRouter = TestBed.inject(Router) as any;
+      Object.defineProperty(mockRouter, 'url', { value: '/dashboard/admin/payslips/payslip1' });
+
+      const label = component.getBackButtonLabel();
+
+      expect(label).toBe('Back to Payslip Management');
+    });
+
+    it('should return staff label when on staff route', () => {
+      const mockRouter = TestBed.inject(Router) as any;
+      Object.defineProperty(mockRouter, 'url', { value: '/dashboard/payslips/payslip1' });
+
+      const label = component.getBackButtonLabel();
+
+      expect(label).toBe('Back to Payslip History');
+    });
+  });
+
+  describe('User Information Fallback', () => {
+    it('should fallback to current user email when payslip user has no email', () => {
+      const userNoEmail = { ...mockUser, email: undefined };
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: userNoEmail as any, allUsers: [mockUser] });
+
+      const email = component.getCurrentUserEmail();
+
+      expect(email).toBe('unknown@tutorcore.com');
+    });
+
+    it('should fallback to current user name when payslip user has no displayName', () => {
+      const userNoName = { ...mockUser, displayName: undefined };
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: userNoName as any, allUsers: [mockUser] });
+
+      const name = component.getCurrentUserName();
+
+      expect(name).toBe('Unknown User');
+    });
+
+    it('should return user email from allUsers when displayName is missing', () => {
+      const userNoDisplayName = { ...mockUser, displayName: undefined } as any;
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [userNoDisplayName] });
+
+      const userName = component.getHistoryUserName('user1');
+
+      expect(userName).toBe('test@example.com');
+    });
+
+    it('should return Unknown User when both displayName and email are missing', () => {
+      const userNoInfo = { ...mockUser, displayName: undefined, email: undefined } as any;
+      component['payslipDataSubject'].next({ payslip: mockPayslip, payslipUser: mockUser, allUsers: [userNoInfo] });
+
+      const userName = component.getHistoryUserName('user1');
+
+      expect(userName).toBe('Unknown User');
     });
   });
 

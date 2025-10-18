@@ -168,11 +168,11 @@ describe('Sidebar', () => {
 
         it('should show a category if at least one child is viewable', () => {
             const adminCategory = mockSidebarItems[1];
-            
+
             spyOn(component, 'canView').and.callFake((permissions) => {
                 return permissions === adminCategory.children![1].requiredPermissions;
             });
-            
+
             expect(component.shouldShow(adminCategory)).toBeTrue();
         });
 
@@ -180,6 +180,17 @@ describe('Sidebar', () => {
             const adminCategory = mockSidebarItems[1];
             spyOn(component, 'canView').and.returnValue(false);
             expect(component.shouldShow(adminCategory)).toBeFalse();
+        });
+    });
+
+    describe('Tutor Rating', () => {
+        it('should not load tutor rating for non-tutor users', () => {
+            const nonTutorUser: IUser = { _id: 'user1', type: EUserType.Staff, displayName: 'Staff User' } as IUser;
+
+            mockAuthService.currentUser$.next(nonTutorUser);
+            fixture.detectChanges();
+
+            expect(component.tutorRating).toBeNull();
         });
     });
 });

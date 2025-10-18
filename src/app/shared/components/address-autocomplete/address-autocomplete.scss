@@ -1,0 +1,96 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.address-autocomplete-wrapper {
+  width: 100%;
+}
+
+.w-full {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.success-icon {
+  color: #4caf50;
+}
+
+.validation-hint {
+  color: #4caf50;
+  font-size: 12px;
+}
+
+.suggestion-item {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+
+  .main-text {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .secondary-text {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+}
+
+.validated-address-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+
+  // Light mode
+  background-color: #f1f8f4;
+
+  // Dark mode
+  @media (prefers-color-scheme: dark) {
+    background-color: rgba(76, 175, 80, 0.1);
+  }
+
+  .address-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #4caf50;
+
+    .check-icon {
+      color: #4caf50;
+      font-size: 20px;
+      height: 20px;
+      width: 20px;
+    }
+
+    strong {
+      font-size: 14px;
+      font-weight: 600;
+    }
+  }
+
+  .address-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .address-line {
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.87;
+    }
+  }
+}
+
+// Override mat-icon when it contains spinner
+mat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

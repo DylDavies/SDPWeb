@@ -44,6 +44,16 @@ export const routes: Routes = [
         canActivate: [permissionGuard([EPermission.ADMIN_DASHBOARD_VIEW])]
       },
       {
+        path: 'admin/payslips',
+        loadComponent: () => import("./dashboard/modules/admin-dashboard/components/admin-payslip-dashboard/admin-payslip-dashboard").then(m => m.AdminPayslipDashboard),
+        canActivate: [permissionGuard([EPermission.CAN_MANAGE_PAYSLIPS])]
+      },
+      {
+        path: 'admin/payslips/:id',
+        loadComponent: () => import("./dashboard/modules/payslip-dashboard/components/payslip-viewer/payslip-viewer").then(m => m.PayslipViewer),
+        canActivate: [permissionGuard([EPermission.CAN_MANAGE_PAYSLIPS])]
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./dashboard/modules/profile-dashboard/profile-dashboard').then(m => m.Profile),
         canActivate: [permissionGuard([EPermission.VIEW_USER_PROFILE])]
@@ -105,6 +115,11 @@ export const routes: Routes = [
         path: 'extrawork',
         loadComponent: () => import('./dashboard/modules/extra-work-dashboard/extra-work-dashboard').then(m => m.ExtraWorkDashboard),
         canActivate: [permissionGuard([EPermission.EXTRA_WORK_VIEW])]
+      },
+      {
+        path: 'platform-stats',
+        loadComponent: () => import("./dashboard/modules/admin-stats/admin-stats").then(m => m.AdminStatsComponent),
+        canActivate: [permissionGuard([EPermission.PLATFORM_STATS_VIEW])]
       }
     ],
     canActivate: [authGuard, profileCompletionGuard, accountStatusGuard]

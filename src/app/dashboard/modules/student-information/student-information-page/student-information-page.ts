@@ -21,6 +21,7 @@ import { MissionService } from '../../../../services/missions-service';
 import { IEvent } from '../../../../models/interfaces/IEvent.interface';
 import { Observable, switchMap, of, catchError, forkJoin } from 'rxjs';
 import { IMissions } from '../../../../models/interfaces/IMissions.interface';
+import { EMissionStatus } from '../../../../models/enums/mission-status.enum';
 
 @Component({
   selector: 'app-student-information-page',
@@ -104,14 +105,20 @@ updateAllMissionHours(): void {
 
 updateMissionsForTutors(tutorHours: Map<string, number>): void {
   const updatePromises:Observable<IMissions | null>[] = [];
-  
+
   tutorHours.forEach((totalHours, tutorId) => {
-    if (totalHours >= 0) { 
+    if (totalHours >= 0) {
       const missionUpdate$ = this.missionService.findMissionByBundleAndTutor(this.bundleId!, tutorId)
         .pipe(
           switchMap(mission => {
             if (mission) {
-              return this.missionService.updateMissionHours(mission._id, totalHours);
+              // Only update hours if mission is still active
+              if (mission.status === EMissionStatus.Active) {
+                return this.missionService.updateMissionHours(mission._id, totalHours);
+              } else {
+                console.log(`Mission ${mission._id} has status ${mission.status}, skipping hours update`);
+                return of(null);
+              }
             } else {
               console.warn(`No mission found for bundle ${this.bundleId} and tutor ${tutorId}`);
               return of(null);
@@ -122,24 +129,24 @@ updateMissionsForTutors(tutorHours: Map<string, number>): void {
             return of(null);
           })
         );
-      
+
       updatePromises.push(missionUpdate$);
     }
   });
-  
+
   if (updatePromises.length > 0) {
     forkJoin(updatePromises).subscribe({
       next: () => {
-        this.isUpdatingMissions = false;  
+        this.isUpdatingMissions = false;
       },
       error: (error) => {
         console.error('Error updating mission hours:', error);
-        this.isUpdatingMissions = false;  
+        this.isUpdatingMissions = false;
       }
     });
   } else {
     console.log('No missions to update');
-    this.isUpdatingMissions = false;  
+    this.isUpdatingMissions = false;
   }
 }
 

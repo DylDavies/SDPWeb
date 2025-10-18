@@ -6,6 +6,19 @@
 import { EBundleStatus } from "../enums/bundle-status.enum";
 
 /**
+ * Represents a structured address with Google Place ID reference.
+ */
+export interface IAddress {
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  placeId?: string;
+  formattedAddress?: string;
+}
+
+/**
  * Represents a simplified, populated user object as returned by the backend.
  */
 export interface IPopulatedUser {
@@ -37,6 +50,9 @@ export interface IBundle {
   createdBy: string | IPopulatedUser; // The ID of the user who created the bundle
   status: EBundleStatus; // The current status of the bundle (e.g., pending, approved)
   isActive: boolean; // Whether the bundle is currently active or not
+  lessonLocation?: IAddress; // The structured address where lessons take place
+  manager?: string | IPopulatedUser; // The ID of the staff member managing this bundle, or the populated manager object
+  stakeholders?: (string | IPopulatedUser)[]; // An array of user IDs who are stakeholders in this bundle, or populated user objects
   createdAt: Date; // The timestamp when the bundle was created
   updatedAt: Date; // The timestamp when the bundle was last updated
 }

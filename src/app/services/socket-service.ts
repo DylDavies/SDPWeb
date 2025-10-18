@@ -11,6 +11,7 @@ import { TOKEN_STORAGE_KEY } from './auth-service';
 })
 export class SocketService implements OnDestroy {
   private socket: Socket | null = null;
+  private isTestEnvironment = false;
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private isConnected = false;
@@ -29,6 +30,15 @@ export class SocketService implements OnDestroy {
 
     // Only initialize socket in browser environment
     if (!this.isBrowser) return;
+
+        // Detect test environment (Karma/Jasmine)
+    this.isTestEnvironment = typeof (window as Window & { jasmine?: unknown; __karma__?: unknown }).jasmine !== 'undefined' ||
+                              typeof (window as Window & { jasmine?: unknown; __karma__?: unknown }).__karma__ !== 'undefined';
+
+    if (this.isTestEnvironment) {
+      console.log('SocketService: Test environment detected, skipping socket connection');
+      return;
+    }
 
     console.log('Initializing Socket.IO connection...');
     this.isConnected = true;

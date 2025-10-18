@@ -99,6 +99,7 @@ export interface INote {
     itemId: string;
     note: string;
     resolved: boolean;
+    resolutionNote?: string;
 }
 
 export interface IHistory {
