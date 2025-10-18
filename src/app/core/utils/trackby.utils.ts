@@ -57,7 +57,7 @@ export class TrackByUtils {
    * trackByName = TrackByUtils.trackByProperty('name');
    * ```
    */
-  static trackByProperty<T>(propertyName: keyof T): (index: number, item: T) => any {
+  static trackByProperty<T>(propertyName: keyof T): (index: number, item: T) => T[keyof T] {
     return (index: number, item: T) => item[propertyName];
   }
 

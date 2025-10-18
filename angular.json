@@ -20,7 +20,6 @@
             "outputPath": "dist/SDPWeb",
             "browser": "src/main.ts",
             "server": "src/main.server.ts",
-            "prerender": false,
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"

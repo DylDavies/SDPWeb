@@ -6,11 +6,43 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import compression from 'compression';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+// --- Helper function to fetch IDs and format them correctly ---
+async function fetchIds(apiUrl: string, paramName: string): Promise<Record<string, string>[]> {
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error(`API responded with ${response.status}`);
+    }
+    const ids = await response.json() as string[]; // Assuming the API returns string[]
+    return ids.map(id => ({ [paramName]: id })); // Format as [{ id: '1' }, { id: '2' }]
+  } catch (error) {
+    console.error(`❌ Failed to fetch prerender params from ${apiUrl}:`, error);
+    return []; // Return empty array on error to prevent build failure
+  }
+}
+
+// --- Specific functions for each route, exported for use in other files ---
+
+const API_BASE_URL = process.env['API_URL'] || 'http://localhost:8080';
+
+export async function getProfilePrerenderParams(): Promise<Record<string, string>[]> {
+  return fetchIds(`${API_BASE_URL}/api/internal/users/ids`, 'id');
+}
+
+export async function getStudentInfoPrerenderParams(): Promise<Record<string, string>[]> {
+  return fetchIds(`${API_BASE_URL}/api/internal/student/ids`, 'id');
+}
+
+export async function getPayslipPrerenderParams(): Promise<Record<string, string>[]> {
+  return fetchIds(`${API_BASE_URL}/api/internal/payslip/ids`, 'id');
+}
 
 /**
  * Example Express Rest API endpoints can be defined here.
@@ -23,6 +55,11 @@ const angularApp = new AngularNodeAppEngine();
  * });
  * ```
  */
+
+app.use(compression({
+  level: 6,
+  threshold: 10 * 1024, // Only compress files > 10KB
+}));
 
 /**
  * Serve static files from /browser

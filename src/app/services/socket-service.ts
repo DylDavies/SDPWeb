@@ -13,10 +13,25 @@ export class SocketService implements OnDestroy {
   private socket: Socket | null = null;
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private isConnected = false;
 
   constructor() {
+    // Don't auto-initialize - wait for explicit connect() call
+  }
+
+  /**
+   * Initializes the socket connection.
+   * This should be called when navigating away from the landing page.
+   */
+  connect() {
+    // Prevent multiple connections
+    if (this.isConnected || this.socket) return;
+
     // Only initialize socket in browser environment
     if (!this.isBrowser) return;
+
+    console.log('Initializing Socket.IO connection...');
+    this.isConnected = true;
 
     this.socket = io(environment.apiUrl.slice(0, -4), {
       reconnectionAttempts: 5,
@@ -34,6 +49,13 @@ export class SocketService implements OnDestroy {
     this.socket.on('connect_error', (error) => {
       console.error('%cSocket.IO Connection Error:', 'color: #f44336; font-weight: bold;', error);
     });
+  }
+
+  /**
+   * Check if socket is connected
+   */
+  isSocketConnected(): boolean {
+    return this.isConnected && this.socket !== null;
   }
 
   public connectionHook(cb: () => void) {
