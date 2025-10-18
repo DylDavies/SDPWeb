@@ -172,6 +172,36 @@ table {
 }
 
 
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
+
+  &.status-active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+
+  &.status-completed {
+    background-color: #fff3e0;
+    color: #f57c00;
+  }
+
+  &.status-achieved {
+    background-color: #e8f5e9;
+    color: #388e3c;
+  }
+
+  &.status-failed {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+}
+
 ::ng-deep .mat-mdc-dialog-content {
   overflow: hidden !important;
 }

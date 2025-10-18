@@ -8,8 +8,11 @@ describe('EditNameDialog', () => {
   let component: EditNameDialog;
   let fixture: ComponentFixture<EditNameDialog>;
   let dialogRef: jasmine.SpyObj<MatDialogRef<EditNameDialog>>;
+  let dialogRef: jasmine.SpyObj<MatDialogRef<EditNameDialog>>;
 
   beforeEach(async () => {
+    const dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
+
     const dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
@@ -24,6 +27,7 @@ describe('EditNameDialog', () => {
     dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<EditNameDialog>>;
     fixture = TestBed.createComponent(EditNameDialog);
     component = fixture.componentInstance;
+    dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<EditNameDialog>>;
     fixture.detectChanges();
   });
 

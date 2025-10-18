@@ -8,6 +8,10 @@ import { BadgeService } from '../../../services/badge-service';
 import { AuthService } from '../../../services/auth-service';
 import IBadge from '../../../models/interfaces/IBadge.interface';
 import { IUser } from '../../../models/interfaces/IUser.interface';
+import { BadgeService } from '../../../services/badge-service';
+import { AuthService } from '../../../services/auth-service';
+import IBadge from '../../../models/interfaces/IBadge.interface';
+import { IUser } from '../../../models/interfaces/IUser.interface';
 
 describe('BadgeLibrary', () => {
   let component: BadgeLibrary;
@@ -69,6 +73,8 @@ describe('BadgeLibrary', () => {
 
     fixture = TestBed.createComponent(BadgeLibrary);
     component = fixture.componentInstance;
+    badgeService = TestBed.inject(BadgeService) as jasmine.SpyObj<BadgeService>;
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     fixture.detectChanges();
   });
 

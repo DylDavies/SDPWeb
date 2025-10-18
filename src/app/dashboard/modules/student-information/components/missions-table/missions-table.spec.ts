@@ -110,6 +110,8 @@ describe('MissionsTable', () => {
     expect(component.canEditMissions).toBeTrue();
     expect(component.canDeleteMissions).toBeFalse();
     expect(component.displayedColumns.includes('actions')).toBeTrue();
+    expect(component.displayedColumns.includes('status')).toBeTrue();
+    expect(component.displayedColumns.includes('viewPdf')).toBeTrue();
   });
 
   it('should NOT add actions column if no permissions', () => {
@@ -119,6 +121,9 @@ describe('MissionsTable', () => {
     expect(component.canEditMissions).toBeFalse();
     expect(component.canDeleteMissions).toBeFalse();
     expect(component.displayedColumns.includes('actions')).toBeFalse();
+    // Status and viewPdf columns should still be present
+    expect(component.displayedColumns.includes('status')).toBeTrue();
+    expect(component.displayedColumns.includes('viewPdf')).toBeTrue();
   });
 
   it('should load and filter out inactive missions on ngOnChanges', () => {
