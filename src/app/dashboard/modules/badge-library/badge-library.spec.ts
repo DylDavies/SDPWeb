@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
+import { of, skip } from 'rxjs';
 
 import { BadgeLibrary } from './badge-library';
 import { BadgeService } from '../../../services/badge-service';
@@ -47,7 +47,10 @@ describe('BadgeLibrary', () => {
 
   beforeEach(async () => {
     const badgeServiceSpy = jasmine.createSpyObj('BadgeService', ['getBadges']);
-    const authServiceSpy = jasmine.createSpyObj('AuthService', [], { currentUser$: of(mockUser) });
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['hasPermission'], {
+      currentUser$: of(mockUser)
+    });
+    authServiceSpy.hasPermission.and.returnValue(false);
 
     await TestBed.configureTestingModule({
       imports: [BadgeLibrary],
@@ -86,14 +89,14 @@ describe('BadgeLibrary', () => {
     });
 
     it('should show only user badges when filter is set to "my"', (done) => {
-      component.filterCtrl.setValue('my');
-
-      component.filteredBadges$.subscribe(badges => {
+      component.filteredBadges$.pipe(skip(1)).subscribe(badges => {
         expect(badges.length).toBe(1);
         expect(badges).toContain(mockBadge1);
         expect(badges).not.toContain(mockBadge2);
         done();
       });
+
+      component.filterCtrl.setValue('my');
     });
   });
 });
