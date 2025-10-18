@@ -1,5 +1,5 @@
 <h1 mat-dialog-title>{{ isEditMode ? 'Edit' : 'Add' }} Remark for {{ data.event.subject }}</h1>
-<mat-dialog-content>
+<mat-dialog-content class="enable-scroll">
   <div *ngIf="isLoading; else formContent" class="loading-container">
     <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
   </div>
