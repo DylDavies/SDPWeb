@@ -235,51 +235,100 @@
       <mat-card>
         <mat-card-content>
           @if (leaderboardDataSource.data.length > 0) {
-            <table mat-table [dataSource]="leaderboardDataSource" matSort class="leaderboard-table">
-              <!-- Rank Column -->
-              <ng-container matColumnDef="rank">
-                <th mat-header-cell *matHeaderCellDef>Rank</th>
-                <td mat-cell *matCellDef="let element; let i = index">
-                  {{ ((paginator?.pageIndex ?? 0) * (paginator?.pageSize ?? 10)) + i + 1 }}
-                </td>
-              </ng-container>
+            <!-- DESKTOP TABLE VIEW -->
+            @if(!isMobile) {
+              <div class="desktop-view">
+                <table mat-table [dataSource]="leaderboardDataSource" matSort class="leaderboard-table">
+                  <!-- Rank Column -->
+                  <ng-container matColumnDef="rank">
+                    <th mat-header-cell *matHeaderCellDef>Rank</th>
+                    <td mat-cell *matCellDef="let element; let i = index">
+                      {{ ((paginator?.pageIndex ?? 0) * (paginator?.pageSize ?? 10)) + i + 1 }}
+                    </td>
+                  </ng-container>
 
-              <!-- Tutor Name Column -->
-              <ng-container matColumnDef="tutorName">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Tutor Name</th>
-                <td mat-cell *matCellDef="let element">{{ element.tutorName }}</td>
-              </ng-container>
+                  <!-- Tutor Name Column -->
+                  <ng-container matColumnDef="tutorName">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Tutor Name</th>
+                    <td mat-cell *matCellDef="let element">{{ element.tutorName }}</td>
+                  </ng-container>
 
-              <!-- Total Hours Column -->
-              <ng-container matColumnDef="totalHours">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Hours</th>
-                <td mat-cell *matCellDef="let element">{{ element.totalHours.toFixed(2) }}</td>
-              </ng-container>
+                  <!-- Total Hours Column -->
+                  <ng-container matColumnDef="totalHours">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Hours</th>
+                    <td mat-cell *matCellDef="let element">{{ element.totalHours.toFixed(2) }}</td>
+                  </ng-container>
 
-              <!-- Average Rating Column -->
-              <ng-container matColumnDef="averageRating">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Average Rating</th>
-                <td mat-cell *matCellDef="let element">
-                  {{ element.averageRating > 0 ? element.averageRating.toFixed(1) + '/5' : 'N/A' }}
-                </td>
-              </ng-container>
+                  <!-- Average Rating Column -->
+                  <ng-container matColumnDef="averageRating">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Average Rating</th>
+                    <td mat-cell *matCellDef="let element">
+                      {{ element.averageRating > 0 ? element.averageRating.toFixed(1) + '/5' : 'N/A' }}
+                    </td>
+                  </ng-container>
 
-              <!-- Missions Achieved Column -->
-              <ng-container matColumnDef="missionsCompleted">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Missions Achieved</th>
-                <td mat-cell *matCellDef="let element">{{ element.missionsCompleted }}</td>
-              </ng-container>
+                  <!-- Missions Achieved Column -->
+                  <ng-container matColumnDef="missionsCompleted">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Missions Achieved</th>
+                    <td mat-cell *matCellDef="let element">{{ element.missionsCompleted }}</td>
+                  </ng-container>
 
-              <tr mat-header-row *matHeaderRowDef="leaderboardColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: leaderboardColumns;"></tr>
-            </table>
+                  <tr mat-header-row *matHeaderRowDef="leaderboardColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: leaderboardColumns;"></tr>
+                </table>
 
-            <mat-paginator
-              [pageSizeOptions]="[5, 10, 20, 50]"
-              [pageSize]="10"
-              showFirstLastButtons
-              aria-label="Select page of tutors">
-            </mat-paginator>
+                <mat-paginator
+                  [pageSizeOptions]="[5, 10, 20, 50]"
+                  [pageSize]="10"
+                  showFirstLastButtons
+                  aria-label="Select page of tutors">
+                </mat-paginator>
+              </div>
+            }
+
+            <!-- MOBILE CARD VIEW -->
+            @if(isMobile) {
+              <div class="mobile-view">
+                <div class="leaderboard-cards">
+                  @for (element of leaderboardDataSource.connect() | async; track element.tutorId; let i = $index) {
+                    <mat-card class="leaderboard-card">
+                      <mat-card-content>
+                        <div class="card-header">
+                           <span class="rank"
+                            [class.gold]="((paginator?.pageIndex ?? 0) * (paginator?.pageSize ?? 10)) + i === 0"
+                            [class.silver]="((paginator?.pageIndex ?? 0) * (paginator?.pageSize ?? 10)) + i === 1"
+                            [class.bronze]="((paginator?.pageIndex ?? 0) * (paginator?.pageSize ?? 10)) + i === 2">
+                            #{{ ((paginator?.pageIndex ?? 0) * (paginator?.pageSize ?? 10)) + i + 1 }}
+                          </span>
+                          <span class="tutor-name">{{ element.tutorName }}</span>
+                        </div>
+                        <mat-divider></mat-divider>
+                        <div class="card-body">
+                          <div class="stat-item">
+                            <span class="stat-label">Total Hours</span>
+                            <span class="stat-value">{{ element.totalHours.toFixed(2) }}</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-label">Avg. Rating</span>
+                            <span class="stat-value">{{ element.averageRating > 0 ? element.averageRating.toFixed(1) + '/5' : 'N/A' }}</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-label">Missions</span>
+                            <span class="stat-value">{{ element.missionsCompleted }}</span>
+                          </div>
+                        </div>
+                      </mat-card-content>
+                    </mat-card>
+                  }
+                </div>
+                <mat-paginator
+                  [pageSizeOptions]="[5, 10, 20, 50]"
+                  [pageSize]="10"
+                  showFirstLastButtons
+                  aria-label="Select page of tutors">
+                </mat-paginator>
+              </div>
+            }
           } @else {
             <div class="no-data">No tutor performance data available</div>
           }
@@ -288,3 +337,4 @@
     </div>
   }
 </div>
+

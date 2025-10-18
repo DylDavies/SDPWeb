@@ -67,9 +67,18 @@ export class Profile implements OnInit, OnDestroy {
     this.userSubscription = this.authService.currentUser$.pipe(
       switchMap(currentUser => {
         const idToFetch = userIdFromRoute || currentUser?._id;
-        this.isOwnProfile = !userIdFromRoute || userIdFromRoute === currentUser?._id;
-
-        if (!idToFetch) {
+        
+        if (idToFetch) {
+          this.isOwnProfile = !userIdFromRoute || userIdFromRoute === currentUser?._id;
+          if (!this.isOwnProfile) this.fetchUserById(idToFetch);
+          else {
+            this.user = currentUser;
+            this.userNotFound = false;
+            this.isLoading = false;
+          }
+        } else {
+          // This handles the case where there is no route ID and the currentUser$ is initially null
+          this.isLoading = false;
           this.userNotFound = !currentUser;
           this.user = currentUser;
           this.isLoading = false;

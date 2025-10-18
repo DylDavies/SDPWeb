@@ -1,5 +1,4 @@
 .rate-history-dialog {
-  min-width: 800px;
   max-width: 1200px;
   width: 100%;
 
@@ -63,6 +62,7 @@
   }
 }
 
+// DESKTOP TABLE STYLES
 table {
   width: 100%;
 
@@ -126,6 +126,206 @@ table {
   }
 }
 
+// MOBILE CARD STYLES
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-card {
+  background-color: var(--mat-sys-surface-container-high);
+  padding: 8px 16px;
+
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    text-align: right;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    &.reason {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      gap: 4px;
+
+      span {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
+  }
+
+  .card-label {
+    color: var(--mat-sys-on-surface-variant);
+    text-align: left;
+    padding-right: 16px;
+  }
+  
+  .rate-value {
+    font-weight: 600;
+    color: var(--mat-sys-primary);
+  }
+}
+
+
 mat-dialog-actions {
   padding-top: 20px;
+}
+
+.rate-history-dialog {
+  max-width: 1200px;
+  width: 100%;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    mat-icon {
+      color: var(--mat-sys-primary);
+    }
+  }
+}
+
+.user-info {
+  background-color: var(--mat-sys-surface-container-lowest);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  color: var(--mat-sys-on-surface);
+}
+
+.adjustments-container {
+  min-height: 200px;
+}
+
+.no-history, .loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+  gap: 16px;
+  p { color: var(--mat-sys-on-surface-variant); margin: 0; }
+  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+}
+
+
+.history-table {
+  width: 100%;
+
+  .mat-mdc-cell, .mat-mdc-header-cell { padding: 12px; }
+  .mat-column-effectiveDate { width: 20%; }
+  .mat-column-rate {
+    width: 20%;
+    .rate-value { font-weight: 600; color: var(--mat-sys-primary); }
+  }
+  .mat-column-reason {
+    width: 40%;
+    .reason-text {
+      display: block;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .mat-column-approvingManager {
+    width: 25%;
+    .approver-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      .approver-name { font-weight: 500; color: var(--mat-sys-on-surface); }
+      .approver-email { font-size: 12px; color: var(--mat-sys-on-surface-variant); }
+    }
+  }
+  .mat-mdc-row {
+    &:nth-child(even) { background-color: var(--mat-sys-surface-container-lowest); }
+    &:hover { background-color: var(--mat-sys-surface-container-highest); }
+  }
+}
+
+mat-dialog-actions {
+  padding-top: 20px;
+}
+
+
+.card-list {
+  display: none; // Hidden on desktop
+}
+
+@media (max-width: 768px) {
+  .history-table {
+    display: none;
+  }
+
+  .card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .history-card {
+    background-color: var(--mat-sys-surface-container-high);
+    border-radius: 8px;
+    padding: 8px 16px;
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 12px 0;
+      text-align: right;
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
+      }
+      &.reason {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        gap: 8px;
+      }
+    }
+
+    .card-label {
+      font-weight: 500;
+      color: var(--mat-sys-on-surface-variant);
+      text-align: left;
+      padding-right: 16px;
+    }
+
+    .rate-value {
+      font-weight: 600;
+      color: var(--mat-sys-primary);
+    }
+    
+    .reason-text-mobile {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .approver-info-mobile {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+  }
+
+  h2 {
+    align-items: flex-start;
+    span {
+      flex: 1;
+    }
+  }
 }

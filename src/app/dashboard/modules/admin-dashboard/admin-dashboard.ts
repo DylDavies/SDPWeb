@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { EPermission } from '../../../models/enums/permission.enum';
@@ -10,6 +10,7 @@ import { UserTable } from '../../../shared/components/user-table/user-table';
 import { SidebarCustomization } from './components/sidebar-customization/sidebar-customization';
 import { BadgeManagement } from "./components/badge-management/badge-management";
 import { RemarkTemplateManagement } from './components/remark-template-management/remark-template-management';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,8 +19,11 @@ import { RemarkTemplateManagement } from './components/remark-template-managemen
   styleUrl: './admin-dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminDashboard {
+export class AdminDashboard implements OnInit{
   private authService = inject(AuthService);
+  private breakpointObserver = inject(BreakpointObserver);
+
+  public isMobile = false;
 
   public canViewUsers = this.authService.hasPermission(EPermission.USERS_VIEW);
   public canViewRoles = this.authService.hasPermission(EPermission.ROLES_VIEW);
@@ -27,4 +31,10 @@ export class AdminDashboard {
   public canManageSidebar = this.authService.hasPermission(EPermission.SIDEBAR_MANAGE);
   public canManageBadges = this.authService.hasPermission(EPermission.BADGES_CREATE);
   public canManageRemarks = this.authService.hasPermission(EPermission.REMARKS_MANAGE);
+
+  ngOnInit(): void {
+    this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Tablet]).subscribe(result =>{
+      this.isMobile = result.matches;
+    })
+  }
 }

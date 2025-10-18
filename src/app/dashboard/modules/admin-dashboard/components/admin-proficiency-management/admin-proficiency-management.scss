@@ -86,3 +86,15 @@
     margin-bottom: 16px;
   }
 }
+
+@media (max-width: 768px) {
+  .proficiency-container {
+    grid-template-columns: 1fr;
+    padding-top: 16px;
+    gap: 16px;
+  }
+
+  :host {
+    height: auto;
+  }
+}

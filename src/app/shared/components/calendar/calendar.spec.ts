@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -14,14 +14,13 @@ import { EUserType } from '../../../models/enums/user-type.enum';
 import { IEvent } from '../../../models/interfaces/IEvent.interface';
 import { AddEventModal } from '../../../dashboard/modules/client-dashboard/components/add-event-modal/add-event-modal';
 import { RemarkModal } from '../../../dashboard/modules/client-dashboard/components/remark-modal/remark-modal';
-import { ESocketMessage } from '../../../models/enums/socket-message.enum'; // <-- FIX: Import ESocketMessage
+import { ESocketMessage } from '../../../models/enums/socket-message.enum';
 
 // --- MOCK DATA ---
 const mockAdminUser: IUser = { _id: 'admin1', type: EUserType.Admin } as IUser;
 const mockStaffUser: IUser = { _id: 'staff1', type: EUserType.Staff } as IUser;
 const mockClientUser: IUser = { _id: 'client1', type: EUserType.Client } as IUser;
 
-// FIX: Use 'subject' instead of 'title' and fill in other required fields
 const mockEvents: IEvent[] = [
     { _id: 'event1', subject: 'Past Event 1', startTime: new Date('2024-01-15T10:00:00'), remarked: false, rating: 0, bundle: '', student: {} as any, tutor: {} as any, duration: 60, remark: '' },
     { _id: 'event2', subject: 'Past Event 2', startTime: new Date('2024-01-15T12:00:00'), remarked: true, rating: 5, bundle: '', student: {} as any, tutor: {} as any, duration: 60, remark: '' },
@@ -45,13 +44,9 @@ describe('CalendarComponent', () => {
             currentUser$: new BehaviorSubject<IUser | null>(mockStaffUser),
         };
 
-        // Correct the MatDialog mock
+        // Create and fully configure the spy *before* TestBed.
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-
-        // Manually add the internal properties that the real service requires.
-        (mockDialog as any).openDialogs = [];
-        (mockDialog as any)._afterAllClosed = new Subject<void>();
-        (mockDialog as any)._afterOpened = new Subject<void>(); // <-- ADD THIS LINE
+        mockDialog.open.and.returnValue({ afterClosed: () => of(true) } as any);
 
         socketListenSubject = new Subject<void>();
         mockSocketService.listen.and.returnValue(socketListenSubject.asObservable());
@@ -66,7 +61,8 @@ describe('CalendarComponent', () => {
                 { provide: EventService, useValue: mockEventService },
                 { provide: SocketService, useValue: mockSocketService },
                 { provide: AuthService, useValue: mockAuthService },
-                { provide: MatDialog, useValue: mockDialog },
+                // Provide the configured spy using useValue to ensure it's used.
+                { provide: MatDialog, useValue: mockDialog }
             ]
         }).compileComponents();
 
@@ -109,7 +105,6 @@ describe('CalendarComponent', () => {
 
         it('should subscribe to socket events and reload on message', () => {
             fixture.detectChanges();
-            // FIX: Use the enum member, not a string
             expect(mockSocketService.subscribe).toHaveBeenCalledWith(ESocketMessage.EventsUpdated);
             
             spyOn(component, 'loadEvents');
@@ -177,21 +172,23 @@ describe('CalendarComponent', () => {
             const day = new Date('2024-01-15');
             const events = component.getEventsForDay(day);
             expect(events.length).toBe(2);
-            // Check sorting
             expect(events[0].subject).toBe('Past Event 1');
             expect(events[1].subject).toBe('Past Event 2');
         });
 
-        it('onDayClick should do nothing if day is null', () => {
-            component.onDayClick(null);
+        // --- FIXED TESTS ---
+        it('selectDay should update selectedDay with the given day', () => {
+            const day = new Date();
+            component.selectDay(day);
+            expect(component.selectedDay).toBe(day);
+        });
+
+        it('openAddEventDialog should not open the dialog if user is not staff or admin', () => {
+            component.isStaffOrAdmin = false;
+            component.openAddEventDialog(new Date());
             expect(mockDialog.open).not.toHaveBeenCalled();
         });
 
-        it('onDayClick should do nothing if user is not staff or admin', () => {
-            component.isStaffOrAdmin = false;
-            component.onDayClick(new Date());
-            expect(mockDialog.open).not.toHaveBeenCalled();
-        });
     });
 
     describe('Utility Functions', () => {
@@ -201,3 +198,4 @@ describe('CalendarComponent', () => {
         });
     });
 });
+

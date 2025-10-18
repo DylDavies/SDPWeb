@@ -5,11 +5,12 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { StatsComponent } from './stats';
-import { UserService } from '../../../../../services/user-service';
+import { UserService, TutorStats } from '../../../../../services/user-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 // --- MOCK DATA ---
-const mockStats = {
+const mockStats: TutorStats = {
   kpis: {
     totalHoursTaught: 120.5,
     netPay: 25000.00,
@@ -54,10 +55,14 @@ describe('StatsComponent', () => {
   let fixture: ComponentFixture<StatsComponent>;
   let mockUserService: jasmine.SpyObj<UserService>;
   let mockSnackbarService: jasmine.SpyObj<SnackBarService>;
+  let mockBreakpointObserver: jasmine.SpyObj<BreakpointObserver>;
 
   beforeEach(async () => {
     mockUserService = jasmine.createSpyObj('UserService', ['getTutorStats']);
     mockSnackbarService = jasmine.createSpyObj('SnackBarService', ['showError', 'showSuccess']);
+    mockBreakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
+
+    mockBreakpointObserver.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
 
     await TestBed.configureTestingModule({
       imports: [StatsComponent, NoopAnimationsModule],
@@ -65,7 +70,8 @@ describe('StatsComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: UserService, useValue: mockUserService },
-        { provide: SnackBarService, useValue: mockSnackbarService }
+        { provide: SnackBarService, useValue: mockSnackbarService },
+        { provide: BreakpointObserver, useValue: mockBreakpointObserver }
       ],
     }).compileComponents();
 
@@ -107,7 +113,6 @@ describe('StatsComponent', () => {
       component.isLoading = false;
       component.loadStats();
 
-      // Before the observable completes, isLoading should be true
       expect(mockUserService.getTutorStats).toHaveBeenCalled();
     });
   });
@@ -156,11 +161,9 @@ describe('StatsComponent', () => {
     });
 
     it('should return 120% of average when max is below that threshold', () => {
-      // mockStats earnings: [8000, 9000, 8000]
-      // Average: 8333.33, Baseline: 10000, Max: 9000
-      // Should return: 10000
       const max = component.getMaxEarnings();
-      expect(max).toBe(10000);
+      const average = (8000 + 9000 + 8000) / 3;
+      expect(max).toBe(average * 1.2);
     });
 
     it('should return actual max when it exceeds 120% of average', () => {
@@ -170,15 +173,13 @@ describe('StatsComponent', () => {
           ...mockStats.charts,
           monthlyEarnings: [
             { month: '2024-01', earnings: 5000.00 },
-            { month: '2024-02', earnings: 15000.00 }, // Much higher
+            { month: '2024-02', earnings: 15000.00 }, 
             { month: '2024-03', earnings: 5000.00 }
           ]
         }
       };
       component.stats = statsWithHighMax;
 
-      // Average: 8333.33, Baseline: 10000, Max: 15000
-      // Should return: 15000
       const max = component.getMaxEarnings();
       expect(max).toBe(15000);
     });
@@ -208,9 +209,6 @@ describe('StatsComponent', () => {
         }
       };
       component.stats = statsWithEqualEarnings;
-
-      // Average: 5000, Baseline: 6000, Max: 5000
-      // Should return: 6000
       const max = component.getMaxEarnings();
       expect(max).toBe(6000);
     });
@@ -270,14 +268,13 @@ describe('StatsComponent', () => {
       const segments = component.getPieChartSegments();
 
       expect(segments.length).toBe(3);
-      expect(segments[0].percentage).toBeCloseTo(49.79, 1); // 60 / 120.5 * 100
-      expect(segments[1].percentage).toBeCloseTo(33.61, 1); // 40.5 / 120.5 * 100
-      expect(segments[2].percentage).toBeCloseTo(16.60, 1); // 20 / 120.5 * 100
+      expect(segments[0].percentage).toBeCloseTo(49.79, 1);
+      expect(segments[1].percentage).toBeCloseTo(33.61, 1);
+      expect(segments[2].percentage).toBeCloseTo(16.60, 1);
 
-      // Check that path property exists and is a string
       expect(segments[0].path).toBeDefined();
       expect(typeof segments[0].path).toBe('string');
-      expect(segments[0].path).toContain('M 100 100'); // Path starts from center
+      expect(segments[0].path).toContain('M 100 100');
     });
 
     it('should have percentages that sum to approximately 100', () => {
@@ -300,7 +297,7 @@ describe('StatsComponent', () => {
       const segments = component.getPieChartSegments();
       expect(segments.length).toBe(1);
       expect(segments[0].percentage).toBe(100);
-      expect(segments[0].path).toContain('a 90,90'); // Circle path
+      expect(segments[0].path).toContain('a 90,90');
     });
 
     it('should assign colors to segments', () => {
@@ -324,7 +321,6 @@ describe('StatsComponent', () => {
 
       const segments = component.getPieChartSegments();
       expect(segments.length).toBe(10);
-      // Check that color wrapping works (9th subject should have same color as 1st)
       expect(segments[8].color).toBe(segments[0].color);
     });
 
@@ -351,8 +347,7 @@ describe('StatsComponent', () => {
       };
 
       const segments = component.getPieChartSegments();
-      // First segment is 70%, should use large arc flag
-      expect(segments[0].path).toContain('1 1'); // Large arc flag should be 1
+      expect(segments[0].path).toContain('1 1');
       expect(segments[0].percentage).toBe(70);
     });
   });
@@ -385,10 +380,11 @@ describe('StatsComponent', () => {
       fixture.detectChanges();
 
       const kpiCards = fixture.nativeElement.querySelectorAll('.kpi-card');
-      expect(kpiCards.length).toBe(5); // Total hours, net pay, rating, missions achieved, leave days
+      expect(kpiCards.length).toBe(5);
     });
 
     it('should display recent activity table', () => {
+      component.isMobile = false; // Ensure we are testing desktop view
       component.ngOnInit();
       fixture.detectChanges();
 
@@ -468,7 +464,7 @@ describe('StatsComponent', () => {
     });
 
     it('should handle very large duration values', () => {
-      const largeMinutes = 10000; // ~166 hours
+      const largeMinutes = 10000;
       const result = component.formatDuration(largeMinutes);
       expect(result).toBe('166h 40m');
     });
@@ -479,7 +475,6 @@ describe('StatsComponent', () => {
       component.loadStats();
 
       const segments = component.getPieChartSegments();
-      // Science has 40.5 hours
       expect(segments[1].hours).toBe(40.5);
     });
 
@@ -507,7 +502,7 @@ describe('StatsComponent', () => {
       ) as HTMLElement;
 
       expect(missionsCard).toBeTruthy();
-      expect(missionsCard?.textContent).toContain('15'); // mockStats.kpis.missionsCompleted = 15
+      expect(missionsCard?.textContent).toContain('15');
     });
   });
 });

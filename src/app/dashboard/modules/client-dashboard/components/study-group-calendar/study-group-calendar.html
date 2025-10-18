@@ -8,13 +8,13 @@
       <mat-icon>chevron_right</mat-icon>
     </button>
   </header>
-  <div class="calendar-grid">
+
+  <!-- DESKTOP VIEW -->
+  <div class="desktop-view">
     <div *ngFor="let dayName of weekDays" class="day-name-cell">
       {{ dayName }}
     </div>
-    <div *ngFor="let day of daysInMonth"
-         class="day-cell"
-         [class.empty-cell]="!day">
+    <div *ngFor="let day of daysInMonth" class="day-cell" [class.empty-cell]="!day">
       <span *ngIf="day" class="day-number">{{ day.getDate() }}</span>
       <div *ngIf="day" class="event-container">
         <div *ngFor="let event of getEventsForDay(day)" class="event-chip">
@@ -26,4 +26,42 @@
       </div>
     </div>
   </div>
+
+  <!-- MOBILE VIEW -->
+  <div class="mobile-view">
+    <div class="mini-grid">
+      <div *ngFor="let dayName of weekDays" class="day-name-cell">
+        {{ dayName.charAt(0) }}
+      </div>
+      <button *ngFor="let day of daysInMonth" 
+              class="mini-day-cell"
+              [class.empty-cell]="!day"
+              [class.selected]="isSameDay(day, selectedDay)"
+              (click)="selectDay(day)"
+              [disabled]="!day">
+        <span *ngIf="day">{{ day.getDate() }}</span>
+        <div *ngIf="day && getEventsForDay(day).length > 0" class="event-dot"></div>
+      </button>
+    </div>
+
+    <div class="details-pane" *ngIf="selectedDay">
+      <div class="details-header">
+        <h2>{{ selectedDay | date:'fullDate' }}</h2>
+      </div>
+      <div class="details-content">
+        <ng-container *ngIf="getEventsForDay(selectedDay).length > 0; else noEvents">
+          <div *ngFor="let event of getEventsForDay(selectedDay)" class="event-chip">
+            <div class="event-content">
+              <span class="event-time">{{ getEventTime(event) }} - </span>
+              <span class="event-name">{{ event.name }}</span>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noEvents>
+          <div class="no-events-message">No study groups scheduled.</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
 </div>
+

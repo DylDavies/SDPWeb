@@ -1,20 +1,20 @@
 <mat-toolbar color="primary" class="barBackground">
-  <div class="leftSide">
-    <img [src]="`assets/navlogo_${theme}.png`" alt="Company Logo" class="logo-image">
-    <p class="logoName">TutorCore</p>
-    <p class="spacer1"></p>
-  </div>
-
   @if (currentUser$ | async; as user) {
-    <p class="spacer2" id="userType">{{ user.type | userTypePipe }}</p>
+    <div class="toolbar-content">
+      <div class="toolbar-section left">
+        <img [src]="`assets/navlogo_${theme}.png`" alt="Company Logo" class="logo-image">
+        <span class="logoName hide-on-mobile">TutorCore</span>
+      </div>
 
-    <div class = "rightSide">
-      <!-- <button matIconButton class="notifications-icon" aria-label="Notifications">
-          <mat-icon>notifications</mat-icon>
-      </button> -->
-      <app-notification-bell />
-      <p class="userName">{{ user.displayName | displayNamePipe }}</p>
-      <app-profile-dropdown />
+      <div class="toolbar-section center hide-on-tablet">
+        <span class="user-type">{{ user.type | userTypePipe }}</span>
+      </div>
+
+      <div class="toolbar-section right">
+        <span class="userName hide-on-mobile">{{ user.displayName | displayNamePipe }}</span>
+        <app-notification-bell />
+        <app-profile-dropdown />
+      </div>
     </div>
   }
 </mat-toolbar>

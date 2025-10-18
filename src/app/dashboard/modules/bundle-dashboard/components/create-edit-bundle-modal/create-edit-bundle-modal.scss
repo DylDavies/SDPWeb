@@ -86,13 +86,12 @@ button[mat-flat-button] {
         width: 20px;
         height: 20px;
         padding: 0;
-        align-self: flex-start; // Aligns the button to the top of the flex container
+        align-self: flex-start;
 
         mat-icon {
             font-size: 16px;
             width: 16px;
             height: 16px;
-            //align-self: flex-start;
         }
     }
 }
@@ -147,4 +146,16 @@ button[mat-flat-button] {
             color: #ffcdd2;
         }
     }
+}
+
+
+@media (max-width: 767px) {
+  .form-row, .subject-group {
+    flex-direction: column;
+    align-items: stretch; 
+  }
+
+  .flex-item, .small-field {
+    flex: 1 1 auto;
+  }
 }

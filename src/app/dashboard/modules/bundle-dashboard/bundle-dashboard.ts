@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { filter } from 'rxjs/operators';
 import { SnackBarService } from '../../../services/snackbar-service';
 import { BundleService } from '../../../services/bundle-service';
-import { IBundle } from '../../../models/interfaces/IBundle.interface';
+import { IBundle, IPopulatedUser } from '../../../models/interfaces/IBundle.interface';
 import { EBundleStatus } from '../../../models/enums/bundle-status.enum';
 import { CreateEditBundleModal } from './components/create-edit-bundle-modal/create-edit-bundle-modal';
 import { AuthService } from '../../../services/auth-service';
@@ -80,6 +80,13 @@ export class BundleDashboard implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  public getDisplayName(user: string | IPopulatedUser | undefined | null): string {
+    if (typeof user === 'object' && user?.displayName) {
+      return user.displayName;
+    }
+    return 'Not assigned';
   }
 
   loadBundles(): void {
@@ -204,4 +211,3 @@ export class BundleDashboard implements OnInit, AfterViewInit {
     return filterFunction;
   }
 }
-
