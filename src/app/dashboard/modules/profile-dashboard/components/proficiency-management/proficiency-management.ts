@@ -24,8 +24,8 @@ import { UserService } from '../../../../../services/user-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { ConfirmationDialog } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { IBackendProficiency } from '../../../../../models/interfaces/IBackendProficiency.interface';
- 
 import { lastValueFrom } from 'rxjs';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-proficiency-management',
@@ -58,6 +58,7 @@ export class ProficiencyManagement implements OnInit {
   private userService = inject(UserService);
   private snackbarService = inject(SnackBarService);
   private dialog = inject(MatDialog);
+  private breakpointObserver: BreakpointObserver;
 
   proficiencies: IProficiency[] = [];
   selectedSyllabus: string | null = null;
@@ -76,14 +77,23 @@ export class ProficiencyManagement implements OnInit {
   filteredSubjects!: Observable<string[]>;
 
   public selectedTabIndex = 0;
+  public isMobile = false;
+
+  constructor() {
+    this.breakpointObserver = inject(BreakpointObserver);
+  }
 
   ngOnInit(): void {
+    this.breakpointObserver.observe(Breakpoints.XSmall).subscribe(result => {
+      this.isMobile = result.matches;
+    });
+
     this.authService.currentUser$.pipe(
       filter((user): user is IUser => !!user),
       switchMap(user => {
         this.user = user;
         if (user.proficiencies) {
-          this.userProficiencies = user.proficiencies.filter(p => p.subjects && Object.keys(p.subjects).length > 0); // dont render profs with no subjects
+          this.userProficiencies = user.proficiencies.filter(p => p.subjects && Object.keys(p.subjects).length > 0);
           this.prepopulateSyllabusSelections();
         }
         return this.profService.fetchAllProficiencies();
@@ -111,12 +121,12 @@ export class ProficiencyManagement implements OnInit {
   private prepopulateSyllabusSelections(): void {
     this.syllabusSelections = {};
     this.userProficiencies.forEach(prof => {
-        this.syllabusSelections[prof.name] = {};
-        if (prof.subjects) {
-            Object.values(prof.subjects).forEach(subject => {
-                this.syllabusSelections[prof.name][subject.name] = [...subject.grades];
-            });
-        }
+      this.syllabusSelections[prof.name] = {};
+      if (prof.subjects) {
+        Object.values(prof.subjects).forEach(subject => {
+          this.syllabusSelections[prof.name][subject.name] = [...subject.grades];
+        });
+      }
     });
     this.initialSyllabusSelections = JSON.parse(JSON.stringify(this.syllabusSelections));
   }
@@ -134,19 +144,19 @@ export class ProficiencyManagement implements OnInit {
 
   onSyllabusSelect(name: string) {
     this.selectedSyllabus = name;
-    
+
     const syllabus = this.proficiencies.find(p => p.name === name);
     this.availableSubjects = syllabus ? Object.values(syllabus.subjects).map((s: ISubject) => s.name) : [];
-    
+
     if (!this.syllabusSelections[name]) {
       this.syllabusSelections[name] = {};
     }
-    
+
     this.selectedSubjects = Object.keys(this.syllabusSelections[name]);
     this.selectedSubject = null;
     this.selectedGrades = [];
     this.clearInput(false);
-    
+
     this.subjectCtrl.setValue('');
   }
 
@@ -164,7 +174,7 @@ export class ProficiencyManagement implements OnInit {
     this.selectSubjectForEditing(subjectName);
     this.clearInput(true);
   }
-  
+
   onChipClick(subjectName: string) {
     this.selectSubjectForEditing(subjectName);
   }
@@ -176,7 +186,7 @@ export class ProficiencyManagement implements OnInit {
     }
     this.selectedSubjects = Object.keys(this.syllabusSelections[this.selectedSyllabus]);
   }
-  
+
   private selectSubjectForEditing(subjectName: string) {
     this.selectedSubject = subjectName;
     this.updateAvailableGrades(subjectName);
@@ -186,14 +196,14 @@ export class ProficiencyManagement implements OnInit {
   private updateAvailableGrades(subjectName: string): void {
     this.availableGrades = [];
     if (!this.selectedSyllabus) return;
-    
+
     const syllabus = this.proficiencies.find(p => p.name === this.selectedSyllabus);
     if (!syllabus) return;
 
     const subjectObject = Object.values(syllabus.subjects).find((s: ISubject) => s.name === subjectName);
-    
+
     if (subjectObject && subjectObject.grades) {
-        this.availableGrades = subjectObject.grades;
+      this.availableGrades = subjectObject.grades;
     }
   }
 
@@ -250,16 +260,12 @@ export class ProficiencyManagement implements OnInit {
     ).subscribe({
       next: (updatedUser) => {
         this.authService.updateCurrentUserState(updatedUser);
-
         this.userProficiencies = updatedUser.proficiencies || [];
-
         if (this.selectedUserSyllabus) {
-            this.onUserSyllabusSelect(this.selectedUserSyllabus);
+          this.onUserSyllabusSelect(this.selectedUserSyllabus);
         }
-        
         this.prepopulateSyllabusSelections();
         this.snackbarService.showSuccess(`Subject "${subjectToDelete.name}" deleted.`);
-
       },
       error: (err) => {
         console.error('Failed to delete subject', err);
@@ -268,7 +274,7 @@ export class ProficiencyManagement implements OnInit {
     });
   }
 
-confirmSave(): void {
+  confirmSave(): void {
     if (!this.user) return;
 
     const proficienciesToSave: IBackendProficiency[] = Object.keys(this.syllabusSelections).map(syllabusName => {
@@ -319,7 +325,7 @@ confirmSave(): void {
           this.authService.updateCurrentUserState(finalUpdatedUser);
           this.snackbarService.showSuccess('Proficiencies updated successfully!');
         } else {
-           this.snackbarService.showError('Could not confirm proficiency updates.');
+          this.snackbarService.showError('Could not confirm proficiency updates.');
         }
       },
       error: (err) => {
@@ -327,5 +333,5 @@ confirmSave(): void {
         this.snackbarService.showError('An error occurred while saving.');
       }
     });
-}
+  }
 }

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-// Correct the import path for the modal
 import { AddEventModal } from '../../../dashboard/modules/client-dashboard/components/add-event-modal/add-event-modal';
 import { IEvent } from '../../../models/interfaces/IEvent.interface';
 import { SocketService } from '../../../services/socket-service';
@@ -36,6 +35,7 @@ export class CalendarComponent implements OnInit {
   public weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   public isStaffOrAdmin = false;
   private currentUser: IUser | null = null;
+  public selectedDay: Date | null = null;
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe(user => {
@@ -48,17 +48,45 @@ export class CalendarComponent implements OnInit {
 
     this.socketService.subscribe(ESocketMessage.EventsUpdated);
     this.socketService.listen(ESocketMessage.EventsUpdated).subscribe(() => {
-        this.loadEvents();
+      // When events are updated from another source, keep the current day selected
+      const dayToKeepSelected = this.selectedDay;
+      this.loadEvents(dayToKeepSelected);
     });
   }
 
-  loadEvents(): void {
+  loadEvents(dayToSelectAfterLoad?: Date | null): void {
       this.eventService.getEvents().subscribe(events => {
           this.events = events.map(e => ({
               ...e,
               startTime: new Date(e.startTime)
           }));
+
+          // If a specific day should be selected, select it. Otherwise, use the default logic.
+          if (dayToSelectAfterLoad) {
+              this.selectedDay = dayToSelectAfterLoad;
+          } else {
+              this.setInitialSelectedDay();
+          }
       });
+  }
+
+  private setInitialSelectedDay(): void {
+    const today = new Date();
+    const todayString = today.toDateString();
+
+    // Prioritize today if it has events
+    if (this.events.some(e => new Date(e.startTime).toDateString() === todayString)) {
+      this.selectedDay = today;
+      return;
+    }
+
+    // Otherwise, find the first day in the current month view that has an event
+    const firstDayWithEvent = this.daysInMonth.find(day => 
+      day && this.getEventsForDay(day).length > 0
+    );
+
+    // Fallback to today if no days in the current view have events
+    this.selectedDay = firstDayWithEvent || today;
   }
 
   getEventStatusIcon(event: IEvent): 'completed' | 'pending' | null {
@@ -92,27 +120,43 @@ export class CalendarComponent implements OnInit {
   previousMonth(): void {
     this.currentDate.setMonth(this.currentDate.getMonth() - 1);
     this.generateCalendarDays();
+    this.setInitialSelectedDay();
   }
 
   nextMonth(): void {
     this.currentDate.setMonth(this.currentDate.getMonth() + 1);
     this.generateCalendarDays();
+    this.setInitialSelectedDay();
   }
 
-  onDayClick(day: Date | null): void {
-    if (!day || !this.isStaffOrAdmin) return;
+  openAddEventDialog(day: Date | null): void {
+    if (!this.isStaffOrAdmin) return;
+    
+    // Ensure we are passing the correct date to the dialog
+    const dateForDialog = day || this.selectedDay || new Date();
 
     const dialogRef = this.dialog.open(AddEventModal, {
       width: '500px',
-      //height: '520px',
-      data: { date: day }
+      data: { date: dateForDialog }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadEvents();
+        // After adding an event, reload the events but keep the same day selected.
+        this.loadEvents(dateForDialog);
       }
     });
+  }
+  
+  selectDay(day: Date | null): void {
+    if (day) {
+        this.selectedDay = day;
+    }
+  }
+
+  isSameDay(date1: Date | null, date2: Date | null): boolean {
+    if (!date1 || !date2) return false;
+    return date1.toDateString() === date2.toDateString();
   }
 
   onEventClick(event: IEvent, domEvent: MouseEvent): void {
@@ -124,7 +168,8 @@ export class CalendarComponent implements OnInit {
   
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadEvents();
+        // Keep the same day selected after a remark is added/updated
+        this.loadEvents(this.selectedDay);
       }
     });
   }

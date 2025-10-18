@@ -24,6 +24,7 @@ export class StudyGroupCalendarComponent implements OnInit {
     "July", "August", "September", "October", "November", "December"
   ];
   public weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  public selectedDay: Date | null = null;
 
   ngOnInit(): void {
     this.generateCalendarDays();
@@ -40,11 +41,28 @@ export class StudyGroupCalendarComponent implements OnInit {
               startTime: new Date(sg.scheduled_start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
               endTime: new Date(sg.scheduled_end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
           }));
+          this.setInitialSelectedDay();
         },
         error: () => {
           this.snackbarService.showError('Could not load upcoming study groups. Please try again later.');
         }
       });
+  }
+
+  private setInitialSelectedDay(): void {
+    const today = new Date();
+    const todayString = today.toDateString();
+
+    if (this.events.some(e => e.date.toDateString() === todayString)) {
+      this.selectedDay = today;
+      return;
+    }
+
+    const firstDayWithEvent = this.daysInMonth.find(day => 
+      day && this.getEventsForDay(day).length > 0
+    );
+
+    this.selectedDay = firstDayWithEvent || today;
   }
 
   generateCalendarDays(): void {
@@ -67,11 +85,24 @@ export class StudyGroupCalendarComponent implements OnInit {
   previousMonth(): void {
     this.currentDate.setMonth(this.currentDate.getMonth() - 1);
     this.generateCalendarDays();
+    this.setInitialSelectedDay();
   }
 
   nextMonth(): void {
     this.currentDate.setMonth(this.currentDate.getMonth() + 1);
     this.generateCalendarDays();
+    this.setInitialSelectedDay();
+  }
+
+  selectDay(day: Date | null): void {
+    if (day) {
+        this.selectedDay = day;
+    }
+  }
+
+  isSameDay(date1: Date | null, date2: Date | null): boolean {
+    if (!date1 || !date2) return false;
+    return date1.toDateString() === date2.toDateString();
   }
 
   getEventTime(event: IStudyGroupEvent): string {
@@ -85,3 +116,4 @@ export class StudyGroupCalendarComponent implements OnInit {
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }
 }
+

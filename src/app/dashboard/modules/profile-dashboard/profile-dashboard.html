@@ -28,6 +28,7 @@
           <mat-tab label="Profile">
             <div class="profile-content">
               <div class="profile-header">
+                
                 <div class="profile-avatar-wrapper">
                   <img class="profile-avatar" 
                        [src]="user.picture || '/assets/no_profile_pic.png'" 
@@ -48,6 +49,7 @@
                     <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
                   </div>
                 </div>
+
                 <div class="profile-actions">
                 @if (isOwnProfile) {
                   <button mat-stroked-button color="primary" (click)="openLeaveModal()">

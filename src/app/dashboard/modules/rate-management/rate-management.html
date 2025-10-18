@@ -1,123 +1,145 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Rate Management</mat-card-title>
-    <mat-card-subtitle>Manage hourly rates for all users</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <div *ngIf="users$ | async as users; else loading" class="rate-management-container">
+<div class="page-header">
+  <h1 class="page-title">Rate Management</h1>
+  <p class="page-subtitle">Manage hourly rates for all users</p>
+</div>
 
-      <div *ngIf="users.length === 0" class="no-users">
-        <p>No users found.</p>
-      </div>
+<div *ngIf="users$ | async as users; else loading" class="rate-management-container">
 
-      <!-- Search Controls -->
-      <div class="search-controls" *ngIf="users.length > 0">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Search by name or email</mat-label>
-          <input matInput
-                 [(ngModel)]="searchTerm"
-                 (input)="onSearchChange()"
-                 placeholder="Enter name or email...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </div>
+  <div *ngIf="users.length === 0" class="no-users">
+    <p>No users found.</p>
+  </div>
 
-      <table *ngIf="users.length > 0" mat-table [dataSource]="filteredUsers" matSort (matSortChange)="onSortChange($event)" matSortActive="displayName" matSortDirection="asc" class="mat-elevation-z8">
-
-        <!-- User Picture Column -->
-        <ng-container matColumnDef="picture">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let user">
-            <img *ngIf="user.picture"
-                 [src]="user.picture"
-                 [alt]="user.displayName"
-                 class="user-picture"
-                 referrerpolicy="no-referrer"
-                 loading="lazy">
-            <div *ngIf="!user.picture" class="user-picture-placeholder">
-              <mat-icon>person</mat-icon>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Display Name Column -->
-        <ng-container matColumnDef="displayName">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-          <td mat-cell *matCellDef="let user">{{ user.displayName }}</td>
-        </ng-container>
-
-        <!-- Email Column -->
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-          <td mat-cell *matCellDef="let user">{{ user.email }}</td>
-        </ng-container>
-
-        <!-- Current Rate Column -->
-        <ng-container matColumnDef="currentRate">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Current Rate</th>
-          <td mat-cell *matCellDef="let user">
-            <span *ngIf="getCurrentRate(user) > 0; else noRate" class="rate-value">
-              {{ getCurrentRate(user) | currency:'R':'symbol':'1.2-2' }}/hr
-            </span>
-            <ng-template #noRate>
-              <span class="no-rate">No rate set</span>
-            </ng-template>
-          </td>
-        </ng-container>
-
-        <!-- Last Adjustment Column -->
-        <ng-container matColumnDef="lastAdjustment">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Adjustment</th>
-          <td mat-cell *matCellDef="let user">
-            <span *ngIf="getLastAdjustmentDate(user) as lastDate; else noAdjustment" class="last-adjustment">
-              {{ lastDate | date:'dd/MM/yyyy' }}
-            </span>
-            <ng-template #noAdjustment>
-              <span class="no-adjustment">Never</span>
-            </ng-template>
-          </td>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let user">
-            <button mat-icon-button
-                    color="primary"
-                    matTooltip="Adjust rate"
-                    (click)="openRateAdjustmentDialog(user)">
-              <mat-icon>trending_up</mat-icon>
-            </button>
-            <button mat-icon-button
-                    color="accent"
-                    matTooltip="View rate history"
-                    (click)="viewRateHistory(user)"
-                    [disabled]="!user.rateAdjustments?.length">
-              <mat-icon>history</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [attr.data-user-id]="row._id"></tr>
-      </table>
-
-      <!-- Pagination -->
-      <mat-paginator *ngIf="users.length > 0"
-                     [length]="totalUsers"
-                     [pageSize]="pageSize"
-                     [pageSizeOptions]="[10, 25, 50, 100]"
-                     [pageIndex]="currentPage"
-                     (page)="onPageChange($event)"
-                     showFirstLastButtons>
-      </mat-paginator>
-
+  <ng-container *ngIf="users.length > 0">
+    <div class="search-controls">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search by name or email</mat-label>
+        <input matInput
+               [(ngModel)]="searchTerm"
+               (input)="onSearchChange()"
+               placeholder="Enter name or email...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
     </div>
 
-    <ng-template #loading>
-      <div class="loading-spinner">
-        <mat-spinner></mat-spinner>
+    <div *ngIf="isMobile" class="card-list">
+      <div *ngFor="let user of filteredUsers" class="user-card">
+        <mat-card class="transparent-card">
+          <mat-card-content class="user-card-header">
+            <img *ngIf="user.picture" [src]="user.picture" [alt]="user.displayName" class="user-picture large-avatar" referrerpolicy="no-referrer" loading="lazy">
+            <div *ngIf="!user.picture" class="user-picture-placeholder large-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="user-info">
+              <span class="display-name">{{ user.displayName }}</span>
+              <span class="email">{{ user.email }}</span>
+            </div>
+          </mat-card-content>
+          <mat-card-content class="user-card-section">
+            <div class="detail-item">
+              <span class="detail-label">Current Rate</span>
+              <span *ngIf="getCurrentRate(user) > 0; else noRate" class="rate-value detail-value">
+                {{ getCurrentRate(user) | currency:'R':'symbol':'1.2-2' }}/hr
+              </span>
+              <ng-template #noRate>
+                <span class="no-rate detail-value">No rate set</span>
+              </ng-template>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Last Adjustment</span>
+              <span *ngIf="getLastAdjustmentDate(user) as lastDate; else noAdjustment" class="last-adjustment detail-value">
+                {{ lastDate | date:'dd/MM/yyyy' }}
+              </span>
+              <ng-template #noAdjustment>
+                <span class="no-adjustment detail-value">Never</span>
+              </ng-template>
+            </div>
+          </mat-card-content>
+          <mat-card-actions class="user-card-actions">
+            <button mat-button color="primary" (click)="openRateAdjustmentDialog(user)">
+              <mat-icon>trending_up</mat-icon> Adjust Rate
+            </button>
+            <button mat-button color="accent" (click)="viewRateHistory(user)" [disabled]="!user.rateAdjustments?.length">
+              <mat-icon>history</mat-icon> History
+            </button>
+          </mat-card-actions>
+        </mat-card>
       </div>
-    </ng-template>
-  </mat-card-content>
-</mat-card>
+    </div>
+
+    <div *ngIf="!isMobile" class="table-container">
+      <div class="table-responsive-wrapper">
+        <table mat-table [dataSource]="filteredUsers" matSort (matSortChange)="onSortChange($event)" matSortActive="displayName" matSortDirection="asc">
+          <ng-container matColumnDef="picture">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let user">
+              <img *ngIf="user.picture" [src]="user.picture" [alt]="user.displayName" class="user-picture" referrerpolicy="no-referrer" loading="lazy">
+              <div *ngIf="!user.picture" class="user-picture-placeholder">
+                <mat-icon>person</mat-icon>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="displayName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+            <td mat-cell *matCellDef="let user">{{ user.displayName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+            <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+          </ng-container>
+          <ng-container matColumnDef="currentRate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Current Rate</th>
+            <td mat-cell *matCellDef="let user">
+              <span *ngIf="getCurrentRate(user) > 0; else noRate" class="rate-value">
+                {{ getCurrentRate(user) | currency:'R':'symbol':'1.2-2' }}/hr
+              </span>
+              <ng-template #noRate>
+                <span class="no-rate">No rate set</span>
+              </ng-template>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="lastAdjustment">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Adjustment</th>
+            <td mat-cell *matCellDef="let user">
+              <span *ngIf="getLastAdjustmentDate(user) as lastDate; else noAdjustment" class="last-adjustment">
+                {{ lastDate | date:'dd/MM/yyyy' }}
+              </span>
+              <ng-template #noAdjustment>
+                <span class="no-adjustment">Never</span>
+              </ng-template>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let user">
+              <button mat-icon-button color="primary" matTooltip="Adjust rate" (click)="openRateAdjustmentDialog(user)">
+                <mat-icon>trending_up</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" matTooltip="View rate history" (click)="viewRateHistory(user)" [disabled]="!user.rateAdjustments?.length">
+                <mat-icon>history</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [attr.data-user-id]="row._id"></tr>
+        </table>
+      </div>
+    </div>
+
+    <mat-paginator
+         [length]="totalUsers"
+         [pageSize]="pageSize"
+         [pageSizeOptions]="[10, 25, 50, 100]"
+         [pageIndex]="currentPage"
+         (page)="onPageChange($event)"
+         showFirstLastButtons>
+    </mat-paginator>
+
+  </ng-container>
+
+</div>
+
+<ng-template #loading>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>
