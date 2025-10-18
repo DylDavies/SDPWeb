@@ -97,7 +97,6 @@ export class Profile implements OnInit {
   }
 
   refreshUserData(): void {
-    console.log("refreshing")
     this.userService.fetchAllUsers().subscribe();
   }
 
