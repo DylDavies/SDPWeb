@@ -8,10 +8,6 @@ import { BadgeService } from '../../../services/badge-service';
 import { AuthService } from '../../../services/auth-service';
 import IBadge from '../../../models/interfaces/IBadge.interface';
 import { IUser } from '../../../models/interfaces/IUser.interface';
-import { BadgeService } from '../../../services/badge-service';
-import { AuthService } from '../../../services/auth-service';
-import IBadge from '../../../models/interfaces/IBadge.interface';
-import { IUser } from '../../../models/interfaces/IUser.interface';
 
 describe('BadgeLibrary', () => {
   let component: BadgeLibrary;
