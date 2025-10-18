@@ -138,6 +138,14 @@
 
 .roles-container {
   margin-top: 5px;
+
+  > span {
+    display: inline-block;
+  }
+}
+
+.user-role > span {
+  display: inline-block;
 }
 
 /* Responsive adjustments for smaller screens */

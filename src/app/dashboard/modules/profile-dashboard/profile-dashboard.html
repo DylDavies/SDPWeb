@@ -43,9 +43,11 @@
                       </button>
                     }
                   </div>
-                  <h2 class="user-role"  matTooltip="User type" aria-label="User type">{{ user.type | userTypePipe }}</h2>
-                  <div class="roles-container" matTooltip="User roles" aria-label="User roles">
-                    <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
+                  <h2 class="user-role"><span matTooltip="User type" matTooltipPosition="right" aria-label="User type">{{ user.type | userTypePipe }}</span></h2>
+                  <div class="roles-container">
+                    <span matTooltip="User roles" matTooltipPosition="right" aria-label="User roles">
+                      <app-role-chip-row [roles]="user.roles" ></app-role-chip-row>
+                    </span>
                   </div>
                 </div>
                 <div class="profile-actions">
