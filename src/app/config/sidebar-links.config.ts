@@ -22,7 +22,7 @@ export const AVAILABLE_SIDEBAR_LINKS: ISidebarLinkDefinition[] = [
       EPermission.BUNDLES_VIEW
     ]
   },
-  { label: 'Tutor Matchmaking', icon: 'connect_without_contact', route: '/dashboard/tutor-matchmaking', requiredPermissions: [EPermission.TUTOR_MATCHMAKING_ACCESS] },
+  { label: 'Tutor Matchmaking', icon: 'search', route: '/dashboard/tutor-matchmaking', requiredPermissions: [EPermission.TUTOR_MATCHMAKING_ACCESS] },
   { label: 'Admin', icon: 'shield', route: '/dashboard/admin', requiredPermissions: [EPermission.ADMIN_DASHBOARD_VIEW], stopRemove: true },
   { label: 'Payslips', icon: 'receipt_long', route: '/dashboard/payslips', requiredPermissions: [EPermission.CAN_VIEW_OWN_PAYSLIP] },
   { label: 'Rate Management', icon: 'price_change', route: '/dashboard/rates', requiredPermissions: [EPermission.CAN_ADJUST_RATES] },
