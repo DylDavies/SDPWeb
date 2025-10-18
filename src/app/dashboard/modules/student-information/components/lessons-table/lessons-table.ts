@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, inject, AfterViewInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, inject, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,7 +29,7 @@ import { MatCardModule } from "@angular/material/card";
   templateUrl: './lessons-table.html',
   styleUrls: ['./lessons-table.scss']
 })
-export class LessonsTable implements OnInit, OnChanges, AfterViewInit, OnDestroy {
+export class LessonsTable implements OnChanges, AfterViewInit, OnDestroy {
   @Input() bundleId: string | null = null;
   private eventService = inject(EventService);
   private dialog = inject(MatDialog);
@@ -62,9 +62,6 @@ export class LessonsTable implements OnInit, OnChanges, AfterViewInit, OnDestroy
     };
 
     this.dataSource.filterPredicate = this.createFilter();
-  }
-
-  ngOnInit(): void {
   }
 
   ngAfterViewInit(): void {

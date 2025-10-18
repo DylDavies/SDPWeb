@@ -35,7 +35,7 @@
       <h2 class="section-title" *ngIf="hasFileFields()">File Attachments <span class="required-indicator">* Required</span></h2>
       <ng-container *ngFor="let field of template?.fields">
         <div *ngIf="isFileFieldType(field.type)" class="file-upload-section">
-          <label class="file-label">{{ field.name }} <span class="required-indicator">*</span></label>
+          <div class="file-label">{{ field.name }} <span class="required-indicator">*</span></div>
           <div *ngIf="existingDocumentsMap.has(field.name)" class="existing-file-info">
             <mat-icon class="info-icon">check_circle</mat-icon>
             <span>Current file: {{ existingDocumentsMap.get(field.name)?.originalFilename }}</span>

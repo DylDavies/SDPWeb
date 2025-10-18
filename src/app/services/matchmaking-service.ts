@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { IAddress } from '../models/interfaces/IAddress.interface';
+import { IProficiency } from '../models/interfaces/IProficiency.interface';
 
 export interface MatchmakingCriteria {
   lessonLocation: IAddress;
@@ -18,7 +19,7 @@ export interface MatchedTutor {
   displayName: string;
   email: string;
   address?: IAddress;
-  proficiencies: any[];
+  proficiencies: IProficiency[];
   availability: number;
   distance: number | null;
   matchScore: number;

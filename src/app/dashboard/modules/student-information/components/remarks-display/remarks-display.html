@@ -13,7 +13,12 @@
       <div class="remarks-list">
         @for (remark of sortedRemarks; track remark._id; let i = $index) {
           <div class="remark-item">
-            <div class="remark-header" (click)="toggleRemark(remark._id)">
+            <div class="remark-header"
+                 role="button"
+                 tabindex="0"
+                 (click)="toggleRemark(remark._id)"
+                 (keydown.enter)="toggleRemark(remark._id)"
+                 (keydown.space)="toggleRemark(remark._id); $event.preventDefault()">
               <div class="header-left">
                 <mat-icon class="expand-icon">{{ isExpanded(remark._id) ? 'expand_more' : 'chevron_right' }}</mat-icon>
                 <div class="header-main-info">

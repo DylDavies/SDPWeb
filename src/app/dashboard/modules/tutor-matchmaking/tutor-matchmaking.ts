@@ -183,7 +183,7 @@ export class TutorMatchmaking implements OnInit {
     return `${distance.toFixed(1)} km`;
   }
 
-  formatProficiencies(proficiencies: any[]): string {
+  formatProficiencies(proficiencies: IProficiency[]): string {
     if (!proficiencies || proficiencies.length === 0) {
       return 'None';
     }

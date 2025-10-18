@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -9,10 +9,11 @@ import { IDocument } from '../../../../../models/interfaces/IDocument.interface'
 import { IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { RemarkService } from '../../../../../services/remark-service';
 import { FileService } from '../../../../../services/file-service';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { IEvent } from '../../../../../models/interfaces/IEvent.interface';
 
 @Component({
   selector: 'app-remarks-display',
@@ -23,7 +24,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   templateUrl: './remarks-display.html',
   styleUrls: ['./remarks-display.scss']
 })
-export class RemarksDisplay implements OnInit, OnChanges, OnDestroy {
+export class RemarksDisplay implements OnChanges, OnDestroy {
   @Input() studentId: string | null = null;
   private remarkService = inject(RemarkService);
   private fileService = inject(FileService);
@@ -35,9 +36,6 @@ export class RemarksDisplay implements OnInit, OnChanges, OnDestroy {
   public expandedRemarks = new Set<string>();
 
   private subscriptions = new Subscription();
-
-  ngOnInit(): void {
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['studentId'] && changes['studentId'].currentValue) {
@@ -72,7 +70,7 @@ export class RemarksDisplay implements OnInit, OnChanges, OnDestroy {
 
   getTutorName(remark: IRemark): string {
     if (remark.event && typeof remark.event === 'object') {
-      const event = remark.event as any;
+      const event = remark.event as IEvent;
       const tutor = event.tutor as IPopulatedUser;
       return tutor?.displayName || 'Unknown Tutor';
     }
@@ -81,7 +79,7 @@ export class RemarksDisplay implements OnInit, OnChanges, OnDestroy {
 
   getSubject(remark: IRemark): string {
     if (remark.event && typeof remark.event === 'object') {
-      const event = remark.event as any;
+      const event = remark.event as IEvent;
       return event.subject || 'Unknown Subject';
     }
     return 'Unknown Subject';
@@ -107,7 +105,7 @@ export class RemarksDisplay implements OnInit, OnChanges, OnDestroy {
 
   getEventDate(remark: IRemark): Date | null {
     if (remark.event && typeof remark.event === 'object') {
-      const event = remark.event as any;
+      const event = remark.event as IEvent;
       return event.startTime ? new Date(event.startTime) : null;
     }
     return null;
@@ -129,11 +127,11 @@ export class RemarksDisplay implements OnInit, OnChanges, OnDestroy {
     return fieldType === 'pdf' || fieldType === 'image' || fieldType === 'audio';
   }
 
-  isDocument(value: any): boolean {
-    return value && typeof value === 'object' && '_id' in value && 'fileKey' in value;
+  isDocument(value: unknown): boolean {
+    return value !== null && value !== undefined && typeof value === 'object' && '_id' in value && 'fileKey' in value;
   }
 
-  getDocument(value: any): IDocument | null {
+  getDocument(value: unknown): IDocument | null {
     return this.isDocument(value) ? value as IDocument : null;
   }
 

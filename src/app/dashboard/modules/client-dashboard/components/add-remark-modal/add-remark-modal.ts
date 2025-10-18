@@ -208,9 +208,9 @@ export class AddRemarkModal implements OnInit {
 
     uploadObservable.pipe(
       switchMap((uploadedDocuments) => {
-        const entries = Object.keys(this.remarkForm.value).map(field => {
+        const allEntries = Object.keys(this.remarkForm.value).map(field => {
           const fieldIndex = fileFieldNames.indexOf(field);
-          let value: any;
+          let value: string | number | boolean | null;
 
           if (fieldIndex !== -1) {
             // This is a file field that was uploaded
@@ -235,6 +235,10 @@ export class AddRemarkModal implements OnInit {
           };
         });
 
+        // Filter out null values and type-cast the result
+        const entries: { field: string; value: string | number | boolean }[] = allEntries
+          .filter((entry): entry is { field: string; value: string | number | boolean } => entry.value !== null);
+
         const apiCall = this.isEditMode
           ? this.remarkService.updateRemark(this.data.remark!._id, entries)
           : this.remarkService.createRemark(this.data.event._id, entries);
@@ -246,8 +250,12 @@ export class AddRemarkModal implements OnInit {
         this.snackBarService.showSuccess('Remark saved successfully!');
         this.dialogRef.close(true);
       },
-      error: (err: any) => {
-        this.snackBarService.showError(err.error?.message || 'Failed to save remark.');
+      error: (err: unknown) => {
+        const errorMessage = err && typeof err === 'object' && 'error' in err &&
+                           err.error && typeof err.error === 'object' && 'message' in err.error
+                           ? String(err.error.message)
+                           : 'Failed to save remark.';
+        this.snackBarService.showError(errorMessage);
         this.isSaving = false;
       }
     });
