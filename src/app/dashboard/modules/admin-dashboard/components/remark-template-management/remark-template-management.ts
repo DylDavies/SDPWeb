@@ -13,12 +13,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { TrackByUtils } from '../../../../../core/utils/trackby.utils';
 
-/**
- * OPTIMIZED VERSION: Replaced lodash with native methods
- * - Removed entire lodash import (saves ~70KB)
- * - Using structuredClone for deep cloning
- * - Using JSON.stringify for deep equality check
- */
 @Component({
   selector: 'app-remark-template-management',
   standalone: true,

@@ -58,7 +58,7 @@
             <button mat-button color="primary" (click)="openRateAdjustmentDialog(user)">
               <mat-icon>trending_up</mat-icon> Adjust Rate
             </button>
-            <button mat-button color="accent" (click)="viewRateHistory(user)" [disabled]="!user.rateAdjustments?.length">
+            <button mat-button color="accent" (click)="viewRateHistory(user)" [disabled]="!user.rateAdjustments.length">
               <mat-icon>history</mat-icon> History
             </button>
           </mat-card-actions>
