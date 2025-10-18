@@ -2,7 +2,7 @@
 
 This document provides a complete guide for setting up and running the **TutorCore platform** in a local development environment. It covers both the **backend API** (Express.js + Node.js) and the **frontend web application** (Angular), including database setup, environment configuration, and testing.
 
-(version 3.0.0)
+(version 4.0.0)
 
 ### Link to documentation: 
 
@@ -134,18 +134,43 @@ npm ci
 ```bash
 # MongoDB Connection
 DB_CONN_STRING=your_mongodb_connection_string_here
-DB_NAME=tutorcore
+DB_NAME=SDPApi
 
-# Google OAuth Credentials (from the steps above)
+# Google OAuth Credentials
 REDIRECT_URI=http://localhost:8080/api/auth/callback
-GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-client-secret-from-google
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # JWT Authentication
 JWT_SECRET=generate_a_long_random_and_secure_string_for_this
 
-# Frontend URL (for CORS and redirects)
+# Application URLs
 FRONTEND_URL=http://localhost:4200
+EXTERNAL_API_BASE_URL=https://your-external-api-url.com/api/external
+
+# Debugging
+DEBUG=true
+
+# Email (Zoho)
+EMAIL_HOST=smtp.zoho.com
+EMAIL_PORT=465
+EMAIL_SECURE=true
+EMAIL_USER=your-zoho-email-user@example.com
+EMAIL_PASS=your-zoho-email-password
+EMAIL_FROM=your-zoho-from-email@example.com
+
+# DigitalOcean Spaces Credentials
+DO_SPACES_ACCESS_KEY_ID=your_do_spaces_access_key
+DO_SPACES_SECRET_ACCESS_KEY=your_do_spaces_secret_key
+DO_SPACES_ENDPOINT=fra1.digitaloceanspaces.com
+DO_SPACES_BUCKET_NAME=tutorcore
+DO_SPACES_REGION=fra1
+
+# ZeptoMail Token
+ZEPTOMAIL_TOKEN=your_zeptomail_api_token
+
+# Google Maps API Key
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
 4. Run the development server
