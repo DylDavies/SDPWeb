@@ -29,32 +29,19 @@ export class AuthService {
 
   private document = inject(DOCUMENT);
   private window = this.document.defaultView;
+  private socketListenerSetup = false;
 
   constructor() {
     this.socketService.connectionHook(() => {
       const token = this.getToken();
 
       if (token) this.socketService.authenticate(token);
-    })
-
-    this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
-      console.log('Received users-updated event. Refreshing logged in user.');
-      this.verification$ = null; // Force re-verification
-      this.verifyCurrentUser().subscribe();
     });
 
-    this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
-      console.log('Received roles-updated event. Refreshing logged in user.');
-      this.verification$ = null; // Force re-verification
-      this.verifyCurrentUser().subscribe();
-    });
-
-    // Listen for changes with the badgse 
-    this.socketService.listen(ESocketMessage.BadgesUpdated).subscribe(() =>{
-      console.log('Received badges-updated event. Refreshing logged in user.');
-      this.verification$ = null; // Force re-verification
-      this.verifyCurrentUser().subscribe();
-    })
+    // Setup socket listeners when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListeners();
+    }
 
     this.currentUser$.pipe(
       startWith(null),
@@ -70,6 +57,61 @@ export class AuthService {
         }
       }
     })
+  }
+
+  /**
+   * Sets up the socket listeners for user, role, and badge updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListeners() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+        console.log('Received users-updated event. Refreshing logged in user.');
+        this.verification$ = null; // Force re-verification
+        this.verifyCurrentUser().subscribe();
+      });
+
+      this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+        console.log('Received roles-updated event. Refreshing logged in user.');
+        this.verification$ = null; // Force re-verification
+        this.verifyCurrentUser().subscribe();
+      });
+
+      // Listen for changes with the badges
+      this.socketService.listen(ESocketMessage.BadgesUpdated).subscribe(() => {
+        console.log('Received badges-updated event. Refreshing logged in user.');
+        this.verification$ = null; // Force re-verification
+        this.verifyCurrentUser().subscribe();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listeners
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen(ESocketMessage.UsersUpdated).subscribe(() => {
+            console.log('Received users-updated event. Refreshing logged in user.');
+            this.verification$ = null; // Force re-verification
+            this.verifyCurrentUser().subscribe();
+          });
+
+          this.socketService.listen(ESocketMessage.RolesUpdated).subscribe(() => {
+            console.log('Received roles-updated event. Refreshing logged in user.');
+            this.verification$ = null; // Force re-verification
+            this.verifyCurrentUser().subscribe();
+          });
+
+          // Listen for changes with the badges
+          this.socketService.listen(ESocketMessage.BadgesUpdated).subscribe(() => {
+            console.log('Received badges-updated event. Refreshing logged in user.');
+            this.verification$ = null; // Force re-verification
+            this.verifyCurrentUser().subscribe();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
   getToken(): string | null {

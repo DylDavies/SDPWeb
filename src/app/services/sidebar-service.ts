@@ -1,4 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ISidebarItem } from '../models/interfaces/ISidebarItem.interface';
@@ -12,22 +13,52 @@ import { ESocketMessage } from '../models/enums/socket-message.enum';
 export class SidebarService {
   private http = inject(HttpService);
   private socketService = inject(SocketService);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   // A BehaviorSubject holds the current value and acts as our cache.
   // It's initialized with an empty array.
   private sidebarItemsSource = new BehaviorSubject<ISidebarItem[]>([]);
-  
+
   /**
    * Public observable that components can subscribe to.
    * They will automatically receive the cached data or updates.
    */
   sidebarItems$ = this.sidebarItemsSource.asObservable();
+  private socketListenerSetup = false;
 
   constructor() {
-    this.socketService.listen(ESocketMessage.SidebarUpdated).subscribe(() => {
-      console.log('Received sidebar-updated event. Refreshing sidebar items.');
-      this.fetchAndCacheSidebarItems();
-    });
+    // Setup socket listener when socket is connected (only in browser)
+    if (this.isBrowser) {
+      this.setupSocketListener();
+    }
+  }
+
+  /**
+   * Sets up the socket listener for sidebar updates.
+   * This is called either immediately if socket is connected, or deferred via connection hook.
+   */
+  private setupSocketListener() {
+    if (this.socketListenerSetup) return;
+
+    if (this.socketService.isSocketConnected()) {
+      this.socketService.listen(ESocketMessage.SidebarUpdated).subscribe(() => {
+        console.log('Received sidebar-updated event. Refreshing sidebar items.');
+        this.fetchAndCacheSidebarItems();
+      });
+      this.socketListenerSetup = true;
+    } else {
+      // Wait for socket to connect before setting up listener
+      this.socketService.connectionHook(() => {
+        if (!this.socketListenerSetup) {
+          this.socketService.listen(ESocketMessage.SidebarUpdated).subscribe(() => {
+            console.log('Received sidebar-updated event. Refreshing sidebar items.');
+            this.fetchAndCacheSidebarItems();
+          });
+          this.socketListenerSetup = true;
+        }
+      });
+    }
   }
 
   /**

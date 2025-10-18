@@ -15,6 +15,7 @@ export class SocketService implements OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
   private isConnected = false;
+  private pendingConnectionHooks: Array<() => void> = [];
 
   constructor() {
     // Don't auto-initialize - wait for explicit connect() call
@@ -50,6 +51,9 @@ export class SocketService implements OnDestroy {
 
     this.socket.on('connect', () => {
       console.log("Socket.IO Connected");
+      // Execute all pending connection hooks
+      this.pendingConnectionHooks.forEach(hook => hook());
+      this.pendingConnectionHooks = [];
     });
 
     this.socket.on('disconnect', (reason) => {
@@ -65,12 +69,31 @@ export class SocketService implements OnDestroy {
    * Check if socket is connected
    */
   isSocketConnected(): boolean {
-    return this.isConnected && this.socket !== null;
+    return this.socket !== null && this.socket.connected;
   }
 
+  /**
+   * Register a callback to be executed when the socket connects.
+   * If the socket is already connected, the callback is executed immediately.
+   * If the socket doesn't exist yet, the callback is queued and will be executed when the socket connects.
+   */
   public connectionHook(cb: () => void) {
-    if (!this.socket) return;
-    this.socket.on('connect', cb);
+    if (!this.socket) {
+      // Socket doesn't exist yet, queue the callback
+      console.log('SocketService: Queueing connection hook (socket not created yet)');
+      this.pendingConnectionHooks.push(cb);
+      return;
+    }
+
+    if (this.socket.connected) {
+      // Already connected, execute immediately
+      console.log('SocketService: Executing connection hook immediately (already connected)');
+      cb();
+    } else {
+      // Not yet connected, register listener
+      console.log('SocketService: Registering connection hook (socket exists but not connected yet)');
+      this.socket.on('connect', cb);
+    }
   }
 
   authenticate(token: string) {
