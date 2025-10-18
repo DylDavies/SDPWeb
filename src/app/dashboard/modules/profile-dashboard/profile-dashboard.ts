@@ -70,7 +70,7 @@ export class Profile implements OnInit, OnDestroy {
         
         if (idToFetch) {
           this.isOwnProfile = !userIdFromRoute || userIdFromRoute === currentUser?._id;
-          if (!this.isOwnProfile) this.fetchUserById(idToFetch);
+          if (!this.isOwnProfile) this.userService.getUserById(idToFetch);
           else {
             this.user = currentUser;
             this.userNotFound = false;
