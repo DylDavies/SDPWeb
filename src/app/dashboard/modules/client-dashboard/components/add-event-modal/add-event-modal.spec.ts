@@ -3,14 +3,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from 'rxjs';
+import { of, throwError, BehaviorSubject } from 'rxjs';
 import { AddEventModal } from './add-event-modal';
 import { BundleService } from '../../../../../services/bundle-service';
 import { EventService } from '../../../../../services/event-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
+import { AuthService } from '../../../../../services/auth-service';
 import { IBundle } from '../../../../../models/interfaces/IBundle.interface';
 import { IEvent } from '../../../../../models/interfaces/IEvent.interface';
 import { EBundleStatus } from '../../../../../models/enums/bundle-status.enum';
+import { IUser } from '../../../../../models/interfaces/IUser.interface';
+import { EUserType } from '../../../../../models/enums/user-type.enum';
 
 // MOCK DATA
 const mockBundle: IBundle = {
@@ -38,19 +41,43 @@ const mockEvent: IEvent = {
     remark: ''
 };
 
+const mockUser: IUser = {
+    _id: 'tutor1',
+    googleId: 'google123',
+    email: 'test@test.com',
+    displayName: 'Test Tutor',
+    firstLogin: false,
+    createdAt: new Date(),
+    roles: [],
+    type: EUserType.Staff,
+    permissions: [],
+    pending: false,
+    disabled: false,
+    theme: 'light',
+    leave: [],
+    paymentType: 'Contract',
+    monthlyMinimum: 0,
+    rateAdjustments: []
+};
+
 describe('AddEventModal', () => {
   let component: AddEventModal;
   let fixture: ComponentFixture<AddEventModal>;
   let bundleServiceSpy: jasmine.SpyObj<BundleService>;
   let eventServiceSpy: jasmine.SpyObj<EventService>;
   let snackbarServiceSpy: jasmine.SpyObj<SnackBarService>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
   let dialogRefSpy: jasmine.SpyObj<MatDialogRef<AddEventModal>>;
+  let currentUserSubject: BehaviorSubject<IUser | null>;
 
   const setupTestBed = async (data: any) => {
     bundleServiceSpy = jasmine.createSpyObj('BundleService', ['getBundles']);
     eventServiceSpy = jasmine.createSpyObj('EventService', ['getEvents', 'createEvent', 'updateEvent']);
     snackbarServiceSpy = jasmine.createSpyObj('SnackBarService', ['showSuccess', 'showError']);
     dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
+
+    currentUserSubject = new BehaviorSubject<IUser | null>(mockUser);
+    authServiceSpy = jasmine.createSpyObj('AuthService', ['hasPermission'], { currentUser$: currentUserSubject.asObservable() });
 
     await TestBed.configureTestingModule({
       imports: [AddEventModal, NoopAnimationsModule],
@@ -60,6 +87,7 @@ describe('AddEventModal', () => {
         { provide: BundleService, useValue: bundleServiceSpy },
         { provide: EventService, useValue: eventServiceSpy },
         { provide: SnackBarService, useValue: snackbarServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
         { provide: MatDialogRef, useValue: dialogRefSpy },
         { provide: MAT_DIALOG_DATA, useValue: data }
       ]

@@ -11,7 +11,7 @@ import { BundleService } from '../../../../../services/bundle-service';
 import { IBundle, IBundleSubject, IPopulatedUser } from '../../../../../models/interfaces/IBundle.interface';
 import { IEvent } from '../../../../../models/interfaces/IEvent.interface';
 import { combineLatest } from 'rxjs';
-import { startWith } from 'rxjs/operators';
+import { startWith, filter } from 'rxjs/operators';
 import { EventService } from '../../../../../services/event-service';
 import { SnackBarService } from '../../../../../services/snackbar-service';
 import { AuthService } from '../../../../../services/auth-service';
@@ -68,17 +68,20 @@ export class AddEventModal implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-        this.currentUser = user;
-    });
-    this.bundleService.getBundles().subscribe(bundles => {
+    // Wait for both current user and bundles to load before filtering
+    combineLatest([
+      this.authService.currentUser$.pipe(filter(user => user !== null)),
+      this.bundleService.getBundles()
+    ]).subscribe(([user, bundles]) => {
+      this.currentUser = user;
       let userBundles = bundles.filter(b => b.isActive && b.status === 'approved');
 
-      if (this.currentUser && this.currentUser.type !== EUserType.Admin) {
+      if (user.type !== EUserType.Admin) {
         userBundles = userBundles.filter(bundle =>
           bundle.subjects.some(subject => {
+            if (!subject.tutor) return false;
             const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
-            return tutorId === this.currentUser?._id;
+            return tutorId === user._id;
           })
         );
       }
@@ -93,8 +96,9 @@ export class AddEventModal implements OnInit {
             this.eventForm.get('duration')?.setValue(this.data.event!.duration);
             this.eventForm.get('subject')?.setValue(this.data.event!.subject);
         }
-    }
+      }
     });
+
     this.eventService.getEvents().subscribe(events => {
       this.allEvents = events;
     });
@@ -104,7 +108,18 @@ export class AddEventModal implements OnInit {
     const subjectControl = this.eventForm.get('subject')!;
 
     bundleControl.valueChanges.pipe(startWith(null)).subscribe((bundle: IBundle | null) => {
-      this.subjectsInBundle = bundle?.subjects || [];
+      let subjects = bundle?.subjects || [];
+
+      // Filter subjects to only show those where current user is the tutor (unless admin)
+      if (this.currentUser && this.currentUser.type !== EUserType.Admin && bundle) {
+        subjects = subjects.filter(subject => {
+          if (!subject.tutor) return false;
+          const tutorId = typeof subject.tutor === 'object' ? subject.tutor._id : subject.tutor;
+          return tutorId === this.currentUser?._id;
+        });
+      }
+
+      this.subjectsInBundle = subjects;
       subjectControl.setValue('');
       if (bundle) {
         subjectControl.enable();

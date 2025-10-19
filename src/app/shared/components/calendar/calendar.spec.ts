@@ -22,9 +22,9 @@ const mockStaffUser: IUser = { _id: 'staff1', type: EUserType.Staff } as IUser;
 const mockClientUser: IUser = { _id: 'client1', type: EUserType.Client } as IUser;
 
 const mockEvents: IEvent[] = [
-    { _id: 'event1', subject: 'Past Event 1', startTime: new Date('2024-01-15T10:00:00'), remarked: false, rating: 0, bundle: '', student: {} as any, tutor: {} as any, duration: 60, remark: '' },
-    { _id: 'event2', subject: 'Past Event 2', startTime: new Date('2024-01-15T12:00:00'), remarked: true, rating: 5, bundle: '', student: {} as any, tutor: {} as any, duration: 60, remark: '' },
-    { _id: 'event3', subject: 'Future Event', startTime: new Date('2099-01-20T14:00:00'), remarked: false, rating: 0, bundle: '', student: {} as any, tutor: {} as any, duration: 60, remark: '' },
+    { _id: 'event1', subject: 'Past Event 1', startTime: new Date('2024-01-15T10:00:00'), remarked: false, rating: 0, bundle: '', student: { _id: 'client1', displayName: 'Client User' }, tutor: { _id: 'staff1', displayName: 'Staff User' }, duration: 60, remark: '' },
+    { _id: 'event2', subject: 'Past Event 2', startTime: new Date('2024-01-15T12:00:00'), remarked: true, rating: 5, bundle: '', student: { _id: 'client1', displayName: 'Client User' }, tutor: { _id: 'staff1', displayName: 'Staff User' }, duration: 60, remark: '' },
+    { _id: 'event3', subject: 'Future Event', startTime: new Date('2099-01-20T14:00:00'), remarked: false, rating: 0, bundle: '', student: { _id: 'client1', displayName: 'Client User' }, tutor: { _id: 'staff1', displayName: 'Staff User' }, duration: 60, remark: '' },
 ];
 
 
@@ -106,11 +106,70 @@ describe('CalendarComponent', () => {
         it('should subscribe to socket events and reload on message', () => {
             fixture.detectChanges();
             expect(mockSocketService.subscribe).toHaveBeenCalledWith(ESocketMessage.EventsUpdated);
-            
+
             spyOn(component, 'loadEvents');
             socketListenSubject.next();
-            
+
             expect(component.loadEvents).toHaveBeenCalled();
+        });
+    });
+
+    describe('Event Filtering by User Type', () => {
+        it('should filter events for staff users to show only events where they are the tutor', () => {
+            mockAuthService.currentUser$.next(mockStaffUser);
+            fixture.detectChanges();
+
+            expect(component.events.length).toBe(3);
+            component.events.forEach(event => {
+                expect(event.tutor._id).toBe('staff1');
+            });
+        });
+
+        it('should filter events for client users to show only events where they are the student', () => {
+            mockAuthService.currentUser$.next(mockClientUser);
+            fixture.detectChanges();
+
+            expect(component.events.length).toBe(3);
+            component.events.forEach(event => {
+                expect(event.student._id).toBe('client1');
+            });
+        });
+
+        it('should show all events for admin users without filtering', () => {
+            mockAuthService.currentUser$.next(mockAdminUser);
+            fixture.detectChanges();
+
+            expect(component.events.length).toBe(3);
+        });
+
+        it('should filter out events where client is not the student', () => {
+            const eventsWithDifferentStudent = [
+                ...mockEvents,
+                { _id: 'event4', subject: 'Other Event', startTime: new Date('2024-01-16T10:00:00'), remarked: false, rating: 0, bundle: '', student: { _id: 'otherStudent', displayName: 'Other Student' }, tutor: { _id: 'staff1', displayName: 'Staff User' }, duration: 60, remark: '' }
+            ];
+            mockEventService.getEvents.and.returnValue(of(eventsWithDifferentStudent as IEvent[]));
+            mockAuthService.currentUser$.next(mockClientUser);
+
+            component.ngOnInit();
+            fixture.detectChanges();
+
+            expect(component.events.length).toBe(3);
+            expect(component.events.every(e => e.student._id === 'client1')).toBeTrue();
+        });
+
+        it('should filter out events where staff is not the tutor', () => {
+            const eventsWithDifferentTutor = [
+                ...mockEvents,
+                { _id: 'event4', subject: 'Other Event', startTime: new Date('2024-01-16T10:00:00'), remarked: false, rating: 0, bundle: '', student: { _id: 'client1', displayName: 'Client User' }, tutor: { _id: 'otherStaff', displayName: 'Other Staff' }, duration: 60, remark: '' }
+            ];
+            mockEventService.getEvents.and.returnValue(of(eventsWithDifferentTutor as IEvent[]));
+            mockAuthService.currentUser$.next(mockStaffUser);
+
+            component.ngOnInit();
+            fixture.detectChanges();
+
+            expect(component.events.length).toBe(3);
+            expect(component.events.every(e => e.tutor._id === 'staff1')).toBeTrue();
         });
     });
 

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +25,7 @@ export class CalendarComponent implements OnInit {
   private eventService = inject(EventService);
   private socketService = inject(SocketService);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   public currentDate: Date = new Date();
   public daysInMonth: (Date | null)[] = [];
@@ -56,10 +57,29 @@ export class CalendarComponent implements OnInit {
 
   loadEvents(dayToSelectAfterLoad?: Date | null): void {
       this.eventService.getEvents().subscribe(events => {
-          this.events = events.map(e => ({
+          let filteredEvents = events.map(e => ({
               ...e,
               startTime: new Date(e.startTime)
           }));
+
+          // Filter events based on user type
+          if (this.currentUser && this.currentUser.type !== EUserType.Admin) {
+              filteredEvents = filteredEvents.filter(event => {
+                  if (this.currentUser!.type === EUserType.Client) {
+                      // Clients see events where they are the student
+                      if (!event.student) return false;
+                      const studentId = typeof event.student === 'object' ? event.student._id : event.student;
+                      return studentId === this.currentUser?._id;
+                  } else {
+                      // Staff/Tutors see events where they are the tutor
+                      if (!event.tutor) return false;
+                      const tutorId = typeof event.tutor === 'object' ? event.tutor._id : event.tutor;
+                      return tutorId === this.currentUser?._id;
+                  }
+              });
+          }
+
+          this.events = filteredEvents;
 
           // If a specific day should be selected, select it. Otherwise, use the default logic.
           if (dayToSelectAfterLoad) {
@@ -67,6 +87,8 @@ export class CalendarComponent implements OnInit {
           } else {
               this.setInitialSelectedDay();
           }
+
+          this.cdr.detectChanges();
       });
   }
 
