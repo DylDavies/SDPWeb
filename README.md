@@ -133,6 +133,8 @@ npm ci
 
 ```bash
 # MongoDB Connection
+# For local development, use: mongodb://localhost:27017/tutor_management_dev
+# For production/cloud, use your MongoDB Atlas connection string
 DB_CONN_STRING=your_mongodb_connection_string_here
 DB_NAME=SDPApi
 
@@ -145,13 +147,13 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 JWT_SECRET=generate_a_long_random_and_secure_string_for_this
 
 # Application URLs
-FRONTEND_URL=http://your-domain-name.com
+FRONTEND_URL=http://localhost:4200
 EXTERNAL_API_BASE_URL=https://your-external-api-url.com/api/external
 
 # Debugging
 DEBUG=true
 
-# Email (Zoho)
+# Email Configuration (Zoho)
 EMAIL_HOST=smtp.zoho.com
 EMAIL_PORT=465
 EMAIL_SECURE=true
@@ -159,17 +161,14 @@ EMAIL_USER=your-zoho-email-user@example.com
 EMAIL_PASS=your-zoho-email-password
 EMAIL_FROM=your-zoho-from-email@example.com
 
-# DigitalOcean Spaces Credentials
+# DigitalOcean Spaces Credentials (for file storage)
 DO_SPACES_ACCESS_KEY_ID=your_do_spaces_access_key
 DO_SPACES_SECRET_ACCESS_KEY=your_do_spaces_secret_key
 DO_SPACES_ENDPOINT=fra1.digitaloceanspaces.com
 DO_SPACES_BUCKET_NAME=tutorcore
 DO_SPACES_REGION=fra1
 
-# ZeptoMail Token
-ZEPTOMAIL_TOKEN=your_zeptomail_api_token
-
-# Google Maps API Key
+# Google Maps API Key (for address validation and geocoding)
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
@@ -628,7 +627,7 @@ This plan outlines an iterative approach to development. Each sprint builds upon
 
 The following MongoDB collections will form the core of our database. Relationships will be managed via object IDs.
 
-The database consists of the following 14 primary collections as of right now:
+The database consists of the following 17 primary collections as of right now:
 
 1.  [**Users**](#1-users-collection): Stores all user account information.
 2.  [**Roles**](#2-roles-collection): Defines the role-based access control (RBAC) hierarchy.
@@ -640,12 +639,13 @@ The database consists of the following 14 primary collections as of right now:
 8.  [**Events**](#8-events-collection): Contains details of tutoring sessions, including ratings and remarks.
 9.  [**ExtraWork**](#9-extrawork-collection): Manages requests for extra work and their approval status.
 10. [**Missions**](#10-missions-collection): Manages missions assigned to users.
-11. [**Notifications**](#11-notifications-collection): Stores notifications for users.
-12. [**Remarks**](#12-remarks-collection): Stores remarks made on events.
-13. [**RemarkTemplates**](#13-remarktemplates-collection): Stores templates for remarks.
-14. [**SidebarItems**](#14-sidebaritems-collection): Defines the structure of the sidebar navigation.
-15. [**Payslips**](#15-payslips-collection): Stores generated payslip data for tutors.
-16. [**PreapprovedItems**](#16-preapproveditems-collection): Stores pre-approved items for payslips.
+11. [**Documents**](#11-documents-collection): Stores metadata for uploaded documents and files.
+12. [**Notifications**](#12-notifications-collection): Stores notifications for users.
+13. [**Remarks**](#13-remarks-collection): Stores remarks made on events.
+14. [**RemarkTemplates**](#14-remarktemplates-collection): Stores templates for remarks.
+15. [**SidebarItems**](#15-sidebaritems-collection): Defines the structure of the sidebar navigation.
+16. [**Payslips**](#16-payslips-collection): Stores generated payslip data for tutors.
+17. [**PreapprovedItems**](#17-preapproveditems-collection): Stores pre-approved items for payslips.
 
 ---
 
@@ -660,6 +660,7 @@ Stores information about all registered users, including their personal details,
 | `email` | `String` | The user's email address. | **Required**, **Unique** |
 | `displayName` | `String` | The user's public display name. | **Required** |
 | `picture` | `String` | URL to the user's profile picture. | Optional |
+| `address` | `IAddress` | The user's physical address. | See **Address Sub-schema** below. |
 | `firstLogin` | `Boolean` | Flag to determine if the user needs to complete the initial profile setup. | `Default: true` |
 | `type` | `String` | The primary category of the user. | **Required**, Enum: `EUserType:[admin, staff, client]`, `Default: 'client'` |
 | `roles` | `Array<ObjectId>` | An array of ObjectIds referencing documents in the `roles` collection. | `ref: 'Role'` |
@@ -673,8 +674,21 @@ Stores information about all registered users, including their personal details,
 | `paymentType` | `String` | The user's payment type. | Enum: `['Contract', 'Salaried']`, `Default: 'Contract'` |
 | `monthlyMinimum`| `Number` | The minimum monthly payment for the user. | `Default: 0` |
 | `rateAdjustments`| `Array` | An array of embedded rate adjustment documents. | See **Rate Adjustment Sub-schema** below. |
+| `welcomeCardDismissed` | `Boolean` | Flag to track if the user has dismissed the welcome card. | `Default: false` |
 | `createdAt` | `Date` | Timestamp of when the user was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
+
+#### Address Sub-schema (Embedded in `users`)
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `streetAddress` | `String` | The street address. | Optional |
+| `city` | `String` | The city. | Optional |
+| `state` | `String` | The state or province. | Optional |
+| `postalCode` | `String` | The postal or ZIP code. | Optional |
+| `country` | `String` | The country. | Optional |
+| `placeId` | `String` | Google Maps Place ID for the address. | Optional |
+| `formattedAddress` | `String` | The full formatted address string. | Optional |
 
 #### Leave Sub-schema (Embedded in `users`)
 
@@ -751,6 +765,9 @@ Manages lesson bundles, linking a student to one or more tutors for specific sub
 | `isActive` | `Boolean` | A flag to quickly activate or deactivate a bundle. | `Default: true` |
 | `status` | `String` | The current status of the bundle (e.g., Pending, Active, Completed). | Enum: `EBundleStatus:[Approved, Pending, Denied]`, `Default: 'Pending'` |
 | `createdBy` | `ObjectId` | A reference to the admin/user who created the bundle. | **Required**, `ref: 'User'` |
+| `lessonLocation` | `IAddress` | The physical location where lessons take place. | See **Address Sub-schema** in users collection. |
+| `manager` | `ObjectId` | A reference to the manager overseeing this bundle. | `ref: 'User'` |
+| `stakeholders` | `Array<ObjectId>` | An array of user references who are stakeholders in this bundle. | `ref: 'User'`, `Default: []` |
 | `createdAt` | `Date` | Timestamp of when the bundle was created. | `timestamps: true` |
 | `updatedAt` | `Date` | Timestamp of the last update. | `timestamps: true` |
 
@@ -862,8 +879,7 @@ Manages missions assigned to users.
 | :--- | :--- | :--- | :--- |
 | `_id` | `ObjectId` | Unique identifier for the mission document. | Automatically generated. |
 | `bundleId` | `ObjectId` | A reference to the bundle document. | **Required**, `ref: 'Bundle'` |
-| `documentPath` | `String` | The path to the mission document. | **Required** |
-| `documentName` | `String` | The name of the mission document. | **Required** |
+| `document` | `ObjectId` | A reference to the mission document. | **Required**, `ref: 'Document'` |
 | `student` | `ObjectId` | A reference to the student user document. | **Required**, `ref: 'User'` |
 | `tutor` | `ObjectId` | A reference to the tutor user document. | **Required**, `ref: 'User'` |
 | `remuneration`| `Number` | The remuneration for the mission. | **Required**, `min: 0` |
@@ -876,7 +892,22 @@ Manages missions assigned to users.
 
 ---
 
-## 11. `notifications` Collection
+## 11. `documents` Collection
+
+Stores metadata for uploaded documents and files. The actual file content is stored externally (e.g., DigitalOcean Spaces), and this collection maintains references and metadata.
+
+| Field | Data Type | Description | Constraints & Defaults |
+| :--- | :--- | :--- | :--- |
+| `_id` | `ObjectId` | Unique identifier for the document. | Automatically generated. |
+| `fileKey` | `String` | The unique key/filename used to retrieve the file from storage. | **Required**, **Unique** |
+| `originalFilename` | `String` | The original filename as uploaded by the user. | **Required** |
+| `contentType` | `String` | The MIME type of the file (e.g., 'application/pdf', 'image/png'). | **Required** |
+| `uploadedBy` | `ObjectId` | A reference to the user who uploaded the document. | **Required**, `ref: 'User'` |
+| `createdAt` | `Date` | Timestamp of when the document was uploaded. | `timestamps: true` |
+
+---
+
+## 12. `notifications` Collection
 
 Stores notifications for users.
 
@@ -892,7 +923,7 @@ Stores notifications for users.
 
 ---
 
-## 12. `remarks` Collection
+## 13. `remarks` Collection
 
 Stores remarks made on events.
 
@@ -915,7 +946,7 @@ Stores remarks made on events.
 
 ---
 
-## 13. `remarktemplates` Collection
+## 14. `remarktemplates` Collection
 
 Stores templates for remarks.
 
@@ -933,11 +964,11 @@ Stores templates for remarks.
 | Field | Data Type | Description | Constraints & Defaults |
 | :--- | :--- | :--- | :--- |
 | `name` | `String` | The name of the remark field. | **Required** |
-| `type` | `String` | The type of the remark field. | **Required**, Enum: `['string', 'boolean', 'number', 'time']` |
+| `type` | `String` | The type of the remark field. | **Required**, Enum: `['string', 'boolean', 'number', 'time', 'pdf', 'image', 'audio']` |
 
 ---
 
-## 14. `sidebaritems` Collection
+## 15. `sidebaritems` Collection
 
 Defines the structure of the sidebar navigation.
 
@@ -953,7 +984,7 @@ Defines the structure of the sidebar navigation.
 #### Special Logic & Methods
 
 
-## 15. `payslips` Collection
+## 16. `payslips` Collection
 
 Stores generated payslip data, including detailed breakdowns of earnings, bonuses, deductions, and historical changes.
 
@@ -1025,6 +1056,7 @@ Stores generated payslip data, including detailed breakdowns of earnings, bonuse
 | `itemId` | `String` | The ID of the item being queried. | **Required** |
 | `note` | `String` | The content of the query note. | **Required** |
 | `resolved` | `Boolean` | Whether the query has been resolved. | **Required** |
+| `resolutionNote` | `String` | Additional note explaining how the query was resolved. | Optional |
 
 ---
 
@@ -1038,7 +1070,7 @@ Stores generated payslip data, including detailed breakdowns of earnings, bonuse
 
 ---
 
-## 16. `preapproveditems` Collection
+## 17. `preapproveditems` Collection
 
 Stores a list of pre-approved bonus or deduction items that can be quickly added to a payslip.
 
