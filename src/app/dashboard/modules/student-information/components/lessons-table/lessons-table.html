@@ -123,21 +123,21 @@
                 </mat-card-actions>
             </mat-card>
         }
-    </div>
 
-    @if (dataSource.filteredData.length === 0 && !isLoading) {
-        <div class="empty-state">
-            <mat-icon>event_note</mat-icon>
-            <h2>No Lessons Found</h2>
-            <p>
-                @if (input.value) {
-                    No lessons match the filter "{{ input.value }}"
-                } @else {
-                    No lessons found for this student
-                }
-            </p>
-        </div>
-    }
+        @if (dataSource.filteredData.length === 0 && !isLoading) {
+            <div class="empty-state">
+                <mat-icon>event_note</mat-icon>
+                <h2>No Lessons Found</h2>
+                <p>
+                    @if (input.value) {
+                        No lessons match the filter "{{ input.value }}"
+                    } @else {
+                        No lessons found for this student
+                    }
+                </p>
+            </div>
+        }
+    </div>
   }
 </div>
 
