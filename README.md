@@ -133,8 +133,6 @@ npm ci
 
 ```bash
 # MongoDB Connection
-# For local development, use: mongodb://localhost:27017/tutor_management_dev
-# For production/cloud, use your MongoDB Atlas connection string
 DB_CONN_STRING=your_mongodb_connection_string_here
 DB_NAME=SDPApi
 
@@ -147,13 +145,13 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 JWT_SECRET=generate_a_long_random_and_secure_string_for_this
 
 # Application URLs
-FRONTEND_URL=http://localhost:4200
+FRONTEND_URL=http://your-domain-name.com
 EXTERNAL_API_BASE_URL=https://your-external-api-url.com/api/external
 
 # Debugging
 DEBUG=true
 
-# Email Configuration (Zoho)
+# Email (Zoho)
 EMAIL_HOST=smtp.zoho.com
 EMAIL_PORT=465
 EMAIL_SECURE=true
@@ -161,14 +159,17 @@ EMAIL_USER=your-zoho-email-user@example.com
 EMAIL_PASS=your-zoho-email-password
 EMAIL_FROM=your-zoho-from-email@example.com
 
-# DigitalOcean Spaces Credentials (for file storage)
+# DigitalOcean Spaces Credentials
 DO_SPACES_ACCESS_KEY_ID=your_do_spaces_access_key
 DO_SPACES_SECRET_ACCESS_KEY=your_do_spaces_secret_key
 DO_SPACES_ENDPOINT=fra1.digitaloceanspaces.com
 DO_SPACES_BUCKET_NAME=tutorcore
 DO_SPACES_REGION=fra1
 
-# Google Maps API Key (for address validation and geocoding)
+# ZeptoMail Token
+ZEPTOMAIL_TOKEN=your_zeptomail_api_token
+
+# Google Maps API Key
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
