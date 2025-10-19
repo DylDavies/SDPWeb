@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, inject, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -45,6 +45,7 @@ export class BadgeListComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private snackbarService = inject(SnackBarService);
   private badgeService = inject(BadgeService); 
+  private cdr = inject(ChangeDetectorRef);
 
   public canManageBadges = false;
   public combinedBadges$: Observable<BadgeWithUserBadge[]> = of([]);
@@ -101,6 +102,7 @@ export class BadgeListComponent implements OnInit, OnDestroy {
       if (result.updatedUser){
         this.snackbarService.showSuccess('Badge added to user.');
         this.userUpdated.emit(); //refresh
+        this.cdr.detectChanges();
       } 
       else if(result.error){
         this.snackbarService.showError('An error occurred, but the badge may have been added.');

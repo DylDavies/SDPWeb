@@ -57,7 +57,7 @@ export class CreateEditBadgeDialogComponent implements OnInit {
       description: ['', Validators.required],
       image: ['', Validators.required],
       permanent: [false],
-      duration: [Validators.required], 
+      duration: [null, [Validators.required, Validators.min(1), Validators.max(3650)]], 
       bonus: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
 
@@ -73,7 +73,7 @@ export class CreateEditBadgeDialogComponent implements OnInit {
         durationControl?.setValue(null); 
       } 
       else {
-        durationControl?.setValidators([Validators.required, Validators.min(1), Validators.max(365)]);
+        durationControl?.setValidators([Validators.required, Validators.min(1), Validators.max(3650)]);
       }
       durationControl?.updateValueAndValidity();
     });
