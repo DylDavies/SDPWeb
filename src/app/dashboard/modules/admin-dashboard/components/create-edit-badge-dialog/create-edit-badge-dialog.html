@@ -91,7 +91,7 @@
         <mat-error>Duration must be at least 1 day.</mat-error>
       }
       @if (badgeForm.get('duration')?.hasError('max')) {
-        <mat-error>Duration cannot exceed 365 days.</mat-error>
+        <mat-error>Duration cannot exceed 10 years (3650 days).</mat-error>
       }
     </mat-form-field>
   </form>
