@@ -11,7 +11,7 @@ export type ISidebarLinkDefinition = ISidebarLink & ISidebarRemovable;
 
 export const AVAILABLE_SIDEBAR_LINKS: ISidebarLinkDefinition[] = [
   { label: 'Home', icon: 'dashboard', route: '/dashboard', requiredPermissions: [], stopRemove: true },
-  { label: 'Profile', icon: 'person', route: '/dashboard/profile', requiredPermissions: [EPermission.PROFILE_PAGE_VIEW] },
+  { label: 'Profile', icon: 'person', route: '/dashboard/profile', requiredPermissions: [EPermission.VIEW_USER_PROFILE] },
   { label: 'User Management', icon: 'people', route: '/dashboard/users', requiredPermissions: [EPermission.USERS_VIEW] },
   { label: 'Students', icon: 'school', route: '/dashboard/students', requiredPermissions: [EPermission.STUDENTS_VIEW] },
   { 
