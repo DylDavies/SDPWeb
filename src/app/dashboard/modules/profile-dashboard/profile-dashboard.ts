@@ -19,7 +19,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../services/user-service';
 import { LeaveManagement } from './components/leave-management/leave-management';
 import { EditAvailabilityDialog } from './components/edit-availability-dialog/edit-availability-dialog';
-import { filter, switchMap, map, of, Subscription } from 'rxjs';
+import { filter, switchMap, of, Subscription } from 'rxjs';
 import { SnackBarService } from '../../../services/snackbar-service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { BadgeListComponent } from './components/badge-list/badge-list';
@@ -71,7 +71,9 @@ export class Profile implements OnInit, OnDestroy {
         
         if (idToFetch) {
           this.isOwnProfile = !userIdFromRoute || userIdFromRoute === currentUser?._id;
-          if (!this.isOwnProfile) this.userService.getUserById(idToFetch);
+          if (!this.isOwnProfile) {
+            return this.userService.getUserById(idToFetch);
+          }
           else {
             this.user = currentUser;
             this.userNotFound = false;
@@ -87,20 +89,15 @@ export class Profile implements OnInit, OnDestroy {
         }
 
         // Return the reactive user stream from the service
-        return this.userService.getUserById(idToFetch).pipe(
-          map(user => {
-            if (user) {
-              this.userNotFound = false;
-              return user;
-            } else {
-              this.userNotFound = true;
-              return null;
-            }
-          })
-        );
+        return of(this.user);
       })
     ).subscribe({
       next: (user) => {
+        if (!user) {
+          this.isLoading = false;
+          this.userNotFound = true;
+          return;
+        }
         this.user = user;
         this.isLoading = false;
       },
