@@ -2,8 +2,8 @@
   width: 12vw;
   min-width: 200px;
   max-width: 280px;
-  background-color: var(--mat-sys-surface-container-low); 
-  color: var(--mat-sys-on-surface); 
+  background-color: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
   position: fixed;
   height: 94vh;
   top: 6vh;
@@ -13,17 +13,33 @@
   transition: box-shadow 0.3s ease-in-out;
 }
 
-::ng-deep .mat-drawer-inner-container {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.sidebar-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
-::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
-  display: none;
+// Ensure the mat-drawer-inner-container doesn't add extra scrolling
+::ng-deep .mat-drawer-inner-container {
+  overflow: hidden !important;
 }
 
 body.dark-theme .custom-sidebar {
   box-shadow: 2px 0px 8px 0px rgba(0, 0, 0, 0.4);
+}
+
+// Dark theme scrollbar adjustments
+body.dark-theme .item-area {
+  scrollbar-color: var(--mat-sys-outline) transparent;
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mat-sys-outline);
+
+    &:hover {
+      background-color: var(--mat-sys-on-surface-variant);
+    }
+  }
 }
 
 mat-toolbar {
@@ -39,11 +55,44 @@ mat-toolbar {
   }
 }
 
-.profile-area{
+.profile-area {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-direction: column;
+  flex-shrink: 0; // Prevent profile area from shrinking
+}
+
+.item-area {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; // Important for flex scrolling
+
+  // Custom scrollbar styling for Material theme
+  scrollbar-width: thin;
+  scrollbar-color: var(--mat-sys-outline-variant) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 4px 0; // Add some margin at top and bottom
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mat-sys-outline-variant);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--mat-sys-outline);
+    }
+  }
+
+  // Add smooth scrolling
+  scroll-behavior: smooth;
 }
 
 .profile-pic{
@@ -93,14 +142,15 @@ mat-toolbar {
 }
 
 .sidebar-footer {
-  position: absolute;
-  bottom: 0;
+  flex-shrink: 0; // Prevent footer from shrinking
   width: 100%;
   padding: 16px;
   box-sizing: border-box; /* Ensures padding is included in the width */
   display: flex;
   justify-content: center;
   background-color: var(--mat-sys-surface-container-low);
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  margin-top: auto; // Push footer to bottom
 }
 
 // Styles to make the expansion panel look and feel like a nav item

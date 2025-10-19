@@ -52,7 +52,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  overflow: hidden;
+  overflow: hidden !important;
+  overflow-y: hidden;
 }
 
 .day-number {
@@ -70,12 +71,12 @@
 .event-container {
   width: 100%;
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: hidden !important;
 }
 
 .event-chip {
   padding: 2px 4px;
-  width: 100%;
+  width: 95%;
   background-color: var(--mat-sys-primary-container);
   color: var(--mat-sys-on-primary-container);
   border-radius: 4px;

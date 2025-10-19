@@ -1,24 +1,26 @@
 <mat-sidenav-container style="height: 94vh;">
   <mat-sidenav #sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="!isMobile" class="custom-sidebar">
-    @if (user) {
-      <section class="profile-area">
-        <img [src]="user.picture || '/no_profile_pic.png'" alt="Profile Picture" class="profile-pic" referrerpolicy="no-referrer">
-        <h4 class="user-name">{{(user.displayName | displayNamePipe) || "Loading..."}}</h4>
-        @if (tutorRating !== null) {
-          <div class="tutor-rating">
-            <mat-icon class="rating-icon">star</mat-icon>
-            <span class="rating-value">{{ tutorRating > 0 ? (tutorRating.toFixed(1) + '/5') : 'N/A' }}</span>
-          </div>
-        }
-      </section>
-    }
-    
-    <mat-nav-list class="item-area">
-      <ng-container *ngTemplateOutlet="itemList; context: { items: sideBarLinks }"></ng-container>
-    </mat-nav-list>
+    <div class="sidebar-content-wrapper">
+      @if (user) {
+        <section class="profile-area">
+          <img [src]="user.picture || '/no_profile_pic.png'" alt="Profile Picture" class="profile-pic" referrerpolicy="no-referrer">
+          <h4 class="user-name">{{(user.displayName | displayNamePipe) || "Loading..."}}</h4>
+          @if (tutorRating !== null) {
+            <div class="tutor-rating">
+              <mat-icon class="rating-icon">star</mat-icon>
+              <span class="rating-value">{{ tutorRating > 0 ? (tutorRating.toFixed(1) + '/5') : 'N/A' }}</span>
+            </div>
+          }
+        </section>
+      }
 
-    <div class="sidebar-footer">
-      <app-theme-toggle-button></app-theme-toggle-button>
+      <mat-nav-list class="item-area">
+        <ng-container *ngTemplateOutlet="itemList; context: { items: sideBarLinks }"></ng-container>
+      </mat-nav-list>
+
+      <div class="sidebar-footer">
+        <app-theme-toggle-button></app-theme-toggle-button>
+      </div>
     </div>
   </mat-sidenav>
 
