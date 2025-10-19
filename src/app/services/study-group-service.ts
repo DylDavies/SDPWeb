@@ -14,6 +14,6 @@ export class StudyGroupService {
    * @returns An observable with an array of study groups.
    */
   getUpcomingStudyGroups(): Observable<IStudyGroup[]> {
-    return this.httpService.get<IStudyGroup[]>('external/consume/studygroups/upcoming');
+    return this.httpService.get<any>('external/consume/studygroups');
   }
 }
